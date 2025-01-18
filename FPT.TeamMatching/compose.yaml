@@ -1,0 +1,6 @@
+﻿services:
+  fpt.teammatching.api:
+    image: fpt.teammatching.api
+    build:
+      context: .
+      dockerfile: FPT.TeamMatching.API/Dockerfile
