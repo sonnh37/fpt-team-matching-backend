@@ -1,0 +1,16 @@
+﻿using FPT.TeamMatching.Domain.Entities.Base;
+
+namespace FPT.TeamMatching.Domain.Entities;
+
+public class RefreshToken : BaseEntity
+{
+    public Guid? UserId { get; set; }
+
+    public string? Token { get; set; }
+
+    public DateTimeOffset? ExpirationDate { get; set; }
+
+    public string? IpAddress { get; set; }
+
+    public virtual User? User { get; set; }
+}

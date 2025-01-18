@@ -1,0 +1,22 @@
+﻿using FPT.TeamMatching.Domain.Entities.Base;
+
+namespace FPT.TeamMatching.Domain.Entities;
+
+public class TeamMember : BaseEntity
+{
+    public Guid? ProjectId { get; set; }
+
+    public Guid? UserId { get; set; }
+
+    public string? Role { get; set; }
+
+    public DateTimeOffset? JoinDate { get; set; }
+
+    public DateTimeOffset? LeaveDate { get; set; }
+
+    public virtual Project? Project { get; set; }
+
+    public virtual ICollection<Rate> Rates { get; set; } = new List<Rate>();
+
+    public virtual User? User { get; set; }
+}
