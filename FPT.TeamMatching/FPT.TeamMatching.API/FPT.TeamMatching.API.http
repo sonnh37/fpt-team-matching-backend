@@ -1,4 +1,4 @@
-@FPT.TeamMatching.API_HostAddress = http://localhost:5045
+@FPT.TeamMatching.API_HostAddress = http://localhost:9999
 
 GET {{FPT.TeamMatching.API_HostAddress}}/weatherforecast/
 Accept: application/json
