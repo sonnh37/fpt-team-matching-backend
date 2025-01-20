@@ -51,7 +51,7 @@ public class UserController : ControllerBase
     }
 
     [HttpPut("restore")]
-    public async Task<IActionResult> UpdateIsDeleted([FromBody] UserRestoreCommand command)
+    public async Task<IActionResult> Restore([FromBody] UserRestoreCommand command)
     {
         var businessResult = await _userService.Restore<UserResult>(command);
 
