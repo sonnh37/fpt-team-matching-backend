@@ -7,3 +7,11 @@ public enum Role
     Manager,
     Admin
 }
+
+public enum TeamMemberRole
+{
+    Member,
+    Leader,
+    MentorSecondary,
+    MentorPrimary
+}

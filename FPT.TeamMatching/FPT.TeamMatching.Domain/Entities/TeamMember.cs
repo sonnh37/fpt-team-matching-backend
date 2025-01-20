@@ -1,4 +1,5 @@
 ﻿using FPT.TeamMatching.Domain.Entities.Base;
+using FPT.TeamMatching.Domain.Enums;
 
 namespace FPT.TeamMatching.Domain.Entities;
 
@@ -8,7 +9,7 @@ public class TeamMember : BaseEntity
 
     public Guid? UserId { get; set; }
 
-    public string? Role { get; set; }
+    public TeamMemberRole? Role { get; set; }
 
     public DateTimeOffset? JoinDate { get; set; }
 

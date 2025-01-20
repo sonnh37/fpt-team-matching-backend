@@ -3,13 +3,17 @@ using System.Text.Json.Serialization;
 using DotNetEnv;
 using FPT.TeamMatching.API.Collections;
 using FPT.TeamMatching.Data.Context;
+using FPT.TeamMatching.Domain.Configs;
 using FPT.TeamMatching.Domain.Configs.Mapping;
+using FPT.TeamMatching.Domain.Entities;
 using FPT.TeamMatching.Domain.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
+using Task = System.Threading.Tasks.Task;
 
 Env.Load();
 
@@ -30,6 +34,7 @@ builder.Services.AddDbContext<FPTMatchingDbContext>(options =>
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
     options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
 });
 builder.Services.AddSwaggerGen(options =>
 {

@@ -1,18 +1,28 @@
-﻿namespace FPT.TeamMatching.Domain.Enums;
+﻿using System.ComponentModel;
+
+namespace FPT.TeamMatching.Domain.Enums;
 
 public enum Type
 {
 }
 
-public enum SessionType
+public enum BlogType
 {
-    Meeting,
-    Offline,
-    SelfLearn
+    [Description("Chia sẻ thông tin, ý tưởng")]
+    Share,
+    
+    [Description("Đăng tuyển thành viên hoặc cộng tác viên")]
+    Recruit
 }
 
-public enum VoucherType
+public enum InvitationUserType
 {
-    DiscountCash,
-    DiscountPercent
+    Invited,
+    Requested
+}
+
+public enum ProjectType
+{
+    Personal, 
+    Academic
 }

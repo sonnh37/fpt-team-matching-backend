@@ -31,24 +31,6 @@ namespace FPT.TeamMatching.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "BlogType",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false, defaultValueSql: "(newid())"),
-                    Title = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    CreatedDate = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
-                    UpdatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    UpdatedDate = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
-                    IsDeleted = table.Column<bool>(type: "bit", nullable: false),
-                    Note = table.Column<string>(type: "nvarchar(max)", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_BlogType", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Permission",
                 columns: table => new
                 {
@@ -71,7 +53,6 @@ namespace FPT.TeamMatching.Data.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false, defaultValueSql: "(newid())"),
-                    Role = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Gender = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Cache = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Username = table.Column<string>(type: "nvarchar(max)", nullable: true),
@@ -145,11 +126,6 @@ namespace FPT.TeamMatching.Data.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Blog", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Blog_BlogType_BlogTypeId",
-                        column: x => x.BlogTypeId,
-                        principalTable: "BlogType",
-                        principalColumn: "Id");
                     table.ForeignKey(
                         name: "FK_Blog_User_UserId",
                         column: x => x.UserId,
@@ -284,7 +260,8 @@ namespace FPT.TeamMatching.Data.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false, defaultValueSql: "(newid())"),
                     UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     Token = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    ExpirationDate = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    Expiry = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    UserAgent = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     IpAddress = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     CreatedDate = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
@@ -732,11 +709,6 @@ namespace FPT.TeamMatching.Data.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Blog_BlogTypeId",
-                table: "Blog",
-                column: "BlogTypeId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Blog_UserId",
                 table: "Blog",
                 column: "UserId");
@@ -991,9 +963,6 @@ namespace FPT.TeamMatching.Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "Permission");
-
-            migrationBuilder.DropTable(
-                name: "BlogType");
 
             migrationBuilder.DropTable(
                 name: "Project");

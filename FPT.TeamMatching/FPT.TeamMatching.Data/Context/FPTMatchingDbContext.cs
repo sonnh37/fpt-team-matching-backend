@@ -1,5 +1,6 @@
 ﻿using FPT.TeamMatching.Domain.Entities;
 using FPT.TeamMatching.Domain.Enums;
+using FPT.TeamMatching.Domain.Utilities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Microsoft.Extensions.Configuration;
@@ -18,8 +19,6 @@ public partial class FPTMatchingDbContext : BaseDbContext
     public virtual DbSet<Action> Actions { get; set; }
 
     public virtual DbSet<Blog> Blogs { get; set; }
-
-    public virtual DbSet<BlogType> BlogTypes { get; set; }
 
     public virtual DbSet<Chat> Chats { get; set; }
 
@@ -65,6 +64,14 @@ public partial class FPTMatchingDbContext : BaseDbContext
 
     public virtual DbSet<VerifySemester> VerifySemesters { get; set; }
 
+    // Auto Enum Convert Int To String
+    protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
+    {
+        base.ConfigureConventions(configurationBuilder);
+ 
+        configurationBuilder.Properties<Enum>().HaveConversion<string>();
+    }
+    
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Action>(entity =>
@@ -84,21 +91,18 @@ public partial class FPTMatchingDbContext : BaseDbContext
 
             entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
 
-            entity.HasOne(d => d.BlogType).WithMany(p => p.Blogs)
-                .HasForeignKey(d => d.BlogTypeId);
-
             entity.HasOne(d => d.User).WithMany(p => p.Blogs)
                 .HasForeignKey(d => d.UserId);
         });
 
-        modelBuilder.Entity<BlogType>(entity =>
-        {
-            entity.HasKey(e => e.Id);
-
-            entity.ToTable("BlogType");
-
-            entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
-        });
+        // modelBuilder.Entity<BlogType>(entity =>
+        // {
+        //     entity.HasKey(e => e.Id);
+        //
+        //     entity.ToTable("BlogType");
+        //
+        //     entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
+        // });
 
         modelBuilder.Entity<Chat>(entity =>
         {
@@ -354,11 +358,11 @@ public partial class FPTMatchingDbContext : BaseDbContext
 
             entity.ToTable("User");
 
-            entity.Property(x => x.Gender)
-                .HasConversion(new EnumToStringConverter<Gender>());
-            
-            entity.Property(x => x.Role)
-                .HasConversion(new EnumToStringConverter<Role>());
+            // entity.Property(x => x.Gender)
+            //     .HasConversion(new EnumToStringConverter<Gender>());
+            //
+            // entity.Property(x => x.Role)
+            //     .HasConversion(new EnumToStringConverter<Role>());
             
             entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
         });

@@ -5,8 +5,6 @@ namespace FPT.TeamMatching.Domain.Entities;
 
 public class User : BaseEntity
 {
-    public Role? Role { get; set; }
-    
     public Gender? Gender { get; set; }
     
     public string? Cache { get; set; }

@@ -8,7 +8,9 @@ public class RefreshToken : BaseEntity
 
     public string? Token { get; set; }
 
-    public DateTimeOffset? ExpirationDate { get; set; }
+    public DateTimeOffset? Expiry { get; set; }
+    
+    public string? UserAgent { get; set; }
 
     public string? IpAddress { get; set; }
 

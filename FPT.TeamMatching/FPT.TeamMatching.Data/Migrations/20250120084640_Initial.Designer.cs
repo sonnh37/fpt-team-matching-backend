@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FPT.TeamMatching.Data.Migrations
 {
     [DbContext(typeof(FPTMatchingDbContext))]
-    [Migration("20250118152257_Initial")]
+    [Migration("20250120084640_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -106,44 +106,9 @@ namespace FPT.TeamMatching.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("BlogTypeId");
-
                     b.HasIndex("UserId");
 
                     b.ToTable("Blog", (string)null);
-                });
-
-            modelBuilder.Entity("FPT.TeamMatching.Domain.Entities.BlogType", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier")
-                        .HasDefaultValueSql("(newid())");
-
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTimeOffset?>("CreatedDate")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Note")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Title")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("UpdatedBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTimeOffset?>("UpdatedDate")
-                        .HasColumnType("datetimeoffset");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("BlogType", (string)null);
                 });
 
             modelBuilder.Entity("FPT.TeamMatching.Domain.Entities.Chat", b =>
@@ -757,7 +722,7 @@ namespace FPT.TeamMatching.Data.Migrations
                     b.Property<DateTimeOffset?>("CreatedDate")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<DateTimeOffset?>("ExpirationDate")
+                    b.Property<DateTimeOffset?>("Expiry")
                         .HasColumnType("datetimeoffset");
 
                     b.Property<string>("IpAddress")
@@ -777,6 +742,9 @@ namespace FPT.TeamMatching.Data.Migrations
 
                     b.Property<DateTimeOffset?>("UpdatedDate")
                         .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("UserAgent")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid?>("UserId")
                         .HasColumnType("uniqueidentifier");
@@ -1023,9 +991,6 @@ namespace FPT.TeamMatching.Data.Migrations
                     b.Property<string>("Phone")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Role")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("UpdatedBy")
                         .HasColumnType("nvarchar(max)");
 
@@ -1187,15 +1152,9 @@ namespace FPT.TeamMatching.Data.Migrations
 
             modelBuilder.Entity("FPT.TeamMatching.Domain.Entities.Blog", b =>
                 {
-                    b.HasOne("FPT.TeamMatching.Domain.Entities.BlogType", "BlogType")
-                        .WithMany("Blogs")
-                        .HasForeignKey("BlogTypeId");
-
                     b.HasOne("FPT.TeamMatching.Domain.Entities.User", "User")
                         .WithMany("Blogs")
                         .HasForeignKey("UserId");
-
-                    b.Navigation("BlogType");
 
                     b.Navigation("User");
                 });
@@ -1477,11 +1436,6 @@ namespace FPT.TeamMatching.Data.Migrations
                     b.Navigation("JobPositions");
 
                     b.Navigation("Likes");
-                });
-
-            modelBuilder.Entity("FPT.TeamMatching.Domain.Entities.BlogType", b =>
-                {
-                    b.Navigation("Blogs");
                 });
 
             modelBuilder.Entity("FPT.TeamMatching.Domain.Entities.Project", b =>

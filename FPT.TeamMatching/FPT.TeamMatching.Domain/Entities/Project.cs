@@ -1,4 +1,5 @@
 ﻿using FPT.TeamMatching.Domain.Entities.Base;
+using FPT.TeamMatching.Domain.Enums;
 
 namespace FPT.TeamMatching.Domain.Entities;
 
@@ -14,11 +15,11 @@ public class Project : BaseEntity
 
     public string? Specialty { get; set; }
 
-    public string? Type { get; set; }
+    public ProjectType? Type { get; set; }
 
     public string? Description { get; set; }
 
-    public string? Status { get; set; }
+    public ProjectStatus? Status { get; set; }
 
     public int? TeamSize { get; set; }
 

@@ -1,4 +1,5 @@
 ﻿using FPT.TeamMatching.Domain.Entities.Base;
+using FPT.TeamMatching.Domain.Enums;
 
 namespace FPT.TeamMatching.Domain.Entities;
 
@@ -14,11 +15,9 @@ public class Blog : BaseEntity
 
     public string? Content { get; set; }
 
-    public string? Type { get; set; }
+    public BlogType? Type { get; set; }
 
     public int? Quantity { get; set; }
-
-    public virtual BlogType? BlogType { get; set; }
 
     public virtual ICollection<Comment> Comments { get; set; } = new List<Comment>();
 
