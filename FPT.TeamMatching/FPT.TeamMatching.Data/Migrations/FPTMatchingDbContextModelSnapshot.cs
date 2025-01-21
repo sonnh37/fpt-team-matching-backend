@@ -400,7 +400,7 @@ namespace FPT.TeamMatching.Data.Migrations
                     b.Property<string>("Note")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("NotificationType")
+                    b.Property<string>("Type")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("UpdatedBy")
@@ -578,8 +578,14 @@ namespace FPT.TeamMatching.Data.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<DateTimeOffset?>("EndDate")
+                        .HasColumnType("datetimeoffset");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
+
+                    b.Property<Guid?>("LeaderId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
@@ -587,14 +593,8 @@ namespace FPT.TeamMatching.Data.Migrations
                     b.Property<string>("Note")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid?>("OwnerId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Profession")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Specialty")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<DateTimeOffset?>("StartDate")
+                        .HasColumnType("datetimeoffset");
 
                     b.Property<string>("Status")
                         .HasColumnType("nvarchar(max)");
@@ -616,7 +616,7 @@ namespace FPT.TeamMatching.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("OwnerId");
+                    b.HasIndex("LeaderId");
 
                     b.ToTable("Project", (string)null);
                 });
@@ -1287,11 +1287,11 @@ namespace FPT.TeamMatching.Data.Migrations
 
             modelBuilder.Entity("FPT.TeamMatching.Domain.Entities.Project", b =>
                 {
-                    b.HasOne("FPT.TeamMatching.Domain.Entities.User", "Owner")
+                    b.HasOne("FPT.TeamMatching.Domain.Entities.User", "Leader")
                         .WithMany("Projects")
-                        .HasForeignKey("OwnerId");
+                        .HasForeignKey("LeaderId");
 
-                    b.Navigation("Owner");
+                    b.Navigation("Leader");
                 });
 
             modelBuilder.Entity("FPT.TeamMatching.Domain.Entities.ProjectActivity", b =>

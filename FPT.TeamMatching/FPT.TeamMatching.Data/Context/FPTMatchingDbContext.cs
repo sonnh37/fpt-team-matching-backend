@@ -254,8 +254,8 @@ public partial class FPTMatchingDbContext : BaseDbContext
 
             entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
 
-            entity.HasOne(d => d.Owner).WithMany(p => p.Projects)
-                .HasForeignKey(d => d.OwnerId);
+            entity.HasOne(d => d.Leader).WithMany(p => p.Projects)
+                .HasForeignKey(d => d.LeaderId);
         });
 
         modelBuilder.Entity<ProjectActivity>(entity =>
@@ -358,12 +358,6 @@ public partial class FPTMatchingDbContext : BaseDbContext
 
             entity.ToTable("User");
 
-            // entity.Property(x => x.Gender)
-            //     .HasConversion(new EnumToStringConverter<Gender>());
-            //
-            // entity.Property(x => x.Role)
-            //     .HasConversion(new EnumToStringConverter<Role>());
-            
             entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
         });
 

@@ -23,6 +23,6 @@ public enum InvitationUserType
 
 public enum ProjectType
 {
-    Personal, 
+    External, 
     Academic
 }

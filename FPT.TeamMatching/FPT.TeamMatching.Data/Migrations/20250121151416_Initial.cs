@@ -171,7 +171,7 @@ namespace FPT.TeamMatching.Data.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false, defaultValueSql: "(newid())"),
                     UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    NotificationType = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Type = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     CreatedDate = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
                     UpdatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
@@ -227,15 +227,15 @@ namespace FPT.TeamMatching.Data.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false, defaultValueSql: "(newid())"),
-                    OwnerId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    LeaderId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     TeamName = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Profession = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    Specialty = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Type = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Description = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Status = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     TeamSize = table.Column<int>(type: "int", nullable: true),
+                    StartDate = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
+                    EndDate = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
                     CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     CreatedDate = table.Column<DateTimeOffset>(type: "datetimeoffset", nullable: true),
                     UpdatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
@@ -247,8 +247,8 @@ namespace FPT.TeamMatching.Data.Migrations
                 {
                     table.PrimaryKey("PK_Project", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Project_User_OwnerId",
-                        column: x => x.OwnerId,
+                        name: "FK_Project_User_LeaderId",
+                        column: x => x.LeaderId,
                         principalTable: "User",
                         principalColumn: "Id");
                 });
@@ -801,9 +801,9 @@ namespace FPT.TeamMatching.Data.Migrations
                 filter: "[UserId] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Project_OwnerId",
+                name: "IX_Project_LeaderId",
                 table: "Project",
-                column: "OwnerId");
+                column: "LeaderId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ProjectActivity_ProjectId",

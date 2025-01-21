@@ -8,7 +8,7 @@ public class Notification : BaseEntity
 
     public string? Description { get; set; }
 
-    public string? NotificationType { get; set; }
+    public string? Type { get; set; }
 
     public virtual User? User { get; set; }
 }

@@ -5,15 +5,11 @@ namespace FPT.TeamMatching.Domain.Entities;
 
 public class Project : BaseEntity
 {
-    public Guid? OwnerId { get; set; }
+    public Guid? LeaderId { get; set; }
 
     public string? TeamName { get; set; }
 
     public string? Name { get; set; }
-
-    public string? Profession { get; set; }
-
-    public string? Specialty { get; set; }
 
     public ProjectType? Type { get; set; }
 
@@ -22,10 +18,14 @@ public class Project : BaseEntity
     public ProjectStatus? Status { get; set; }
 
     public int? TeamSize { get; set; }
+    
+    public DateTimeOffset? StartDate { get; set; }
+    
+    public DateTimeOffset? EndDate { get; set; }
 
     public virtual ICollection<InvitationUser> InvitationUsers { get; set; } = new List<InvitationUser>();
 
-    public virtual User? Owner { get; set; }
+    public virtual User? Leader { get; set; }
 
     public virtual ICollection<ProjectActivity> ProjectActivities { get; set; } = new List<ProjectActivity>();
 
