@@ -42,6 +42,18 @@ public static class Const
 
     public const string API_USERS = $"{BaseApi}/users";
 
+    public const string API_PROJECTS = $"{BaseApi}/projects";
+
+    public const string API_PROJECT_ACTIVITIES = $"{BaseApi}/project-activities";
+
+    public const string API_TASKS = $"{BaseApi}/tasks";
+
+    public const string API_REPORTS = $"{BaseApi}/reports";
+
+    public const string API_LECTURER_FEEDBACKS = $"{BaseApi}/lecturer-feedbacks";
+
+    public const string API_INVITATION_USERS = $"{BaseApi}/invitation-users";
+
     public const string SortFieldDefault = "CreatedDate";
 
     #endregion
