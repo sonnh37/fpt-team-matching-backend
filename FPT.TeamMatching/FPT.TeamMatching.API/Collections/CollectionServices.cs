@@ -15,5 +15,6 @@ public static class CollectionServices
         services.AddTransient<IProjectActivityService, ProjectActivityService>();
         services.AddTransient<ILecturerFeedbackService, LecturerFeedbackService>();
         services.AddTransient<IInvitationUserService, InvitationUserService>();
+        services.AddTransient<IRefreshTokenService, RefreshTokenService>();
     }
 }

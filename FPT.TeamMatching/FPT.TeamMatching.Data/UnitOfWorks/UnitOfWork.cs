@@ -14,6 +14,7 @@ public class UnitOfWork : BaseUnitOfWork<FPTMatchingDbContext>, IUnitOfWork
     public ITaskRepository TaskRepository => GetRepository<ITaskRepository>();
     public IReportRepository ReportRepository => GetRepository<IReportRepository>();
     public IInvitationUserRepository InvitationUserRepository => GetRepository<IInvitationUserRepository>();
+    public IRefreshTokenRepository RefreshTokenRepository => GetRepository<IRefreshTokenRepository>();
     public ILecturerFeedbackRepository LecturerFeedbackRepository => GetRepository<ILecturerFeedbackRepository>();
     public IProjectRepository ProjectRepository => GetRepository<IProjectRepository>();
     public IProjectActivityRepository ProjectActivityRepository => GetRepository<IProjectActivityRepository>();

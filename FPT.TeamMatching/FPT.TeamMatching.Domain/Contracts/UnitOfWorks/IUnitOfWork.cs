@@ -17,4 +17,6 @@ public interface IUnitOfWork : IBaseUnitOfWork
     IReportRepository ReportRepository { get; }
 
     IInvitationUserRepository InvitationUserRepository { get; }
+    
+    IRefreshTokenRepository RefreshTokenRepository { get; }
 }

@@ -41,6 +41,8 @@ public static class Const
     private const string BaseApi = "api";
 
     public const string API_USERS = $"{BaseApi}/users";
+    
+    public const string API_REFRESH_TOKENS = $"{BaseApi}/users/refresh-tokens";
 
     public const string API_PROJECTS = $"{BaseApi}/projects";
 

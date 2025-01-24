@@ -3,6 +3,7 @@ using FPT.TeamMatching.Domain.Models.Requests.Commands.InvitationUsers;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.LecturerFeedbacks;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.ProjectActivities;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Projects;
+using FPT.TeamMatching.Domain.Models.Requests.Commands.RefreshTokens;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Reports;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Tasks;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Users;
@@ -68,6 +69,14 @@ public class MappingProfile : Profile
         CreateMap<LecturerFeedback, LecturerFeedbackResult>().ReverseMap();
         CreateMap<LecturerFeedback, LecturerFeedbackCreateCommand>().ReverseMap();
         CreateMap<LecturerFeedback, LecturerFeedbackUpdateCommand>().ReverseMap();
+
+        #endregion
+        
+        #region RefreshToken
+
+        CreateMap<RefreshToken, RefreshTokenResult>().ReverseMap();
+        CreateMap<RefreshToken, RefreshTokenCreateCommand>().ReverseMap();
+        CreateMap<RefreshToken, RefreshTokenUpdateCommand>().ReverseMap();
 
         #endregion
     }
