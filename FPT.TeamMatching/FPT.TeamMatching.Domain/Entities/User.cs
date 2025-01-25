@@ -27,9 +27,9 @@ public class User : BaseEntity
 
     public virtual ICollection<Blog> Blogs { get; set; } = new List<Blog>();
 
-    public virtual ICollection<Chat> ChatSenders { get; set; } = new List<Chat>();
-
-    public virtual ICollection<Chat> ChatReceivers { get; set; } = new List<Chat>();
+    public virtual ICollection<ConversationMember> ConversationMembers { get; set; } = new List<ConversationMember>();
+    
+    public virtual ICollection<Message> MessageSendBys { get; set; } = new List<Message>();
 
     public virtual ICollection<Comment> Comments { get; set; } = new List<Comment>();
 

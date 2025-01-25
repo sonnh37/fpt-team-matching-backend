@@ -20,7 +20,11 @@ public partial class FPTMatchingDbContext : BaseDbContext
 
     public virtual DbSet<Blog> Blogs { get; set; }
 
-    public virtual DbSet<Chat> Chats { get; set; }
+    public virtual DbSet<Conversation> Conversations { get; set; }
+    
+    public virtual DbSet<ConversationMember> ConversationMembers { get; set; }
+    
+    public virtual DbSet<Message> Messages { get; set; }
 
     public virtual DbSet<Comment> Comments { get; set; }
 
@@ -95,26 +99,38 @@ public partial class FPTMatchingDbContext : BaseDbContext
                 .HasForeignKey(d => d.UserId);
         });
 
-        // modelBuilder.Entity<BlogType>(entity =>
-        // {
-        //     entity.HasKey(e => e.Id);
-        //
-        //     entity.ToTable("BlogType");
-        //
-        //     entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
-        // });
-
-        modelBuilder.Entity<Chat>(entity =>
+        modelBuilder.Entity<Conversation>(entity =>
         {
             entity.HasKey(e => e.Id);
-            entity.ToTable("Chat");
+            entity.ToTable("Conversation");
             entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
 
-            entity.HasOne(d => d.Sender).WithMany(p => p.ChatSenders)
-                .HasForeignKey(d => d.SenderId);
+           });
+        
+        modelBuilder.Entity<ConversationMember>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.ToTable("ConversationMember");
+            entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
 
-            entity.HasOne(d => d.Receiver).WithMany(p => p.ChatReceivers)
-                .HasForeignKey(d => d.ReceiverId);
+            entity.HasOne(d => d.User).WithMany(p => p.ConversationMembers)
+                .HasForeignKey(d => d.UserId);
+
+            entity.HasOne(d => d.Conversation).WithMany(p => p.ConversationMembers)
+                .HasForeignKey(d => d.ConversationId);
+        });
+        
+        modelBuilder.Entity<Message>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.ToTable("Message");
+            entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
+
+            entity.HasOne(d => d.SendBy).WithMany(p => p.MessageSendBys)
+                .HasForeignKey(d => d.SendById);
+
+            entity.HasOne(d => d.Conversation).WithMany(p => p.Messages)
+                .HasForeignKey(d => d.ConversationId);
         });
 
         modelBuilder.Entity<Comment>(entity =>
