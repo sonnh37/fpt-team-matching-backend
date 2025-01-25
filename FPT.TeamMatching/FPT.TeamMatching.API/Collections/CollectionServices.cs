@@ -15,12 +15,12 @@ public static class CollectionServices
         services.AddTransient<IRateService, RateService>();
         services.AddTransient<IJobPositionService, JobPositionService>();
         services.AddTransient<ITeamMemberService, TeamMemberService>();
-        
         services.AddTransient<ITaskService, TaskService>();
         services.AddTransient<IReportService, ReportService>();
         services.AddTransient<IProjectService, ProjectService>();
         services.AddTransient<IProjectActivityService, ProjectActivityService>();
         services.AddTransient<ILecturerFeedbackService, LecturerFeedbackService>();
         services.AddTransient<IInvitationUserService, InvitationUserService>();
+        services.AddTransient<IRefreshTokenService, RefreshTokenService>();
     }
 }

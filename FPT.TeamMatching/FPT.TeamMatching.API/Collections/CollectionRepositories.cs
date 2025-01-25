@@ -24,6 +24,7 @@ public static class CollectionRepositories
         services.AddScoped<IRateRepository, RateRepository>();
         services.AddScoped<IJobPositionRepository, JobPositionRepository>();
         services.AddScoped<ITeamMemberRepository, TeamMemberRepository>();
+        services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
 
     }
 }
