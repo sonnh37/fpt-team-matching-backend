@@ -11,11 +11,6 @@ public interface IUnitOfWork : IBaseUnitOfWork
     IRateRepository RateRepository { get; }
     IJobPositionRepository JobPositionRepository { get; }
     ITeamMemberRepository TeamMemberRepository { get; }
-
-
-
-}   
-
     IProjectRepository ProjectRepository { get; }
 
     IProjectActivityRepository ProjectActivityRepository { get; }
