@@ -25,7 +25,6 @@
 
     <ItemGroup>
         <ProjectReference Include="..\FPT.TeamMatching.Domain\FPT.TeamMatching.Domain.csproj" />
-        <ProjectReference Include="..\FPT.TeamMatching.Services\FPT.TeamMatching.Services.csproj" />
     </ItemGroup>
 
 </Project>
