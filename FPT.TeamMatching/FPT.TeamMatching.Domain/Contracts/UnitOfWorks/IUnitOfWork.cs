@@ -15,3 +15,16 @@ public interface IUnitOfWork : IBaseUnitOfWork
 
 
 }   
+
+    IProjectRepository ProjectRepository { get; }
+
+    IProjectActivityRepository ProjectActivityRepository { get; }
+
+    ILecturerFeedbackRepository LecturerFeedbackRepository { get; }
+
+    ITaskRepository TaskRepository { get; }
+
+    IReportRepository ReportRepository { get; }
+
+    IInvitationUserRepository InvitationUserRepository { get; }
+}

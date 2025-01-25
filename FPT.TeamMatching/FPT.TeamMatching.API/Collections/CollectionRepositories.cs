@@ -12,6 +12,12 @@ public static class CollectionRepositories
     {
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<ITaskRepository, TaskRepository>();
+        services.AddScoped<IReportRepository, ReportRepository>();
+        services.AddScoped<IProjectRepository, ProjectRepository>();
+        services.AddScoped<IProjectActivityRepository, ProjectActivityRepository>();
+        services.AddScoped<ILecturerFeedbackRepository, LecturerFeedbackRepository>();
+        services.AddScoped<IInvitationUserRepository, InvitationUserRepository>();
         services.AddScoped<IBlogRepository, BlogRepository>();
         services.AddScoped<ILikeRepository, LikeRepository>();
         services.AddScoped<ICommentRepository, CommentRepository>();

@@ -13,13 +13,15 @@ public class UnitOfWork : BaseUnitOfWork<FPTMatchingDbContext>, IUnitOfWork
     public IUserRepository UserRepository => GetRepository<IUserRepository>();
 
     public IBlogRepository BlogRepository => GetRepository<IBlogRepository>();
-
     public ILikeRepository LikeRepository => GetRepository<ILikeRepository>();
     public ICommentRepository CommentRepository => GetRepository<ICommentRepository>();
-
     public IRateRepository RateRepository => GetRepository<IRateRepository>();
-
     public IJobPositionRepository JobPositionRepository => GetRepository<IJobPositionRepository>();
-
     public ITeamMemberRepository TeamMemberRepository => GetRepository<ITeamMemberRepository>();
+    public ITaskRepository TaskRepository => GetRepository<ITaskRepository>();
+    public IReportRepository ReportRepository => GetRepository<IReportRepository>();
+    public IInvitationUserRepository InvitationUserRepository => GetRepository<IInvitationUserRepository>();
+    public ILecturerFeedbackRepository LecturerFeedbackRepository => GetRepository<ILecturerFeedbackRepository>();
+    public IProjectRepository ProjectRepository => GetRepository<IProjectRepository>();
+    public IProjectActivityRepository ProjectActivityRepository => GetRepository<IProjectActivityRepository>();
 }
