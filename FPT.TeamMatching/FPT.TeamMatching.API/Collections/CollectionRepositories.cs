@@ -1,4 +1,5 @@
-﻿using FPT.TeamMatching.Data.Repositories.Base;
+﻿using FPT.TeamMatching.Data.Repositories;
+using FPT.TeamMatching.Data.Repositories.Base;
 using FPT.TeamMatching.Data.UnitOfWorks;
 using FPT.TeamMatching.Domain.Contracts.Repositories;
 using FPT.TeamMatching.Domain.Contracts.UnitOfWorks;
@@ -11,5 +12,12 @@ public static class CollectionRepositories
     {
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IBlogRepository, BlogRepository>();
+        services.AddScoped<ILikeRepository, LikeRepository>();
+        services.AddScoped<ICommentRepository, CommentRepository>();
+        services.AddScoped<IRateRepository, RateRepository>();
+        services.AddScoped<IJobPositionRepository, JobPositionRepository>();
+        services.AddScoped<ITeamMemberRepository, TeamMemberRepository>();
+
     }
 }
