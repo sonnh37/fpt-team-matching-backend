@@ -34,7 +34,7 @@ builder.Services.AddDbContext<FPTMatchingDbContext>(options =>
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
     options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
-    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    // options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
 });
 builder.Services.AddSwaggerGen(options =>
 {

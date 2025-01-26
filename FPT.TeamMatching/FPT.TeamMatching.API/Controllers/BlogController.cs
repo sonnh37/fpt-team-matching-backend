@@ -12,7 +12,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace FPT.TeamMatching.API.Controllers
 {
-    [Route(Const.API_TASKS)]
+    [Route(Const.API_BLOGS)]
     [ApiController]
     [AllowAnonymous]
     public class BlogController : ControllerBase
