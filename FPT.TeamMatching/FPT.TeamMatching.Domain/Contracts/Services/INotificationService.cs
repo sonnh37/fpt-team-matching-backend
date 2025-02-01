@@ -12,4 +12,5 @@ public interface INotificationService
     Task<BusinessResult> GenerateNotification(NotificationCreateCommand notification);
     Task<BusinessResult> GetNotificationByUserId(Guid userId);
     Task<BusinessResult> UpdateSeenNotification(Guid notificationId);
+    Task<BusinessResult> DeleteNotification(Guid notificationId);
 }

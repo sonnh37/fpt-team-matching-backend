@@ -1,9 +1,10 @@
+using FPT.TeamMatching.Domain.Models.Results.Bases;
+
 namespace FPT.TeamMatching.Domain.Models.Results;
 
-public class ProfileResult
+public class ProfileResult : BaseResult
 {
-    public Guid Id { get; set; }
-    public Guid UserId { get; set; }
+    public Guid? UserId { get; set; }
 
     public string? Bio { get; set; }
 

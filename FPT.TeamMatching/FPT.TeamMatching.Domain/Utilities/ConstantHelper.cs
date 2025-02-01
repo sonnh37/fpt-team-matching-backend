@@ -54,6 +54,16 @@ public static class Const
 
     public const string API_INVITATION_USERS = $"{BaseApi}/invitation-users";
 
+    public const string API_NOTIFICATIONS = $"{BaseApi}/notifications";
+    
+    public const string API_PROFILES = $"{BaseApi}/profiles";
+    
+    public const string API_SKILLPROFILES = $"{BaseApi}/skill-profiles";
+    
+    public const string? API_VERIFY_QUALIFIED = $"{BaseApi}/verify-qualified";
+    
+    public const string API_VERIFY_SEMESTER = $"{BaseApi}/verify-semester";
+    
     public const string SortFieldDefault = "CreatedDate";
 
     #endregion

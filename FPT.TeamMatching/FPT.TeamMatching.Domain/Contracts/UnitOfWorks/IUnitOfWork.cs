@@ -22,4 +22,10 @@ public interface IUnitOfWork : IBaseUnitOfWork
     IReportRepository ReportRepository { get; }
 
     IInvitationUserRepository InvitationUserRepository { get; }
+    
+    INotificationRepository NotificationRepository { get; }
+    IProfileRepository ProfileRepository { get; }
+    ISkillProfileRepository SkillProfileRepository { get; }
+    IVerifyQualifiedForAcademicProjectRepository VerifyQualifiedForAcademicProjectRepository { get; }
+    IVerifySemesterRepository VerifySemesterRepository { get; }
 }

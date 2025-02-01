@@ -1,6 +1,9 @@
+using FPT.TeamMatching.Domain.Contracts.Repositories.Bases;
+using FPT.TeamMatching.Domain.Entities;
+
 namespace FPT.TeamMatching.Domain.Contracts.Repositories;
 
-public class IProfileRepository
+public interface IProfileRepository : IBaseRepository<Profile>
 {
-    
+    Task<Profile> GetProfileByUserId(Guid userId);
 }
