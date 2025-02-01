@@ -4,6 +4,7 @@ using FPT.TeamMatching.Domain.Models.Requests.Commands.Users;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Blog;
 using FPT.TeamMatching.Domain.Models.Responses;
 using FPT.TeamMatching.Domain.Models.Results;
+using FPT.TeamMatching.Domain.Utilities;
 using FPT.TeamMatching.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -11,7 +12,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace FPT.TeamMatching.API.Controllers
 {
-    [Route("api/blog")]
+    [Route(Const.API_BLOGS)]
     [ApiController]
     [AllowAnonymous]
     public class BlogController : ControllerBase

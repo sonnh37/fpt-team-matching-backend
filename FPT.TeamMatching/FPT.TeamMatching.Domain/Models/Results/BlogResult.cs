@@ -13,8 +13,6 @@ namespace FPT.TeamMatching.Domain.Models.Results
 
         public Guid? UserId { get; set; }
 
-        public Guid? BlogTypeId { get; set; }
-
         public string? Title { get; set; }
 
         public string? Content { get; set; }

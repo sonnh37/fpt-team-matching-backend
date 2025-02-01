@@ -4,13 +4,14 @@ using FPT.TeamMatching.Domain.Models.Requests.Commands.Users;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.TeamMember;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Users;
 using FPT.TeamMatching.Domain.Models.Results;
+using FPT.TeamMatching.Domain.Utilities;
 using Microsoft.AspNetCore.Mvc;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace FPT.TeamMatching.API.Controllers
 {
-    [Route("api/teammember")]
+    [Route(Const.API_TEAM_MEMBERS)]
     [ApiController]
     public class TeamMemberController : ControllerBase
     {

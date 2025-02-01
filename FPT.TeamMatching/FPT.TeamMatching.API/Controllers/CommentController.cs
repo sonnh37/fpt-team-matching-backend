@@ -4,6 +4,7 @@ using FPT.TeamMatching.Domain.Models.Requests.Commands.Users;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Comment;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Users;
 using FPT.TeamMatching.Domain.Models.Results;
+using FPT.TeamMatching.Domain.Utilities;
 using FPT.TeamMatching.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,7 +12,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace FPT.TeamMatching.API.Controllers
 {
-    [Route("api/comment")]
+    [Route(Const.API_COMMENTS)]
     [ApiController]
     public class CommentController : ControllerBase
     {
