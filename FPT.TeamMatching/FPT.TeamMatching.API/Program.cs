@@ -1,11 +1,13 @@
 using System.Text;
 using System.Text.Json.Serialization;
+using CloudinaryDotNet;
 using DotNetEnv;
 using FPT.TeamMatching.API.Collections;
 using FPT.TeamMatching.Data.Context;
 using FPT.TeamMatching.Domain.Configs;
 using FPT.TeamMatching.Domain.Configs.Mapping;
 using FPT.TeamMatching.Domain.Entities;
+using FPT.TeamMatching.Domain.Lib;
 using FPT.TeamMatching.Domain.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -68,6 +70,11 @@ builder.Services.AddAutoMapper(typeof(MappingProfile));
 builder.Services.AddCollectionRepositories();
 builder.Services.AddCollectionServices();
 
+#region Cloudinary
+
+builder.Services.AddScoped<CloudinaryConfig>();
+
+#endregion
 #region Config-Authentication_Authorization
 
 builder.Services.Configure<TokenSetting>(builder.Configuration.GetSection("TokenSetting"));

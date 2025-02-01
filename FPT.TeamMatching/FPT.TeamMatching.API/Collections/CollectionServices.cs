@@ -22,5 +22,11 @@ public static class CollectionServices
         services.AddTransient<IProjectActivityService, ProjectActivityService>();
         services.AddTransient<ILecturerFeedbackService, LecturerFeedbackService>();
         services.AddTransient<IInvitationUserService, InvitationUserService>();
+
+        services.AddTransient<INotificationService, NotificationService>();
+        services.AddTransient<IProfileService, ProfileService>();
+        services.AddTransient<ISkillProfileService, SkillProfileService>();
+        services.AddTransient<IVerifyQualifiedForAcademicProjectService, VerifyQualifiedForAcademicProjectService>();
+        services.AddTransient<IVerifySemesterService, VerifySemesterService>();
     }
 }
