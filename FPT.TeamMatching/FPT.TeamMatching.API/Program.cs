@@ -3,6 +3,7 @@ using System.Text.Json.Serialization;
 using CloudinaryDotNet;
 using DotNetEnv;
 using FPT.TeamMatching.API.Collections;
+using FPT.TeamMatching.API.Hub;
 using FPT.TeamMatching.Data.Context;
 using FPT.TeamMatching.Domain.Configs;
 using FPT.TeamMatching.Domain.Configs.Mapping;
@@ -33,6 +34,11 @@ builder.Services.AddDbContext<FPTMatchingDbContext>(options =>
 
 #endregion
 
+#region Add signalR
+
+builder.Services.AddSignalR();
+
+#endregion
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
     options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
@@ -167,5 +173,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.MapHub<ChatHub>("/Chat");
 
 app.Run();
