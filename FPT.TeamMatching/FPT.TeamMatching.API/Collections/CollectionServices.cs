@@ -15,6 +15,7 @@ public static class CollectionServices
         services.AddTransient<IRateService, RateService>();
         services.AddTransient<IJobPositionService, JobPositionService>();
         services.AddTransient<ITeamMemberService, TeamMemberService>();
+        
         services.AddTransient<ITaskService, TaskService>();
         services.AddTransient<IReportService, ReportService>();
         services.AddTransient<IProjectService, ProjectService>();
@@ -22,5 +23,11 @@ public static class CollectionServices
         services.AddTransient<ILecturerFeedbackService, LecturerFeedbackService>();
         services.AddTransient<IInvitationUserService, InvitationUserService>();
         services.AddTransient<IRefreshTokenService, RefreshTokenService>();
+
+        services.AddTransient<INotificationService, NotificationService>();
+        services.AddTransient<IProfileService, ProfileService>();
+        services.AddTransient<ISkillProfileService, SkillProfileService>();
+        services.AddTransient<IVerifyQualifiedForAcademicProjectService, VerifyQualifiedForAcademicProjectService>();
+        services.AddTransient<IVerifySemesterService, VerifySemesterService>();
     }
 }

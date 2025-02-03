@@ -7,11 +7,15 @@ using FPT.TeamMatching.Domain.Models.Requests.Commands.Rate;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.TeamMember;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.InvitationUsers;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.LecturerFeedbacks;
+using FPT.TeamMatching.Domain.Models.Requests.Commands.Notification;
+using FPT.TeamMatching.Domain.Models.Requests.Commands.Profile;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.ProjectActivities;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Projects;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Reports;
+using FPT.TeamMatching.Domain.Models.Requests.Commands.SkillProfile;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Tasks;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Users;
+using FPT.TeamMatching.Domain.Models.Requests.Commands.VerifySemester;
 using FPT.TeamMatching.Domain.Models.Results;
 using Profile = AutoMapper.Profile;
 
@@ -118,6 +122,37 @@ public class MappingProfile : Profile
         CreateMap<LecturerFeedback, LecturerFeedbackCreateCommand>().ReverseMap();
         CreateMap<LecturerFeedback, LecturerFeedbackUpdateCommand>().ReverseMap();
 
+        #endregion
+
+        #region Notification
+        CreateMap<Notification, NotificationCreateCommand>().ReverseMap();
+        CreateMap<Notification, NotificationResult>().ReverseMap();
+        #endregion
+
+        #region Profile
+        CreateMap<Profile, ProjectCreateCommand>().ReverseMap();
+        CreateMap<Profile, ProfileUpdateCommand>().ReverseMap();
+        CreateMap<Profile, ProfileResult>().ReverseMap();
+        #endregion
+
+        #region SkillProfile
+        CreateMap<SkillProfile, SkillProfileResult>().ReverseMap();
+        CreateMap<SkillProfile, SkillProfileCreateCommand>().ReverseMap();
+        CreateMap<SkillProfile, SkillProfileUpdateCommand>().ReverseMap();
+        #endregion
+
+        #region VerifySemester
+
+        CreateMap<VerifySemester, VerifySemesterResult>().ReverseMap();
+        CreateMap<VerifySemester, VerifySemesterCreateCommand>().ReverseMap();
+        CreateMap<VerifySemester, VerifySemesterUpdateCommand>().ReverseMap();
+        #endregion
+
+        #region VerifyQualifiedForAcademicProject
+
+        CreateMap<VerifyQualifiedForAcademicProject, VerifySemesterCreateCommand>().ReverseMap();
+        CreateMap<VerifyQualifiedForAcademicProject, VerifySemesterUpdateCommand>().ReverseMap();
+        CreateMap<VerifyQualifiedForAcademicProject, VerifyQualifiedForAcademicProjectResult>().ReverseMap();
         #endregion
     }
 }

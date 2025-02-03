@@ -26,5 +26,10 @@ public static class CollectionRepositories
         services.AddScoped<ITeamMemberRepository, TeamMemberRepository>();
         services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
 
+        services.AddScoped<INotificationRepository, NotificationRepository>();
+        services.AddScoped<IProfileRepository, ProfileRepository>();
+        services.AddScoped<ISkillProfileRepository, SkillProfileRepository>();
+        services.AddScoped<IVerifySemesterRepository, VerifySemesterRepository>();
+        services.AddScoped<IVerifyQualifiedForAcademicProjectRepository, VerifyQualifiedForAcademicProjectRepository>();
     }
 }

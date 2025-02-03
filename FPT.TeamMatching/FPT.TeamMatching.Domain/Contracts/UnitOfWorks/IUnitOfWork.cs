@@ -12,10 +12,21 @@ public interface IUnitOfWork : IBaseUnitOfWork
     IJobPositionRepository JobPositionRepository { get; }
     ITeamMemberRepository TeamMemberRepository { get; }
     IProjectRepository ProjectRepository { get; }
+
     IProjectActivityRepository ProjectActivityRepository { get; }
+
     ILecturerFeedbackRepository LecturerFeedbackRepository { get; }
+
     ITaskRepository TaskRepository { get; }
+
     IReportRepository ReportRepository { get; }
+
     IInvitationUserRepository InvitationUserRepository { get; }
     IRefreshTokenRepository RefreshTokenRepository { get; }
+    
+    INotificationRepository NotificationRepository { get; }
+    IProfileRepository ProfileRepository { get; }
+    ISkillProfileRepository SkillProfileRepository { get; }
+    IVerifyQualifiedForAcademicProjectRepository VerifyQualifiedForAcademicProjectRepository { get; }
+    IVerifySemesterRepository VerifySemesterRepository { get; }
 }

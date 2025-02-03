@@ -25,4 +25,9 @@ public class UnitOfWork : BaseUnitOfWork<FPTMatchingDbContext>, IUnitOfWork
     public ILecturerFeedbackRepository LecturerFeedbackRepository => GetRepository<ILecturerFeedbackRepository>();
     public IProjectRepository ProjectRepository => GetRepository<IProjectRepository>();
     public IProjectActivityRepository ProjectActivityRepository => GetRepository<IProjectActivityRepository>();
+    public INotificationRepository NotificationRepository => GetRepository<INotificationRepository>();
+    public IProfileRepository ProfileRepository => GetRepository<IProfileRepository>();
+    public ISkillProfileRepository SkillProfileRepository => GetRepository<ISkillProfileRepository>();
+    public IVerifyQualifiedForAcademicProjectRepository VerifyQualifiedForAcademicProjectRepository => GetRepository<IVerifyQualifiedForAcademicProjectRepository>();
+    public IVerifySemesterRepository VerifySemesterRepository => GetRepository<IVerifySemesterRepository>();
 }

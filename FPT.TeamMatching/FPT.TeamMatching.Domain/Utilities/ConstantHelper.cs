@@ -60,6 +60,16 @@ public static class Const
     public const string API_RATES = $"{BaseApi}/rates";
     public const string API_TEAM_MEMBERS = $"{BaseApi}/team-members";
 
+    public const string API_NOTIFICATIONS = $"{BaseApi}/notifications";
+    
+    public const string API_PROFILES = $"{BaseApi}/profiles";
+    
+    public const string API_SKILLPROFILES = $"{BaseApi}/skill-profiles";
+    
+    public const string? API_VERIFY_QUALIFIED = $"{BaseApi}/verify-qualified";
+    
+    public const string API_VERIFY_SEMESTER = $"{BaseApi}/verify-semester";
+    
     public const string SortFieldDefault = "CreatedDate";
 
     #endregion
