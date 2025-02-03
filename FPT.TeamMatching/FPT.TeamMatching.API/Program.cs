@@ -23,8 +23,8 @@ builder.Services.AddLogging();
 #region Add-DbContext
 
 builder.Services.AddDbContext<FPTMatchingDbContext>(options =>
-{
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"),
+{   
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"),
         npgsqlOptions => npgsqlOptions.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery));
     options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
 });
