@@ -5,7 +5,7 @@ using Task = System.Threading.Tasks.Task;
 
 namespace FPT.TeamMatching.API.Hub;
 
-public sealed class ChatHub : Microsoft.AspNetCore.SignalR.Hub
+public class ChatHub : Microsoft.AspNetCore.SignalR.Hub
 {
     public override async Task OnConnectedAsync()
     {
@@ -16,15 +16,15 @@ public sealed class ChatHub : Microsoft.AspNetCore.SignalR.Hub
     {
         await Clients.All.SendAsync("ReceiveMessage", $"{Context.ConnectionId}: {message}");
     }
-    //
-    // public async Task JoinChat(ConversationMember conn)
-    // {
-    //     await Clients.All.SendAsync("ReceiveMessage", "admin", $"{conn.UserId} has joined");
-    // }
-    //
-    // public async Task JoinSpecificChatRoom(ConversationMember conn)
-    // {
-    //     await Groups.AddToGroupAsync(Context.ConnectionId, conn.ConversationId.ToString());
-    //     await Clients.Group(conn.ConversationId.ToString()).SendAsync("ReceiveMessage", "admin", $"{conn.UserId} has joined {conn.ConversationId}");
-    // }
+    
+    public async Task JoinChat(ConversationMember conn)
+    {
+        await Clients.All.SendAsync("ReceiveMessage", "admin", $"{conn.UserId} has joined");
+    }
+    
+    public async Task JoinSpecificChatRoom(ConversationMember conn)
+    {
+        await Groups.AddToGroupAsync(Context.ConnectionId, conn.ConversationId.ToString());
+        await Clients.Group(conn.ConversationId.ToString()).SendAsync("ReceiveMessage", "admin", $"{conn.UserId} has joined {conn.ConversationId}");
+    }
 }
