@@ -40,7 +40,7 @@ public partial class FPTMatchingDbContext : BaseDbContext
 
     public virtual DbSet<Permission> Permissions { get; set; }
 
-    public virtual DbSet<PermissionXAction> PermissionXactions { get; set; }
+    public virtual DbSet<PermissionXAction> PermissionXActions { get; set; }
 
     public virtual DbSet<Profile> Profiles { get; set; }
 
@@ -62,7 +62,7 @@ public partial class FPTMatchingDbContext : BaseDbContext
 
     public virtual DbSet<User> Users { get; set; }
 
-    public virtual DbSet<UserXPermission> UserXpermissions { get; set; }
+    public virtual DbSet<UserXPermission> UserXPermissions { get; set; }
 
     public virtual DbSet<VerifyQualifiedForAcademicProject> VerifyQualifiedForAcademicProjects { get; set; }
 
@@ -84,7 +84,8 @@ public partial class FPTMatchingDbContext : BaseDbContext
 
             entity.ToTable("Action");
 
-            entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
+            entity.Property(e => e.Id).ValueGeneratedOnAdd()
+                .HasDefaultValueSql("gen_random_uuid()");
         });
 
         modelBuilder.Entity<Blog>(entity =>
@@ -93,7 +94,8 @@ public partial class FPTMatchingDbContext : BaseDbContext
 
             entity.ToTable("Blog");
 
-            entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
+            entity.Property(e => e.Id).ValueGeneratedOnAdd()
+                .HasDefaultValueSql("gen_random_uuid()");
 
             entity.HasOne(d => d.User).WithMany(p => p.Blogs)
                 .HasForeignKey(d => d.UserId);
@@ -103,7 +105,8 @@ public partial class FPTMatchingDbContext : BaseDbContext
         {
             entity.HasKey(e => e.Id);
             entity.ToTable("Conversation");
-            entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
+            entity.Property(e => e.Id).ValueGeneratedOnAdd()
+                .HasDefaultValueSql("gen_random_uuid()");
 
            });
         
@@ -111,7 +114,8 @@ public partial class FPTMatchingDbContext : BaseDbContext
         {
             entity.HasKey(e => e.Id);
             entity.ToTable("ConversationMember");
-            entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
+            entity.Property(e => e.Id).ValueGeneratedOnAdd()
+                .HasDefaultValueSql("gen_random_uuid()");
 
             entity.HasOne(d => d.User).WithMany(p => p.ConversationMembers)
                 .HasForeignKey(d => d.UserId);
@@ -124,7 +128,8 @@ public partial class FPTMatchingDbContext : BaseDbContext
         {
             entity.HasKey(e => e.Id);
             entity.ToTable("Message");
-            entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
+            entity.Property(e => e.Id).ValueGeneratedOnAdd()
+                .HasDefaultValueSql("gen_random_uuid()");
 
             entity.HasOne(d => d.SendBy).WithMany(p => p.MessageSendBys)
                 .HasForeignKey(d => d.SendById);
@@ -139,7 +144,8 @@ public partial class FPTMatchingDbContext : BaseDbContext
 
             entity.ToTable("Comment");
 
-            entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
+            entity.Property(e => e.Id).ValueGeneratedOnAdd()
+                .HasDefaultValueSql("gen_random_uuid()");
 
             entity.HasOne(d => d.Blog).WithMany(p => p.Comments)
                 .HasForeignKey(d => d.BlogId);
@@ -154,7 +160,8 @@ public partial class FPTMatchingDbContext : BaseDbContext
 
             entity.ToTable("InvitationUser");
 
-            entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
+            entity.Property(e => e.Id).ValueGeneratedOnAdd()
+                .HasDefaultValueSql("gen_random_uuid()");
 
             entity.HasOne(d => d.Project).WithMany(p => p.InvitationUsers)
                 .HasForeignKey(d => d.ProjectId);
@@ -172,7 +179,8 @@ public partial class FPTMatchingDbContext : BaseDbContext
 
             entity.ToTable("JobPosition");
 
-            entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
+            entity.Property(e => e.Id).ValueGeneratedOnAdd()
+                .HasDefaultValueSql("gen_random_uuid()");
             entity.Property(e => e.FileCv).HasMaxLength(1);
 
             entity.HasOne(d => d.Blog).WithMany(p => p.JobPositions)
@@ -188,7 +196,8 @@ public partial class FPTMatchingDbContext : BaseDbContext
 
             entity.ToTable("LecturerFeedback");
 
-            entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
+            entity.Property(e => e.Id).ValueGeneratedOnAdd()
+                .HasDefaultValueSql("gen_random_uuid()");
 
             entity.HasOne(d => d.Lecturer).WithMany(p => p.LecturerFeedbacks)
                 .HasForeignKey(d => d.LecturerId);
@@ -203,7 +212,8 @@ public partial class FPTMatchingDbContext : BaseDbContext
 
             entity.ToTable("Like");
 
-            entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
+            entity.Property(e => e.Id).ValueGeneratedOnAdd()
+                .HasDefaultValueSql("gen_random_uuid()");
 
             entity.HasOne(d => d.Blog).WithMany(p => p.Likes)
                 .HasForeignKey(d => d.BlogId);
@@ -218,7 +228,8 @@ public partial class FPTMatchingDbContext : BaseDbContext
 
             entity.ToTable("Notification");
 
-            entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
+            entity.Property(e => e.Id).ValueGeneratedOnAdd()
+                .HasDefaultValueSql("gen_random_uuid()");
 
             entity.HasOne(d => d.User).WithMany(p => p.Notifications)
                 .HasForeignKey(d => d.UserId);
@@ -230,7 +241,8 @@ public partial class FPTMatchingDbContext : BaseDbContext
 
             entity.ToTable("Permission");
 
-            entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
+            entity.Property(e => e.Id).ValueGeneratedOnAdd()
+                .HasDefaultValueSql("gen_random_uuid()");
         });
 
         modelBuilder.Entity<PermissionXAction>(entity =>
@@ -239,7 +251,8 @@ public partial class FPTMatchingDbContext : BaseDbContext
 
             entity.ToTable("PermissionXAction");
 
-            entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
+            entity.Property(e => e.Id).ValueGeneratedOnAdd()
+                .HasDefaultValueSql("gen_random_uuid()");
 
             entity.HasOne(d => d.Action).WithMany()
                 .HasForeignKey(d => d.ActionId);
@@ -256,7 +269,8 @@ public partial class FPTMatchingDbContext : BaseDbContext
 
             entity.HasIndex(e => e.UserId).IsUnique();
 
-            entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
+            entity.Property(e => e.Id).ValueGeneratedOnAdd()
+                .HasDefaultValueSql("gen_random_uuid()");
 
             entity.HasOne(d => d.User).WithOne(p => p.Profile)
                 .HasForeignKey<Profile>(d => d.UserId);
@@ -268,7 +282,8 @@ public partial class FPTMatchingDbContext : BaseDbContext
 
             entity.ToTable("Project");
 
-            entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
+            entity.Property(e => e.Id).ValueGeneratedOnAdd()
+                .HasDefaultValueSql("gen_random_uuid()");
 
             entity.HasOne(d => d.Leader).WithMany(p => p.Projects)
                 .HasForeignKey(d => d.LeaderId);
@@ -280,7 +295,8 @@ public partial class FPTMatchingDbContext : BaseDbContext
 
             entity.ToTable("ProjectActivity");
 
-            entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
+            entity.Property(e => e.Id).ValueGeneratedOnAdd()
+                .HasDefaultValueSql("gen_random_uuid()");
 
             entity.HasOne(d => d.Project).WithMany(p => p.ProjectActivities)
                 .HasForeignKey(d => d.ProjectId);
@@ -308,7 +324,8 @@ public partial class FPTMatchingDbContext : BaseDbContext
 
             entity.ToTable("RefreshToken");
 
-            entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
+            entity.Property(e => e.Id).ValueGeneratedOnAdd()
+                .HasDefaultValueSql("gen_random_uuid()");
 
             entity.HasOne(d => d.User).WithMany(p => p.RefreshTokens)
                 .HasForeignKey(d => d.UserId);
@@ -320,7 +337,8 @@ public partial class FPTMatchingDbContext : BaseDbContext
 
             entity.ToTable("Report");
 
-            entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
+            entity.Property(e => e.Id).ValueGeneratedOnAdd()
+                .HasDefaultValueSql("gen_random_uuid()");
 
             entity.HasOne(d => d.Project).WithMany(p => p.Reports)
                 .HasForeignKey(d => d.ProjectId);
@@ -332,7 +350,8 @@ public partial class FPTMatchingDbContext : BaseDbContext
 
             entity.ToTable("SkillProfile");
 
-            entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
+            entity.Property(e => e.Id).ValueGeneratedOnAdd()
+                .HasDefaultValueSql("gen_random_uuid()");
 
             entity.HasOne(d => d.User).WithMany(p => p.SkillProfiles)
                 .HasForeignKey(d => d.UserId);
@@ -344,7 +363,8 @@ public partial class FPTMatchingDbContext : BaseDbContext
 
             entity.ToTable("Task");
 
-            entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
+            entity.Property(e => e.Id).ValueGeneratedOnAdd()
+                .HasDefaultValueSql("gen_random_uuid()");
 
             entity.HasOne(d => d.AssignedTo).WithMany(p => p.Tasks)
                 .HasForeignKey(d => d.AssignedToId);
@@ -359,7 +379,8 @@ public partial class FPTMatchingDbContext : BaseDbContext
 
             entity.ToTable("TeamMember");
 
-            entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
+            entity.Property(e => e.Id).ValueGeneratedOnAdd()
+                .HasDefaultValueSql("gen_random_uuid()");
 
             entity.HasOne(d => d.Project).WithMany(p => p.TeamMembers)
                 .HasForeignKey(d => d.ProjectId);
@@ -374,7 +395,8 @@ public partial class FPTMatchingDbContext : BaseDbContext
 
             entity.ToTable("User");
 
-            entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
+            entity.Property(e => e.Id).ValueGeneratedOnAdd()
+                .HasDefaultValueSql("gen_random_uuid()");
         });
 
         modelBuilder.Entity<UserXPermission>(entity =>
@@ -383,7 +405,8 @@ public partial class FPTMatchingDbContext : BaseDbContext
 
             entity.ToTable("UserXPermission");
 
-            entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
+            entity.Property(e => e.Id).ValueGeneratedOnAdd()
+                .HasDefaultValueSql("gen_random_uuid()");
 
             entity.HasOne(d => d.Permission).WithMany()
                 .HasForeignKey(d => d.PermissionId);
@@ -400,7 +423,8 @@ public partial class FPTMatchingDbContext : BaseDbContext
 
             entity.HasIndex(e => e.UserId).IsUnique();
 
-            entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
+            entity.Property(e => e.Id).ValueGeneratedOnAdd()
+                .HasDefaultValueSql("gen_random_uuid()");
 
             entity.HasOne(d => d.User).WithOne(p => p.VerifyQualifiedForAcademicProject)
                 .HasForeignKey<VerifyQualifiedForAcademicProject>(d => d.UserId);
@@ -417,7 +441,8 @@ public partial class FPTMatchingDbContext : BaseDbContext
 
             entity.HasIndex(e => e.UserId).IsUnique();
 
-            entity.Property(e => e.Id).HasDefaultValueSql("(newid())");
+            entity.Property(e => e.Id).ValueGeneratedOnAdd()
+                .HasDefaultValueSql("gen_random_uuid()");
 
             entity.HasOne(d => d.User).WithOne(p => p.VerifySemester)
                 .HasForeignKey<VerifySemester>(d => d.UserId);
@@ -435,7 +460,7 @@ public partial class FPTMatchingDbContext : BaseDbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        if (!optionsBuilder.IsConfigured) optionsBuilder.UseSqlServer(GetConnectionString());
+        if (!optionsBuilder.IsConfigured) optionsBuilder.UseNpgsql(GetConnectionString());
     }
 
     private string GetConnectionString()
