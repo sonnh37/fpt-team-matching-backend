@@ -1,4 +1,5 @@
-﻿using FPT.TeamMatching.Domain.Contracts.Repositories;
+﻿using FPT.TeamMatching.API.Hub;
+using FPT.TeamMatching.Domain.Contracts.Repositories;
 using FPT.TeamMatching.Domain.Contracts.Services;
 using FPT.TeamMatching.Services;
 
@@ -29,5 +30,7 @@ public static class CollectionServices
         services.AddTransient<ISkillProfileService, SkillProfileService>();
         services.AddTransient<IVerifyQualifiedForAcademicProjectService, VerifyQualifiedForAcademicProjectService>();
         services.AddTransient<IVerifySemesterService, VerifySemesterService>();
+
+        services.AddTransient<ChatHub>();
     }
 }

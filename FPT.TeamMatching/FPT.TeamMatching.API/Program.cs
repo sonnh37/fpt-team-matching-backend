@@ -15,6 +15,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
+using MongoDB.Driver;
 using Task = System.Threading.Tasks.Task;
 
 Env.Load();
@@ -31,6 +32,13 @@ builder.Services.AddDbContext<FPTMatchingDbContext>(options =>
     options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
 });
 
+// builder.Services.AddDbContext<ChatRoomDbContext>(options =>
+// {
+//     var mongoClient = new MongoClient(builder.Configuration["MONGODB_URI"]);
+//     var database = mongoClient.GetDatabase("fpt-matching-chatroom");
+//     options.UseMongoDB(database.Client, database.DatabaseNamespace.DatabaseName);
+// });
+builder.Services.AddDbContext<ChatRoomDbContext>(ServiceLifetime.Scoped);
 #endregion
 
 builder.Services.AddControllers().AddJsonOptions(options =>
@@ -73,6 +81,12 @@ builder.Services.AddCollectionServices();
 #region Cloudinary
 
 builder.Services.AddScoped<CloudinaryConfig>();
+
+#endregion
+
+#region Redis
+
+builder.Services.AddSingleton<RedisConfig>();
 
 #endregion
 #region Config-Authentication_Authorization
