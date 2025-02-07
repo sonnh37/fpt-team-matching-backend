@@ -1,12 +1,12 @@
-﻿using FPT.TeamMatching.Domain.Entities.Base;
+﻿using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
 
 namespace FPT.TeamMatching.Domain.Entities;
 
-public class Conversation : BaseEntity
+public class Conversation
 {
+    [BsonId]
+    public string Id { get; set; } = Guid.NewGuid().ToString();
+    [BsonElement]
     public string? ConversationName { get; set; }
-    
-    public virtual ICollection<Message> Messages { get; set; } = new List<Message>();
-    
-    public virtual ICollection<ConversationMember> ConversationMembers { get; set; } = new List<ConversationMember>();
 }
