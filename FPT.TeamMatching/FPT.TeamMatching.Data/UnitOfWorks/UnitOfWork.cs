@@ -1,6 +1,8 @@
 ﻿using FPT.TeamMatching.Data.Context;
+using FPT.TeamMatching.Data.Repositories;
 using FPT.TeamMatching.Domain.Contracts.Repositories;
 using FPT.TeamMatching.Domain.Contracts.UnitOfWorks;
+using FPT.TeamMatching.Domain.Entities;
 
 namespace FPT.TeamMatching.Data.UnitOfWorks;
 
@@ -9,6 +11,7 @@ public class UnitOfWork : BaseUnitOfWork<FPTMatchingDbContext>, IUnitOfWork
     public UnitOfWork(FPTMatchingDbContext context, IServiceProvider serviceProvider) : base(context, serviceProvider)
     {
     }
+    
 
     public IUserRepository UserRepository => GetRepository<IUserRepository>();
 
@@ -30,4 +33,5 @@ public class UnitOfWork : BaseUnitOfWork<FPTMatchingDbContext>, IUnitOfWork
     public ISkillProfileRepository SkillProfileRepository => GetRepository<ISkillProfileRepository>();
     public IVerifyQualifiedForAcademicProjectRepository VerifyQualifiedForAcademicProjectRepository => GetRepository<IVerifyQualifiedForAcademicProjectRepository>();
     public IVerifySemesterRepository VerifySemesterRepository => GetRepository<IVerifySemesterRepository>();
+    
 }

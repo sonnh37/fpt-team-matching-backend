@@ -1,30 +1,122 @@
-
+using System.Text.Json;
+using AutoMapper;
+using FPT.TeamMatching.Domain.Contracts.UnitOfWorks;
 using FPT.TeamMatching.Domain.Entities;
+using FPT.TeamMatching.Domain.Lib;
+using FPT.TeamMatching.Domain.Models;
 using Microsoft.AspNetCore.SignalR;
+using Quartz.Util;
+using StackExchange.Redis;
 using Task = System.Threading.Tasks.Task;
 
 namespace FPT.TeamMatching.API.Hub;
 
 public class ChatHub : Microsoft.AspNetCore.SignalR.Hub
 {
-    public override async Task OnConnectedAsync()
+    private readonly IMongoUnitOfWork _unitOfWork;
+    private readonly IMapper _mapper;
+    private readonly IDatabase _redis;
+
+    public ChatHub(IMongoUnitOfWork unitOfWork, IMapper mapper, RedisConfig redisConfig)
     {
-         await Clients.All.SendAsync("ReceiveMessage", $"{Context.ConnectionId} has joined");
+        _unitOfWork = unitOfWork;
+        _mapper = mapper;
+        _redis = redisConfig.GetConnection();
     }
 
     public async Task SendMessage(string message)
     {
-        await Clients.All.SendAsync("ReceiveMessage", $"{Context.ConnectionId}: {message}");
+        try
+        {
+            //1. Lấy value của connectionId trong redis
+            string redisKey = $"chat:{Context.ConnectionId}";
+            string? redisValue = await _redis.StringGetAsync(redisKey);
+
+            //2. Kiểm tra xem redisKey có tồn tại không
+            if (!redisValue.IsNullOrWhiteSpace())
+            {
+                Console.WriteLine("Not found redis key");
+                throw new Exception("Key not found");
+            }
+
+            //3. Convert lại redis value
+            var conn = JsonSerializer.Deserialize<ConversationMemberModel>(redisValue);
+            //4. Lưu message vào redis
+
+            //5. Send message
+            await Clients.Group(conn.ConversationId.ToString())
+                .SendAsync("ReceiveSpecificMessage", conn.UserId, message);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
     }
-    
-    public async Task JoinChat(ConversationMember conn)
+
+    public async Task JoinSpecificChatRoom(ConversationMemberModel conn)
     {
-        await Clients.All.SendAsync("ReceiveMessage", "admin", $"{conn.UserId} has joined");
+        try
+        {
+            //1.1 Kiểm tra xem ConversationId có empty không
+            // nếu empty có nghĩa conversation đó chưa tồn tại và cần phải gửi kèm với partnerId
+            // để tạo ra conversation và conversation member
+            if (conn.ConversationId == null)
+            {
+                // Tạo conversation mới
+                var conversationEntity = new Conversation
+                {
+                    ConversationName = "",
+                };
+                _unitOfWork.ConversationRepository().Add(conversationEntity);
+                
+                // Tạo conversation member
+                var conversationUser = new ConversationMember
+                {
+                    ConversationId = conversationEntity.Id,
+                    UserId = conn.UserId.ToString(),
+                };
+                _unitOfWork.ConversationMemberRepository().Add(conversationUser);
+
+                var conversationPartner = new ConversationMember
+                {
+                    ConversationId = conversationEntity.Id,
+                    UserId = conn.PartnerId.ToString(),
+                };
+                _unitOfWork.ConversationMemberRepository().Add(conversationPartner);
+                await _unitOfWork.SaveChanges();
+                // Gắn conversation ID vào cho request lại
+                conn.ConversationId = Guid.Parse(conversationEntity.Id);
+            }
+
+            //1.2 Thêm vào SignalR group
+            await Groups.AddToGroupAsync(Context.ConnectionId, conn.ConversationId.ToString());
+
+            //2. Lưu vào redis ConnectionId, JSON ConversationMemberModel
+            string redisKey = $"chat:{Context.ConnectionId}";
+            string redisValue = JsonSerializer.Serialize(conn);
+
+            await _redis.StringSetAsync(redisKey, redisValue);
+
+            //thông báo test
+            await Clients.Group(conn.ConversationId.ToString()).SendAsync("JoinSpecificChatRoom", "admin",
+                $"{conn.UserId} has joined {conn.ConversationId}");
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
     }
-    
-    public async Task JoinSpecificChatRoom(ConversationMember conn)
+
+    //Custom lại khi ngắt kết nối thì xóa key trong redis rồi mới tiếp tục xóa như default
+    public override async Task OnDisconnectedAsync(Exception? exception)
     {
-        await Groups.AddToGroupAsync(Context.ConnectionId, conn.ConversationId.ToString());
-        await Clients.Group(conn.ConversationId.ToString()).SendAsync("ReceiveMessage", "admin", $"{conn.UserId} has joined {conn.ConversationId}");
+        //1. Xóa key trong redis
+        string redisKey = $"chat:{Context.ConnectionId}";
+        await _redis.KeyDeleteAsync(redisKey);
+
+        //2. Ngắt kết nối như bình thường
+        await base.OnDisconnectedAsync(exception);
     }
 }
