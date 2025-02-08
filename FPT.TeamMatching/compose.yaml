@@ -19,6 +19,7 @@
   kafka:
     image: quay.io/debezium/kafka:2.7
     container_name: fpt.matching.kafka
+    restart: always
     ports:
       - '29092:9092'
 #      - '9092:9092'
