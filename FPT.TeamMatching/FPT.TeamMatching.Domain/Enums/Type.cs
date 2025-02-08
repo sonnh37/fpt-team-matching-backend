@@ -10,7 +10,7 @@ public enum BlogType
 {
     [Description("Chia sẻ thông tin, ý tưởng")]
     Share,
-    
+
     [Description("Đăng tuyển thành viên hoặc cộng tác viên")]
     Recruit
 }
@@ -23,6 +23,6 @@ public enum InvitationUserType
 
 public enum ProjectType
 {
-    External, 
+    External,
     Academic
 }

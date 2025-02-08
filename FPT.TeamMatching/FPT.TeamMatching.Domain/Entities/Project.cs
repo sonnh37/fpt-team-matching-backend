@@ -18,9 +18,9 @@ public class Project : BaseEntity
     public ProjectStatus? Status { get; set; }
 
     public int? TeamSize { get; set; }
-    
+
     public DateTimeOffset? StartDate { get; set; }
-    
+
     public DateTimeOffset? EndDate { get; set; }
 
     public virtual ICollection<InvitationUser> InvitationUsers { get; set; } = new List<InvitationUser>();

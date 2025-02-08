@@ -5,8 +5,10 @@ namespace FPT.TeamMatching.Domain.Models.Results;
 
 public class UserResult : BaseResult
 {
+    public Role Role { get; set; }
+
     public Gender? Gender { get; set; }
-    
+
     public string? Cache { get; set; }
 
     public string? Username { get; set; }

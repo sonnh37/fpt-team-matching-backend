@@ -1,6 +1,6 @@
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Base;
 
-namespace FPT.TeamMatching.Domain.Models.Requests.Queries;
+namespace FPT.TeamMatching.Domain.Models.Requests.Queries.VerifyQualifiedForAcademicProject;
 
 public class VerifyQualifiedForAcademicProjectGetAllQuery : GetQueryableQuery
 {

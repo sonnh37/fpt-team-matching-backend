@@ -9,7 +9,8 @@ namespace FPT.TeamMatching.Data.Repositories;
 
 public class ProfileRepository : BaseRepository<Profile>, IProfileRepository
 {
-    private readonly FPTMatchingDbContext _dbContext;   
+    private readonly FPTMatchingDbContext _dbContext;
+
     public ProfileRepository(IMapper mapper, FPTMatchingDbContext dbContext) : base(dbContext, mapper)
     {
         _dbContext = dbContext;

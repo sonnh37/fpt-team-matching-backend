@@ -1,31 +1,25 @@
 ﻿using FPT.TeamMatching.Domain.Enums;
 using FPT.TeamMatching.Domain.Models.Results.Bases;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace FPT.TeamMatching.Domain.Models.Results
+namespace FPT.TeamMatching.Domain.Models.Results;
+
+public class ProjectResult : BaseResult
 {
-    public class ProjectResult: BaseResult
-    {
-        public Guid? LeaderId { get; set; }
+    public Guid? LeaderId { get; set; }
 
-        public string? TeamName { get; set; }
+    public string? TeamName { get; set; }
 
-        public string? Name { get; set; }
+    public string? Name { get; set; }
 
-        public ProjectType? Type { get; set; }
+    public ProjectType? Type { get; set; }
 
-        public string? Description { get; set; }
+    public string? Description { get; set; }
 
-        public ProjectStatus? Status { get; set; }
+    public ProjectStatus? Status { get; set; }
 
-        public int? TeamSize { get; set; }
+    public int? TeamSize { get; set; }
 
-        public DateTimeOffset? StartDate { get; set; }
+    public DateTimeOffset? StartDate { get; set; }
 
-        public DateTimeOffset? EndDate { get; set; }
-    }
+    public DateTimeOffset? EndDate { get; set; }
 }

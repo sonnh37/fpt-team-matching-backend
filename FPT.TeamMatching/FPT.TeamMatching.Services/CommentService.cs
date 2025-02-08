@@ -4,21 +4,15 @@ using FPT.TeamMatching.Domain.Contracts.Services;
 using FPT.TeamMatching.Domain.Contracts.UnitOfWorks;
 using FPT.TeamMatching.Domain.Entities;
 using FPT.TeamMatching.Services.Bases;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace FPT.TeamMatching.Services
+namespace FPT.TeamMatching.Services;
+
+public class CommentService : BaseService<Comment>, ICommentService
 {
-    public class CommentService : BaseService<Comment>, ICommentService
-    {
-        private readonly ICommentRepository _service;
+    private readonly ICommentRepository _service;
 
-        public CommentService(IMapper mapper, IUnitOfWork unitOfWork) : base(mapper, unitOfWork)
-        {
-            _service = _unitOfWork.CommentRepository;
-        }
+    public CommentService(IMapper mapper, IUnitOfWork unitOfWork) : base(mapper, unitOfWork)
+    {
+        _service = _unitOfWork.CommentRepository;
     }
 }

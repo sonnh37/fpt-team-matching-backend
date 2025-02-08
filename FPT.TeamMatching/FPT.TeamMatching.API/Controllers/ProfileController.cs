@@ -6,13 +6,18 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FPT.TeamMatching.API.Controllers;
+
 [Route(Const.API_PROFILES)]
 [ApiController]
 [AllowAnonymous]
 public class ProfileController : ControllerBase
 {
     private readonly IProfileService _profileService;
-    public ProfileController(IProfileService profileService) => _profileService = profileService;
+
+    public ProfileController(IProfileService profileService)
+    {
+        _profileService = profileService;
+    }
 
     [HttpGet]
     public async Task<IActionResult> GetProfile([FromQuery] ProfileGetAllQuery query)
@@ -22,7 +27,7 @@ public class ProfileController : ControllerBase
     }
 
     [HttpGet("{id:guid}")]
-    public async Task<IActionResult> GetProfileId([FromRoute]Guid id)
+    public async Task<IActionResult> GetProfileId([FromRoute] Guid id)
     {
         var msg = await _profileService.GetProfileById(id);
         return Ok(msg);

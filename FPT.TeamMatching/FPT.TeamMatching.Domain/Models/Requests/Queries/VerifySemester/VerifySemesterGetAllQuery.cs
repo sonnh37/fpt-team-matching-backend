@@ -13,5 +13,4 @@ public class VerifySemesterGetAllQuery : GetQueryableQuery
     public DateTimeOffset? SendDate { get; set; }
 
     public string? FileUpload { get; set; }
-
 }

@@ -1,4 +1,3 @@
-using FPT.TeamMatching.Domain.Entities;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.SkillProfile;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.SkillProfile;
 using FPT.TeamMatching.Domain.Models.Responses;

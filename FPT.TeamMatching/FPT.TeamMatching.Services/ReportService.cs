@@ -4,21 +4,15 @@ using FPT.TeamMatching.Domain.Contracts.Services;
 using FPT.TeamMatching.Domain.Contracts.UnitOfWorks;
 using FPT.TeamMatching.Domain.Entities;
 using FPT.TeamMatching.Services.Bases;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace FPT.TeamMatching.Services
+namespace FPT.TeamMatching.Services;
+
+public class ReportService : BaseService<Report>, IReportService
 {
-    public class ReportService : BaseService<Report>, IReportService
-    {
-        private readonly IReportRepository _repository;
+    private readonly IReportRepository _repository;
 
-        public ReportService(IMapper mapper, IUnitOfWork unitOfWork) : base(mapper, unitOfWork)
-        {
-            _repository = unitOfWork.ReportRepository;
-        }
+    public ReportService(IMapper mapper, IUnitOfWork unitOfWork) : base(mapper, unitOfWork)
+    {
+        _repository = unitOfWork.ReportRepository;
     }
 }

@@ -4,7 +4,6 @@ using FPT.TeamMatching.Domain.Contracts.Services;
 using FPT.TeamMatching.Domain.Contracts.UnitOfWorks;
 using FPT.TeamMatching.Domain.Entities;
 using FPT.TeamMatching.Services.Bases;
-using Microsoft.Extensions.Configuration;
 
 namespace FPT.TeamMatching.Services;
 
@@ -18,5 +17,4 @@ public class UserService : BaseService<User>, IUserService
     {
         _userRepository = _unitOfWork.UserRepository;
     }
-   
 }
