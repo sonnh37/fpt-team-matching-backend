@@ -3,6 +3,7 @@ using System.Text.Json.Serialization;
 using CloudinaryDotNet;
 using DotNetEnv;
 using FPT.TeamMatching.API.Collections;
+using FPT.TeamMatching.API.Hub;
 using FPT.TeamMatching.Data.Context;
 using FPT.TeamMatching.Domain.Configs;
 using FPT.TeamMatching.Domain.Configs.Mapping;
@@ -23,6 +24,15 @@ Env.Load();
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddLogging();
 
+#region Add SignalR
+
+builder.Services.AddSignalR();
+
+#endregion
+
+#region Add Kafka Config
+builder.Services.AddScoped<IKafkaProducerConfig, KafkaProducer>();
+#endregion
 #region Add-DbContext
 
 builder.Services.AddDbContext<FPTMatchingDbContext>(options =>
@@ -179,7 +189,7 @@ app.UseCors("AllowSpecificOrigins");
 app.UseAuthentication();
 
 app.UseAuthorization();
-
+app.MapHub<ChatHub>("/chat");
 app.MapControllers();
 
 app.Run();
