@@ -5,5 +5,4 @@ namespace FPT.TeamMatching.Domain.Contracts.Repositories;
 
 public interface IVerifyQualifiedForAcademicProjectRepository : IBaseRepository<VerifyQualifiedForAcademicProject>
 {
-    
 }

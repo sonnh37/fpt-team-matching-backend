@@ -4,5 +4,4 @@ namespace FPT.TeamMatching.Domain.Models.Requests.Commands.RefreshTokens;
 
 public class RefreshTokenDeleteCommand : DeleteCommand
 {
-    
 }

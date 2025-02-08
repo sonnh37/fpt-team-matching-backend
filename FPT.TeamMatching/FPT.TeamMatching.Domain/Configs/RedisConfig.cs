@@ -8,13 +8,20 @@ public class RedisConfig
 
     public RedisConfig()
     {
-        ConfigurationOptions conf = new ConfigurationOptions()
+        var conf = new ConfigurationOptions
         {
-            EndPoints = { "localhost: 6379" },
+            EndPoints = { "localhost: 6379" }
         };
         _conn = ConnectionMultiplexer.Connect(conf);
     }
-    
-    public IDatabase GetConnection() => _conn.GetDatabase();
-    public void CloseConnection() => _conn.Close();
+
+    public IDatabase GetConnection()
+    {
+        return _conn.GetDatabase();
+    }
+
+    public void CloseConnection()
+    {
+        _conn.Close();
+    }
 }

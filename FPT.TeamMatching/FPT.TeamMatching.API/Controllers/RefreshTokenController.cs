@@ -15,7 +15,6 @@ public class RefreshTokenController : ControllerBase
 {
     private readonly IRefreshTokenService _refreshTokenService;
 
-
     public RefreshTokenController(IRefreshTokenService __refreshTokenService)
     {
         _refreshTokenService = __refreshTokenService;

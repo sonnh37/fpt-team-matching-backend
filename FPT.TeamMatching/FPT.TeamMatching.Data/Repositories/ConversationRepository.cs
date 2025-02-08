@@ -8,7 +8,12 @@ namespace FPT.TeamMatching.Data.Repositories;
 public class ConversationRepository : IConversationRepository
 {
     private readonly ChatRoomDbContext _dbContext;
-    public ConversationRepository (ChatRoomDbContext dbContext) => _dbContext = dbContext;
+
+    public ConversationRepository(ChatRoomDbContext dbContext)
+    {
+        _dbContext = dbContext;
+    }
+
     public void Add(Conversation conversation)
     {
         try
@@ -39,12 +44,12 @@ public class ConversationRepository : IConversationRepository
     {
         try
         {
-            return await _dbContext.Conversations.FirstOrDefaultAsync(x => x.Id == conversationId.ToString()); 
+            return await _dbContext.Conversations.FirstOrDefaultAsync(x => x.Id == conversationId.ToString());
         }
         catch (Exception e)
         {
             Console.WriteLine(e);
             throw;
-        }        
+        }
     }
 }

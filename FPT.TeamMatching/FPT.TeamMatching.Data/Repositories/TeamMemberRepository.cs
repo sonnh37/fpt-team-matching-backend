@@ -2,19 +2,12 @@
 using FPT.TeamMatching.Data.Repositories.Base;
 using FPT.TeamMatching.Domain.Contracts.Repositories;
 using FPT.TeamMatching.Domain.Entities;
-using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace FPT.TeamMatching.Data.Repositories
+namespace FPT.TeamMatching.Data.Repositories;
+
+public class TeamMemberRepository : BaseRepository<TeamMember>, ITeamMemberRepository
 {
-    public class TeamMemberRepository : BaseRepository<TeamMember>, ITeamMemberRepository
+    public TeamMemberRepository(FPTMatchingDbContext dbContext) : base(dbContext)
     {
-        public TeamMemberRepository(FPTMatchingDbContext dbContext) : base(dbContext)
-        {
-        }
     }
 }

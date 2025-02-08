@@ -5,8 +5,10 @@ namespace FPT.TeamMatching.Domain.Entities;
 
 public class User : BaseEntity
 {
+    public Role Role { get; set; }
+
     public Gender? Gender { get; set; }
-    
+
     public string? Cache { get; set; }
 
     public string? Username { get; set; }
@@ -28,7 +30,7 @@ public class User : BaseEntity
     public virtual ICollection<Blog> Blogs { get; set; } = new List<Blog>();
 
     // public virtual ICollection<ConversationMember> ConversationMembers { get; set; } = new List<ConversationMember>();
-    
+
     // public virtual ICollection<Message> MessageSendBys { get; set; } = new List<Message>();
 
     public virtual ICollection<Comment> Comments { get; set; } = new List<Comment>();

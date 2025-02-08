@@ -1,5 +1,4 @@
 using FPT.TeamMatching.Domain.Contracts.Services;
-using FPT.TeamMatching.Domain.Entities;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.VerifySemester;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.VerifySemester;
 using FPT.TeamMatching.Domain.Utilities;
@@ -7,13 +6,18 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FPT.TeamMatching.API.Controllers;
+
 [Route(Const.API_VERIFY_SEMESTER)]
 [ApiController]
 [AllowAnonymous]
 public class VerifySemesterController : ControllerBase
 {
     private readonly IVerifySemesterService _verifySemesterService;
-    public VerifySemesterController(IVerifySemesterService verifySemesterService) => _verifySemesterService = verifySemesterService;
+
+    public VerifySemesterController(IVerifySemesterService verifySemesterService)
+    {
+        _verifySemesterService = verifySemesterService;
+    }
 
     [HttpGet]
     public async Task<IActionResult> GetAll([FromQuery] VerifySemesterGetAllQuery query)

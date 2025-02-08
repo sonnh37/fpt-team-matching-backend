@@ -1,5 +1,4 @@
 using FPT.TeamMatching.Domain.Contracts.Services;
-using FPT.TeamMatching.Domain.Entities;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.SkillProfile;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.SkillProfile;
 using FPT.TeamMatching.Domain.Utilities;
@@ -7,23 +6,28 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FPT.TeamMatching.API.Controllers;
+
 [Route(Const.API_SKILLPROFILES)]
 [ApiController]
 [AllowAnonymous]
 public class SkillProfileController : ControllerBase
 {
     private readonly ISkillProfileService _skillProfileService;
-    
-    public SkillProfileController(ISkillProfileService skillProfileService) => _skillProfileService = skillProfileService;
+
+    public SkillProfileController(ISkillProfileService skillProfileService)
+    {
+        _skillProfileService = skillProfileService;
+    }
+
     [HttpGet]
-    public async Task<IActionResult> GetAllSkillProfiles([FromQuery]SkillProfileGetAllQuery query)
+    public async Task<IActionResult> GetAllSkillProfiles([FromQuery] SkillProfileGetAllQuery query)
     {
         var msg = await _skillProfileService.GetSkillProfiles(query);
         return Ok(msg);
     }
 
     [HttpGet("{id:guid}")]
-    public async Task<IActionResult> GetSkillProfileById([FromRoute]Guid id)
+    public async Task<IActionResult> GetSkillProfileById([FromRoute] Guid id)
     {
         var msg = await _skillProfileService.GetSkillProfile(id);
         return Ok(msg);

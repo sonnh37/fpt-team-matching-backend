@@ -1,5 +1,4 @@
 ﻿using FPT.TeamMatching.API.Hub;
-using FPT.TeamMatching.Domain.Contracts.Repositories;
 using FPT.TeamMatching.Domain.Contracts.Services;
 using FPT.TeamMatching.Services;
 
@@ -16,7 +15,8 @@ public static class CollectionServices
         services.AddTransient<IRateService, RateService>();
         services.AddTransient<IJobPositionService, JobPositionService>();
         services.AddTransient<ITeamMemberService, TeamMemberService>();
-        
+        services.AddTransient<IAuthService, AuthService>();
+
         services.AddTransient<ITaskService, TaskService>();
         services.AddTransient<IReportService, ReportService>();
         services.AddTransient<IProjectService, ProjectService>();
