@@ -3,7 +3,7 @@ using CloudinaryDotNet.Actions;
 using dotenv.net;
 using Microsoft.AspNetCore.Http;
 
-namespace FPT.TeamMatching.Domain.Lib;
+namespace FPT.TeamMatching.Domain.Configs;
 
 public class CloudinaryConfig
 {

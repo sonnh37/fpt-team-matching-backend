@@ -1,10 +1,10 @@
 using AutoMapper;
 using CloudinaryDotNet;
+using FPT.TeamMatching.Domain.Configs;
 using FPT.TeamMatching.Domain.Contracts.Repositories;
 using FPT.TeamMatching.Domain.Contracts.Services;
 using FPT.TeamMatching.Domain.Contracts.UnitOfWorks;
 using FPT.TeamMatching.Domain.Entities;
-using FPT.TeamMatching.Domain.Lib;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Profile;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Profile;
 using FPT.TeamMatching.Domain.Models.Responses;

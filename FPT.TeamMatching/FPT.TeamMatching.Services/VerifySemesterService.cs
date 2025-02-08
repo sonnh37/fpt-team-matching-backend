@@ -1,9 +1,9 @@
 using AutoMapper;
+using FPT.TeamMatching.Domain.Configs;
 using FPT.TeamMatching.Domain.Contracts.Repositories;
 using FPT.TeamMatching.Domain.Contracts.Services;
 using FPT.TeamMatching.Domain.Contracts.UnitOfWorks;
 using FPT.TeamMatching.Domain.Entities;
-using FPT.TeamMatching.Domain.Lib;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.VerifySemester;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.VerifySemester;
 using FPT.TeamMatching.Domain.Models.Responses;

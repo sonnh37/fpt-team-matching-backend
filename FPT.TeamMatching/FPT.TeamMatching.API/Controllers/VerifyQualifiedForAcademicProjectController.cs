@@ -2,6 +2,7 @@ using FPT.TeamMatching.Domain.Contracts.Services;
 using FPT.TeamMatching.Domain.Entities;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.VerifyQualifiedForAcademicProject;
 using FPT.TeamMatching.Domain.Models.Requests.Queries;
+using FPT.TeamMatching.Domain.Models.Requests.Queries.VerifyQualifiedForAcademicProject;
 using FPT.TeamMatching.Domain.Utilities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

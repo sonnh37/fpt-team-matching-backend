@@ -7,7 +7,6 @@ using FPT.TeamMatching.Data.Context;
 using FPT.TeamMatching.Domain.Configs;
 using FPT.TeamMatching.Domain.Configs.Mapping;
 using FPT.TeamMatching.Domain.Entities;
-using FPT.TeamMatching.Domain.Lib;
 using FPT.TeamMatching.Domain.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;

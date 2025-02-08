@@ -1,11 +1,12 @@
 using AutoMapper;
 using CloudinaryDotNet;
+using FPT.TeamMatching.Domain.Configs;
 using FPT.TeamMatching.Domain.Contracts.Services;
 using FPT.TeamMatching.Domain.Contracts.UnitOfWorks;
 using FPT.TeamMatching.Domain.Entities;
-using FPT.TeamMatching.Domain.Lib;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.VerifyQualifiedForAcademicProject;
 using FPT.TeamMatching.Domain.Models.Requests.Queries;
+using FPT.TeamMatching.Domain.Models.Requests.Queries.VerifyQualifiedForAcademicProject;
 using FPT.TeamMatching.Domain.Models.Responses;
 using FPT.TeamMatching.Domain.Models.Results;
 using FPT.TeamMatching.Domain.Utilities;

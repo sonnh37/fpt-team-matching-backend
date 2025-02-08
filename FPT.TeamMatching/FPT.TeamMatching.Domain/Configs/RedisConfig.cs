@@ -1,6 +1,6 @@
 ﻿using StackExchange.Redis;
 
-namespace FPT.TeamMatching.Domain.Lib;
+namespace FPT.TeamMatching.Domain.Configs;
 
 public class RedisConfig
 {

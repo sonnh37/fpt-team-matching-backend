@@ -1,6 +1,6 @@
 ﻿using Confluent.Kafka;
 
-namespace FPT.TeamMatching.Domain.Lib;
+namespace FPT.TeamMatching.Domain.Configs;
 public interface IKafkaProducerConfig
 {
     Task ProduceAsync(string topic, Message<string, string> message);
