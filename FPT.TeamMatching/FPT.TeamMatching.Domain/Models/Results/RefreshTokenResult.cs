@@ -13,4 +13,6 @@ public class RefreshTokenResult : BaseResult
     public string? UserAgent { get; set; }
 
     public string? IpAddress { get; set; }
+
+    public UserResult? User { get; set; }
 }

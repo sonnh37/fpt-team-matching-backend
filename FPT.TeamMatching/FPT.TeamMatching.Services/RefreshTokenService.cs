@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using FPT.TeamMatching.Domain.Contracts.Services;
-using FPT.TeamMatching.Domain.Contracts.Services.Bases;
 using FPT.TeamMatching.Domain.Contracts.UnitOfWorks;
 using FPT.TeamMatching.Domain.Entities;
 using FPT.TeamMatching.Services.Bases;

@@ -5,11 +5,7 @@ namespace FPT.TeamMatching.Domain.Entities;
 
 public class Blog : BaseEntity
 {
-    public Guid Id { get; set; }
-
     public Guid? UserId { get; set; }
-
-    public Guid? BlogTypeId { get; set; }
 
     public string? Title { get; set; }
 

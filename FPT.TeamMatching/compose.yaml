@@ -1,6 +1,41 @@
 ﻿services:
-  fpt.teammatching.api:
-    image: fpt.teammatching.api
-    build:
-      context: .
-      dockerfile: FPT.TeamMatching.API/Dockerfile
+#  fpt.teammatching.api:
+#    image: fpt.teammatching.api
+#    build:
+#      context: .
+#      dockerfile: FPT.TeamMatching.API/Dockerfile
+  redis:
+    image: redis:7.0
+    container_name: fpt.matching.redis
+    ports:
+      - "6379:6379"
+  zookeeper:
+    image: quay.io/debezium/zookeeper:2.7
+    container_name: fpt.matching.zookeeper
+    ports:
+      - "2181:2181"
+      - "2888:2888"
+      - "3888:3888"
+  kafka:
+    image: quay.io/debezium/kafka:2.7
+    container_name: fpt.matching.kafka
+    ports:
+      - '29092:9092'
+#      - '9092:9092'
+#      - '29092:29092'
+    environment:
+      - ZOOKEEPER_CONNECT=zookeeper:2181
+#      - KAFKA_LISTENERS=INTERNAL://0.0.0.0:9092,EXTERNAL://0.0.0.0:29092
+#      - KAFKA_ADVERTISED_LISTENERS=INTERNAL://fpt.matching.kafka:9092,EXTERNAL://localhost:29092
+#      - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
+#      - KAFKA_INTER_BROKER_LISTENER_NAME=INTERNAL
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: fpt.matching.kafka-ui
+    environment:
+      KAFKA_CLUSTERS_0_NAME: local
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: fpt.matching.kafka:9092
+    ports:
+      - "9089:8080"
+    links:
+      - kafka

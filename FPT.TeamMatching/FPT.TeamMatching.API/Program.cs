@@ -1,11 +1,13 @@
 using System.Text;
 using System.Text.Json.Serialization;
+using CloudinaryDotNet;
 using DotNetEnv;
 using FPT.TeamMatching.API.Collections;
 using FPT.TeamMatching.Data.Context;
 using FPT.TeamMatching.Domain.Configs;
 using FPT.TeamMatching.Domain.Configs.Mapping;
 using FPT.TeamMatching.Domain.Entities;
+using FPT.TeamMatching.Domain.Lib;
 using FPT.TeamMatching.Domain.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -13,6 +15,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
+using MongoDB.Driver;
 using Task = System.Threading.Tasks.Task;
 
 Env.Load();
@@ -23,18 +26,25 @@ builder.Services.AddLogging();
 #region Add-DbContext
 
 builder.Services.AddDbContext<FPTMatchingDbContext>(options =>
-{
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"),
+{   
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"),
         npgsqlOptions => npgsqlOptions.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery));
     options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
 });
 
+// builder.Services.AddDbContext<ChatRoomDbContext>(options =>
+// {
+//     var mongoClient = new MongoClient(builder.Configuration["MONGODB_URI"]);
+//     var database = mongoClient.GetDatabase("fpt-matching-chatroom");
+//     options.UseMongoDB(database.Client, database.DatabaseNamespace.DatabaseName);
+// });
+builder.Services.AddDbContext<ChatRoomDbContext>(ServiceLifetime.Scoped);
 #endregion
 
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
     options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
-    options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    // options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
 });
 builder.Services.AddSwaggerGen(options =>
 {
@@ -68,6 +78,17 @@ builder.Services.AddAutoMapper(typeof(MappingProfile));
 builder.Services.AddCollectionRepositories();
 builder.Services.AddCollectionServices();
 
+#region Cloudinary
+
+builder.Services.AddScoped<CloudinaryConfig>();
+
+#endregion
+
+#region Redis
+
+builder.Services.AddSingleton<RedisConfig>();
+
+#endregion
 #region Config-Authentication_Authorization
 
 builder.Services.Configure<TokenSetting>(builder.Configuration.GetSection("TokenSetting"));
