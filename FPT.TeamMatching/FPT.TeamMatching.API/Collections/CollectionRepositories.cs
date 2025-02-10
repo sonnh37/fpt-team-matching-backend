@@ -1,6 +1,4 @@
-﻿using FPT.TeamMatching.API.Hub;
-using FPT.TeamMatching.Data.Repositories;
-using FPT.TeamMatching.Data.Repositories.Base;
+﻿using FPT.TeamMatching.Data.Repositories;
 using FPT.TeamMatching.Data.UnitOfWorks;
 using FPT.TeamMatching.Domain.Contracts.Repositories;
 using FPT.TeamMatching.Domain.Contracts.UnitOfWorks;
@@ -37,6 +35,5 @@ public static class CollectionRepositories
         services.AddScoped<IMessageRepository, MessageRepository>();
         services.AddScoped<IConversationRepository, ConversationRepository>();
         services.AddScoped<IConversationMemberRepository, ConversationMemberRepository>();
-
     }
 }

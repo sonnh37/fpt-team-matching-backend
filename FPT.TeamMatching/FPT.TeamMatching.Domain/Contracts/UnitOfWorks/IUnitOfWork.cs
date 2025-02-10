@@ -23,7 +23,7 @@ public interface IUnitOfWork : IBaseUnitOfWork
 
     IInvitationUserRepository InvitationUserRepository { get; }
     IRefreshTokenRepository RefreshTokenRepository { get; }
-    
+
     INotificationRepository NotificationRepository { get; }
     IProfileRepository ProfileRepository { get; }
     ISkillProfileRepository SkillProfileRepository { get; }

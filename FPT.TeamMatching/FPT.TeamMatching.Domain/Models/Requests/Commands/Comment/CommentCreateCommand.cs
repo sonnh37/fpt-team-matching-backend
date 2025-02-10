@@ -1,21 +1,12 @@
-﻿using FPT.TeamMatching.Domain.Entities;
-using FPT.TeamMatching.Domain.Models.Requests.Commands.Base;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using FPT.TeamMatching.Domain.Models.Requests.Commands.Base;
 
-namespace FPT.TeamMatching.Domain.Models.Requests.Commands.Comment
+namespace FPT.TeamMatching.Domain.Models.Requests.Commands.Comment;
+
+public class CommentCreateCommand : CreateCommand
 {
-    public class CommentCreateCommand : CreateCommand
-    {
-        public Guid? BlogId { get; set; }
+    public Guid? BlogId { get; set; }
 
-        public Guid? UserId { get; set; }
+    public Guid? UserId { get; set; }
 
-        public string? Content { get; set; }
-
-   
-    }
+    public string? Content { get; set; }
 }

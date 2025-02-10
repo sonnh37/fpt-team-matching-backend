@@ -1,14 +1,11 @@
-using System.Text;
 using System.Text.Json.Serialization;
-using CloudinaryDotNet;
 using DotNetEnv;
 using FPT.TeamMatching.API.Collections;
 using FPT.TeamMatching.API.Hub;
 using FPT.TeamMatching.Data.Context;
 using FPT.TeamMatching.Domain.Configs;
 using FPT.TeamMatching.Domain.Configs.Mapping;
-using FPT.TeamMatching.Domain.Entities;
-using FPT.TeamMatching.Domain.Lib;
+using FPT.TeamMatching.Domain.Contracts.Services;
 using FPT.TeamMatching.Domain.Models;
 using Hangfire;
 using Hangfire.PostgreSql;
@@ -16,9 +13,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Any;
 using Microsoft.OpenApi.Models;
-using MongoDB.Driver;
 using Task = System.Threading.Tasks.Task;
 
 Env.Load();
@@ -47,7 +42,7 @@ builder.Services.AddScoped<IKafkaProducerConfig, KafkaProducer>();
 #region Add-DbContext
 
 builder.Services.AddDbContext<FPTMatchingDbContext>(options =>
-{   
+{
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"),
         npgsqlOptions => npgsqlOptions.UseQuerySplittingBehavior(QuerySplittingBehavior.SplitQuery));
     options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
@@ -60,6 +55,7 @@ builder.Services.AddDbContext<FPTMatchingDbContext>(options =>
 //     options.UseMongoDB(database.Client, database.DatabaseNamespace.DatabaseName);
 // });
 builder.Services.AddDbContext<ChatRoomDbContext>(ServiceLifetime.Scoped);
+
 #endregion
 
 builder.Services.AddControllers().AddJsonOptions(options =>
@@ -110,6 +106,7 @@ builder.Services.AddScoped<CloudinaryConfig>();
 builder.Services.AddSingleton<RedisConfig>();
 
 #endregion
+
 #region Config-Authentication_Authorization
 
 builder.Services.Configure<TokenSetting>(builder.Configuration.GetSection("TokenSetting"));
@@ -130,13 +127,23 @@ builder.Services.AddAuthentication(x =>
             ValidateAudience = false,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
-                builder.Configuration.GetValue<string>("AppSettings:Token"))),
             ClockSkew = TimeSpan.Zero,
-            RoleClaimType = "Role"
+            RoleClaimType = "Role",
+
+            IssuerSigningKeyResolver = (token, securityToken, kid, validationParameters) =>
+            {
+                var httpContextAccessor =
+                    builder.Services.BuildServiceProvider().GetRequiredService<IHttpContextAccessor>();
+
+                var authService = httpContextAccessor.HttpContext.RequestServices.GetRequiredService<IAuthService>();
+                if (authService == null) throw new SecurityTokenException("AuthService not available.");
+
+                var rsa = authService.GetRSAKeyFromTokenAsync(token, kid).Result;
+                return new List<SecurityKey> { new RsaSecurityKey(rsa) };
+            }
         };
 
-        // Đọc token từ cookie
+        // Lấy token từ cookie
         options.Events = new JwtBearerEvents
         {
             OnMessageReceived = context =>
@@ -160,8 +167,8 @@ builder.Services.AddCors(options =>
 
     options.AddPolicy("AllowSpecificOrigins", builder =>
     {
-        builder.WithOrigins(frontendDomains) 
-            .AllowCredentials() 
+        builder.WithOrigins(frontendDomains)
+            .AllowCredentials()
             .AllowAnyHeader()
             .AllowAnyMethod();
     });

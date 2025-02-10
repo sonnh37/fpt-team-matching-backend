@@ -1,8 +1,5 @@
 ﻿using FPT.TeamMatching.Domain.Entities;
-using FPT.TeamMatching.Domain.Enums;
-using FPT.TeamMatching.Domain.Utilities;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Microsoft.Extensions.Configuration;
 using Action = FPT.TeamMatching.Domain.Entities.Action;
 using Task = FPT.TeamMatching.Domain.Entities.Task;
@@ -38,10 +35,6 @@ public partial class FPTMatchingDbContext : BaseDbContext
 
     public virtual DbSet<Notification> Notifications { get; set; }
 
-    public virtual DbSet<Permission> Permissions { get; set; }
-
-    public virtual DbSet<PermissionXAction> PermissionXActions { get; set; }
-
     public virtual DbSet<Profile> Profiles { get; set; }
 
     public virtual DbSet<Project> Projects { get; set; }
@@ -62,8 +55,6 @@ public partial class FPTMatchingDbContext : BaseDbContext
 
     public virtual DbSet<User> Users { get; set; }
 
-    public virtual DbSet<UserXPermission> UserXPermissions { get; set; }
-
     public virtual DbSet<VerifyQualifiedForAcademicProject> VerifyQualifiedForAcademicProjects { get; set; }
 
     public virtual DbSet<VerifySemester> VerifySemesters { get; set; }
@@ -72,10 +63,10 @@ public partial class FPTMatchingDbContext : BaseDbContext
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
     {
         base.ConfigureConventions(configurationBuilder);
- 
+
         configurationBuilder.Properties<Enum>().HaveConversion<string>();
     }
-    
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Action>(entity =>
@@ -235,32 +226,6 @@ public partial class FPTMatchingDbContext : BaseDbContext
                 .HasForeignKey(d => d.UserId);
         });
 
-        modelBuilder.Entity<Permission>(entity =>
-        {
-            entity.HasKey(e => e.Id);
-
-            entity.ToTable("Permission");
-
-            entity.Property(e => e.Id).ValueGeneratedOnAdd()
-                .HasDefaultValueSql("gen_random_uuid()");
-        });
-
-        modelBuilder.Entity<PermissionXAction>(entity =>
-        {
-            entity.HasKey(e => e.Id);
-
-            entity.ToTable("PermissionXAction");
-
-            entity.Property(e => e.Id).ValueGeneratedOnAdd()
-                .HasDefaultValueSql("gen_random_uuid()");
-
-            entity.HasOne(d => d.Action).WithMany()
-                .HasForeignKey(d => d.ActionId);
-
-            entity.HasOne(d => d.Permission).WithMany()
-                .HasForeignKey(d => d.PermissionId);
-        });
-
         modelBuilder.Entity<Profile>(entity =>
         {
             entity.HasKey(e => e.Id);
@@ -397,22 +362,6 @@ public partial class FPTMatchingDbContext : BaseDbContext
 
             entity.Property(e => e.Id).ValueGeneratedOnAdd()
                 .HasDefaultValueSql("gen_random_uuid()");
-        });
-
-        modelBuilder.Entity<UserXPermission>(entity =>
-        {
-            entity.HasKey(e => e.Id);
-
-            entity.ToTable("UserXPermission");
-
-            entity.Property(e => e.Id).ValueGeneratedOnAdd()
-                .HasDefaultValueSql("gen_random_uuid()");
-
-            entity.HasOne(d => d.Permission).WithMany()
-                .HasForeignKey(d => d.PermissionId);
-
-            entity.HasOne(d => d.User).WithMany()
-                .HasForeignKey(d => d.UserId);
         });
 
         modelBuilder.Entity<VerifyQualifiedForAcademicProject>(entity =>

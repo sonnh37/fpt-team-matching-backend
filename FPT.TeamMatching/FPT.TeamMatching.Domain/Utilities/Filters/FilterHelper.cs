@@ -2,9 +2,8 @@
 using FPT.TeamMatching.Domain.Entities.Base;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Base;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Users;
-using FPT.TeamMatching.Domain.Utilities.Filters;
 
-namespace FPT.TeamMatching.Domain.Utilities;
+namespace FPT.TeamMatching.Domain.Utilities.Filters;
 
 public static class FilterHelper
 {

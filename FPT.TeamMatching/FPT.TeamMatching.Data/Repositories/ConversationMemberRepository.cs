@@ -3,13 +3,17 @@ using FPT.TeamMatching.Domain.Contracts.Repositories;
 using FPT.TeamMatching.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
-
 namespace FPT.TeamMatching.Data.Repositories;
 
 public class ConversationMemberRepository : IConversationMemberRepository
 {
     private readonly ChatRoomDbContext _dbContext;
-    public ConversationMemberRepository (ChatRoomDbContext dbContext) => _dbContext = dbContext;
+
+    public ConversationMemberRepository(ChatRoomDbContext dbContext)
+    {
+        _dbContext = dbContext;
+    }
+
     public void Add(ConversationMember conversationMember)
     {
         try
@@ -40,7 +44,8 @@ public class ConversationMemberRepository : IConversationMemberRepository
     {
         try
         {
-            return await _dbContext.ConversationMembers.FirstOrDefaultAsync(x => x.Id == conversationMemberId.ToString());
+            return await _dbContext.ConversationMembers.FirstOrDefaultAsync(
+                x => x.Id == conversationMemberId.ToString());
         }
         catch (Exception e)
         {

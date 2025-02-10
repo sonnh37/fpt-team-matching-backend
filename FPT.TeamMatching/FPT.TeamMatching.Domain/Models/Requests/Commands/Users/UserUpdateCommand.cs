@@ -5,8 +5,10 @@ namespace FPT.TeamMatching.Domain.Models.Requests.Commands.Users;
 
 public class UserUpdateCommand : UpdateCommand
 {
+    public Role Role { get; set; }
+
     public Gender? Gender { get; set; }
-    
+
     public string? Cache { get; set; }
 
     public string? Username { get; set; }

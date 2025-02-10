@@ -8,13 +8,13 @@ public enum InvitationUserStatus
 {
     Pending,
     Rejected,
-    Accepted,
+    Accepted
 }
 
 public enum ProjectStatus
 {
-    Pending,        
-    InProgress,     
-    Completed,     
-    Archived       
+    Pending,
+    InProgress,
+    Completed,
+    Archived
 }

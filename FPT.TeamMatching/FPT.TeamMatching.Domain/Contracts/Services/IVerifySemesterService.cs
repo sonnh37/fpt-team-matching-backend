@@ -1,4 +1,3 @@
-using FPT.TeamMatching.Domain.Entities;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.VerifySemester;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.VerifySemester;
 using FPT.TeamMatching.Domain.Models.Responses;

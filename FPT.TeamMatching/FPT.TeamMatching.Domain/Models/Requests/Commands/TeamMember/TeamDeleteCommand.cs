@@ -1,13 +1,7 @@
 ﻿using FPT.TeamMatching.Domain.Models.Requests.Commands.Base;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace FPT.TeamMatching.Domain.Models.Requests.Commands.TeamMember
+namespace FPT.TeamMatching.Domain.Models.Requests.Commands.TeamMember;
+
+public class TeamDeleteCommand : DeleteCommand
 {
-    public class TeamDeleteCommand : DeleteCommand
-    {
-    }
 }
