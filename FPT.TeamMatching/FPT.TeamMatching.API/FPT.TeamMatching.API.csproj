@@ -8,6 +8,10 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="DotNetEnv" Version="3.1.1" />
+        <PackageReference Include="Hangfire" Version="1.8.17" />
+        <PackageReference Include="Hangfire.PostgreSql" Version="1.20.10" />
+        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.12" />
         <PackageReference Include="DotNetEnv" Version="3.1.1"/>
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.12"/>
         <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.0">
@@ -25,6 +29,17 @@
     </ItemGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\FPT.TeamMatching.Data\FPT.TeamMatching.Data.csproj"/>
+        <ProjectReference Include="..\FPT.TeamMatching.Domain\FPT.TeamMatching.Domain.csproj"/>
+        <ProjectReference Include="..\FPT.TeamMatching.Services\FPT.TeamMatching.Services.csproj"/>
+        <PackageReference Include="DotNetEnv" Version="3.1.1" />
+        <PackageReference Include="Hangfire" Version="1.8.17" />
+        <PackageReference Include="Hangfire.PostgreSql" Version="1.20.10" />
+        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.12" />
+        <PackageReference Include="DotNetEnv" Version="3.1.1"/>
+        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.12"/>
+        <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="8.0.7"/>
+        <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2"/>
         <ProjectReference Include="..\FPT.TeamMatching.Data\FPT.TeamMatching.Data.csproj"/>
         <ProjectReference Include="..\FPT.TeamMatching.Domain\FPT.TeamMatching.Domain.csproj"/>
         <ProjectReference Include="..\FPT.TeamMatching.Services\FPT.TeamMatching.Services.csproj"/>
