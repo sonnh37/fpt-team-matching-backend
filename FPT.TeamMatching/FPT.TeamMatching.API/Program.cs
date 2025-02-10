@@ -10,6 +10,8 @@ using FPT.TeamMatching.Domain.Configs.Mapping;
 using FPT.TeamMatching.Domain.Entities;
 using FPT.TeamMatching.Domain.Lib;
 using FPT.TeamMatching.Domain.Models;
+using Hangfire;
+using Hangfire.PostgreSql;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -24,12 +26,21 @@ Env.Load();
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddLogging();
 
+#region Hangfire Config
+
+builder.Services.AddHangfire(config =>
+{
+    config.UseSimpleAssemblyNameTypeSerializer()
+        .UseRecommendedSerializerSettings()
+        .UsePostgreSqlStorage(builder.Configuration.GetConnectionString("DefaultConnection"));
+});
+builder.Services.AddHangfireServer();
+#endregion
 #region Add SignalR
 
 builder.Services.AddSignalR();
 
 #endregion
-
 #region Add Kafka Config
 builder.Services.AddScoped<IKafkaProducerConfig, KafkaProducer>();
 #endregion
@@ -172,7 +183,13 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseMiddleware<AuthenticationMiddleware>();
+app.UseMiddleware<AuthenticationMiddleware>()
+    .UseHttpsRedirection()
+    .UseRouting()
+    .UseCors("AllowSpecificOrigins")
+    .UseAuthorization()
+    .UseAuthentication()
+    .UseHangfireDashboard();
 
 // using (var scope = app.Services.CreateScope())
 // {
@@ -180,16 +197,15 @@ app.UseMiddleware<AuthenticationMiddleware>();
 //     DummyData.SeedDatabase(context);
 // }
 
-app.UseHttpsRedirection();
-app.UseRouting();
-
-
-app.UseCors("AllowSpecificOrigins");
-
-app.UseAuthentication();
-
-app.UseAuthorization();
+// app.UseHttpsRedirection();
+// app.UseRouting();
+//
+//
+// app.UseCors("AllowSpecificOrigins");
+//
+// app.UseAuthentication();
+//
+// app.UseAuthorization();
 app.MapHub<ChatHub>("/chat");
 app.MapControllers();
-
 app.Run();
