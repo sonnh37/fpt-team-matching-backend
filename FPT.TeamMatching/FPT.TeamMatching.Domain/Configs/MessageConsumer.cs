@@ -5,7 +5,7 @@ using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json;
 using Task = System.Threading.Tasks.Task;
 
-namespace FPT.TeamMatching.Domain.Lib;
+namespace FPT.TeamMatching.Domain.Configs;
 
 public class MessageConsumer(IMongoUnitOfWork unitOfWork) : BackgroundService
 {

@@ -2,7 +2,7 @@
 
 namespace FPT.TeamMatching.Domain.Models.Results;
 
-public class ReportResult : BaseResult
+public class ReviewResult : BaseResult
 {
     public Guid? ProjectId { get; set; }
 

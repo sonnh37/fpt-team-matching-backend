@@ -19,7 +19,7 @@ public interface IUnitOfWork : IBaseUnitOfWork
 
     ITaskRepository TaskRepository { get; }
 
-    IReportRepository ReportRepository { get; }
+    IReviewRepository ReviewRepository { get; }
 
     IInvitationUserRepository InvitationUserRepository { get; }
     IRefreshTokenRepository RefreshTokenRepository { get; }

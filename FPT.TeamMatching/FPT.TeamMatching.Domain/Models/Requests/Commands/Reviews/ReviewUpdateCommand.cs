@@ -1,8 +1,8 @@
 ﻿using FPT.TeamMatching.Domain.Models.Requests.Commands.Base;
 
-namespace FPT.TeamMatching.Domain.Models.Requests.Commands.Reports;
+namespace FPT.TeamMatching.Domain.Models.Requests.Commands.Reviews;
 
-public class ReportUpdateCommand : UpdateCommand
+public class ReviewUpdateCommand : UpdateCommand
 {
     public Guid? ProjectId { get; set; }
 

@@ -11,7 +11,7 @@ using FPT.TeamMatching.Domain.Models.Requests.Commands.ProjectActivities;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Projects;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Rate;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.RefreshTokens;
-using FPT.TeamMatching.Domain.Models.Requests.Commands.Reports;
+using FPT.TeamMatching.Domain.Models.Requests.Commands.Reviews;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.SkillProfile;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Tasks;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.TeamMember;
@@ -116,9 +116,9 @@ public class MappingProfile : Profile
 
         #region Report
 
-        CreateMap<Report, ReportResult>().ReverseMap();
-        CreateMap<Report, ReportCreateCommand>().ReverseMap();
-        CreateMap<Report, ReportUpdateCommand>().ReverseMap();
+        CreateMap<Review, ReviewResult>().ReverseMap();
+        CreateMap<Review, ReviewCreateCommand>().ReverseMap();
+        CreateMap<Review, ReviewUpdateCommand>().ReverseMap();
 
         #endregion
 

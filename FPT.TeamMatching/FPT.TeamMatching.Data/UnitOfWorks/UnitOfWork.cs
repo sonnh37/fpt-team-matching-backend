@@ -20,7 +20,7 @@ public class UnitOfWork : BaseUnitOfWork<FPTMatchingDbContext>, IUnitOfWork
     public IJobPositionRepository JobPositionRepository => GetRepository<IJobPositionRepository>();
     public ITeamMemberRepository TeamMemberRepository => GetRepository<ITeamMemberRepository>();
     public ITaskRepository TaskRepository => GetRepository<ITaskRepository>();
-    public IReportRepository ReportRepository => GetRepository<IReportRepository>();
+    public IReviewRepository ReviewRepository => GetRepository<IReviewRepository>();
     public IInvitationUserRepository InvitationUserRepository => GetRepository<IInvitationUserRepository>();
     public IRefreshTokenRepository RefreshTokenRepository => GetRepository<IRefreshTokenRepository>();
     public ILecturerFeedbackRepository LecturerFeedbackRepository => GetRepository<ILecturerFeedbackRepository>();
