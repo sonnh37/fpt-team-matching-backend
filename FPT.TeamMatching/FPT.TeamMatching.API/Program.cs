@@ -194,25 +194,10 @@ app.UseMiddleware<AuthenticationMiddleware>()
     .UseHttpsRedirection()
     .UseRouting()
     .UseCors("AllowSpecificOrigins")
-    .UseAuthorization()
     .UseAuthentication()
+    .UseAuthorization()
     .UseHangfireDashboard();
 
-// using (var scope = app.Services.CreateScope())
-// {
-//     var context = scope.ServiceProvider.GetRequiredService<StudioContext>();
-//     DummyData.SeedDatabase(context);
-// }
-
-// app.UseHttpsRedirection();
-// app.UseRouting();
-//
-//
-// app.UseCors("AllowSpecificOrigins");
-//
-// app.UseAuthentication();
-//
-// app.UseAuthorization();
 app.MapHub<ChatHub>("/chat");
 app.MapControllers();
 app.Run();
