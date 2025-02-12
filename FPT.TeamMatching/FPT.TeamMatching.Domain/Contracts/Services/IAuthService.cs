@@ -13,7 +13,7 @@ public interface IAuthService
 
     Task<RSA> GetRSAKeyFromTokenAsync(string token, string kid);
 
-    BusinessResult GetUserByCookie(AuthGetByCookieQuery request);
+    BusinessResult GetUserByCookie();
 
     Task<BusinessResult> RefreshToken(UserRefreshTokenCommand request);
 

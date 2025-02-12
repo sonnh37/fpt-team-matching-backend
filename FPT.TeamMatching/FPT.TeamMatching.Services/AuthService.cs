@@ -155,131 +155,141 @@ public class AuthService : IAuthService
         }
     }
 
-    public BusinessResult GetUserByCookie(AuthGetByCookieQuery request)
+    public BusinessResult GetUserByCookie()
     {
         BusinessResult? businessResult = null;
-
+    
         #region Check refresh token
-
+    
         var refreshToken = _httpContextAccessor.HttpContext.Request.Cookies["refreshToken"];
         businessResult = ValidateRefreshTokenIpAdMatch(refreshToken);
         if (businessResult.Status != 1) return businessResult;
-
+    
         #endregion
-
+    
         #region CheckAccessToken
-
+    
         var accessToken = _httpContextAccessor.HttpContext.Request.Cookies["accessToken"];
         if (accessToken != null)
         {
             var br = GetUserByClaims().Result;
-
+    
             return br;
         }
-
+    
         #endregion
-
+    
         #region SaveRefreshToken
-
+    
         businessResult = RefreshToken(new UserRefreshTokenCommand
         {
             RefreshToken = refreshToken
         }).Result;
-
+    
         if (businessResult.Status != 1) return businessResult;
-
+    
         #endregion
-
+    
         #region CheckRefreshToken is valid => return user
-
+    
         var tokenResult = businessResult.Data as TokenResult;
         businessResult = GetUserByToken(tokenResult.AccessToken).Result;
-
+    
         return businessResult;
-
+    
         #endregion
     }
 
     public async Task<BusinessResult> RefreshToken(UserRefreshTokenCommand request)
     {
         // Bước 1: Lấy thông tin refresh token từ database
-        var refreshTokenEntity = await _refreshTokenRepository.GetByRefreshTokenAsync(request.RefreshToken);
-        if (refreshTokenEntity == null)
-            return new ResponseBuilder()
-                .WithStatus(Const.NOT_FOUND_CODE)
-                .WithMessage("Refresh token not found.")
-                .Build();
-
-        // Bước 2: Xác thực chữ ký JWT bằng public key
-        var isValid = ValidateJwtSignature(request.RefreshToken, refreshTokenEntity.PublicKey);
-        if (!isValid)
-            return new ResponseBuilder()
-                .WithStatus(Const.FAIL_CODE)
-                .WithMessage("Invalid refresh token signature.")
-                .Build();
-
-        // Bước 3: Kiểm tra IP của request có khớp với IP đã lưu không
-        var businessResult = _refreshTokenService.ValidateRefreshTokenIpMatch();
-
-        if (businessResult.Status != 1)
-            return new ResponseBuilder()
-                .WithStatus(Const.FAIL_CODE)
-                .WithMessage("IP address mismatch.")
-                .Build();
-
-        // Bước 4: Tạo cặp khóa RSA mới
-        using (var rsa = new RSACryptoServiceProvider(2048))
+        try
         {
-            try
-            {
-                // Lấy public key mới (dạng XML) để lưu vào database
-                var newPublicKey = rsa.ToXmlString(false);
+            var refreshTokenEntity = await _refreshTokenRepository.GetByRefreshTokenAsync(request.RefreshToken!);
+            if (refreshTokenEntity == null)
+                return new ResponseBuilder()
+                    .WithStatus(Const.NOT_FOUND_CODE)
+                    .WithMessage("Refresh token not found.")
+                    .Build();
 
-                // Bước 5: Tạo access token mới với private key mới
-                var user = await _userRepository.GetById(refreshTokenEntity.UserId!.Value);
-                var userResult = _mapper.Map<UserResult>(user);
-                // 🟢 Tạo kid từ publicKey (hash SHA256)
-                var kid = Convert.ToBase64String(SHA256.HashData(Encoding.UTF8.GetBytes(newPublicKey)));
+            // Bước 2: Xác thực chữ ký JWT bằng public key
+            var isValid = ValidateJwtSignature(request.RefreshToken, refreshTokenEntity.PublicKey);
+            if (!isValid)
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("Invalid refresh token signature.")
+                    .Build();
+
+            // Bước 3: Kiểm tra IP của request có khớp với IP đã lưu không
+            var businessResult = _refreshTokenService.ValidateRefreshTokenIpMatch();
+
+            if (businessResult.Status != 1)
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("IP address mismatch.")
+                    .Build();
+
+            // Bước 4: Tạo cặp khóa RSA mới
+            using (var rsa = new RSACryptoServiceProvider(2048))
+            {
+                try
+                {
+                    // Lấy public key mới (dạng XML) để lưu vào database
+                    var newPublicKey = rsa.ToXmlString(false);
+
+                    // Bước 5: Tạo access token mới với private key mới
+                    var user = await _userRepository.GetById(refreshTokenEntity.UserId!.Value);
+                    var userResult = _mapper.Map<UserResult>(user);
+                    // 🟢 Tạo kid từ publicKey (hash SHA256)
+                    var kid = Convert.ToBase64String(SHA256.HashData(Encoding.UTF8.GetBytes(newPublicKey)));
 
 // Tạo access token với private key
-                var newAccessToken = CreateToken(userResult, rsa, "AccessToken", kid);
+                    var newAccessToken = CreateToken(userResult, rsa, "AccessToken", kid);
 
 // Tạo refresh token với kid giống access token
-                var newRefreshToken = CreateToken(userResult, rsa, "RefreshToken", kid);
+                    var newRefreshToken = CreateToken(userResult, rsa, "RefreshToken", kid);
 
-                // Bước 7: Cập nhật refresh token trong database
-                refreshTokenEntity.Token = newRefreshToken;
-                refreshTokenEntity.PublicKey = newPublicKey;
-                refreshTokenEntity.KeyId = kid;
-                refreshTokenEntity.Expiry = DateTime.UtcNow.AddDays(_tokenSetting.RefreshTokenExpiryDays);
-                _refreshTokenRepository.Update(refreshTokenEntity);
-                var isSaveChanges = await _unitOfWork.SaveChanges();
-                if (!isSaveChanges)
-                    return new ResponseBuilder()
-                        .WithStatus(Const.FAIL_CODE)
-                        .WithMessage("Refresh token validation failed when saving changes.")
+                    // Bước 7: Cập nhật refresh token trong database
+                    refreshTokenEntity.Token = newRefreshToken;
+                    refreshTokenEntity.PublicKey = newPublicKey;
+                    refreshTokenEntity.KeyId = kid;
+                    refreshTokenEntity.Expiry = DateTime.UtcNow.AddDays(_tokenSetting.RefreshTokenExpiryDays);
+                    _refreshTokenRepository.Update(refreshTokenEntity);
+                    var isSaveChanges = await _unitOfWork.SaveChanges();
+                    if (!isSaveChanges)
+                        return new ResponseBuilder()
+                            .WithStatus(Const.FAIL_CODE)
+                            .WithMessage("Refresh token validation failed when saving changes.")
+                            .Build();
+
+                    // Bước 8: Lưu access token vào cookie (nếu cần)
+                    SaveHttpOnlyCookie(newAccessToken, newRefreshToken);
+
+                    // Bước 9: Trả về access token và refresh token mới
+                    var tokenResult = new TokenResult
+                    {
+                        AccessToken = newAccessToken,
+                        RefreshToken = newRefreshToken
+                    };
+
+                    return new ResponseBuilder<TokenResult>()
+                        .WithData(tokenResult)
+                        .WithStatus(Const.SUCCESS_CODE)
+                        .WithMessage("Token refreshed successfully.")
                         .Build();
-
-                // Bước 8: Lưu access token vào cookie (nếu cần)
-                SaveHttpOnlyCookie(newAccessToken, newRefreshToken);
-
-                // Bước 9: Trả về access token và refresh token mới
-                var tokenResult = new TokenResult
+                }
+                finally
                 {
-                    AccessToken = newAccessToken,
-                    RefreshToken = newRefreshToken
-                };
-
-                return new ResponseBuilder<TokenResult>()
-                    .WithData(tokenResult)
-                    .WithStatus(Const.SUCCESS_CODE)
-                    .WithMessage("Token refreshed successfully.")
-                    .Build();
+                    rsa.PersistKeyInCsp = false; // Đảm bảo xóa key từ container
+                }
             }
-            finally
-            {
-                rsa.PersistKeyInCsp = false; // Đảm bảo xóa key từ container
-            }
+        }
+        catch (Exception ex)
+        {
+            return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage(ex.Message)
+                .Build();
         }
     }
 
@@ -510,9 +520,9 @@ public class AuthService : IAuthService
         var claims = new List<Claim>
         {
             new("Id", user.Id.ToString()),
-            new("TokenType", tokenType) 
+            new("TokenType", tokenType)
         };
-        
+
         // 🟢 Nếu UserXRoles chứa danh sách role, thêm tất cả role vào claims
         if (user.UserXRoles != null && user.UserXRoles.Any())
         {
