@@ -75,10 +75,7 @@ public class AuthController : ControllerBase
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] UserCreateCommand request)
     {
-        var passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
-        request.Password = passwordHash;
-
-        var businessResult = await _userService.CreateOrUpdate<UserResult>(request);
+        var businessResult = await _userService.Create(request);
         return Ok(businessResult);
     }
 

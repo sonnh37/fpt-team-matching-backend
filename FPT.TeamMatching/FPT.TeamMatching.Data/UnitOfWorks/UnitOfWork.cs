@@ -34,4 +34,6 @@ public class UnitOfWork : BaseUnitOfWork<FPTMatchingDbContext>, IUnitOfWork
         GetRepository<IVerifyQualifiedForAcademicProjectRepository>();
 
     public IVerifySemesterRepository VerifySemesterRepository => GetRepository<IVerifySemesterRepository>();
+    public IRoleRepository RoleRepository => GetRepository<IRoleRepository>();
+    public IUserXRoleRepository UserXRoleRepository => GetRepository<IUserXRoleRepository>();
 }

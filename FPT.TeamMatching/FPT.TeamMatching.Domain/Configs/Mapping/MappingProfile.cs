@@ -35,6 +35,18 @@ public class MappingProfile : Profile
 
         #endregion
         
+        #region Role
+
+        CreateMap<Role, RoleResult>().ReverseMap();
+
+        #endregion
+        
+        #region UserXRole
+
+        CreateMap<UserXRole, UserXRoleResult>().ReverseMap();
+
+        #endregion
+        
         #region RefreshToken
 
         CreateMap<RefreshToken, RefreshTokenResult>().ReverseMap();

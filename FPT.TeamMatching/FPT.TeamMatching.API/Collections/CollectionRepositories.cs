@@ -25,15 +25,15 @@ public static class CollectionRepositories
         services.AddScoped<IJobPositionRepository, JobPositionRepository>();
         services.AddScoped<ITeamMemberRepository, TeamMemberRepository>();
         services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
-
         services.AddScoped<INotificationRepository, NotificationRepository>();
         services.AddScoped<IProfileRepository, ProfileRepository>();
         services.AddScoped<ISkillProfileRepository, SkillProfileRepository>();
         services.AddScoped<IVerifySemesterRepository, VerifySemesterRepository>();
         services.AddScoped<IVerifyQualifiedForAcademicProjectRepository, VerifyQualifiedForAcademicProjectRepository>();
-
         services.AddScoped<IMessageRepository, MessageRepository>();
         services.AddScoped<IConversationRepository, ConversationRepository>();
         services.AddScoped<IConversationMemberRepository, ConversationMemberRepository>();
+        services.AddScoped<IRoleRepository, RoleRepository>();
+        services.AddScoped<IUserXRoleRepository, UserXRoleRepository>();
     }
 }

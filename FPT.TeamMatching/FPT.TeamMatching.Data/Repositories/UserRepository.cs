@@ -3,6 +3,7 @@ using FPT.TeamMatching.Data.Context;
 using FPT.TeamMatching.Data.Repositories.Base;
 using FPT.TeamMatching.Domain.Contracts.Repositories;
 using FPT.TeamMatching.Domain.Entities;
+using FPT.TeamMatching.Domain.Utilities.Filters;
 using Microsoft.EntityFrameworkCore;
 
 namespace FPT.TeamMatching.Data.Repositories;
@@ -13,17 +14,16 @@ public class UserRepository : BaseRepository<User>, IUserRepository
     {
     }
 
-    public async Task<User?> FindUsernameOrEmail(string key)
+    public async Task<User?> GetUserByUsernameOrEmail(string key)
     {
-        var queryable = GetQueryable();
-        queryable = queryable.Where(entity => !entity.IsDeleted);
+        key = key.Trim().ToLower();
+        var queyable = GetQueryable();
+        queyable = IncludeHelper.Apply(queyable);
 
-        queryable = queryable.Where(e => e.Email!.ToLower().Trim() == key.ToLower().Trim()
-                                         || e.Username!.ToLower().Trim() == key.ToLower().Trim());
-
-        var result = await queryable.SingleOrDefaultAsync();
-
-        return result;
+        return await queyable
+            .Where(entity => !entity.IsDeleted)
+            .Where(e => e.Email!.ToLower().Trim() == key || e.Username!.ToLower().Trim() == key)
+            .FirstOrDefaultAsync();
     }
 
     public async Task<User?> GetByEmail(string keyword)

@@ -84,7 +84,7 @@ public class AuthService : IAuthService
 
     public BusinessResult Login(AuthQuery query)
     {
-        var user = _userRepository.FindUsernameOrEmail(query.Account).Result;
+        var user = _userRepository.GetUserByUsernameOrEmail(query.Account).Result;
         if (user == null)
             return new ResponseBuilder()
                 .WithStatus(Const.NOT_FOUND_CODE)
@@ -510,9 +510,17 @@ public class AuthService : IAuthService
         var claims = new List<Claim>
         {
             new("Id", user.Id.ToString()),
-            new("Role", user.Role.ToString()),
-            new("TokenType", tokenType) // 🟢 Thêm claim để phân biệt
+            new("TokenType", tokenType) 
         };
+        
+        // 🟢 Nếu UserXRoles chứa danh sách role, thêm tất cả role vào claims
+        if (user.UserXRoles != null && user.UserXRoles.Any())
+        {
+            foreach (var role in user.UserXRoles)
+            {
+                claims.Add(new Claim("Role", role.Role.RoleName)); // 🟢 Claim dạng danh sách
+            }
+        }
 
         var key = new RsaSecurityKey(rsa)
         {
