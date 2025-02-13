@@ -132,11 +132,8 @@ builder.Services.AddAuthentication(x =>
 
             IssuerSigningKeyResolver = (token, securityToken, kid, validationParameters) =>
             {
-                var httpContextAccessor =
-                    builder.Services.BuildServiceProvider().GetRequiredService<IHttpContextAccessor>();
-
-                var authService = httpContextAccessor.HttpContext.RequestServices.GetRequiredService<IAuthService>();
-                if (authService == null) throw new SecurityTokenException("AuthService not available.");
+                var serviceProvider = builder.Services.BuildServiceProvider();
+                var authService = serviceProvider.GetRequiredService<IAuthService>();
 
                 var rsa = authService.GetRSAKeyFromTokenAsync(token, kid).Result;
                 return new List<SecurityKey> { new RsaSecurityKey(rsa) };
