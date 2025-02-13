@@ -17,12 +17,6 @@ public partial class FPTMatchingDbContext : BaseDbContext
 
     public virtual DbSet<Blog> Blogs { get; set; }
 
-    // public virtual DbSet<Conversation> Conversations { get; set; }
-    //
-    // public virtual DbSet<ConversationMember> ConversationMembers { get; set; }
-    //
-    // public virtual DbSet<Message> Messages { get; set; }
-
     public virtual DbSet<Comment> Comments { get; set; }
 
     public virtual DbSet<InvitationUser> InvitationUsers { get; set; }
@@ -32,6 +26,8 @@ public partial class FPTMatchingDbContext : BaseDbContext
     public virtual DbSet<LecturerFeedback> LecturerFeedbacks { get; set; }
 
     public virtual DbSet<Like> Likes { get; set; }
+    
+    public virtual DbSet<Feedback> Feedbacks { get; set; }
 
     public virtual DbSet<Notification> Notifications { get; set; }
 
@@ -45,7 +41,7 @@ public partial class FPTMatchingDbContext : BaseDbContext
 
     public virtual DbSet<RefreshToken> RefreshTokens { get; set; }
 
-    public virtual DbSet<Report> Reports { get; set; }
+    public virtual DbSet<Review> Reviews { get; set; }
 
     public virtual DbSet<SkillProfile> SkillProfiles { get; set; }
 
@@ -58,6 +54,16 @@ public partial class FPTMatchingDbContext : BaseDbContext
     public virtual DbSet<VerifyQualifiedForAcademicProject> VerifyQualifiedForAcademicProjects { get; set; }
 
     public virtual DbSet<VerifySemester> VerifySemesters { get; set; }
+    
+    public virtual DbSet<Semester> Semesters { get; set; }
+    
+    public virtual DbSet<Idea> Ideas { get; set; }
+    
+    public virtual DbSet<IdeaReview> IdeaReviews { get; set; }
+    
+    public virtual DbSet<UserXRole> UserXRoles { get; set; }
+    
+    public virtual DbSet<Role> Roles { get; set; }
 
     // Auto Enum Convert Int To String
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
@@ -91,43 +97,6 @@ public partial class FPTMatchingDbContext : BaseDbContext
             entity.HasOne(d => d.User).WithMany(p => p.Blogs)
                 .HasForeignKey(d => d.UserId);
         });
-
-        // modelBuilder.Entity<Conversation>(entity =>
-        // {
-        //     entity.HasKey(e => e.Id);
-        //     entity.ToTable("Conversation");
-        //     entity.Property(e => e.Id).ValueGeneratedOnAdd()
-        //         .HasDefaultValueSql("gen_random_uuid()");
-        //
-        //    });
-        //
-        // modelBuilder.Entity<ConversationMember>(entity =>
-        // {
-        //     entity.HasKey(e => e.Id);
-        //     entity.ToTable("ConversationMember");
-        //     entity.Property(e => e.Id).ValueGeneratedOnAdd()
-        //         .HasDefaultValueSql("gen_random_uuid()");
-        //
-        //     entity.HasOne(d => d.User).WithMany(p => p.ConversationMembers)
-        //         .HasForeignKey(d => d.UserId);
-        //
-        //     entity.HasOne(d => d.Conversation).WithMany(p => p.ConversationMembers)
-        //         .HasForeignKey(d => d.ConversationId);
-        // });
-        //
-        // modelBuilder.Entity<Message>(entity =>
-        // {
-        //     entity.HasKey(e => e.Id);
-        //     entity.ToTable("Message");
-        //     entity.Property(e => e.Id).ValueGeneratedOnAdd()
-        //         .HasDefaultValueSql("gen_random_uuid()");
-        //
-        //     entity.HasOne(d => d.SendBy).WithMany(p => p.MessageSendBys)
-        //         .HasForeignKey(d => d.SendById);
-        //
-        //     entity.HasOne(d => d.Conversation).WithMany(p => p.Messages)
-        //         .HasForeignKey(d => d.ConversationId);
-        // });
 
         modelBuilder.Entity<Comment>(entity =>
         {
@@ -193,8 +162,21 @@ public partial class FPTMatchingDbContext : BaseDbContext
             entity.HasOne(d => d.Lecturer).WithMany(p => p.LecturerFeedbacks)
                 .HasForeignKey(d => d.LecturerId);
 
-            entity.HasOne(d => d.Report).WithMany(p => p.LecturerFeedbacks)
-                .HasForeignKey(d => d.ReportId);
+            entity.HasOne(d => d.Review).WithMany(p => p.LecturerFeedbacks)
+                .HasForeignKey(d => d.ReviewId);
+        });
+        
+        modelBuilder.Entity<Feedback>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            entity.ToTable("Feedback");
+
+            entity.Property(e => e.Id).ValueGeneratedOnAdd()
+                .HasDefaultValueSql("gen_random_uuid()");
+
+            entity.HasOne(d => d.Review).WithMany(p => p.Feedbacks)
+                .HasForeignKey(d => d.ReviewId);
         });
 
         modelBuilder.Entity<Like>(entity =>
@@ -296,16 +278,16 @@ public partial class FPTMatchingDbContext : BaseDbContext
                 .HasForeignKey(d => d.UserId);
         });
 
-        modelBuilder.Entity<Report>(entity =>
+        modelBuilder.Entity<Review>(entity =>
         {
             entity.HasKey(e => e.Id);
 
-            entity.ToTable("Report");
+            entity.ToTable("Review");
 
             entity.Property(e => e.Id).ValueGeneratedOnAdd()
                 .HasDefaultValueSql("gen_random_uuid()");
 
-            entity.HasOne(d => d.Project).WithMany(p => p.Reports)
+            entity.HasOne(d => d.Project).WithMany(p => p.Reviews)
                 .HasForeignKey(d => d.ProjectId);
         });
 
@@ -354,6 +336,16 @@ public partial class FPTMatchingDbContext : BaseDbContext
                 .HasForeignKey(d => d.UserId);
         });
 
+        modelBuilder.Entity<Role>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            entity.ToTable("Role");
+
+            entity.Property(e => e.Id).ValueGeneratedOnAdd()
+                .HasDefaultValueSql("gen_random_uuid()");
+        });
+        
         modelBuilder.Entity<User>(entity =>
         {
             entity.HasKey(e => e.Id);
@@ -362,6 +354,22 @@ public partial class FPTMatchingDbContext : BaseDbContext
 
             entity.Property(e => e.Id).ValueGeneratedOnAdd()
                 .HasDefaultValueSql("gen_random_uuid()");
+        });
+        
+        modelBuilder.Entity<UserXRole>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            entity.ToTable("UserXRole");
+
+            entity.Property(e => e.Id).ValueGeneratedOnAdd()
+                .HasDefaultValueSql("gen_random_uuid()");
+            
+            entity.HasOne(d => d.User).WithMany(p => p.UserXRoles)
+                .HasForeignKey(d => d.UserId);
+            
+            entity.HasOne(d => d.Role).WithMany(p => p.UserXRoles)
+                .HasForeignKey(d => d.RoleId);
         });
 
         modelBuilder.Entity<VerifyQualifiedForAcademicProject>(entity =>
@@ -399,6 +407,47 @@ public partial class FPTMatchingDbContext : BaseDbContext
             entity.HasOne(d => d.VerifyBy).WithMany(p => p.VerifySemesters)
                 .HasForeignKey(d => d.VerifyById);
         });
+        
+        modelBuilder.Entity<Semester>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            entity.ToTable("Semester");
+        });
+        
+        modelBuilder.Entity<Idea>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            entity.ToTable("Idea");
+
+            entity.Property(e => e.Id).ValueGeneratedOnAdd()
+                .HasDefaultValueSql("gen_random_uuid()");
+
+            entity.HasOne(d => d.User).WithMany(p => p.Ideas)
+                .HasForeignKey(d => d.UserId);
+
+            entity.HasOne(d => d.Semester).WithMany(p => p.Ideas)
+                .HasForeignKey(d => d.SemesterId);
+        });
+        
+        modelBuilder.Entity<IdeaReview>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            entity.ToTable("IdeaReview");
+
+            entity.Property(e => e.Id).ValueGeneratedOnAdd()
+                .HasDefaultValueSql("gen_random_uuid()");
+
+            entity.HasOne(d => d.Idea).WithMany(p => p.IdeaReviews)
+                .HasForeignKey(d => d.IdeaId);
+
+            entity.HasOne(d => d.Reviewer).WithMany(p => p.IdeaReviews)
+                .HasForeignKey(d => d.ReviewerId);
+        });
+        
+        
 
         OnModelCreatingPartial(modelBuilder);
     }

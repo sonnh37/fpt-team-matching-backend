@@ -26,3 +26,8 @@ public enum ProjectType
     External,
     Academic
 }
+
+public enum IdeaType
+{
+    
+}

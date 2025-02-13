@@ -7,12 +7,12 @@ using FPT.TeamMatching.Services.Bases;
 
 namespace FPT.TeamMatching.Services;
 
-public class ReportService : BaseService<Report>, IReportService
+public class ReviewService : BaseService<Review>, IReviewService
 {
-    private readonly IReportRepository _repository;
+    private readonly IReviewRepository _repository;
 
-    public ReportService(IMapper mapper, IUnitOfWork unitOfWork) : base(mapper, unitOfWork)
+    public ReviewService(IMapper mapper, IUnitOfWork unitOfWork) : base(mapper, unitOfWork)
     {
-        _repository = unitOfWork.ReportRepository;
+        _repository = unitOfWork.ReviewRepository;
     }
 }

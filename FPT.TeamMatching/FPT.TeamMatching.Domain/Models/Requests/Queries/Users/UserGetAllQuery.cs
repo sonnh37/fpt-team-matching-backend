@@ -5,8 +5,6 @@ namespace FPT.TeamMatching.Domain.Models.Requests.Queries.Users;
 
 public class UserGetAllQuery : GetQueryableQuery
 {
-    public Role Role { get; set; }
-
     public Gender? Gender { get; set; }
 
     public string? Cache { get; set; }

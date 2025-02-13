@@ -10,7 +10,8 @@ namespace FPT.TeamMatching.API.Controllers;
 
 [Route(Const.API_BLOGS)]
 [ApiController]
-[Authorize]
+// test authorize
+[Authorize(Roles = "Student,Lecturer")]
 public class BlogController : ControllerBase
 {
     private readonly IBlogService _service;

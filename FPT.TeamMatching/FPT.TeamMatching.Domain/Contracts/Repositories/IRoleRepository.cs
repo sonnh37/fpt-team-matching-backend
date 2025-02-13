@@ -3,6 +3,7 @@ using FPT.TeamMatching.Domain.Entities;
 
 namespace FPT.TeamMatching.Domain.Contracts.Repositories;
 
-public interface IReportRepository : IBaseRepository<Report>
+public interface IRoleRepository : IBaseRepository<Role>
 {
+    
 }

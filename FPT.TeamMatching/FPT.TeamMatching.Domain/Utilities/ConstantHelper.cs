@@ -50,7 +50,7 @@ public static class Const
 
     public const string API_TASKS = $"{BaseApi}/tasks";
 
-    public const string API_REPORTS = $"{BaseApi}/reports";
+    public const string API_REVIEWS = $"{BaseApi}/reviews";
 
     public const string API_LECTURER_FEEDBACKS = $"{BaseApi}/lecturer-feedbacks";
 

@@ -22,9 +22,9 @@ public class AuthController : ControllerBase
 
     [AllowAnonymous]
     [HttpGet("info")]
-    public IActionResult GetUserInfo([FromQuery] AuthGetByCookieQuery request)
+    public IActionResult GetUserInfo()
     {
-        var businessResult = _authService.GetUserByCookie(request);
+        var businessResult = _authService.GetUserByCookie();
 
         return Ok(businessResult);
     }
@@ -38,7 +38,7 @@ public class AuthController : ControllerBase
         return Ok(businessResult);
     }
 
-    [AllowAnonymous]
+    [Authorize]
     [HttpPost("logout")]
     public async Task<IActionResult> Logout()
     {
@@ -75,10 +75,7 @@ public class AuthController : ControllerBase
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] UserCreateCommand request)
     {
-        var passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
-        request.Password = passwordHash;
-
-        var businessResult = await _userService.CreateOrUpdate<UserResult>(request);
+        var businessResult = await _userService.Create(request);
         return Ok(businessResult);
     }
 

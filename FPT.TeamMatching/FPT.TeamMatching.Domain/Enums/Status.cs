@@ -13,8 +13,10 @@ public enum InvitationUserStatus
 
 public enum ProjectStatus
 {
-    Pending,
-    InProgress,
-    Completed,
-    Archived
+    Pending_Mentor,
+    Approved_Mentor,
+    Rejected_Mentor,
+    Pending_Council,
+    Approved_Council,
+    Rejected_Council,
 }
