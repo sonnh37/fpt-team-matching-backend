@@ -11,6 +11,7 @@ public class Message
     [BsonElement] public string? SendById { get; set; }
 
     [BsonElement] public string? Content { get; set; }
+    [BsonElement] public DateTime? CreatedDate { get; set; }
 
     [BsonIgnore] public virtual Conversation? Conversation { get; set; }
 }
