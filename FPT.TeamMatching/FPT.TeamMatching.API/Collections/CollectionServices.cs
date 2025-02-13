@@ -28,6 +28,8 @@ public static class CollectionServices
         services.AddTransient<ISkillProfileService, SkillProfileService>();
         services.AddTransient<IVerifyQualifiedForAcademicProjectService, VerifyQualifiedForAcademicProjectService>();
         services.AddTransient<IVerifySemesterService, VerifySemesterService>();
+        
+        services.AddTransient<IMessageService, MessageService>();
 
         services.AddTransient<ChatHub>();
     }

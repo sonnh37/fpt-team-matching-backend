@@ -43,7 +43,20 @@ public class ChatHub : Microsoft.AspNetCore.SignalR.Hub
 
             //3. Convert lại redis value
             var conn = JsonSerializer.Deserialize<ConversationMemberModel>(redisValue);
-            //4. Lưu message vào redis
+            //4. Bắn message vào kafka
+            var messageModel = new MessageModel
+            {
+                Message = message,
+                UserId = conn.UserId.ToString(),
+                CreatedDate = DateTime.Now,
+            };
+
+            var kafkaMessage = JsonSerializer.Serialize(messageModel);
+            await _kafkaProducer.ProduceAsync("chat.message", new Message<string, string>
+            {
+                Key = conn.ConversationId.ToString(),
+                Value = kafkaMessage
+            });
 
             //5. Send message
             await Clients.Group(conn.ConversationId.ToString())
