@@ -1,4 +1,5 @@
 ﻿using FPT.TeamMatching.Domain.Contracts.Services;
+using FPT.TeamMatching.Domain.Models.Requests.Commands.Projects;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Tasks;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Users;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Tasks;
@@ -58,5 +59,14 @@ namespace FPT.TeamMatching.API.Controllers
 
             return Ok(businessResult);
         }
+
+        [HttpPut("restore")]
+        public async Task<IActionResult> Restore([FromBody] TaskRestoreCommand command)
+        {
+            var businessResult = await _service.Restore<TaskResult>(command);
+
+            return Ok(businessResult);
+        }
     }
 }
+

@@ -1,6 +1,7 @@
 ﻿using FPT.TeamMatching.Domain.Contracts.Services;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.InvitationUsers;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Reports;
+using FPT.TeamMatching.Domain.Models.Requests.Commands.Tasks;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.InvitationUsers;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Reports;
 using FPT.TeamMatching.Domain.Models.Results;
@@ -55,6 +56,14 @@ namespace FPT.TeamMatching.API.Controllers
         public async Task<IActionResult> Delete([FromQuery] InvitationUserDeleteCommand request)
         {
             var businessResult = await _service.DeleteById(request.Id, request.IsPermanent);
+
+            return Ok(businessResult);
+        }
+
+        [HttpPut("restore")]
+        public async Task<IActionResult> Restore([FromBody] InvitationUserRestoreCommand command)
+        {
+            var businessResult = await _service.Restore<InvitationUserResult>(command);
 
             return Ok(businessResult);
         }

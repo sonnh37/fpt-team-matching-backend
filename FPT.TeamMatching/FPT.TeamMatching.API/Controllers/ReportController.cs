@@ -58,5 +58,13 @@ namespace FPT.TeamMatching.API.Controllers
 
             return Ok(businessResult);
         }
+
+        [HttpPut("restore")]
+        public async Task<IActionResult> Restore([FromBody] ReportRestoreCommand command)
+        {
+            var businessResult = await _service.Restore<ReportResult>(command);
+
+            return Ok(businessResult);
+        }
     }
 }
