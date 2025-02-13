@@ -378,7 +378,7 @@ public abstract class BaseService<TEntity> : BaseService, IBaseService
         return saveChanges ? entity : default;
     }
 
-    private async Task<TEntity?> RestoreEntity(UpdateCommand updateCommand)
+    protected async Task<TEntity?> RestoreEntity(UpdateCommand updateCommand)
     {
         TEntity? entity;
 
@@ -397,7 +397,7 @@ public abstract class BaseService<TEntity> : BaseService, IBaseService
     }
 
 
-    private void InitializeBaseEntityForCreate(TEntity? entity)
+    protected void InitializeBaseEntityForCreate(TEntity? entity)
     {
         if (entity == null) return;
 

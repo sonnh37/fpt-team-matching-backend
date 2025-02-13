@@ -1,11 +1,10 @@
 using AutoMapper;
-using CloudinaryDotNet;
+using FPT.TeamMatching.Domain.Configs;
 using FPT.TeamMatching.Domain.Contracts.Services;
 using FPT.TeamMatching.Domain.Contracts.UnitOfWorks;
 using FPT.TeamMatching.Domain.Entities;
-using FPT.TeamMatching.Domain.Lib;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.VerifyQualifiedForAcademicProject;
-using FPT.TeamMatching.Domain.Models.Requests.Queries;
+using FPT.TeamMatching.Domain.Models.Requests.Queries.VerifyQualifiedForAcademicProject;
 using FPT.TeamMatching.Domain.Models.Responses;
 using FPT.TeamMatching.Domain.Models.Results;
 using FPT.TeamMatching.Domain.Utilities;
@@ -14,23 +13,25 @@ namespace FPT.TeamMatching.Services;
 
 public class VerifyQualifiedForAcademicProjectService : IVerifyQualifiedForAcademicProjectService
 {
-    private readonly IUnitOfWork _unitOfWork;
-    private readonly IMapper _mapper;
     private readonly CloudinaryConfig _cloudinary;
-    public VerifyQualifiedForAcademicProjectService(IUnitOfWork unitOfWork, IMapper mapper, CloudinaryConfig cloudinary) 
+    private readonly IMapper _mapper;
+    private readonly IUnitOfWork _unitOfWork;
+
+    public VerifyQualifiedForAcademicProjectService(IUnitOfWork unitOfWork, IMapper mapper, CloudinaryConfig cloudinary)
     {
         _unitOfWork = unitOfWork;
         _mapper = mapper;
         _cloudinary = cloudinary;
     }
+
     public async Task<BusinessResult> Add(VerifyQualifiedForAcademicProjectCreateCommand command)
     {
         try
         {
             //1. Kiểm tra user có tồn tại không 
             var foundUser = _unitOfWork.UserRepository.GetById(command.UserId);
-            if (foundUser == null) throw new Exception("User not found");   
-            
+            if (foundUser == null) throw new Exception("User not found");
+
             //2. Upload to storage
             var cloudinaryResult = await _cloudinary.UploadVerifyQualified(command.FileUpload, command.UserId);
             //3. Save db
@@ -54,14 +55,14 @@ public class VerifyQualifiedForAcademicProjectService : IVerifyQualifiedForAcade
             //1. Kiểm tra user có tồn tại hay không
             var foundUser = await _unitOfWork.UserRepository.GetById(command.UserId);
             if (foundUser == null || foundUser.IsDeleted) throw new Exception("User not found");
-            
+
             //2. kiểm tra có tồn tại trong DB không 
             var foundQualified = await _unitOfWork.VerifyQualifiedForAcademicProjectRepository.GetById(command.Id);
             if (foundQualified == null || foundQualified.IsDeleted) throw new Exception("Qualified not found");
-            
+
             //3. Override on storage
             var cloudinaryResult = await _cloudinary.UploadVerifyQualified(command.FileUpload, command.UserId);
-            
+
             //4. Save to DB
             var entity = _mapper.Map<VerifyQualifiedForAcademicProject>(command);
             entity.FileUpload = cloudinaryResult.Url.ToString();
@@ -110,7 +111,8 @@ public class VerifyQualifiedForAcademicProjectService : IVerifyQualifiedForAcade
             }
 
             var tuple = await _unitOfWork.VerifySemesterRepository.GetPaged(x);
-            List<VerifyQualifiedForAcademicProjectResult> result = _mapper.Map<List<VerifyQualifiedForAcademicProjectResult>>(tuple);
+            var result =
+                _mapper.Map<List<VerifyQualifiedForAcademicProjectResult>>(tuple);
             return new BusinessResult(Const.SUCCESS_CODE, Const.SUCCESS_READ_MSG, result);
         }
         catch (Exception e)

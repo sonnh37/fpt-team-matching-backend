@@ -1,8 +1,9 @@
 using System.Text.Json;
 using AutoMapper;
+using Confluent.Kafka;
+using FPT.TeamMatching.Domain.Configs;
 using FPT.TeamMatching.Domain.Contracts.UnitOfWorks;
 using FPT.TeamMatching.Domain.Entities;
-using FPT.TeamMatching.Domain.Lib;
 using FPT.TeamMatching.Domain.Models;
 using Microsoft.AspNetCore.SignalR;
 using Quartz.Util;
@@ -16,12 +17,13 @@ public class ChatHub : Microsoft.AspNetCore.SignalR.Hub
     private readonly IMongoUnitOfWork _unitOfWork;
     private readonly IMapper _mapper;
     private readonly IDatabase _redis;
-
-    public ChatHub(IMongoUnitOfWork unitOfWork, IMapper mapper, RedisConfig redisConfig)
+    private readonly IKafkaProducerConfig _kafkaProducer;
+    public ChatHub(IMongoUnitOfWork unitOfWork, IMapper mapper, RedisConfig redisConfig, IKafkaProducerConfig kafkaProducerConfig)
     {
         _unitOfWork = unitOfWork;
         _mapper = mapper;
         _redis = redisConfig.GetConnection();
+        _kafkaProducer = kafkaProducerConfig;
     }
 
     public async Task SendMessage(string message)
@@ -41,7 +43,20 @@ public class ChatHub : Microsoft.AspNetCore.SignalR.Hub
 
             //3. Convert lại redis value
             var conn = JsonSerializer.Deserialize<ConversationMemberModel>(redisValue);
-            //4. Lưu message vào redis
+            //4. Bắn message vào kafka
+            var messageModel = new MessageModel
+            {
+                Message = message,
+                UserId = conn.UserId.ToString(),
+                CreatedDate = DateTime.Now,
+            };
+
+            var kafkaMessage = JsonSerializer.Serialize(messageModel);
+            await _kafkaProducer.ProduceAsync("chat.message", new Message<string, string>
+            {
+                Key = conn.ConversationId.ToString(),
+                Value = kafkaMessage
+            });
 
             //5. Send message
             await Clients.Group(conn.ConversationId.ToString())

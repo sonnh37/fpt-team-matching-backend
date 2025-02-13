@@ -6,11 +6,11 @@ public class LecturerFeedback : BaseEntity
 {
     public Guid? LecturerId { get; set; }
 
-    public Guid? ReportId { get; set; }
+    public Guid? ReviewId { get; set; }
 
     public string? Content { get; set; }
 
     public virtual User? Lecturer { get; set; }
 
-    public virtual Report? Report { get; set; }
+    public virtual Review? Review { get; set; }
 }

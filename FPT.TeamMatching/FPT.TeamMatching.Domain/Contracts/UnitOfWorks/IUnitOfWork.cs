@@ -19,14 +19,16 @@ public interface IUnitOfWork : IBaseUnitOfWork
 
     ITaskRepository TaskRepository { get; }
 
-    IReportRepository ReportRepository { get; }
+    IReviewRepository ReviewRepository { get; }
 
     IInvitationUserRepository InvitationUserRepository { get; }
     IRefreshTokenRepository RefreshTokenRepository { get; }
-    
+
     INotificationRepository NotificationRepository { get; }
     IProfileRepository ProfileRepository { get; }
     ISkillProfileRepository SkillProfileRepository { get; }
     IVerifyQualifiedForAcademicProjectRepository VerifyQualifiedForAcademicProjectRepository { get; }
     IVerifySemesterRepository VerifySemesterRepository { get; }
+    IRoleRepository RoleRepository { get; }
+    IUserXRoleRepository UserXRoleRepository { get; }
 }

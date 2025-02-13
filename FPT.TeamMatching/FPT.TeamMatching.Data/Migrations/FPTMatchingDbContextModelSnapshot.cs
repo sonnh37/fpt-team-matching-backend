@@ -148,6 +148,171 @@ namespace FPT.TeamMatching.Data.Migrations
                     b.ToTable("Comment", (string)null);
                 });
 
+            modelBuilder.Entity("FPT.TeamMatching.Domain.Entities.Feedback", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<string>("Content")
+                        .HasColumnType("text");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("text");
+
+                    b.Property<DateTimeOffset?>("CreatedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text");
+
+                    b.Property<string>("FileUpload")
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Note")
+                        .HasColumnType("text");
+
+                    b.Property<Guid?>("ReviewId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("text");
+
+                    b.Property<DateTimeOffset?>("UpdatedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ReviewId");
+
+                    b.ToTable("Feedback", (string)null);
+                });
+
+            modelBuilder.Entity("FPT.TeamMatching.Domain.Entities.Idea", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("text");
+
+                    b.Property<DateTimeOffset?>("CreatedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text");
+
+                    b.Property<string>("EnglishName")
+                        .HasColumnType("text");
+
+                    b.Property<string>("File")
+                        .HasColumnType("text");
+
+                    b.Property<string>("IdeaCode")
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool?>("IsExistedTeam")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Major")
+                        .HasColumnType("text");
+
+                    b.Property<int?>("MaxTeamSize")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Note")
+                        .HasColumnType("text");
+
+                    b.Property<Guid?>("SemesterId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Status")
+                        .HasColumnType("text");
+
+                    b.Property<Guid?>("SubMentorId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Title")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Type")
+                        .HasColumnType("text");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("text");
+
+                    b.Property<DateTimeOffset?>("UpdatedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("VietNamName")
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SemesterId");
+
+                    b.HasIndex("SubMentorId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Idea", (string)null);
+                });
+
+            modelBuilder.Entity("FPT.TeamMatching.Domain.Entities.IdeaReview", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("text");
+
+                    b.Property<DateTimeOffset?>("CreatedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("IdeaId")
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Note")
+                        .HasColumnType("text");
+
+                    b.Property<DateTimeOffset?>("ProcessDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("ReviewerId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("text");
+
+                    b.Property<DateTimeOffset?>("UpdatedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("IdeaId");
+
+                    b.HasIndex("ReviewerId");
+
+                    b.ToTable("IdeaReview", (string)null);
+                });
+
             modelBuilder.Entity("FPT.TeamMatching.Domain.Entities.InvitationUser", b =>
                 {
                     b.Property<Guid>("Id")
@@ -271,7 +436,7 @@ namespace FPT.TeamMatching.Data.Migrations
                     b.Property<string>("Note")
                         .HasColumnType("text");
 
-                    b.Property<Guid?>("ReportId")
+                    b.Property<Guid?>("ReviewId")
                         .HasColumnType("uuid");
 
                     b.Property<string>("UpdatedBy")
@@ -284,7 +449,7 @@ namespace FPT.TeamMatching.Data.Migrations
 
                     b.HasIndex("LecturerId");
 
-                    b.HasIndex("ReportId");
+                    b.HasIndex("ReviewId");
 
                     b.ToTable("LecturerFeedback", (string)null);
                 });
@@ -368,82 +533,6 @@ namespace FPT.TeamMatching.Data.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Notification", (string)null);
-                });
-
-            modelBuilder.Entity("FPT.TeamMatching.Domain.Entities.Permission", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasDefaultValueSql("gen_random_uuid()");
-
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("text");
-
-                    b.Property<DateTimeOffset?>("CreatedDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Note")
-                        .HasColumnType("text");
-
-                    b.Property<string>("UpdatedBy")
-                        .HasColumnType("text");
-
-                    b.Property<DateTimeOffset?>("UpdatedDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Permission", (string)null);
-                });
-
-            modelBuilder.Entity("FPT.TeamMatching.Domain.Entities.PermissionXAction", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasDefaultValueSql("gen_random_uuid()");
-
-                    b.Property<Guid?>("ActionId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("text");
-
-                    b.Property<DateTimeOffset?>("CreatedDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<bool>("IsDeleted")
-                        .HasColumnType("boolean");
-
-                    b.Property<bool>("Licensed")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("Note")
-                        .HasColumnType("text");
-
-                    b.Property<Guid?>("PermissionId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("UpdatedBy")
-                        .HasColumnType("text");
-
-                    b.Property<DateTimeOffset?>("UpdatedDate")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ActionId");
-
-                    b.HasIndex("PermissionId");
-
-                    b.ToTable("PermissionXAction", (string)null);
                 });
 
             modelBuilder.Entity("FPT.TeamMatching.Domain.Entities.Profile", b =>
@@ -678,7 +767,13 @@ namespace FPT.TeamMatching.Data.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
 
+                    b.Property<string>("KeyId")
+                        .HasColumnType("text");
+
                     b.Property<string>("Note")
+                        .HasColumnType("text");
+
+                    b.Property<string>("PublicKey")
                         .HasColumnType("text");
 
                     b.Property<string>("Token")
@@ -703,7 +798,7 @@ namespace FPT.TeamMatching.Data.Migrations
                     b.ToTable("RefreshToken", (string)null);
                 });
 
-            modelBuilder.Entity("FPT.TeamMatching.Domain.Entities.Report", b =>
+            modelBuilder.Entity("FPT.TeamMatching.Domain.Entities.Review", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -716,7 +811,10 @@ namespace FPT.TeamMatching.Data.Migrations
                     b.Property<DateTimeOffset?>("CreatedDate")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("Document")
+                    b.Property<string>("Description")
+                        .HasColumnType("text");
+
+                    b.Property<string>("FileUpload")
                         .HasColumnType("text");
 
                     b.Property<bool>("IsDeleted")
@@ -725,13 +823,16 @@ namespace FPT.TeamMatching.Data.Migrations
                     b.Property<string>("Note")
                         .HasColumnType("text");
 
+                    b.Property<int>("Number")
+                        .HasColumnType("integer");
+
                     b.Property<Guid?>("ProjectId")
                         .HasColumnType("uuid");
 
-                    b.Property<string>("Question")
+                    b.Property<string>("Reviewer1")
                         .HasColumnType("text");
 
-                    b.Property<string>("Title")
+                    b.Property<string>("Reviewer2")
                         .HasColumnType("text");
 
                     b.Property<string>("UpdatedBy")
@@ -744,7 +845,81 @@ namespace FPT.TeamMatching.Data.Migrations
 
                     b.HasIndex("ProjectId");
 
-                    b.ToTable("Report", (string)null);
+                    b.ToTable("Review", (string)null);
+                });
+
+            modelBuilder.Entity("FPT.TeamMatching.Domain.Entities.Role", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("text");
+
+                    b.Property<DateTimeOffset?>("CreatedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Note")
+                        .HasColumnType("text");
+
+                    b.Property<string>("RoleName")
+                        .HasColumnType("text");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("text");
+
+                    b.Property<DateTimeOffset?>("UpdatedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Role", (string)null);
+                });
+
+            modelBuilder.Entity("FPT.TeamMatching.Domain.Entities.Semester", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("text");
+
+                    b.Property<DateTimeOffset?>("CreatedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset?>("EndDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Note")
+                        .HasColumnType("text");
+
+                    b.Property<string>("SemesterCode")
+                        .HasColumnType("text");
+
+                    b.Property<string>("SemesterName")
+                        .HasColumnType("text");
+
+                    b.Property<DateTimeOffset?>("StartDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("text");
+
+                    b.Property<DateTimeOffset?>("UpdatedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Semester", (string)null);
                 });
 
             modelBuilder.Entity("FPT.TeamMatching.Domain.Entities.SkillProfile", b =>
@@ -952,7 +1127,7 @@ namespace FPT.TeamMatching.Data.Migrations
                     b.ToTable("User", (string)null);
                 });
 
-            modelBuilder.Entity("FPT.TeamMatching.Domain.Entities.UserXPermission", b =>
+            modelBuilder.Entity("FPT.TeamMatching.Domain.Entities.UserXRole", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -968,13 +1143,10 @@ namespace FPT.TeamMatching.Data.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
 
-                    b.Property<Guid>("Licensed")
-                        .HasColumnType("uuid");
-
                     b.Property<string>("Note")
                         .HasColumnType("text");
 
-                    b.Property<Guid?>("PermissionId")
+                    b.Property<Guid?>("RoleId")
                         .HasColumnType("uuid");
 
                     b.Property<string>("UpdatedBy")
@@ -988,11 +1160,11 @@ namespace FPT.TeamMatching.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("PermissionId");
+                    b.HasIndex("RoleId");
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("UserXPermission", (string)null);
+                    b.ToTable("UserXRole", (string)null);
                 });
 
             modelBuilder.Entity("FPT.TeamMatching.Domain.Entities.VerifyQualifiedForAcademicProject", b =>
@@ -1119,6 +1291,51 @@ namespace FPT.TeamMatching.Data.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("FPT.TeamMatching.Domain.Entities.Feedback", b =>
+                {
+                    b.HasOne("FPT.TeamMatching.Domain.Entities.Review", "Review")
+                        .WithMany("Feedbacks")
+                        .HasForeignKey("ReviewId");
+
+                    b.Navigation("Review");
+                });
+
+            modelBuilder.Entity("FPT.TeamMatching.Domain.Entities.Idea", b =>
+                {
+                    b.HasOne("FPT.TeamMatching.Domain.Entities.Semester", "Semester")
+                        .WithMany("Ideas")
+                        .HasForeignKey("SemesterId");
+
+                    b.HasOne("FPT.TeamMatching.Domain.Entities.User", "SubMentor")
+                        .WithMany()
+                        .HasForeignKey("SubMentorId");
+
+                    b.HasOne("FPT.TeamMatching.Domain.Entities.User", "User")
+                        .WithMany("Ideas")
+                        .HasForeignKey("UserId");
+
+                    b.Navigation("Semester");
+
+                    b.Navigation("SubMentor");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("FPT.TeamMatching.Domain.Entities.IdeaReview", b =>
+                {
+                    b.HasOne("FPT.TeamMatching.Domain.Entities.Idea", "Idea")
+                        .WithMany("IdeaReviews")
+                        .HasForeignKey("IdeaId");
+
+                    b.HasOne("FPT.TeamMatching.Domain.Entities.User", "Reviewer")
+                        .WithMany("IdeaReviews")
+                        .HasForeignKey("ReviewerId");
+
+                    b.Navigation("Idea");
+
+                    b.Navigation("Reviewer");
+                });
+
             modelBuilder.Entity("FPT.TeamMatching.Domain.Entities.InvitationUser", b =>
                 {
                     b.HasOne("FPT.TeamMatching.Domain.Entities.Project", "Project")
@@ -1161,13 +1378,13 @@ namespace FPT.TeamMatching.Data.Migrations
                         .WithMany("LecturerFeedbacks")
                         .HasForeignKey("LecturerId");
 
-                    b.HasOne("FPT.TeamMatching.Domain.Entities.Report", "Report")
+                    b.HasOne("FPT.TeamMatching.Domain.Entities.Review", "Review")
                         .WithMany("LecturerFeedbacks")
-                        .HasForeignKey("ReportId");
+                        .HasForeignKey("ReviewId");
 
                     b.Navigation("Lecturer");
 
-                    b.Navigation("Report");
+                    b.Navigation("Review");
                 });
 
             modelBuilder.Entity("FPT.TeamMatching.Domain.Entities.Like", b =>
@@ -1192,21 +1409,6 @@ namespace FPT.TeamMatching.Data.Migrations
                         .HasForeignKey("UserId");
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("FPT.TeamMatching.Domain.Entities.PermissionXAction", b =>
-                {
-                    b.HasOne("FPT.TeamMatching.Domain.Entities.Action", "Action")
-                        .WithMany()
-                        .HasForeignKey("ActionId");
-
-                    b.HasOne("FPT.TeamMatching.Domain.Entities.Permission", "Permission")
-                        .WithMany()
-                        .HasForeignKey("PermissionId");
-
-                    b.Navigation("Action");
-
-                    b.Navigation("Permission");
                 });
 
             modelBuilder.Entity("FPT.TeamMatching.Domain.Entities.Profile", b =>
@@ -1266,10 +1468,10 @@ namespace FPT.TeamMatching.Data.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("FPT.TeamMatching.Domain.Entities.Report", b =>
+            modelBuilder.Entity("FPT.TeamMatching.Domain.Entities.Review", b =>
                 {
                     b.HasOne("FPT.TeamMatching.Domain.Entities.Project", "Project")
-                        .WithMany("Reports")
+                        .WithMany("Reviews")
                         .HasForeignKey("ProjectId");
 
                     b.Navigation("Project");
@@ -1314,17 +1516,17 @@ namespace FPT.TeamMatching.Data.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("FPT.TeamMatching.Domain.Entities.UserXPermission", b =>
+            modelBuilder.Entity("FPT.TeamMatching.Domain.Entities.UserXRole", b =>
                 {
-                    b.HasOne("FPT.TeamMatching.Domain.Entities.Permission", "Permission")
-                        .WithMany()
-                        .HasForeignKey("PermissionId");
+                    b.HasOne("FPT.TeamMatching.Domain.Entities.Role", "Role")
+                        .WithMany("UserXRoles")
+                        .HasForeignKey("RoleId");
 
                     b.HasOne("FPT.TeamMatching.Domain.Entities.User", "User")
-                        .WithMany()
+                        .WithMany("UserXRoles")
                         .HasForeignKey("UserId");
 
-                    b.Navigation("Permission");
+                    b.Navigation("Role");
 
                     b.Navigation("User");
                 });
@@ -1368,22 +1570,39 @@ namespace FPT.TeamMatching.Data.Migrations
                     b.Navigation("Likes");
                 });
 
+            modelBuilder.Entity("FPT.TeamMatching.Domain.Entities.Idea", b =>
+                {
+                    b.Navigation("IdeaReviews");
+                });
+
             modelBuilder.Entity("FPT.TeamMatching.Domain.Entities.Project", b =>
                 {
                     b.Navigation("InvitationUsers");
 
                     b.Navigation("ProjectActivities");
 
-                    b.Navigation("Reports");
+                    b.Navigation("Reviews");
 
                     b.Navigation("Tasks");
 
                     b.Navigation("TeamMembers");
                 });
 
-            modelBuilder.Entity("FPT.TeamMatching.Domain.Entities.Report", b =>
+            modelBuilder.Entity("FPT.TeamMatching.Domain.Entities.Review", b =>
                 {
+                    b.Navigation("Feedbacks");
+
                     b.Navigation("LecturerFeedbacks");
+                });
+
+            modelBuilder.Entity("FPT.TeamMatching.Domain.Entities.Role", b =>
+                {
+                    b.Navigation("UserXRoles");
+                });
+
+            modelBuilder.Entity("FPT.TeamMatching.Domain.Entities.Semester", b =>
+                {
+                    b.Navigation("Ideas");
                 });
 
             modelBuilder.Entity("FPT.TeamMatching.Domain.Entities.TeamMember", b =>
@@ -1396,6 +1615,10 @@ namespace FPT.TeamMatching.Data.Migrations
                     b.Navigation("Blogs");
 
                     b.Navigation("Comments");
+
+                    b.Navigation("IdeaReviews");
+
+                    b.Navigation("Ideas");
 
                     b.Navigation("InvitationUserReceivers");
 
@@ -1424,6 +1647,8 @@ namespace FPT.TeamMatching.Data.Migrations
                     b.Navigation("Tasks");
 
                     b.Navigation("TeamMembers");
+
+                    b.Navigation("UserXRoles");
 
                     b.Navigation("VerifyQualifiedForAcademicProject");
 

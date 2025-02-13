@@ -1,5 +1,5 @@
 using FPT.TeamMatching.Domain.Models.Requests.Commands.VerifyQualifiedForAcademicProject;
-using FPT.TeamMatching.Domain.Models.Requests.Queries;
+using FPT.TeamMatching.Domain.Models.Requests.Queries.VerifyQualifiedForAcademicProject;
 using FPT.TeamMatching.Domain.Models.Responses;
 
 namespace FPT.TeamMatching.Domain.Contracts.Services;

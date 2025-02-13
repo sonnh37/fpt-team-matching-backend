@@ -7,9 +7,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace FPT.TeamMatching.Data.Repositories;
 
-public class NotificationRepository :  BaseRepository<Notification>, INotificationRepository
+public class NotificationRepository : BaseRepository<Notification>, INotificationRepository
 {
     private readonly FPTMatchingDbContext _dbContext;
+
     public NotificationRepository(FPTMatchingDbContext context, IMapper mapper) : base(context, mapper)
     {
         _dbContext = context;
@@ -19,7 +20,7 @@ public class NotificationRepository :  BaseRepository<Notification>, INotificati
     {
         var result = await _dbContext.Notifications.Where(x => x.UserId == userId)
             .ToListAsync();
-        
+
         return result;
     }
 }

@@ -6,7 +6,7 @@ namespace FPT.TeamMatching.Domain.Models.Requests.Commands.Users;
 public class UserCreateCommand : CreateCommand
 {
     public Gender? Gender { get; set; }
-    
+
     public string? Cache { get; set; }
 
     public string? Username { get; set; }

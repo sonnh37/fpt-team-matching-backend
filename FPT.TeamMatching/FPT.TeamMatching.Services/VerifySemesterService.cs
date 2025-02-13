@@ -1,9 +1,8 @@
 using AutoMapper;
-using FPT.TeamMatching.Domain.Contracts.Repositories;
+using FPT.TeamMatching.Domain.Configs;
 using FPT.TeamMatching.Domain.Contracts.Services;
 using FPT.TeamMatching.Domain.Contracts.UnitOfWorks;
 using FPT.TeamMatching.Domain.Entities;
-using FPT.TeamMatching.Domain.Lib;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.VerifySemester;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.VerifySemester;
 using FPT.TeamMatching.Domain.Models.Responses;
@@ -14,9 +13,9 @@ namespace FPT.TeamMatching.Services;
 
 public class VerifySemesterService : IVerifySemesterService
 {
-    private readonly IUnitOfWork _unitOfWork;
+    private readonly CloudinaryConfig _cloudinaryConfig;
     private readonly IMapper _mapper;
-    private CloudinaryConfig _cloudinaryConfig;
+    private readonly IUnitOfWork _unitOfWork;
 
     public VerifySemesterService(IUnitOfWork unitOfWork, IMapper mapper, CloudinaryConfig cloudinaryConfig)
     {
@@ -39,7 +38,7 @@ public class VerifySemesterService : IVerifySemesterService
             }
 
             var tuple = await _unitOfWork.VerifySemesterRepository.GetPaged(x);
-            List<VerifySemesterResult> results = _mapper.Map<List<VerifySemesterResult>>(tuple.Item1);
+            var results = _mapper.Map<List<VerifySemesterResult>>(tuple.Item1);
             return new BusinessResult(Const.SUCCESS_CODE, Const.SUCCESS_READ_MSG, results);
         }
         catch (Exception e)
@@ -72,13 +71,14 @@ public class VerifySemesterService : IVerifySemesterService
             //1. Kiểm tra user có tồn tại không
             var foundUser = await _unitOfWork.UserRepository.GetById(verifySemester.UserId);
             if (foundUser == null || foundUser.IsDeleted) throw new Exception("User not found");
-            
+
             //2. Kiểm tra verify có tồn tại trong hệ thống chưa bằng userId
             var foundVerifyingSemester = _unitOfWork.VerifySemesterRepository.FindByUserId(verifySemester.UserId);
             if (foundVerifyingSemester != null) throw new Exception("Verify semester already exists");
-            
+
             //3. Upload file vào storage
-            var cloudinaryResult = await _cloudinaryConfig.UploadVerifySemester(verifySemester.ImageFile, verifySemester.UserId);
+            var cloudinaryResult =
+                await _cloudinaryConfig.UploadVerifySemester(verifySemester.ImageFile, verifySemester.UserId);
             //4. Thêm vào DB
             var entity = _mapper.Map<VerifySemester>(verifySemester);
             entity.FileUpload = cloudinaryResult.Url.ToString();
@@ -100,9 +100,10 @@ public class VerifySemesterService : IVerifySemesterService
             //1. Kiểm tra user có tồn tại không
             var foundUser = await _unitOfWork.UserRepository.GetById(verifySemester.UserId);
             if (foundUser == null || foundUser.IsDeleted) throw new Exception("User not found");
-            
+
             //2. Upload file vào storage
-            var cloudinaryResult = await _cloudinaryConfig.UploadVerifySemester(verifySemester.ImageFile, verifySemester.UserId);
+            var cloudinaryResult =
+                await _cloudinaryConfig.UploadVerifySemester(verifySemester.ImageFile, verifySemester.UserId);
             //3. Thêm vào DB
             var entity = _mapper.Map<VerifySemester>(verifySemester);
             entity.FileUpload = cloudinaryResult.Url.ToString();

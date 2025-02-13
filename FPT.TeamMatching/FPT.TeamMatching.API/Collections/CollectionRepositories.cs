@@ -1,6 +1,4 @@
-﻿using FPT.TeamMatching.API.Hub;
-using FPT.TeamMatching.Data.Repositories;
-using FPT.TeamMatching.Data.Repositories.Base;
+﻿using FPT.TeamMatching.Data.Repositories;
 using FPT.TeamMatching.Data.UnitOfWorks;
 using FPT.TeamMatching.Domain.Contracts.Repositories;
 using FPT.TeamMatching.Domain.Contracts.UnitOfWorks;
@@ -15,7 +13,7 @@ public static class CollectionRepositories
         services.AddScoped<IMongoUnitOfWork, MongoUnitOfWork>();
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<ITaskRepository, TaskRepository>();
-        services.AddScoped<IReportRepository, ReportRepository>();
+        services.AddScoped<IReviewRepository, ReviewRepository>();
         services.AddScoped<IProjectRepository, ProjectRepository>();
         services.AddScoped<IProjectActivityRepository, ProjectActivityRepository>();
         services.AddScoped<ILecturerFeedbackRepository, LecturerFeedbackRepository>();
@@ -27,16 +25,15 @@ public static class CollectionRepositories
         services.AddScoped<IJobPositionRepository, JobPositionRepository>();
         services.AddScoped<ITeamMemberRepository, TeamMemberRepository>();
         services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
-
         services.AddScoped<INotificationRepository, NotificationRepository>();
         services.AddScoped<IProfileRepository, ProfileRepository>();
         services.AddScoped<ISkillProfileRepository, SkillProfileRepository>();
         services.AddScoped<IVerifySemesterRepository, VerifySemesterRepository>();
         services.AddScoped<IVerifyQualifiedForAcademicProjectRepository, VerifyQualifiedForAcademicProjectRepository>();
-
         services.AddScoped<IMessageRepository, MessageRepository>();
         services.AddScoped<IConversationRepository, ConversationRepository>();
         services.AddScoped<IConversationMemberRepository, ConversationMemberRepository>();
-
+        services.AddScoped<IRoleRepository, RoleRepository>();
+        services.AddScoped<IUserXRoleRepository, UserXRoleRepository>();
     }
 }

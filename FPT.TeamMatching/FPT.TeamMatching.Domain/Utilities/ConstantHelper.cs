@@ -35,12 +35,14 @@ public static class Const
     public const string NOT_FOUND_MSG = "Not found";
 
     #endregion
-    
+
     #region Url api
 
     private const string BaseApi = "api";
 
     public const string API_USERS = $"{BaseApi}/users";
+
+    public const string API_REFRESH_TOKENS = $"{BaseApi}/refresh-tokens";
 
     public const string API_PROJECTS = $"{BaseApi}/projects";
 
@@ -48,7 +50,7 @@ public static class Const
 
     public const string API_TASKS = $"{BaseApi}/tasks";
 
-    public const string API_REPORTS = $"{BaseApi}/reports";
+    public const string API_REVIEWS = $"{BaseApi}/reviews";
 
     public const string API_LECTURER_FEEDBACKS = $"{BaseApi}/lecturer-feedbacks";
 
@@ -61,19 +63,22 @@ public static class Const
     public const string API_TEAM_MEMBERS = $"{BaseApi}/team-members";
 
     public const string API_NOTIFICATIONS = $"{BaseApi}/notifications";
-    
+
     public const string API_PROFILES = $"{BaseApi}/profiles";
-    
+
     public const string API_SKILLPROFILES = $"{BaseApi}/skill-profiles";
-    
+
     public const string? API_VERIFY_QUALIFIED = $"{BaseApi}/verify-qualified";
-    
+
     public const string API_VERIFY_SEMESTER = $"{BaseApi}/verify-semester";
     
+    public const string API_MESSAGE = $"{BaseApi}/message";
+
     public const string SortFieldDefault = "CreatedDate";
 
+    public const string HANGFIRE = $"{BaseApi}/hangfire";
     #endregion
-    
+
     #region Default get query
 
     public const int PageNumberDefault = 1;

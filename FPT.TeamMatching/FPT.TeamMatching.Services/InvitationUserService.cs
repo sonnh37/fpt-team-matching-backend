@@ -4,21 +4,15 @@ using FPT.TeamMatching.Domain.Contracts.Services;
 using FPT.TeamMatching.Domain.Contracts.UnitOfWorks;
 using FPT.TeamMatching.Domain.Entities;
 using FPT.TeamMatching.Services.Bases;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace FPT.TeamMatching.Services
+namespace FPT.TeamMatching.Services;
+
+public class InvitationUserService : BaseService<InvitationUser>, IInvitationUserService
 {
-    public class InvitationUserService : BaseService<InvitationUser>, IInvitationUserService
-    {
-        private readonly IInvitationUserRepository _repository;
+    private readonly IInvitationUserRepository _repository;
 
-        public InvitationUserService(IMapper mapper, IUnitOfWork unitOfWork) : base(mapper, unitOfWork)
-        {
-            _repository = unitOfWork.InvitationUserRepository;
-        }
+    public InvitationUserService(IMapper mapper, IUnitOfWork unitOfWork) : base(mapper, unitOfWork)
+    {
+        _repository = unitOfWork.InvitationUserRepository;
     }
 }

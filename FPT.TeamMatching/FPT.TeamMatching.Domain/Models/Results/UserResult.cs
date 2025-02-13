@@ -6,10 +6,12 @@ namespace FPT.TeamMatching.Domain.Models.Results;
 public class UserResult : BaseResult
 {
     public Gender? Gender { get; set; }
-    
+
     public string? Cache { get; set; }
 
     public string? Username { get; set; }
+
+    public string? Password { get; set; }
 
     public string? FirstName { get; set; }
 
@@ -22,4 +24,8 @@ public class UserResult : BaseResult
     public string? Phone { get; set; }
 
     public string? Address { get; set; }
+    
+    public virtual ICollection<BlogResult> Blogs { get; set; } = new List<BlogResult>();
+    
+    public virtual ICollection<UserXRoleResult> UserXRoles { get; set; } = new List<UserXRoleResult>();
 }

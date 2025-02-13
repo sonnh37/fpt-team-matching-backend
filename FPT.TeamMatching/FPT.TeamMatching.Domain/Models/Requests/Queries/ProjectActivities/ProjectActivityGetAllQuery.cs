@@ -1,13 +1,7 @@
 ﻿using FPT.TeamMatching.Domain.Models.Requests.Queries.Base;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace FPT.TeamMatching.Domain.Models.Requests.Queries.ProjectActivities
+namespace FPT.TeamMatching.Domain.Models.Requests.Queries.ProjectActivities;
+
+public class ProjectActivityGetAllQuery : GetQueryableQuery
 {
-    public class ProjectActivityGetAllQuery : GetQueryableQuery
-    {
-    }
 }
