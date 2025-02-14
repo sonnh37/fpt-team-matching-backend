@@ -1,6 +1,8 @@
 ﻿using dotenv.net;
+using FPT.TeamMatching.Domain.Configs;
 using FPT.TeamMatching.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 using MongoDB.EntityFrameworkCore.Extensions;
 
@@ -8,31 +10,21 @@ namespace FPT.TeamMatching.Data.Context;
 
 public class ChatRoomDbContext : DbContext
 {
-    public ChatRoomDbContext(DbContextOptions<ChatRoomDbContext> options)
-        : base(options)
-    {
-        ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
-    }
+    private readonly IMongoDatabase _database;
 
-    public DbSet<Conversation> Conversations { get; init; }
-    public DbSet<Message> Messages { get; init; }
-    public DbSet<ConversationMember> ConversationMembers { get; init; }
-
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    public ChatRoomDbContext()
     {
         DotEnv.Load(new DotEnvOptions(probeForEnv: true));
         var connectionString = Environment.GetEnvironmentVariable("MONGODB_URI");
-        var mongoClient = new MongoClient(connectionString);
-        var database = mongoClient.GetDatabase("fpt-matching-chatroom");
-        optionsBuilder.UseMongoDB(database.Client, database.DatabaseNamespace.DatabaseName);
-        base.OnConfiguring(optionsBuilder);
+        var client = new MongoClient(connectionString);
+        _database = client.GetDatabase("fpt-matching-chatroom");
     }
 
-    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    public IMongoDatabase GetDatabase() => _database;
+
+    public IMongoCollection<T> GetCollection<T>(string collectionName)
     {
-        base.OnModelCreating(modelBuilder);
-        modelBuilder.Entity<Conversation>().ToCollection("conversations");
-        modelBuilder.Entity<Message>().ToCollection("messages");
-        modelBuilder.Entity<ConversationMember>().ToCollection("conversationMembers");
+        return _database.GetCollection<T>(collectionName);
     }
 }
+

@@ -56,14 +56,14 @@ builder.Services.AddDbContext<FPTMatchingDbContext>(options =>
 });
 
 
-var mongoClient = new MongoClient(builder.Configuration["MONGODB_URI"]);
-var database = mongoClient.GetDatabase("fpt-matching-chatroom");
-builder.Services.AddDbContext<ChatRoomDbContext>(options =>
-{
-    options.UseMongoDB(database.Client, database.DatabaseNamespace.DatabaseName);
-});
+// var mongoClient = new MongoClient(builder.Configuration["MONGODB_URI"]);
+// var database = mongoClient.GetDatabase("fpt-matching-chatroom");
+// builder.Services.AddDbContext<ChatRoomDbContext>(options =>
+// {
+//     options.UseMongoDB(database.Client, database.DatabaseNamespace.DatabaseName);
+// });
 
-// builder.Services.AddDbContext<ChatRoomDbContext>(ServiceLifetime.Scoped);
+builder.Services.AddSingleton<ChatRoomDbContext>();
 
 #endregion
 

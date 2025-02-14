@@ -30,6 +30,7 @@ public static class CollectionServices
         services.AddTransient<IVerifySemesterService, VerifySemesterService>();
         
         services.AddTransient<IMessageService, MessageService>();
+        services.AddTransient<IConversationMemberService, ConversationMemberService>();
 
         services.AddTransient<ChatHub>();
     }

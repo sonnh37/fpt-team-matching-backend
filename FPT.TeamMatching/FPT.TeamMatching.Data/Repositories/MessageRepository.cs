@@ -2,23 +2,25 @@
 using FPT.TeamMatching.Domain.Contracts.Repositories;
 using FPT.TeamMatching.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
+using MongoDB.Driver;
+using Task = System.Threading.Tasks.Task;
 
 namespace FPT.TeamMatching.Data.Repositories;
 
 public class MessageRepository : IMessageRepository
 {
-    private readonly ChatRoomDbContext _dbContext;
+    private readonly IMongoCollection<Message> _collection;
 
     public MessageRepository(ChatRoomDbContext dbContext)
     {
-        _dbContext = dbContext;
+        _collection = dbContext.GetDatabase().GetCollection<Message>("messages");
     }
 
-    public void AddMessage(Message message)
+    public async Task AddMessage(Message message)
     {
         try
         {
-            _dbContext.Messages.Add(message);
+             await _collection.InsertOneAsync(message); 
         }
         catch (Exception e)
         {
@@ -31,7 +33,7 @@ public class MessageRepository : IMessageRepository
     {
         try
         {
-            return await _dbContext.Messages.FirstOrDefaultAsync(x => x.Id == id.ToString());
+            return await _collection.Find(x => x.Id == id.ToString()).FirstOrDefaultAsync();
         }
         catch (Exception e)
         {
@@ -44,7 +46,7 @@ public class MessageRepository : IMessageRepository
     {
         try
         {
-            return await _dbContext.Messages.Where(x => x.ConversationId == conversationId.ToString()).ToListAsync();
+            return await _collection.Find(x => x.ConversationId == conversationId.ToString()).ToListAsync();
         }
         catch (Exception e)
         {
