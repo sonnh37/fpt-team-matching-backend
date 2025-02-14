@@ -1,8 +1,6 @@
 ﻿using FPT.TeamMatching.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using Action = FPT.TeamMatching.Domain.Entities.Action;
-using Task = FPT.TeamMatching.Domain.Entities.Task;
 
 namespace FPT.TeamMatching.Data.Context;
 
@@ -13,17 +11,13 @@ public partial class FPTMatchingDbContext : BaseDbContext
     {
     }
 
-    public virtual DbSet<Action> Actions { get; set; }
-
     public virtual DbSet<Blog> Blogs { get; set; }
 
     public virtual DbSet<Comment> Comments { get; set; }
 
-    public virtual DbSet<InvitationUser> InvitationUsers { get; set; }
+    public virtual DbSet<Invitation> Invitations { get; set; }
 
-    public virtual DbSet<JobPosition> JobPositions { get; set; }
-
-    public virtual DbSet<LecturerFeedback> LecturerFeedbacks { get; set; }
+    public virtual DbSet<Application> JobPositions { get; set; }
 
     public virtual DbSet<Like> Likes { get; set; }
     
@@ -31,11 +25,9 @@ public partial class FPTMatchingDbContext : BaseDbContext
 
     public virtual DbSet<Notification> Notifications { get; set; }
 
-    public virtual DbSet<Profile> Profiles { get; set; }
+    public virtual DbSet<ProfileStudent> Profiles { get; set; }
 
     public virtual DbSet<Project> Projects { get; set; }
-
-    public virtual DbSet<ProjectActivity> ProjectActivities { get; set; }
 
     public virtual DbSet<Rate> Rates { get; set; }
 
@@ -45,16 +37,10 @@ public partial class FPTMatchingDbContext : BaseDbContext
 
     public virtual DbSet<SkillProfile> SkillProfiles { get; set; }
 
-    public virtual DbSet<Task> Tasks { get; set; }
-
     public virtual DbSet<TeamMember> TeamMembers { get; set; }
 
     public virtual DbSet<User> Users { get; set; }
 
-    public virtual DbSet<VerifyQualifiedForAcademicProject> VerifyQualifiedForAcademicProjects { get; set; }
-
-    public virtual DbSet<VerifySemester> VerifySemesters { get; set; }
-    
     public virtual DbSet<Semester> Semesters { get; set; }
     
     public virtual DbSet<Idea> Ideas { get; set; }
@@ -65,6 +51,7 @@ public partial class FPTMatchingDbContext : BaseDbContext
     
     public virtual DbSet<Role> Roles { get; set; }
 
+    #region Config
     // Auto Enum Convert Int To String
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
     {
@@ -72,19 +59,30 @@ public partial class FPTMatchingDbContext : BaseDbContext
 
         configurationBuilder.Properties<Enum>().HaveConversion<string>();
     }
+    
+    
+
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        if (!optionsBuilder.IsConfigured) optionsBuilder.UseNpgsql(GetConnectionString());
+    }
+
+    private string GetConnectionString()
+    {
+        IConfiguration config = new ConfigurationBuilder()
+            .SetBasePath(Directory.GetCurrentDirectory())
+            .AddJsonFile("appsettings.json", true, true)
+            .Build();
+        var strConn = config.GetConnectionString("DefaultConnection");
+
+        return strConn;
+    }
+
+    #endregion
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<Action>(entity =>
-        {
-            entity.HasKey(e => e.Id);
-
-            entity.ToTable("Action");
-
-            entity.Property(e => e.Id).ValueGeneratedOnAdd()
-                .HasDefaultValueSql("gen_random_uuid()");
-        });
-
+        //modelBuilder.Ignore<Task>(); 
         modelBuilder.Entity<Blog>(entity =>
         {
             entity.HasKey(e => e.Id);
@@ -114,26 +112,26 @@ public partial class FPTMatchingDbContext : BaseDbContext
                 .HasForeignKey(d => d.UserId);
         });
 
-        modelBuilder.Entity<InvitationUser>(entity =>
+        modelBuilder.Entity<Invitation>(entity =>
         {
             entity.HasKey(e => e.Id);
 
-            entity.ToTable("InvitationUser");
+            entity.ToTable("Invitation");
 
             entity.Property(e => e.Id).ValueGeneratedOnAdd()
                 .HasDefaultValueSql("gen_random_uuid()");
 
-            entity.HasOne(d => d.Project).WithMany(p => p.InvitationUsers)
+            entity.HasOne(d => d.Project).WithMany(p => p.Invitations)
                 .HasForeignKey(d => d.ProjectId);
 
-            entity.HasOne(d => d.Sender).WithMany(p => p.InvitationUserSenders)
+            entity.HasOne(d => d.Sender).WithMany(p => p.InvitationOfSenders)
                 .HasForeignKey(d => d.SenderId);
 
-            entity.HasOne(d => d.Receiver).WithMany(p => p.InvitationUserReceivers)
+            entity.HasOne(d => d.Receiver).WithMany(p => p.InvitationOfReceivers)
                 .HasForeignKey(d => d.ReceiverId);
         });
 
-        modelBuilder.Entity<JobPosition>(entity =>
+        modelBuilder.Entity<Application>(entity =>
         {
             entity.HasKey(e => e.Id);
 
@@ -143,27 +141,11 @@ public partial class FPTMatchingDbContext : BaseDbContext
                 .HasDefaultValueSql("gen_random_uuid()");
             entity.Property(e => e.FileCv).HasMaxLength(1);
 
-            entity.HasOne(d => d.Blog).WithMany(p => p.JobPositions)
+            entity.HasOne(d => d.Blog).WithMany(p => p.Applications)
                 .HasForeignKey(d => d.BlogId);
 
-            entity.HasOne(d => d.User).WithMany(p => p.JobPositions)
+            entity.HasOne(d => d.User).WithMany(p => p.Applications)
                 .HasForeignKey(d => d.UserId);
-        });
-
-        modelBuilder.Entity<LecturerFeedback>(entity =>
-        {
-            entity.HasKey(e => e.Id);
-
-            entity.ToTable("LecturerFeedback");
-
-            entity.Property(e => e.Id).ValueGeneratedOnAdd()
-                .HasDefaultValueSql("gen_random_uuid()");
-
-            entity.HasOne(d => d.Lecturer).WithMany(p => p.LecturerFeedbacks)
-                .HasForeignKey(d => d.LecturerId);
-
-            entity.HasOne(d => d.Review).WithMany(p => p.LecturerFeedbacks)
-                .HasForeignKey(d => d.ReviewId);
         });
         
         modelBuilder.Entity<Feedback>(entity =>
@@ -208,19 +190,19 @@ public partial class FPTMatchingDbContext : BaseDbContext
                 .HasForeignKey(d => d.UserId);
         });
 
-        modelBuilder.Entity<Profile>(entity =>
+        modelBuilder.Entity<ProfileStudent>(entity =>
         {
             entity.HasKey(e => e.Id);
 
-            entity.ToTable("Profile");
+            entity.ToTable("ProfileStudent");
 
             entity.HasIndex(e => e.UserId).IsUnique();
 
             entity.Property(e => e.Id).ValueGeneratedOnAdd()
                 .HasDefaultValueSql("gen_random_uuid()");
 
-            entity.HasOne(d => d.User).WithOne(p => p.Profile)
-                .HasForeignKey<Profile>(d => d.UserId);
+            entity.HasOne(d => d.User).WithOne(p => p.ProfileStudent)
+                .HasForeignKey<ProfileStudent>(d => d.UserId);
         });
 
         modelBuilder.Entity<Project>(entity =>
@@ -234,26 +216,19 @@ public partial class FPTMatchingDbContext : BaseDbContext
 
             entity.HasOne(d => d.Leader).WithMany(p => p.Projects)
                 .HasForeignKey(d => d.LeaderId);
+            
+            entity.HasOne(d => d.Idea).WithOne(p => p.Project)
+                .HasForeignKey<Project>(d => d.IdeaId);
         });
-
-        modelBuilder.Entity<ProjectActivity>(entity =>
-        {
-            entity.HasKey(e => e.Id);
-
-            entity.ToTable("ProjectActivity");
-
-            entity.Property(e => e.Id).ValueGeneratedOnAdd()
-                .HasDefaultValueSql("gen_random_uuid()");
-
-            entity.HasOne(d => d.Project).WithMany(p => p.ProjectActivities)
-                .HasForeignKey(d => d.ProjectId);
-        });
-
+        
         modelBuilder.Entity<Rate>(entity =>
         {
             entity.HasKey(e => e.Id);
 
             entity.ToTable("Rate");
+            
+            entity.Property(e => e.Id).ValueGeneratedOnAdd()
+                .HasDefaultValueSql("gen_random_uuid()");
 
             entity.HasOne(d => d.RateBy).WithMany(p => p.RateBys)
                 .HasForeignKey(d => d.RateById);
@@ -300,24 +275,8 @@ public partial class FPTMatchingDbContext : BaseDbContext
             entity.Property(e => e.Id).ValueGeneratedOnAdd()
                 .HasDefaultValueSql("gen_random_uuid()");
 
-            entity.HasOne(d => d.User).WithMany(p => p.SkillProfiles)
-                .HasForeignKey(d => d.UserId);
-        });
-
-        modelBuilder.Entity<Task>(entity =>
-        {
-            entity.HasKey(e => e.Id);
-
-            entity.ToTable("Task");
-
-            entity.Property(e => e.Id).ValueGeneratedOnAdd()
-                .HasDefaultValueSql("gen_random_uuid()");
-
-            entity.HasOne(d => d.AssignedTo).WithMany(p => p.Tasks)
-                .HasForeignKey(d => d.AssignedToId);
-
-            entity.HasOne(d => d.Project).WithMany(p => p.Tasks)
-                .HasForeignKey(d => d.ProjectId);
+            entity.HasOne(d => d.ProfileStudent).WithMany(p => p.SkillProfiles)
+                .HasForeignKey(d => d.ProfileStudentId);
         });
 
         modelBuilder.Entity<TeamMember>(entity =>
@@ -372,47 +331,14 @@ public partial class FPTMatchingDbContext : BaseDbContext
                 .HasForeignKey(d => d.RoleId);
         });
 
-        modelBuilder.Entity<VerifyQualifiedForAcademicProject>(entity =>
-        {
-            entity.HasKey(e => e.Id);
-
-            entity.ToTable("VerifyQualifiedForAcademicProject");
-
-            entity.HasIndex(e => e.UserId).IsUnique();
-
-            entity.Property(e => e.Id).ValueGeneratedOnAdd()
-                .HasDefaultValueSql("gen_random_uuid()");
-
-            entity.HasOne(d => d.User).WithOne(p => p.VerifyQualifiedForAcademicProject)
-                .HasForeignKey<VerifyQualifiedForAcademicProject>(d => d.UserId);
-
-            entity.HasOne(d => d.VerifyBy).WithMany(p => p.VerifyQualifiedForAcademicProjects)
-                .HasForeignKey(d => d.VerifyById);
-        });
-
-        modelBuilder.Entity<VerifySemester>(entity =>
-        {
-            entity.HasKey(e => e.Id);
-
-            entity.ToTable("VerifySemester");
-
-            entity.HasIndex(e => e.UserId).IsUnique();
-
-            entity.Property(e => e.Id).ValueGeneratedOnAdd()
-                .HasDefaultValueSql("gen_random_uuid()");
-
-            entity.HasOne(d => d.User).WithOne(p => p.VerifySemester)
-                .HasForeignKey<VerifySemester>(d => d.UserId);
-
-            entity.HasOne(d => d.VerifyBy).WithMany(p => p.VerifySemesters)
-                .HasForeignKey(d => d.VerifyById);
-        });
-        
         modelBuilder.Entity<Semester>(entity =>
         {
             entity.HasKey(e => e.Id);
 
             entity.ToTable("Semester");
+            
+            entity.Property(e => e.Id).ValueGeneratedOnAdd()
+                .HasDefaultValueSql("gen_random_uuid()");
         });
         
         modelBuilder.Entity<Idea>(entity =>
@@ -424,8 +350,11 @@ public partial class FPTMatchingDbContext : BaseDbContext
             entity.Property(e => e.Id).ValueGeneratedOnAdd()
                 .HasDefaultValueSql("gen_random_uuid()");
 
-            entity.HasOne(d => d.User).WithMany(p => p.Ideas)
+            entity.HasOne(d => d.User).WithMany(p => p.IdeaOfUsers)
                 .HasForeignKey(d => d.UserId);
+            
+            entity.HasOne(d => d.SubMentor).WithMany(p => p.IdeaOfSubMentors)
+                .HasForeignKey(d => d.SubMentorId);
 
             entity.HasOne(d => d.Semester).WithMany(p => p.Ideas)
                 .HasForeignKey(d => d.SemesterId);
@@ -447,30 +376,8 @@ public partial class FPTMatchingDbContext : BaseDbContext
                 .HasForeignKey(d => d.ReviewerId);
         });
         
-        
-
         OnModelCreatingPartial(modelBuilder);
     }
 
     partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
-
-    #region Config
-
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        if (!optionsBuilder.IsConfigured) optionsBuilder.UseNpgsql(GetConnectionString());
-    }
-
-    private string GetConnectionString()
-    {
-        IConfiguration config = new ConfigurationBuilder()
-            .SetBasePath(Directory.GetCurrentDirectory())
-            .AddJsonFile("appsettings.json", true, true)
-            .Build();
-        var strConn = config.GetConnectionString("DefaultConnection");
-
-        return strConn;
-    }
-
-    #endregion
 }

@@ -2,6 +2,6 @@
 
 namespace FPT.TeamMatching.Domain.Contracts.Services;
 
-public interface IInvitationUserService : IBaseService
+public interface IInvitationService : IBaseService
 {
 }

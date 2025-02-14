@@ -18,8 +18,6 @@ public class Review : BaseEntity
     
     public virtual Project? Project { get; set; }
 
-    public virtual ICollection<LecturerFeedback> LecturerFeedbacks { get; set; } = new List<LecturerFeedback>();
-    
     public virtual ICollection<Feedback> Feedbacks { get; set; } = new List<Feedback>();
 
 }

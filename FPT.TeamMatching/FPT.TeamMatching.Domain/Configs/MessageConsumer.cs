@@ -3,7 +3,6 @@ using FPT.TeamMatching.Domain.Contracts.UnitOfWorks;
 using FPT.TeamMatching.Domain.Entities;
 using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json;
-using Task = System.Threading.Tasks.Task;
 
 namespace FPT.TeamMatching.Domain.Configs;
 

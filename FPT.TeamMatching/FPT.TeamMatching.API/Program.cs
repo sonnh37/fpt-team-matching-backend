@@ -18,7 +18,6 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using MongoDB.Driver;
 using Npgsql;
-using Task = System.Threading.Tasks.Task;
 
 Env.Load();
 

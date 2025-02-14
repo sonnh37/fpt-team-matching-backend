@@ -4,7 +4,7 @@ public enum Status
 {
 }
 
-public enum InvitationUserStatus
+public enum InvitationStatus
 {
     Pending,
     Rejected,

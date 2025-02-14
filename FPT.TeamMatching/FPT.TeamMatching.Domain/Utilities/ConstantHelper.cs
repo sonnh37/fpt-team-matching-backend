@@ -58,7 +58,7 @@ public static class Const
     public const string API_BLOGS = $"{BaseApi}/blogs";
     public const string API_COMMENTS = $"{BaseApi}/comments";
     public const string API_LIKES = $"{BaseApi}/likes";
-    public const string API_JOB_POSITIONS = $"{BaseApi}/job-positions";
+    public const string API_APPLICATIONS = $"{BaseApi}/applications";
     public const string API_RATES = $"{BaseApi}/rates";
     public const string API_TEAM_MEMBERS = $"{BaseApi}/team-members";
 

@@ -8,7 +8,6 @@ using FPT.TeamMatching.Domain.Models;
 using Microsoft.AspNetCore.SignalR;
 using Quartz.Util;
 using StackExchange.Redis;
-using Task = System.Threading.Tasks.Task;
 
 namespace FPT.TeamMatching.API.Hub;
 

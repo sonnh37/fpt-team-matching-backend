@@ -25,8 +25,6 @@ public class Idea : BaseEntity
     
     public string? File { get; set; }
     
-    public string? Description { get; set; }
-
     public ProjectStatus? Status { get; set; }
 
     public bool? IsExistedTeam { get; set; }
@@ -36,6 +34,8 @@ public class Idea : BaseEntity
     public virtual User? User { get; set; }
     
     public virtual User? SubMentor { get; set; }
+    
+    public virtual Project? Project { get; set; }
     
     public virtual Semester? Semester { get; set; }
     
