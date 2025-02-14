@@ -33,7 +33,7 @@ public class Project : BaseEntity
 
     public virtual ICollection<Review> Reviews { get; set; } = new List<Review>();
 
-    public virtual ICollection<Task> Tasks { get; set; } = new List<Task>();
+    // public virtual ICollection<Task> Tasks { get; set; } = new List<Task>();
 
     public virtual ICollection<TeamMember> TeamMembers { get; set; } = new List<TeamMember>();
 }

@@ -53,7 +53,7 @@ public partial class FPTMatchingDbContext : BaseDbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Ignore<Task>(); 
+        // modelBuilder.Ignore<Task>(); 
         modelBuilder.Entity<Blog>(entity =>
         {
             entity.HasKey(e => e.Id);
