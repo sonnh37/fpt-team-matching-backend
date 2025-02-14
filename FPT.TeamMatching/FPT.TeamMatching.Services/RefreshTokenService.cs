@@ -76,60 +76,50 @@ public class RefreshTokenService : BaseService<RefreshToken>, IRefreshTokenServi
                 .Build();
         }
     }
-    private string NormalizeIpAddress(string ipAddress)
-    {
-        if (ipAddress.Contains(","))
-        {
-            ipAddress = ipAddress.Split(',')[0].Trim();
-        }
-        
-        if (IPAddress.TryParse(ipAddress, out var ip))
-        {
-            if (ip.IsIPv4MappedToIPv6)
-            {
-                return ip.MapToIPv4().ToString();
-            }
-            
-            // Chuyển loopback IPv6 (::1) về loopback IPv4 (127.0.0.1)
-            if (IPAddress.IPv6Loopback.Equals(ip))
-            {
-                return IPAddress.Loopback.ToString(); // Trả về 127.0.0.1
-            }
-        }
-        return ipAddress; 
-    }
+
     public BusinessResult ValidateRefreshTokenIpMatch()
     {
         var ipAddress = _httpContextAccessor.HttpContext.Request.Headers["X-Forwarded-For"].FirstOrDefault()
                         ?? _httpContextAccessor.HttpContext.Connection.RemoteIpAddress?.ToString() ?? "0.0.0.0";
         var refreshToken = _httpContextAccessor.HttpContext.Request.Cookies["refreshToken"];
-        
+
         ipAddress = NormalizeIpAddress(ipAddress);
         // Kiểm tra refreshToken và IP address
         var storedRefreshToken = _refreshTokenRepository.GetByRefreshTokenAsync(refreshToken).Result;
 
         if (storedRefreshToken == null || storedRefreshToken.Expiry < DateTime.UtcNow)
-        {
             return new ResponseBuilder()
                 .WithStatus(Const.FAIL_CODE)
                 .WithMessage("Your session has expired. Please log in again.")
                 .Build();
-        }
 
         if (storedRefreshToken.IpAddress != ipAddress)
-        {
             return new ResponseBuilder()
                 .WithStatus(Const.FAIL_CODE)
                 .WithMessage("Warning!! someone trying to get token.")
                 .Build();
-        }
-        
+
         var refreshTokenResult = _mapper.Map<RefreshTokenResult>(storedRefreshToken);
         return new ResponseBuilder<RefreshTokenResult>()
             .WithData(refreshTokenResult)
             .WithStatus(Const.SUCCESS_CODE)
             .WithMessage(Const.SUCCESS_READ_MSG)
             .Build();
+    }
+
+    private string NormalizeIpAddress(string ipAddress)
+    {
+        if (ipAddress.Contains(",")) ipAddress = ipAddress.Split(',')[0].Trim();
+
+        if (IPAddress.TryParse(ipAddress, out var ip))
+        {
+            if (ip.IsIPv4MappedToIPv6) return ip.MapToIPv4().ToString();
+
+            // Chuyển loopback IPv6 (::1) về loopback IPv4 (127.0.0.1)
+            if (IPAddress.IPv6Loopback.Equals(ip)) return IPAddress.Loopback.ToString(); // Trả về 127.0.0.1
+        }
+
+        return ipAddress;
     }
 
     protected async Task<RefreshToken?> CreateOrUpdateEntity(CreateOrUpdateCommand createOrUpdateCommand)

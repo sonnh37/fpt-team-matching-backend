@@ -29,5 +29,4 @@ public enum ProjectType
 
 public enum IdeaType
 {
-    
 }

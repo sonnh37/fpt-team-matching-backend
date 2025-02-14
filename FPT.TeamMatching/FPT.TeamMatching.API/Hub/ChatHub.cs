@@ -13,11 +13,13 @@ namespace FPT.TeamMatching.API.Hub;
 
 public class ChatHub : Microsoft.AspNetCore.SignalR.Hub
 {
-    private readonly IMongoUnitOfWork _unitOfWork;
+    private readonly IKafkaProducerConfig _kafkaProducer;
     private readonly IMapper _mapper;
     private readonly IDatabase _redis;
-    private readonly IKafkaProducerConfig _kafkaProducer;
-    public ChatHub(IMongoUnitOfWork unitOfWork, IMapper mapper, RedisConfig redisConfig, IKafkaProducerConfig kafkaProducerConfig)
+    private readonly IMongoUnitOfWork _unitOfWork;
+
+    public ChatHub(IMongoUnitOfWork unitOfWork, IMapper mapper, RedisConfig redisConfig,
+        IKafkaProducerConfig kafkaProducerConfig)
     {
         _unitOfWork = unitOfWork;
         _mapper = mapper;
@@ -30,7 +32,7 @@ public class ChatHub : Microsoft.AspNetCore.SignalR.Hub
         try
         {
             //1. Lấy value của connectionId trong redis
-            string redisKey = $"chat:{Context.ConnectionId}";
+            var redisKey = $"chat:{Context.ConnectionId}";
             string? redisValue = await _redis.StringGetAsync(redisKey);
 
             //2. Kiểm tra xem redisKey có tồn tại không
@@ -47,7 +49,7 @@ public class ChatHub : Microsoft.AspNetCore.SignalR.Hub
             {
                 Message = message,
                 UserId = conn.UserId.ToString(),
-                CreatedDate = DateTime.Now,
+                CreatedDate = DateTime.Now
             };
 
             var kafkaMessage = JsonSerializer.Serialize(messageModel);
@@ -80,22 +82,22 @@ public class ChatHub : Microsoft.AspNetCore.SignalR.Hub
                 // Tạo conversation mới
                 var conversationEntity = new Conversation
                 {
-                    ConversationName = "",
+                    ConversationName = ""
                 };
                 _unitOfWork.ConversationRepository.Add(conversationEntity);
-                
+
                 // Tạo conversation member
                 var conversationUser = new ConversationMember
                 {
                     ConversationId = conversationEntity.Id,
-                    UserId = conn.UserId.ToString(),
+                    UserId = conn.UserId.ToString()
                 };
                 _unitOfWork.ConversationMemberRepository.Add(conversationUser);
 
                 var conversationPartner = new ConversationMember
                 {
                     ConversationId = conversationEntity.Id,
-                    UserId = conn.PartnerId.ToString(),
+                    UserId = conn.PartnerId.ToString()
                 };
                 _unitOfWork.ConversationMemberRepository.Add(conversationPartner);
                 await _unitOfWork.SaveChanges();
@@ -107,8 +109,8 @@ public class ChatHub : Microsoft.AspNetCore.SignalR.Hub
             await Groups.AddToGroupAsync(Context.ConnectionId, conn.ConversationId.ToString());
 
             //2. Lưu vào redis ConnectionId, JSON ConversationMemberModel
-            string redisKey = $"chat:{Context.ConnectionId}";
-            string redisValue = JsonSerializer.Serialize(conn);
+            var redisKey = $"chat:{Context.ConnectionId}";
+            var redisValue = JsonSerializer.Serialize(conn);
 
             await _redis.StringSetAsync(redisKey, redisValue);
 
@@ -129,9 +131,8 @@ public class ChatHub : Microsoft.AspNetCore.SignalR.Hub
         try
         {
             //1. Xóa key trong redis
-            string redisKey = $"chat:{Context.ConnectionId}";
+            var redisKey = $"chat:{Context.ConnectionId}";
             await _redis.KeyDeleteAsync(redisKey);
-
         }
         catch (Exception e)
         {

@@ -35,15 +35,21 @@ builder.Services.AddHangfire(config =>
 builder.Services.AddHangfireServer();
 
 builder.Services.AddScoped<IJobHangfireService, JobHangFireService>();
+
 #endregion
+
 #region Add SignalR
 
 builder.Services.AddSignalR();
 
 #endregion
+
 #region Add Kafka Config
+
 builder.Services.AddScoped<IKafkaProducerConfig, KafkaProducer>();
+
 #endregion
+
 #region Add-DbContext
 
 var dbDataSource = new NpgsqlDataSourceBuilder(builder.Configuration.GetConnectionString("DefaultConnection")).Build();

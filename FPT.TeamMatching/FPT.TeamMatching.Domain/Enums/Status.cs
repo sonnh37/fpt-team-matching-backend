@@ -18,5 +18,5 @@ public enum ProjectStatus
     Rejected_Mentor,
     Pending_Council,
     Approved_Council,
-    Rejected_Council,
+    Rejected_Council
 }

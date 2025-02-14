@@ -17,10 +17,10 @@ public partial class FPTMatchingDbContext : BaseDbContext
 
     public virtual DbSet<Invitation> Invitations { get; set; }
 
-    public virtual DbSet<Application> JobPositions { get; set; }
+    public virtual DbSet<Application> Applications { get; set; }
 
     public virtual DbSet<Like> Likes { get; set; }
-    
+
     public virtual DbSet<Feedback> Feedbacks { get; set; }
 
     public virtual DbSet<Notification> Notifications { get; set; }
@@ -42,47 +42,18 @@ public partial class FPTMatchingDbContext : BaseDbContext
     public virtual DbSet<User> Users { get; set; }
 
     public virtual DbSet<Semester> Semesters { get; set; }
-    
+
     public virtual DbSet<Idea> Ideas { get; set; }
-    
+
     public virtual DbSet<IdeaReview> IdeaReviews { get; set; }
-    
+
     public virtual DbSet<UserXRole> UserXRoles { get; set; }
-    
+
     public virtual DbSet<Role> Roles { get; set; }
-
-    #region Config
-    // Auto Enum Convert Int To String
-    protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
-    {
-        base.ConfigureConventions(configurationBuilder);
-
-        configurationBuilder.Properties<Enum>().HaveConversion<string>();
-    }
-    
-    
-
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-    {
-        if (!optionsBuilder.IsConfigured) optionsBuilder.UseNpgsql(GetConnectionString());
-    }
-
-    private string GetConnectionString()
-    {
-        IConfiguration config = new ConfigurationBuilder()
-            .SetBasePath(Directory.GetCurrentDirectory())
-            .AddJsonFile("appsettings.json", true, true)
-            .Build();
-        var strConn = config.GetConnectionString("DefaultConnection");
-
-        return strConn;
-    }
-
-    #endregion
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        //modelBuilder.Ignore<Task>(); 
+        modelBuilder.Ignore<Task>(); 
         modelBuilder.Entity<Blog>(entity =>
         {
             entity.HasKey(e => e.Id);
@@ -135,7 +106,7 @@ public partial class FPTMatchingDbContext : BaseDbContext
         {
             entity.HasKey(e => e.Id);
 
-            entity.ToTable("JobPosition");
+            entity.ToTable("Application");
 
             entity.Property(e => e.Id).ValueGeneratedOnAdd()
                 .HasDefaultValueSql("gen_random_uuid()");
@@ -147,7 +118,7 @@ public partial class FPTMatchingDbContext : BaseDbContext
             entity.HasOne(d => d.User).WithMany(p => p.Applications)
                 .HasForeignKey(d => d.UserId);
         });
-        
+
         modelBuilder.Entity<Feedback>(entity =>
         {
             entity.HasKey(e => e.Id);
@@ -216,17 +187,17 @@ public partial class FPTMatchingDbContext : BaseDbContext
 
             entity.HasOne(d => d.Leader).WithMany(p => p.Projects)
                 .HasForeignKey(d => d.LeaderId);
-            
+
             entity.HasOne(d => d.Idea).WithOne(p => p.Project)
                 .HasForeignKey<Project>(d => d.IdeaId);
         });
-        
+
         modelBuilder.Entity<Rate>(entity =>
         {
             entity.HasKey(e => e.Id);
 
             entity.ToTable("Rate");
-            
+
             entity.Property(e => e.Id).ValueGeneratedOnAdd()
                 .HasDefaultValueSql("gen_random_uuid()");
 
@@ -304,7 +275,7 @@ public partial class FPTMatchingDbContext : BaseDbContext
             entity.Property(e => e.Id).ValueGeneratedOnAdd()
                 .HasDefaultValueSql("gen_random_uuid()");
         });
-        
+
         modelBuilder.Entity<User>(entity =>
         {
             entity.HasKey(e => e.Id);
@@ -314,7 +285,7 @@ public partial class FPTMatchingDbContext : BaseDbContext
             entity.Property(e => e.Id).ValueGeneratedOnAdd()
                 .HasDefaultValueSql("gen_random_uuid()");
         });
-        
+
         modelBuilder.Entity<UserXRole>(entity =>
         {
             entity.HasKey(e => e.Id);
@@ -323,10 +294,10 @@ public partial class FPTMatchingDbContext : BaseDbContext
 
             entity.Property(e => e.Id).ValueGeneratedOnAdd()
                 .HasDefaultValueSql("gen_random_uuid()");
-            
+
             entity.HasOne(d => d.User).WithMany(p => p.UserXRoles)
                 .HasForeignKey(d => d.UserId);
-            
+
             entity.HasOne(d => d.Role).WithMany(p => p.UserXRoles)
                 .HasForeignKey(d => d.RoleId);
         });
@@ -336,11 +307,11 @@ public partial class FPTMatchingDbContext : BaseDbContext
             entity.HasKey(e => e.Id);
 
             entity.ToTable("Semester");
-            
+
             entity.Property(e => e.Id).ValueGeneratedOnAdd()
                 .HasDefaultValueSql("gen_random_uuid()");
         });
-        
+
         modelBuilder.Entity<Idea>(entity =>
         {
             entity.HasKey(e => e.Id);
@@ -352,14 +323,14 @@ public partial class FPTMatchingDbContext : BaseDbContext
 
             entity.HasOne(d => d.User).WithMany(p => p.IdeaOfUsers)
                 .HasForeignKey(d => d.UserId);
-            
+
             entity.HasOne(d => d.SubMentor).WithMany(p => p.IdeaOfSubMentors)
                 .HasForeignKey(d => d.SubMentorId);
 
             entity.HasOne(d => d.Semester).WithMany(p => p.Ideas)
                 .HasForeignKey(d => d.SemesterId);
         });
-        
+
         modelBuilder.Entity<IdeaReview>(entity =>
         {
             entity.HasKey(e => e.Id);
@@ -375,9 +346,38 @@ public partial class FPTMatchingDbContext : BaseDbContext
             entity.HasOne(d => d.Reviewer).WithMany(p => p.IdeaReviews)
                 .HasForeignKey(d => d.ReviewerId);
         });
-        
+
         OnModelCreatingPartial(modelBuilder);
     }
 
     partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
+
+    #region Config
+
+    // Auto Enum Convert Int To String
+    protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
+    {
+        base.ConfigureConventions(configurationBuilder);
+
+        configurationBuilder.Properties<Enum>().HaveConversion<string>();
+    }
+
+
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        if (!optionsBuilder.IsConfigured) optionsBuilder.UseNpgsql(GetConnectionString());
+    }
+
+    private string GetConnectionString()
+    {
+        IConfiguration config = new ConfigurationBuilder()
+            .SetBasePath(Directory.GetCurrentDirectory())
+            .AddJsonFile("appsettings.json", true, true)
+            .Build();
+        var strConn = config.GetConnectionString("DefaultConnection");
+
+        return strConn;
+    }
+
+    #endregion
 }

@@ -12,7 +12,7 @@ public class User : BaseEntity
     public string? Username { get; set; }
 
     public string? Password { get; set; }
-    
+
     public string? Avatar { get; set; }
 
     public string? FirstName { get; set; }
@@ -26,17 +26,17 @@ public class User : BaseEntity
     public string? Phone { get; set; }
 
     public string? Address { get; set; }
-    
+
     public string? Department { get; set; }
 
     public virtual ICollection<Blog> Blogs { get; set; } = new List<Blog>();
-    
+
     public virtual ICollection<IdeaReview> IdeaReviews { get; set; } = new List<IdeaReview>();
 
     public virtual ICollection<Idea> IdeaOfUsers { get; set; } = new List<Idea>();
-    
+
     public virtual ICollection<Idea> IdeaOfSubMentors { get; set; } = new List<Idea>();
-    
+
     public virtual ICollection<UserXRole> UserXRoles { get; set; } = new List<UserXRole>();
     public virtual ICollection<Comment> Comments { get; set; } = new List<Comment>();
 
@@ -53,7 +53,7 @@ public class User : BaseEntity
     public virtual ProfileStudent? ProfileStudent { get; set; }
 
     public virtual ICollection<Project> Projects { get; set; } = new List<Project>();
-    
+
     public virtual ICollection<Project> ProjectOfLeaders { get; set; } = new List<Project>();
 
     public virtual ICollection<Rate> RateBys { get; set; } = new List<Rate>();

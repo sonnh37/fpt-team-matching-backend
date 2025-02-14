@@ -10,7 +10,6 @@ using FPT.TeamMatching.Domain.Contracts.UnitOfWorks;
 using FPT.TeamMatching.Domain.Models;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.RefreshTokens;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Users;
-using FPT.TeamMatching.Domain.Models.Requests.Queries.Auths;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Users;
 using FPT.TeamMatching.Domain.Models.Responses;
 using FPT.TeamMatching.Domain.Models.Results;
@@ -158,45 +157,45 @@ public class AuthService : IAuthService
     public BusinessResult GetUserByCookie()
     {
         BusinessResult? businessResult = null;
-    
+
         #region Check refresh token
-    
+
         var refreshToken = _httpContextAccessor.HttpContext.Request.Cookies["refreshToken"];
         businessResult = ValidateRefreshTokenIpAdMatch(refreshToken);
         if (businessResult.Status != 1) return businessResult;
-    
+
         #endregion
-    
+
         #region CheckAccessToken
-    
+
         var accessToken = _httpContextAccessor.HttpContext.Request.Cookies["accessToken"];
         if (accessToken != null)
         {
             var br = GetUserByClaims().Result;
-    
+
             return br;
         }
-    
+
         #endregion
-    
+
         #region SaveRefreshToken
-    
+
         businessResult = RefreshToken(new UserRefreshTokenCommand
         {
             RefreshToken = refreshToken
         }).Result;
-    
+
         if (businessResult.Status != 1) return businessResult;
-    
+
         #endregion
-    
+
         #region CheckRefreshToken is valid => return user
-    
+
         var tokenResult = businessResult.Data as TokenResult;
         businessResult = GetUserByToken(tokenResult.AccessToken).Result;
-    
+
         return businessResult;
-    
+
         #endregion
     }
 
@@ -525,12 +524,8 @@ public class AuthService : IAuthService
 
         // 🟢 Nếu UserXRoles chứa danh sách role, thêm tất cả role vào claims
         if (user.UserXRoles != null && user.UserXRoles.Any())
-        {
             foreach (var role in user.UserXRoles)
-            {
                 claims.Add(new Claim("Role", role.Role.RoleName)); // 🟢 Claim dạng danh sách
-            }
-        }
 
         var key = new RsaSecurityKey(rsa)
         {

@@ -29,24 +29,25 @@ public class MappingProfile : Profile
         CreateMap<User, UserUpdateCommand>().ReverseMap();
 
         #endregion
-        
+
         #region Role
 
         CreateMap<Role, RoleResult>().ReverseMap();
 
         #endregion
-        
+
         #region UserXRole
 
         CreateMap<UserXRole, UserXRoleResult>().ReverseMap();
 
         #endregion
-        
+
         #region RefreshToken
 
         CreateMap<RefreshToken, RefreshTokenResult>().ReverseMap();
         CreateMap<RefreshToken, RefreshTokenCreateCommand>().ReverseMap();
         CreateMap<RefreshToken, RefreshTokenUpdateCommand>().ReverseMap();
+
         #endregion
 
         #region Blog

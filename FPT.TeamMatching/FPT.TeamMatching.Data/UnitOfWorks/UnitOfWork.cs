@@ -9,7 +9,7 @@ public class UnitOfWork : BaseUnitOfWork<FPTMatchingDbContext>, IUnitOfWork
     public UnitOfWork(FPTMatchingDbContext context, IServiceProvider serviceProvider) : base(context, serviceProvider)
     {
     }
-    
+
     public IUserRepository UserRepository => GetRepository<IUserRepository>();
     public IBlogRepository BlogRepository => GetRepository<IBlogRepository>();
     public ILikeRepository LikeRepository => GetRepository<ILikeRepository>();

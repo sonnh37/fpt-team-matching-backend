@@ -6,7 +6,6 @@ using FPT.TeamMatching.Domain.Entities;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Users;
 using FPT.TeamMatching.Domain.Models.Responses;
 using FPT.TeamMatching.Domain.Models.Results;
-using FPT.TeamMatching.Domain.Models.Results.Bases;
 using FPT.TeamMatching.Domain.Utilities;
 using FPT.TeamMatching.Services.Bases;
 
@@ -14,8 +13,8 @@ namespace FPT.TeamMatching.Services;
 
 public class UserService : BaseService<User>, IUserService
 {
-    private readonly IUserRepository _userRepository;
     private readonly IRoleRepository _roleRepository;
+    private readonly IUserRepository _userRepository;
     private readonly IUserXRoleRepository _userXRoleRepository;
 
     public UserService(IMapper mapper,
@@ -37,7 +36,7 @@ public class UserService : BaseService<User>, IUserService
                     .WithStatus(Const.FAIL_CODE)
                     .WithMessage("The email has already been registered.")
                     .Build();
-            
+
             // set password
             var passwordHash = BCrypt.Net.BCrypt.HashPassword(command.Password);
             command.Password = passwordHash;
@@ -54,7 +53,7 @@ public class UserService : BaseService<User>, IUserService
             var userXRole = new UserXRole
             {
                 UserId = userResult.Id,
-                RoleId = role.Id,
+                RoleId = role.Id
             };
             _userXRoleRepository.Add(userXRole);
             var isSaveChanges = await _unitOfWork.SaveChanges();

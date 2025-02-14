@@ -25,6 +25,6 @@ public class ProfileStudent : BaseEntity
     public string? FileCv { get; set; }
 
     public virtual User? User { get; set; }
-    
+
     public virtual ICollection<SkillProfile> SkillProfiles { get; set; } = new List<SkillProfile>();
 }
