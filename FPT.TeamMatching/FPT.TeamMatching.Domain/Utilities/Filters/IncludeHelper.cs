@@ -21,10 +21,7 @@ public static class IncludeHelper
         queryable = queryable
             .Include(m => m.Tasks);
 
-        if (queryable.Any())
-        {
-            queryable = queryable.Include(m => m.UserXRoles).ThenInclude(x => x.Role);
-        }
+        if (queryable.Any()) queryable = queryable.Include(m => m.UserXRoles).ThenInclude(x => x.Role);
 
         return queryable;
     }

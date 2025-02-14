@@ -1,6 +1,6 @@
 ﻿using FPT.TeamMatching.Domain.Contracts.Services;
-using FPT.TeamMatching.Domain.Models.Requests.Commands.InvitationUsers;
-using FPT.TeamMatching.Domain.Models.Requests.Queries.InvitationUsers;
+using FPT.TeamMatching.Domain.Models.Requests.Commands.Invitations;
+using FPT.TeamMatching.Domain.Models.Requests.Queries.Invitations;
 using FPT.TeamMatching.Domain.Models.Results;
 using FPT.TeamMatching.Domain.Utilities;
 using Microsoft.AspNetCore.Mvc;
@@ -20,7 +20,7 @@ public class InvitationController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetAll([FromQuery] InvitationUserGetAllQuery query)
+    public async Task<IActionResult> GetAll([FromQuery] InvitationGetAllQuery query)
     {
         var msg = await _service.GetAll<InvitationResult>(query);
         return Ok(msg);
@@ -34,14 +34,14 @@ public class InvitationController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create([FromBody] InvitationUserCreateCommand request)
+    public async Task<IActionResult> Create([FromBody] InvitationCreateCommand request)
     {
         var msg = await _service.CreateOrUpdate<InvitationResult>(request);
         return Ok(msg);
     }
 
     [HttpPut]
-    public async Task<IActionResult> Update([FromBody] InvitationUserUpdateCommand request)
+    public async Task<IActionResult> Update([FromBody] InvitationUpdateCommand request)
     {
         var businessResult = await _service.CreateOrUpdate<InvitationResult>(request);
 
@@ -49,7 +49,7 @@ public class InvitationController : ControllerBase
     }
 
     [HttpDelete]
-    public async Task<IActionResult> Delete([FromQuery] InvitationUserDeleteCommand request)
+    public async Task<IActionResult> Delete([FromQuery] InvitationDeleteCommand request)
     {
         var businessResult = await _service.DeleteById(request.Id, request.IsPermanent);
 

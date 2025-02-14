@@ -1,4 +1,11 @@
 ﻿using FPT.TeamMatching.Domain.Entities;
+using FPT.TeamMatching.Domain.Models.Requests.Commands.Applications;
+using FPT.TeamMatching.Domain.Models.Requests.Commands.Blogs;
+using FPT.TeamMatching.Domain.Models.Requests.Commands.Comments;
+using FPT.TeamMatching.Domain.Models.Requests.Commands.Invitations;
+using FPT.TeamMatching.Domain.Models.Requests.Commands.Likes;
+using FPT.TeamMatching.Domain.Models.Requests.Commands.Notifications;
+using FPT.TeamMatching.Domain.Models.Requests.Commands.ProfileStudents;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Blog;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Comment;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Feedback;
@@ -7,15 +14,16 @@ using FPT.TeamMatching.Domain.Models.Requests.Commands.Like;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Notification;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Profile;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Projects;
-using FPT.TeamMatching.Domain.Models.Requests.Commands.Rate;
+using FPT.TeamMatching.Domain.Models.Requests.Commands.Rates;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.RefreshTokens;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Reviews;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.SkillProfile;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.TeamMember;
+using FPT.TeamMatching.Domain.Models.Requests.Commands.SkillProfiles;
+using FPT.TeamMatching.Domain.Models.Requests.Commands.TeamMembers;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Users;
 using FPT.TeamMatching.Domain.Models.Results;
 using Profile = AutoMapper.Profile;
-using Task = FPT.TeamMatching.Domain.Entities.Task;
 
 namespace FPT.TeamMatching.Domain.Configs.Mapping;
 
@@ -30,24 +38,25 @@ public class MappingProfile : Profile
         CreateMap<User, UserUpdateCommand>().ReverseMap();
 
         #endregion
-        
+
         #region Role
 
         CreateMap<Role, RoleResult>().ReverseMap();
 
         #endregion
-        
+
         #region UserXRole
 
         CreateMap<UserXRole, UserXRoleResult>().ReverseMap();
 
         #endregion
-        
+
         #region RefreshToken
 
         CreateMap<RefreshToken, RefreshTokenResult>().ReverseMap();
         CreateMap<RefreshToken, RefreshTokenCreateCommand>().ReverseMap();
         CreateMap<RefreshToken, RefreshTokenUpdateCommand>().ReverseMap();
+
         #endregion
 
         #region Blog
@@ -95,6 +104,9 @@ public class MappingProfile : Profile
         CreateMap<Idea, IdeaResult>().ReverseMap();
         CreateMap<Idea, IdeaCreateCommand>().ReverseMap();
         CreateMap<Idea, IdeaUpdateCommand>().ReverseMap();
+        CreateMap<Application, ApplicationResult>().ReverseMap();
+        CreateMap<Application, ApplicationCreateCommand>().ReverseMap();
+        CreateMap<Application, ApplicationUpdateCommand>().ReverseMap();
 
         #endregion
 
@@ -153,11 +165,11 @@ public class MappingProfile : Profile
 
         #endregion
 
-        #region Profile
+        #region ProfileStudent
 
-        CreateMap<Profile, ProjectCreateCommand>().ReverseMap();
-        CreateMap<Profile, ProfileUpdateCommand>().ReverseMap();
-        CreateMap<Profile, ProfileResult>().ReverseMap();
+        CreateMap<ProfileStudent, ProfileStudentCreateCommand>().ReverseMap();
+        CreateMap<ProfileStudent, ProfileStudentUpdateCommand>().ReverseMap();
+        CreateMap<ProfileStudent, ProfileStudentResult>().ReverseMap();
 
         #endregion
 

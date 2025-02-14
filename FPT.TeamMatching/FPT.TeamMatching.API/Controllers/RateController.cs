@@ -1,6 +1,6 @@
 ﻿using FPT.TeamMatching.Domain.Contracts.Services;
-using FPT.TeamMatching.Domain.Models.Requests.Commands.Rate;
-using FPT.TeamMatching.Domain.Models.Requests.Queries.Rate;
+using FPT.TeamMatching.Domain.Models.Requests.Commands.Rates;
+using FPT.TeamMatching.Domain.Models.Requests.Queries.Rates;
 using FPT.TeamMatching.Domain.Models.Results;
 using FPT.TeamMatching.Domain.Utilities;
 using Microsoft.AspNetCore.Mvc;

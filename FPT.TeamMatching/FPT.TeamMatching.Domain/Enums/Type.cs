@@ -15,7 +15,7 @@ public enum BlogType
     Recruit
 }
 
-public enum InvitationUserType
+public enum InvitationType
 {
     Invited,
     Requested
@@ -29,5 +29,4 @@ public enum ProjectType
 
 public enum IdeaType
 {
-    
 }

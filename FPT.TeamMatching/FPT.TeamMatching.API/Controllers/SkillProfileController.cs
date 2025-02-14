@@ -1,6 +1,6 @@
 using FPT.TeamMatching.Domain.Contracts.Services;
-using FPT.TeamMatching.Domain.Models.Requests.Commands.SkillProfile;
-using FPT.TeamMatching.Domain.Models.Requests.Queries.SkillProfile;
+using FPT.TeamMatching.Domain.Models.Requests.Commands.SkillProfiles;
+using FPT.TeamMatching.Domain.Models.Requests.Queries.SkillProfiles;
 using FPT.TeamMatching.Domain.Utilities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

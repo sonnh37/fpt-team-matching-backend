@@ -7,7 +7,7 @@ using FPT.TeamMatching.Services.Bases;
 
 namespace FPT.TeamMatching.Services;
 
-public class InvitationService : BaseService<InvitationUser>, IInvitationService
+public class InvitationService : BaseService<Invitation>, IInvitationService
 {
     private readonly IInvitationRepository _repository;
 

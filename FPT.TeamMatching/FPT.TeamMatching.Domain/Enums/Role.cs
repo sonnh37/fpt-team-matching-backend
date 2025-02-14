@@ -12,6 +12,6 @@ public enum TeamMemberRole
 {
     Member,
     Leader,
-    MentorSecondary,
-    MentorPrimary
+    Mentor,
+    SubMentor
 }

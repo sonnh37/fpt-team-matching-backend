@@ -17,17 +17,16 @@ public class UnitOfWork : BaseUnitOfWork<FPTMatchingDbContext>, IUnitOfWork
     public IRateRepository RateRepository => GetRepository<IRateRepository>();
     public IIdeaRepository IdeaRepository => GetRepository<IIdeaRepository>();
     public IIdeaReviewRepository IdeaReviewRepository => GetRepository<IIdeaReviewRepository>();
+    public IApplicationRepository ApplicationRepository => GetRepository<IApplicationRepository>();
     public ITeamMemberRepository TeamMemberRepository => GetRepository<ITeamMemberRepository>();
     public IReviewRepository ReviewRepository => GetRepository<IReviewRepository>();
     public IInvitationRepository InvitationRepository => GetRepository<IInvitationRepository>();
     public IRefreshTokenRepository RefreshTokenRepository => GetRepository<IRefreshTokenRepository>();
     public IProjectRepository ProjectRepository => GetRepository<IProjectRepository>();
-    public IUserXProjectRepository UserXProjectActivityRepository => GetRepository<IUserXProjectRepository>();
     public INotificationRepository NotificationRepository => GetRepository<INotificationRepository>();
-    public IProfileRepository ProfileRepository => GetRepository<IProfileRepository>();
+    public IProfileStudentRepository ProfileStudentRepository => GetRepository<IProfileStudentRepository>();
     public ISkillProfileRepository SkillProfileRepository => GetRepository<ISkillProfileRepository>();
     public IRoleRepository RoleRepository => GetRepository<IRoleRepository>();
     public IUserXRoleRepository UserXRoleRepository => GetRepository<IUserXRoleRepository>();
     public IFeedbackRepository FeedbackRepository => GetRepository<IFeedbackRepository>();
-    public IUserXProjectRepository UserXProjectRepository => GetRepository<IUserXProjectRepository>();
 }

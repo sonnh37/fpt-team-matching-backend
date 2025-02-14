@@ -4,15 +4,17 @@ using Hangfire;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FPT.TeamMatching.API.Controllers;
+
 [Route(Const.HANGFIRE)]
 [ApiController]
 public class HangfireController : ControllerBase
 {
-    private readonly IJobHangfireService _jobHangfireService;
     private readonly IBackgroundJobClient _backgroundJobClient;
+    private readonly IJobHangfireService _jobHangfireService;
     private readonly IRecurringJobManager _recurringJobManager;
-    
-    public HangfireController(IBackgroundJobClient backgroundJobClient, IJobHangfireService hangfireService, IRecurringJobManager recurringJobManager)
+
+    public HangfireController(IBackgroundJobClient backgroundJobClient, IJobHangfireService hangfireService,
+        IRecurringJobManager recurringJobManager)
     {
         _jobHangfireService = hangfireService;
         _backgroundJobClient = backgroundJobClient;
@@ -32,5 +34,4 @@ public class HangfireController : ControllerBase
         _recurringJobManager.AddOrUpdate(jobId.ToString(), () => _jobHangfireService.ReccuringJob(), Cron.Minutely);
         return Ok();
     }
-    
 }

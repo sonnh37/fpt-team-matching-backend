@@ -11,9 +11,9 @@ public class InvitationResult : BaseResult
 
     public Guid? ReceiverId { get; set; }
 
-    public InvitationUserStatus? Status { get; set; }
+    public InvitationStatus? Status { get; set; }
 
-    public InvitationUserType? Type { get; set; }
+    public InvitationType? Type { get; set; }
 
     public string? Content { get; set; }
 }

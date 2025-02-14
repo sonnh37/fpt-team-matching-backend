@@ -6,7 +6,7 @@ using FPT.TeamMatching.Domain.Entities;
 
 namespace FPT.TeamMatching.Data.Repositories;
 
-public class IdeaRepository : BaseRepository<ProjectActivity>, IUserXProjectRepository
+public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
 {
     public IdeaRepository(FPTMatchingDbContext dbContext, IMapper mapper) : base(dbContext, mapper)
     {

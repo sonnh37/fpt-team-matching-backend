@@ -10,7 +10,7 @@ public class Rate : BaseEntity
 
     public Guid? RateById { get; set; }
 
-    public int StarRating { get; set; }
+    public int NumbOfStar { get; set; }
 
     public virtual User? RateFor { get; set; }
 

@@ -1,6 +1,6 @@
 ﻿using FPT.TeamMatching.Domain.Contracts.Services;
-using FPT.TeamMatching.Domain.Models.Requests.Commands.TeamMember;
-using FPT.TeamMatching.Domain.Models.Requests.Queries.TeamMember;
+using FPT.TeamMatching.Domain.Models.Requests.Commands.TeamMembers;
+using FPT.TeamMatching.Domain.Models.Requests.Queries.TeamMembers;
 using FPT.TeamMatching.Domain.Models.Results;
 using FPT.TeamMatching.Domain.Utilities;
 using Microsoft.AspNetCore.Mvc;
