@@ -9,26 +9,18 @@ public interface IUnitOfWork : IBaseUnitOfWork
     ILikeRepository LikeRepository { get; }
     ICommentRepository CommentRepository { get; }
     IRateRepository RateRepository { get; }
-    IJobPositionRepository JobPositionRepository { get; }
+    IIdeaRepository IdeaRepository { get; }
+    IIdeaReviewRepository IdeaReviewRepository { get; }
     ITeamMemberRepository TeamMemberRepository { get; }
     IProjectRepository ProjectRepository { get; }
-
-    IProjectActivityRepository ProjectActivityRepository { get; }
-
-    ILecturerFeedbackRepository LecturerFeedbackRepository { get; }
-
-    ITaskRepository TaskRepository { get; }
-
+    IFeedbackRepository FeedbackRepository { get; }
     IReviewRepository ReviewRepository { get; }
-
-    IInvitationUserRepository InvitationUserRepository { get; }
+    IInvitationRepository InvitationRepository { get; }
     IRefreshTokenRepository RefreshTokenRepository { get; }
-
     INotificationRepository NotificationRepository { get; }
     IProfileRepository ProfileRepository { get; }
     ISkillProfileRepository SkillProfileRepository { get; }
-    IVerifyQualifiedForAcademicProjectRepository VerifyQualifiedForAcademicProjectRepository { get; }
-    IVerifySemesterRepository VerifySemesterRepository { get; }
     IRoleRepository RoleRepository { get; }
     IUserXRoleRepository UserXRoleRepository { get; }
+    IUserXProjectRepository UserXProjectRepository { get; }
 }

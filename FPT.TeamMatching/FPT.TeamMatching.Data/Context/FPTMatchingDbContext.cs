@@ -19,7 +19,7 @@ public partial class FPTMatchingDbContext : BaseDbContext
 
     public virtual DbSet<Comment> Comments { get; set; }
 
-    public virtual DbSet<InvitationUser> InvitationUsers { get; set; }
+    public virtual DbSet<Invitation> InvitationUsers { get; set; }
 
     public virtual DbSet<JobPosition> JobPositions { get; set; }
 
@@ -114,7 +114,7 @@ public partial class FPTMatchingDbContext : BaseDbContext
                 .HasForeignKey(d => d.UserId);
         });
 
-        modelBuilder.Entity<InvitationUser>(entity =>
+        modelBuilder.Entity<Invitation>(entity =>
         {
             entity.HasKey(e => e.Id);
 

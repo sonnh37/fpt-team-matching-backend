@@ -12,12 +12,12 @@ public static class CollectionRepositories
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IMongoUnitOfWork, MongoUnitOfWork>();
         services.AddScoped<IUserRepository, UserRepository>();
-        services.AddScoped<ITaskRepository, TaskRepository>();
+        services.AddScoped<ITaskRepository, IdeaReviewRepository>();
         services.AddScoped<IReviewRepository, ReviewRepository>();
         services.AddScoped<IProjectRepository, ProjectRepository>();
-        services.AddScoped<IProjectActivityRepository, ProjectActivityRepository>();
-        services.AddScoped<ILecturerFeedbackRepository, LecturerFeedbackRepository>();
-        services.AddScoped<IInvitationUserRepository, InvitationUserRepository>();
+        services.AddScoped<IUserXProjectRepository, IdeaRepository>();
+        services.AddScoped<IIdeaRepository, FeedbackRepository>();
+        services.AddScoped<IInvitationRepository, InvitationRepository>();
         services.AddScoped<IBlogRepository, BlogRepository>();
         services.AddScoped<ILikeRepository, LikeRepository>();
         services.AddScoped<ICommentRepository, CommentRepository>();

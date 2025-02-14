@@ -1,22 +1,18 @@
 ﻿using FPT.TeamMatching.Domain.Entities;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Blog;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Comment;
-using FPT.TeamMatching.Domain.Models.Requests.Commands.InvitationUsers;
-using FPT.TeamMatching.Domain.Models.Requests.Commands.JobPosition;
-using FPT.TeamMatching.Domain.Models.Requests.Commands.LecturerFeedbacks;
+using FPT.TeamMatching.Domain.Models.Requests.Commands.Feedback;
+using FPT.TeamMatching.Domain.Models.Requests.Commands.Idea;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Like;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Notification;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Profile;
-using FPT.TeamMatching.Domain.Models.Requests.Commands.ProjectActivities;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Projects;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Rate;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.RefreshTokens;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Reviews;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.SkillProfile;
-using FPT.TeamMatching.Domain.Models.Requests.Commands.Tasks;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.TeamMember;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Users;
-using FPT.TeamMatching.Domain.Models.Requests.Commands.VerifySemester;
 using FPT.TeamMatching.Domain.Models.Results;
 using Profile = AutoMapper.Profile;
 using Task = FPT.TeamMatching.Domain.Entities.Task;
@@ -94,11 +90,35 @@ public class MappingProfile : Profile
 
         #endregion
 
-        #region JobPosition
+        #region Idea
 
-        CreateMap<JobPosition, JobPositionResult>().ReverseMap();
-        CreateMap<JobPosition, JobPositionCreateCommand>().ReverseMap();
-        CreateMap<JobPosition, JobPositionUpdateCommand>().ReverseMap();
+        CreateMap<Idea, IdeaResult>().ReverseMap();
+        CreateMap<Idea, IdeaCreateCommand>().ReverseMap();
+        CreateMap<Idea, IdeaUpdateCommand>().ReverseMap();
+
+        #endregion
+
+        #region IdeaReview
+
+        CreateMap<IdeaReview, IdeaReviewResult>().ReverseMap();
+        CreateMap<IdeaReview, IdeaCreateCommand>().ReverseMap();
+        CreateMap<IdeaReview, IdeaUpdateCommand>().ReverseMap();
+
+        #endregion
+
+        #region Review
+
+        CreateMap<Review, ReviewResult>().ReverseMap();
+        CreateMap<Review, ReviewCreateCommand>().ReverseMap();
+        CreateMap<Review, ReviewUpdateCommand>().ReverseMap();
+
+        #endregion
+
+        #region UserXProject
+
+        //CreateMap<UserXProject, >().ReverseMap();
+        //CreateMap<UserXProject, >().ReverseMap();
+        //CreateMap<UserXProject, >().ReverseMap();
 
         #endregion
 
@@ -110,43 +130,19 @@ public class MappingProfile : Profile
 
         #endregion
 
-        #region ProjectActivity
+        #region Invitation
 
-        CreateMap<ProjectActivity, ProjectActivityResult>().ReverseMap();
-        CreateMap<ProjectActivity, ProjectActivityCreateCommand>().ReverseMap();
-        CreateMap<ProjectActivity, ProjectActivityUpdateCommand>().ReverseMap();
-
-        #endregion
-
-        #region Task
-
-        CreateMap<Task, TaskResult>().ReverseMap();
-        CreateMap<Task, TaskCreateCommand>().ReverseMap();
-        CreateMap<Task, TaskUpdateCommand>().ReverseMap();
+        //CreateMap<Invitation, InvitationResult>().ReverseMap();
+        //CreateMap<Invitation, InvitationCreateCommand>().ReverseMap();
+        //CreateMap<Invitation, InvitationUpdateCommand>().ReverseMap();
 
         #endregion
 
-        #region Report
+        #region Feedback
 
-        CreateMap<Review, ReviewResult>().ReverseMap();
-        CreateMap<Review, ReviewCreateCommand>().ReverseMap();
-        CreateMap<Review, ReviewUpdateCommand>().ReverseMap();
-
-        #endregion
-
-        #region InvitationUser
-
-        CreateMap<InvitationUser, InvitationUserResult>().ReverseMap();
-        CreateMap<InvitationUser, InvitationUserCreateCommand>().ReverseMap();
-        CreateMap<InvitationUser, InvitationUserUpdateCommand>().ReverseMap();
-
-        #endregion
-
-        #region LecturerFeedback
-
-        CreateMap<LecturerFeedback, LecturerFeedbackResult>().ReverseMap();
-        CreateMap<LecturerFeedback, LecturerFeedbackCreateCommand>().ReverseMap();
-        CreateMap<LecturerFeedback, LecturerFeedbackUpdateCommand>().ReverseMap();
+        CreateMap<Feedback, FeedbackResult>().ReverseMap();
+        CreateMap<Feedback, FeedbackCreateCommand>().ReverseMap();
+        CreateMap<Feedback, FeedbackUpdateCommand>().ReverseMap();
 
         #endregion
 
@@ -173,20 +169,5 @@ public class MappingProfile : Profile
 
         #endregion
 
-        #region VerifySemester
-
-        CreateMap<VerifySemester, VerifySemesterResult>().ReverseMap();
-        CreateMap<VerifySemester, VerifySemesterCreateCommand>().ReverseMap();
-        CreateMap<VerifySemester, VerifySemesterUpdateCommand>().ReverseMap();
-
-        #endregion
-
-        #region VerifyQualifiedForAcademicProject
-
-        CreateMap<VerifyQualifiedForAcademicProject, VerifySemesterCreateCommand>().ReverseMap();
-        CreateMap<VerifyQualifiedForAcademicProject, VerifySemesterUpdateCommand>().ReverseMap();
-        CreateMap<VerifyQualifiedForAcademicProject, VerifyQualifiedForAcademicProjectResult>().ReverseMap();
-
-        #endregion
     }
 }

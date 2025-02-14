@@ -25,7 +25,7 @@ public class Project : BaseEntity
     
     public virtual User? Leader { get; set; }
 
-    public virtual ICollection<InvitationUser> InvitationUsers { get; set; } = new List<InvitationUser>();
+    public virtual ICollection<Invitation> InvitationUsers { get; set; } = new List<Invitation>();
 
     public virtual ICollection<ProjectActivity> ProjectActivities { get; set; } = new List<ProjectActivity>();
 

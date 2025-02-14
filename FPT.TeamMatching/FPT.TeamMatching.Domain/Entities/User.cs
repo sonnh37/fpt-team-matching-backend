@@ -35,9 +35,9 @@ public class User : BaseEntity
 
     public virtual ICollection<Comment> Comments { get; set; } = new List<Comment>();
 
-    public virtual ICollection<InvitationUser> InvitationUserSenders { get; set; } = new List<InvitationUser>();
+    public virtual ICollection<Invitation> InvitationUserSenders { get; set; } = new List<Invitation>();
 
-    public virtual ICollection<InvitationUser> InvitationUserReceivers { get; set; } = new List<InvitationUser>();
+    public virtual ICollection<Invitation> InvitationUserReceivers { get; set; } = new List<Invitation>();
 
     public virtual ICollection<JobPosition> JobPositions { get; set; } = new List<JobPosition>();
 

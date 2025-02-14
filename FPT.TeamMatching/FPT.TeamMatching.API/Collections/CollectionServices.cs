@@ -16,12 +16,12 @@ public static class CollectionServices
         services.AddTransient<IJobPositionService, JobPositionService>();
         services.AddTransient<ITeamMemberService, TeamMemberService>();
         services.AddTransient<IAuthService, AuthService>();
-        services.AddTransient<ITaskService, TaskService>();
+        services.AddTransient<ITaskService, IdeaReviewService>();
         services.AddTransient<IReviewService, ReviewService>();
         services.AddTransient<IProjectService, ProjectService>();
-        services.AddTransient<IProjectActivityService, ProjectActivityService>();
-        services.AddTransient<ILecturerFeedbackService, LecturerFeedbackService>();
-        services.AddTransient<IInvitationUserService, InvitationUserService>();
+        services.AddTransient<IUserXProjectService, IdeaService>();
+        services.AddTransient<IFeedbackService, FeedbackService>();
+        services.AddTransient<IInvitationService, InvitationService>();
         services.AddTransient<IRefreshTokenService, RefreshTokenService>();
         services.AddTransient<INotificationService, NotificationService>();
         services.AddTransient<IProfileService, ProfileService>();
