@@ -1,8 +1,6 @@
 ﻿using FPT.TeamMatching.Domain.Contracts.Services.Bases;
-using FPT.TeamMatching.Domain.Models.Requests.Commands.Base;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Users;
 using FPT.TeamMatching.Domain.Models.Responses;
-using FPT.TeamMatching.Domain.Models.Results.Bases;
 
 namespace FPT.TeamMatching.Domain.Contracts.Services;
 

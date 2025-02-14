@@ -1,8 +1,6 @@
 ﻿using FPT.TeamMatching.Domain.Contracts.Services;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Users;
-using FPT.TeamMatching.Domain.Models.Requests.Queries.Auths;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Users;
-using FPT.TeamMatching.Domain.Models.Results;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 

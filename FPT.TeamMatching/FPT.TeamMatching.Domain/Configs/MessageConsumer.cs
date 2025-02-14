@@ -3,7 +3,6 @@ using FPT.TeamMatching.Domain.Contracts.UnitOfWorks;
 using FPT.TeamMatching.Domain.Entities;
 using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json;
-using Task = System.Threading.Tasks.Task;
 
 namespace FPT.TeamMatching.Domain.Configs;
 
@@ -11,19 +10,16 @@ public class MessageConsumer(IMongoUnitOfWork unitOfWork) : BackgroundService
 {
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        return Task.Run(() =>
-        {
-            _ = ConsumeAsync("order-topic", stoppingToken);
-        }, stoppingToken);
+        return Task.Run(() => { _ = ConsumeAsync("order-topic", stoppingToken); }, stoppingToken);
     }
-    
+
     public async Task ConsumeAsync(string topic, CancellationToken stoppingToken)
     {
         var config = new ConsumerConfig
         {
             GroupId = "message-group",
             BootstrapServers = "localhost:29092",
-            AutoOffsetReset = AutoOffsetReset.Earliest,
+            AutoOffsetReset = AutoOffsetReset.Earliest
         };
 
         using var consumer = new ConsumerBuilder<string, string>(config).Build();
@@ -48,7 +44,7 @@ public class MessageConsumer(IMongoUnitOfWork unitOfWork) : BackgroundService
             // dbContext.Invoice.Add(invoiceEntity);
             // await dbContext.SaveChangesAsync();
         }
+
         consumer.Close();
     }
-
 }

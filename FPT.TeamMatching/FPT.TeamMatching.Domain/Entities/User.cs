@@ -13,6 +13,8 @@ public class User : BaseEntity
 
     public string? Password { get; set; }
 
+    public string? Avatar { get; set; }
+
     public string? FirstName { get; set; }
 
     public string? LastName { get; set; }
@@ -25,31 +27,34 @@ public class User : BaseEntity
 
     public string? Address { get; set; }
 
+    public string? Department { get; set; }
+
     public virtual ICollection<Blog> Blogs { get; set; } = new List<Blog>();
-    
+
     public virtual ICollection<IdeaReview> IdeaReviews { get; set; } = new List<IdeaReview>();
 
-    public virtual ICollection<Idea> Ideas { get; set; } = new List<Idea>();
-    
-    public virtual ICollection<UserXRole> UserXRoles { get; set; } = new List<UserXRole>();
+    public virtual ICollection<Idea> IdeaOfUsers { get; set; } = new List<Idea>();
 
+    public virtual ICollection<Idea> IdeaOfSubMentors { get; set; } = new List<Idea>();
+
+    public virtual ICollection<UserXRole> UserXRoles { get; set; } = new List<UserXRole>();
     public virtual ICollection<Comment> Comments { get; set; } = new List<Comment>();
 
-    public virtual ICollection<InvitationUser> InvitationUserSenders { get; set; } = new List<InvitationUser>();
+    public virtual ICollection<Invitation> InvitationOfSenders { get; set; } = new List<Invitation>();
 
-    public virtual ICollection<InvitationUser> InvitationUserReceivers { get; set; } = new List<InvitationUser>();
+    public virtual ICollection<Invitation> InvitationOfReceivers { get; set; } = new List<Invitation>();
 
-    public virtual ICollection<JobPosition> JobPositions { get; set; } = new List<JobPosition>();
-
-    public virtual ICollection<LecturerFeedback> LecturerFeedbacks { get; set; } = new List<LecturerFeedback>();
+    public virtual ICollection<Application> Applications { get; set; } = new List<Application>();
 
     public virtual ICollection<Like> Likes { get; set; } = new List<Like>();
 
     public virtual ICollection<Notification> Notifications { get; set; } = new List<Notification>();
 
-    public virtual Profile? Profile { get; set; }
+    public virtual ProfileStudent? ProfileStudent { get; set; }
 
     public virtual ICollection<Project> Projects { get; set; } = new List<Project>();
+
+    public virtual ICollection<Project> ProjectOfLeaders { get; set; } = new List<Project>();
 
     public virtual ICollection<Rate> RateBys { get; set; } = new List<Rate>();
 
@@ -62,13 +67,4 @@ public class User : BaseEntity
     public virtual ICollection<Task> Tasks { get; set; } = new List<Task>();
 
     public virtual ICollection<TeamMember> TeamMembers { get; set; } = new List<TeamMember>();
-
-    public virtual VerifyQualifiedForAcademicProject? VerifyQualifiedForAcademicProject { get; set; }
-
-    public virtual ICollection<VerifyQualifiedForAcademicProject> VerifyQualifiedForAcademicProjects { get; set; } =
-        new List<VerifyQualifiedForAcademicProject>();
-
-    public virtual VerifySemester? VerifySemester { get; set; }
-
-    public virtual ICollection<VerifySemester> VerifySemesters { get; set; } = new List<VerifySemester>();
 }

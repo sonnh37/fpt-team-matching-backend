@@ -58,7 +58,7 @@ public static class Const
     public const string API_BLOGS = $"{BaseApi}/blogs";
     public const string API_COMMENTS = $"{BaseApi}/comments";
     public const string API_LIKES = $"{BaseApi}/likes";
-    public const string API_JOB_POSITIONS = $"{BaseApi}/job-positions";
+    public const string API_APPLICATIONS = $"{BaseApi}/applications";
     public const string API_RATES = $"{BaseApi}/rates";
     public const string API_TEAM_MEMBERS = $"{BaseApi}/team-members";
 
@@ -71,12 +71,13 @@ public static class Const
     public const string? API_VERIFY_QUALIFIED = $"{BaseApi}/verify-qualified";
 
     public const string API_VERIFY_SEMESTER = $"{BaseApi}/verify-semester";
-    
+
     public const string API_MESSAGE = $"{BaseApi}/message";
 
     public const string SortFieldDefault = "CreatedDate";
 
     public const string HANGFIRE = $"{BaseApi}/hangfire";
+
     #endregion
 
     #region Default get query

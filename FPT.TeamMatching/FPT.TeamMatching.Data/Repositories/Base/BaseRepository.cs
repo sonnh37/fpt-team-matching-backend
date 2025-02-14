@@ -5,7 +5,6 @@ using FPT.TeamMatching.Domain.Contracts.Repositories.Bases;
 using FPT.TeamMatching.Domain.Entities.Base;
 using FPT.TeamMatching.Domain.Enums;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Base;
-using FPT.TeamMatching.Domain.Utilities;
 using FPT.TeamMatching.Domain.Utilities.Filters;
 using Microsoft.EntityFrameworkCore;
 
