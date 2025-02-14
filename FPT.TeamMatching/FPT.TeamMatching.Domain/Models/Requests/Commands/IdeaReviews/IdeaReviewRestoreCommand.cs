@@ -5,9 +5,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace FPT.TeamMatching.Domain.Models.Requests.Commands.Invitations
+namespace FPT.TeamMatching.Domain.Models.Requests.Commands.IdeaReviews
 {
-    public class InvitationDeleteCommand: DeleteCommand
+    public class IdeaReviewRestoreCommand : UpdateCommand
     {
     }
 }

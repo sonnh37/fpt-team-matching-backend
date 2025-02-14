@@ -4,7 +4,6 @@ using FPT.TeamMatching.Domain.Contracts.Services;
 using FPT.TeamMatching.Domain.Contracts.UnitOfWorks;
 using FPT.TeamMatching.Domain.Entities;
 using FPT.TeamMatching.Services.Bases;
-using Task = FPT.TeamMatching.Domain.Entities.Task;
 
 namespace FPT.TeamMatching.Services;
 

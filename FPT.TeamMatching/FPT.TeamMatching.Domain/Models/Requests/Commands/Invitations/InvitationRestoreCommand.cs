@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace FPT.TeamMatching.Domain.Models.Requests.Commands.Invitations
 {
-    public class InvitationDeleteCommand: DeleteCommand
+    public class InvitationRestoreCommand: UpdateCommand
     {
     }
 }

@@ -1,55 +1,55 @@
 ﻿using FPT.TeamMatching.Domain.Contracts.Services;
-using FPT.TeamMatching.Domain.Models.Requests.Commands.ProjectActivities;
-using FPT.TeamMatching.Domain.Models.Requests.Queries.ProjectActivities;
+using FPT.TeamMatching.Domain.Models.Requests.Commands.IdeaReviews;
+using FPT.TeamMatching.Domain.Models.Requests.Queries.IdeaReviews;
 using FPT.TeamMatching.Domain.Models.Results;
 using FPT.TeamMatching.Domain.Utilities;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FPT.TeamMatching.API.Controllers;
 
-[Route(Const.API_PROJECT_ACTIVITIES)]
+[Route(Const.API_IDEA_REVIEWS)]
 [ApiController]
 public class IdeaReviewController : ControllerBase
 {
-    private readonly IUserXProjectService _service;
+    private readonly IIdeaReviewService _service;
 
 
-    public IdeaReviewController(IUserXProjectService __service)
+    public IdeaReviewController(IIdeaReviewService __service)
     {
         _service = __service;
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetAll([FromQuery] ProjectActivityGetAllQuery query)
+    public async Task<IActionResult> GetAll([FromQuery] IdeaReviewGetAllQuery query)
     {
-        var msg = await _service.GetAll<ProjectActivityResult>(query);
+        var msg = await _service.GetAll<IdeaReviewResult>(query);
         return Ok(msg);
     }
 
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetById([FromRoute] Guid id)
     {
-        var msg = await _service.GetById<ProjectActivityResult>(id);
+        var msg = await _service.GetById<IdeaReviewResult>(id);
         return Ok(msg);
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create([FromBody] ProjectActivityCreateCommand request)
+    public async Task<IActionResult> Create([FromBody] IdeaReviewCreateCommand request)
     {
-        var msg = await _service.CreateOrUpdate<ProjectActivityResult>(request);
+        var msg = await _service.CreateOrUpdate<IdeaReviewResult>(request);
         return Ok(msg);
     }
 
     [HttpPut]
-    public async Task<IActionResult> Update([FromBody] ProjectActivityUpdateCommand request)
+    public async Task<IActionResult> Update([FromBody] IdeaReviewUpdateCommand request)
     {
-        var businessResult = await _service.CreateOrUpdate<ProjectActivityResult>(request);
+        var businessResult = await _service.CreateOrUpdate<IdeaReviewResult>(request);
 
         return Ok(businessResult);
     }
 
     [HttpDelete]
-    public async Task<IActionResult> Delete([FromQuery] ProjectActivityDeleteCommand request)
+    public async Task<IActionResult> Delete([FromQuery] IdeaReviewDeleteCommand request)
     {
         var businessResult = await _service.DeleteById(request.Id, request.IsPermanent);
 
@@ -57,12 +57,10 @@ public class IdeaReviewController : ControllerBase
         }
 
         [HttpPut("restore")]
-        public async Task<IActionResult> Restore([FromBody] ProjectActivityRestoreCommand command)
+        public async Task<IActionResult> Restore([FromBody] IdeaReviewRestoreCommand command)
         {
-            var businessResult = await _service.Restore<ProjectActivityResult>(command);
+            var businessResult = await _service.Restore<IdeaReviewResult>(command);
 
             return Ok(businessResult);
         }
     }
-}
-}

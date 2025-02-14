@@ -1,6 +1,6 @@
 ﻿using FPT.TeamMatching.Domain.Contracts.Services;
-using FPT.TeamMatching.Domain.Models.Requests.Commands.Feedback;
-using FPT.TeamMatching.Domain.Models.Requests.Queries.Feedback;
+using FPT.TeamMatching.Domain.Models.Requests.Commands.Feedbacks;
+using FPT.TeamMatching.Domain.Models.Requests.Queries.Feedbacks;
 using FPT.TeamMatching.Domain.Models.Results;
 using FPT.TeamMatching.Domain.Utilities;
 using Microsoft.AspNetCore.Mvc;
@@ -64,4 +64,3 @@ public class FeedbackController : ControllerBase
             return Ok(businessResult);
         }
     }
-}

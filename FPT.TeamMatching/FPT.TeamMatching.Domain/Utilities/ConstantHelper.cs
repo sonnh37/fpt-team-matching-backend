@@ -50,7 +50,7 @@ public static class Const
 
     public const string API_FEEDBACKS = $"{BaseApi}/feedbacks";
 
-    public const string API_INVITATION = $"{BaseApi}/invitations";
+    public const string API_INVITATIONS = $"{BaseApi}/invitations";
     public const string API_BLOGS = $"{BaseApi}/blogs";
     public const string API_COMMENTS = $"{BaseApi}/comments";
     public const string API_LIKES = $"{BaseApi}/likes";
@@ -65,10 +65,6 @@ public static class Const
     public const string API_PROFILES = $"{BaseApi}/profiles";
 
     public const string API_SKILLPROFILES = $"{BaseApi}/skill-profiles";
-
-    public const string? API_VERIFY_QUALIFIED = $"{BaseApi}/verify-qualified";
-
-    public const string API_VERIFY_SEMESTER = $"{BaseApi}/verify-semester";
 
     public const string API_MESSAGE = $"{BaseApi}/message";
 

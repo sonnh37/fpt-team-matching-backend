@@ -23,5 +23,4 @@ public interface IUnitOfWork : IBaseUnitOfWork
     ISkillProfileRepository SkillProfileRepository { get; }
     IRoleRepository RoleRepository { get; }
     IUserXRoleRepository UserXRoleRepository { get; }
-    IUserXProjectRepository UserXProjectRepository { get; }
 }

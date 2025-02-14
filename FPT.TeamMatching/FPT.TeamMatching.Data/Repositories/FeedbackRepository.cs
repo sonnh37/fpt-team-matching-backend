@@ -6,7 +6,7 @@ using FPT.TeamMatching.Domain.Entities;
 
 namespace FPT.TeamMatching.Data.Repositories;
 
-public class FeedbackRepository : BaseRepository<LecturerFeedback>, IIdeaRepository
+public class FeedbackRepository : BaseRepository<Feedback>, IFeedbackRepository
 {
     public FeedbackRepository(FPTMatchingDbContext dbContext, IMapper mapper) : base(dbContext, mapper)
     {

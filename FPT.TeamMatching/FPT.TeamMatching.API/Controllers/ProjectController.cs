@@ -57,16 +57,12 @@ public class ProjectController : ControllerBase
 
         return Ok(businessResult);
     }
-}
-            return Ok(businessResult);
-        }
 
-        [HttpPut("restore")]
-        public async Task<IActionResult> Restore([FromBody] ProjectRestoreCommand command)
-        {
-            var businessResult = await _service.Restore<ProjectResult>(command);
+    [HttpPut("restore")]
+    public async Task<IActionResult> Restore([FromBody] ProjectRestoreCommand command)
+    {
+        var businessResult = await _service.Restore<ProjectResult>(command);
 
-            return Ok(businessResult);
-        }
+        return Ok(businessResult);
     }
 }

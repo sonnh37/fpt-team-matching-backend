@@ -6,24 +6,17 @@ using FPT.TeamMatching.Domain.Models.Requests.Commands.Invitations;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Likes;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Notifications;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.ProfileStudents;
-using FPT.TeamMatching.Domain.Models.Requests.Commands.Blog;
-using FPT.TeamMatching.Domain.Models.Requests.Commands.Comment;
-using FPT.TeamMatching.Domain.Models.Requests.Commands.Feedback;
-using FPT.TeamMatching.Domain.Models.Requests.Commands.Idea;
-using FPT.TeamMatching.Domain.Models.Requests.Commands.Like;
-using FPT.TeamMatching.Domain.Models.Requests.Commands.Notification;
-using FPT.TeamMatching.Domain.Models.Requests.Commands.Profile;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Projects;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Rates;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.RefreshTokens;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Reviews;
-using FPT.TeamMatching.Domain.Models.Requests.Commands.SkillProfile;
-using FPT.TeamMatching.Domain.Models.Requests.Commands.TeamMember;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.SkillProfiles;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.TeamMembers;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Users;
 using FPT.TeamMatching.Domain.Models.Results;
 using Profile = AutoMapper.Profile;
+using FPT.TeamMatching.Domain.Models.Requests.Commands.Feedbacks;
+using FPT.TeamMatching.Domain.Models.Requests.Commands.Ideas;
 
 namespace FPT.TeamMatching.Domain.Configs.Mapping;
 
@@ -94,8 +87,8 @@ public class MappingProfile : Profile
         #region TeamMember
 
         CreateMap<TeamMember, TeamMemberResult>().ReverseMap();
-        CreateMap<TeamMember, TeamCreateCommand>().ReverseMap();
-        CreateMap<TeamMember, TeamUpdateCommand>().ReverseMap();
+        CreateMap<TeamMember, TeamMemberCreateCommand>().ReverseMap();
+        CreateMap<TeamMember, TeamMemberUpdateCommand>().ReverseMap();
 
         #endregion
 
@@ -104,6 +97,11 @@ public class MappingProfile : Profile
         CreateMap<Idea, IdeaResult>().ReverseMap();
         CreateMap<Idea, IdeaCreateCommand>().ReverseMap();
         CreateMap<Idea, IdeaUpdateCommand>().ReverseMap();
+
+        #endregion
+
+        #region Application
+
         CreateMap<Application, ApplicationResult>().ReverseMap();
         CreateMap<Application, ApplicationCreateCommand>().ReverseMap();
         CreateMap<Application, ApplicationUpdateCommand>().ReverseMap();

@@ -1,7 +1,7 @@
 ﻿using FPT.TeamMatching.Domain.Contracts.Services;
-using FPT.TeamMatching.Domain.Models.Requests.Commands.Idea;
+using FPT.TeamMatching.Domain.Models.Requests.Commands.Ideas;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Projects;
-using FPT.TeamMatching.Domain.Models.Requests.Queries.Idea;
+using FPT.TeamMatching.Domain.Models.Requests.Queries.Ideas;
 using FPT.TeamMatching.Domain.Models.Results;
 using FPT.TeamMatching.Domain.Utilities;
 using Microsoft.AspNetCore.Mvc;
@@ -58,12 +58,11 @@ public class IdeaController : ControllerBase
         }
 
         [HttpPut("restore")]
-        public async Task<IActionResult> Restore([FromBody] TaskRestoreCommand command)
+        public async Task<IActionResult> Restore([FromBody] IdeaRestoreCommand command)
         {
             var businessResult = await _service.Restore<IdeaResult>(command);
 
             return Ok(businessResult);
         }
     }
-}
 
