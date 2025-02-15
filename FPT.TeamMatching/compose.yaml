@@ -1,6 +1,8 @@
 ﻿services:
   fpt.teammatching.api:
     image: fpt.teammatching.api
+    ports:
+      - "8080:8082"
     build:
       context: .
       dockerfile: FPT.TeamMatching.API/Dockerfile
