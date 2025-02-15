@@ -10,30 +10,20 @@ public class UnitOfWork : BaseUnitOfWork<FPTMatchingDbContext>, IUnitOfWork
     {
     }
 
-
     public IUserRepository UserRepository => GetRepository<IUserRepository>();
-
     public IBlogRepository BlogRepository => GetRepository<IBlogRepository>();
     public ILikeRepository LikeRepository => GetRepository<ILikeRepository>();
     public ICommentRepository CommentRepository => GetRepository<ICommentRepository>();
     public IRateRepository RateRepository => GetRepository<IRateRepository>();
-    public IJobPositionRepository JobPositionRepository => GetRepository<IJobPositionRepository>();
+    public IApplicationRepository ApplicationRepository => GetRepository<IApplicationRepository>();
     public ITeamMemberRepository TeamMemberRepository => GetRepository<ITeamMemberRepository>();
-    public ITaskRepository TaskRepository => GetRepository<ITaskRepository>();
     public IReviewRepository ReviewRepository => GetRepository<IReviewRepository>();
-    public IInvitationUserRepository InvitationUserRepository => GetRepository<IInvitationUserRepository>();
+    public IInvitationRepository InvitationRepository => GetRepository<IInvitationRepository>();
     public IRefreshTokenRepository RefreshTokenRepository => GetRepository<IRefreshTokenRepository>();
-    public ILecturerFeedbackRepository LecturerFeedbackRepository => GetRepository<ILecturerFeedbackRepository>();
     public IProjectRepository ProjectRepository => GetRepository<IProjectRepository>();
-    public IProjectActivityRepository ProjectActivityRepository => GetRepository<IProjectActivityRepository>();
     public INotificationRepository NotificationRepository => GetRepository<INotificationRepository>();
-    public IProfileRepository ProfileRepository => GetRepository<IProfileRepository>();
+    public IProfileStudentRepository ProfileStudentRepository => GetRepository<IProfileStudentRepository>();
     public ISkillProfileRepository SkillProfileRepository => GetRepository<ISkillProfileRepository>();
-
-    public IVerifyQualifiedForAcademicProjectRepository VerifyQualifiedForAcademicProjectRepository =>
-        GetRepository<IVerifyQualifiedForAcademicProjectRepository>();
-
-    public IVerifySemesterRepository VerifySemesterRepository => GetRepository<IVerifySemesterRepository>();
     public IRoleRepository RoleRepository => GetRepository<IRoleRepository>();
     public IUserXRoleRepository UserXRoleRepository => GetRepository<IUserXRoleRepository>();
 }

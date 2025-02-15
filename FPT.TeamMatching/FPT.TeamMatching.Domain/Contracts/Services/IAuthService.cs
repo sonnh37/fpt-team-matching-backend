@@ -1,7 +1,6 @@
 ﻿using System.Security.Cryptography;
 using FPT.TeamMatching.Domain.Models;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Users;
-using FPT.TeamMatching.Domain.Models.Requests.Queries.Auths;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Users;
 using FPT.TeamMatching.Domain.Models.Responses;
 

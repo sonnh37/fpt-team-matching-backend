@@ -17,6 +17,7 @@ public class MessageService : IMessageService
     {
         _unitOfWork = unitOfWork;
     }
+
     public async Task<BusinessResult> GetAllMessageInDay(Guid conversationId)
     {
         try
@@ -27,7 +28,7 @@ public class MessageService : IMessageService
                 BootstrapServers = "localhost:29092",
                 AutoOffsetReset = AutoOffsetReset.Earliest,
                 EnableAutoCommit = false,
-                IsolationLevel = IsolationLevel.ReadUncommitted,
+                IsolationLevel = IsolationLevel.ReadUncommitted
             };
 
             using var consumer = new ConsumerBuilder<string, string>(consumerConfig).Build();
@@ -46,12 +47,13 @@ public class MessageService : IMessageService
                         ConversationId = consumeResult.Message.Key,
                         Content = messageModel.Message,
                         SendById = messageModel.UserId,
-                        CreatedDate = messageModel.CreatedDate,
+                        CreatedDate = messageModel.CreatedDate
                         // Id = 
                     };
                     messages.Add(messageEntity);
                 }
             }
+
             consumer.Close();
             return new BusinessResult(Const.SUCCESS_CODE, Const.SUCCESS_READ_MSG, messages);
         }

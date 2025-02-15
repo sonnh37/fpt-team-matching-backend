@@ -6,9 +6,9 @@ using FPT.TeamMatching.Domain.Entities;
 
 namespace FPT.TeamMatching.Data.Repositories;
 
-public class InvitationUserRepository : BaseRepository<InvitationUser>, IInvitationUserRepository
+public class InvitationRepository : BaseRepository<Invitation>, IInvitationRepository
 {
-    public InvitationUserRepository(FPTMatchingDbContext dbContext, IMapper mapper) : base(dbContext, mapper)
+    public InvitationRepository(FPTMatchingDbContext dbContext, IMapper mapper) : base(dbContext, mapper)
     {
     }
 }

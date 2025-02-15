@@ -7,6 +7,8 @@ public class Project : BaseEntity
 {
     public Guid? LeaderId { get; set; }
 
+    public Guid? IdeaId { get; set; }
+
     public string? TeamName { get; set; }
 
     public string? Name { get; set; }
@@ -22,16 +24,16 @@ public class Project : BaseEntity
     public DateTimeOffset? StartDate { get; set; }
 
     public DateTimeOffset? EndDate { get; set; }
-    
+
     public virtual User? Leader { get; set; }
 
-    public virtual ICollection<InvitationUser> InvitationUsers { get; set; } = new List<InvitationUser>();
+    public virtual Idea? Idea { get; set; }
 
-    public virtual ICollection<ProjectActivity> ProjectActivities { get; set; } = new List<ProjectActivity>();
+    public virtual ICollection<Invitation> Invitations { get; set; } = new List<Invitation>();
 
     public virtual ICollection<Review> Reviews { get; set; } = new List<Review>();
 
-    public virtual ICollection<Task> Tasks { get; set; } = new List<Task>();
+    // public virtual ICollection<Task> Tasks { get; set; } = new List<Task>();
 
     public virtual ICollection<TeamMember> TeamMembers { get; set; } = new List<TeamMember>();
 }

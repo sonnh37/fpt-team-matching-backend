@@ -18,13 +18,10 @@ public static class IncludeHelper
 
     private static IQueryable<User> User(IQueryable<User> queryable)
     {
-        queryable = queryable
-            .Include(m => m.Tasks);
+        // queryable = queryable
+        //     .Include(m => m.Tasks);
 
-        if (queryable.Any())
-        {
-            queryable = queryable.Include(m => m.UserXRoles).ThenInclude(x => x.Role);
-        }
+        if (queryable.Any()) queryable = queryable.Include(m => m.UserXRoles).ThenInclude(x => x.Role);
 
         return queryable;
     }

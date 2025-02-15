@@ -5,9 +5,9 @@ namespace FPT.TeamMatching.Domain.Entities;
 
 public class TeamMember : BaseEntity
 {
-    public Guid? ProjectId { get; set; }
-
     public Guid? UserId { get; set; }
+
+    public Guid? ProjectId { get; set; }
 
     public TeamMemberRole? Role { get; set; }
 
