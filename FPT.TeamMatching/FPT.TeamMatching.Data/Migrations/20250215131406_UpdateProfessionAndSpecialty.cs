@@ -6,21 +6,26 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace FPT.TeamMatching.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class UpdateIdeaWithProfessionAndSpecialty : Migration
+    public partial class UpdateProfessionAndSpecialty : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.RenameColumn(
+                name: "Major",
+                table: "Idea",
+                newName: "Description");
+
             migrationBuilder.AddColumn<string>(
                 name: "Abbreviations",
                 table: "Idea",
                 type: "text",
                 nullable: true);
 
-            migrationBuilder.AddColumn<string>(
-                name: "Description",
+            migrationBuilder.AddColumn<Guid>(
+                name: "SpecialtyId",
                 table: "Idea",
-                type: "text",
+                type: "uuid",
                 nullable: true);
 
             migrationBuilder.CreateTable(
@@ -66,27 +71,52 @@ namespace FPT.TeamMatching.Data.Migrations
                 });
 
             migrationBuilder.CreateIndex(
+                name: "IX_Idea_SpecialtyId",
+                table: "Idea",
+                column: "SpecialtyId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Specialty_ProfessionId",
                 table: "Specialty",
                 column: "ProfessionId");
+
+            migrationBuilder.AddForeignKey(
+                name: "FK_Idea_Specialty_SpecialtyId",
+                table: "Idea",
+                column: "SpecialtyId",
+                principalTable: "Specialty",
+                principalColumn: "Id");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropForeignKey(
+                name: "FK_Idea_Specialty_SpecialtyId",
+                table: "Idea");
+
             migrationBuilder.DropTable(
                 name: "Specialty");
 
             migrationBuilder.DropTable(
                 name: "Profession");
 
+            migrationBuilder.DropIndex(
+                name: "IX_Idea_SpecialtyId",
+                table: "Idea");
+
             migrationBuilder.DropColumn(
                 name: "Abbreviations",
                 table: "Idea");
 
             migrationBuilder.DropColumn(
-                name: "Description",
+                name: "SpecialtyId",
                 table: "Idea");
+
+            migrationBuilder.RenameColumn(
+                name: "Description",
+                table: "Idea",
+                newName: "Major");
         }
     }
 }
