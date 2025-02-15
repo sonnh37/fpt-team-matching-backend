@@ -15,6 +15,7 @@ public static class CollectionRepositories
         services.AddScoped<IReviewRepository, ReviewRepository>();
         services.AddScoped<IProjectRepository, ProjectRepository>();
         services.AddScoped<IIdeaRepository, IdeaRepository>();
+        services.AddScoped<IIdeaReviewRepository, IdeaReviewRepository>();
         services.AddScoped<IFeedbackRepository, FeedbackRepository>();
         services.AddScoped<IInvitationRepository, InvitationRepository>();
         services.AddScoped<IBlogRepository, BlogRepository>();
@@ -32,5 +33,7 @@ public static class CollectionRepositories
         services.AddScoped<IConversationMemberRepository, ConversationMemberRepository>();
         services.AddScoped<IRoleRepository, RoleRepository>();
         services.AddScoped<IUserXRoleRepository, UserXRoleRepository>();
+        services.AddScoped<IProfessionRepository, ProfessionRepository>();
+        services.AddScoped<ISpecialtyRepository, SpecialtyRepository>();
     }
 }

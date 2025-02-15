@@ -12,7 +12,7 @@ public static class CollectionServices
         services.AddTransient<IBlogService, BlogService>();
         services.AddTransient<ILikeService, LikeService>();
         services.AddTransient<ICommentService, CommentService>();
-        services.AddTransient<IRateService, RateService>();
+        services.AddTransient<ISpecialtyService, RateService>();
         services.AddTransient<IApplicationService, ApplicationService>();
         services.AddTransient<ITeamMemberService, TeamMemberService>();
         services.AddTransient<IAuthService, AuthService>();
@@ -26,6 +26,10 @@ public static class CollectionServices
         services.AddTransient<ISkillProfileService, SkillProfileService>();
         services.AddTransient<IMessageService, MessageService>();
         services.AddTransient<IConversationMemberService, ConversationMemberService>();
+        services.AddTransient<IProfessionService, ProfessionService>();
+        services.AddTransient<ISpecialtyService, SpecialtyService>();
+        services.AddTransient<IIdeaReviewService, IdeaReviewService>();
+        services.AddTransient<IIdeaService, IdeaService>();
 
         services.AddTransient<ChatHub>();
     }

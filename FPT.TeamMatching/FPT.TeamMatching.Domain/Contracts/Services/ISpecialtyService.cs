@@ -2,6 +2,6 @@
 
 namespace FPT.TeamMatching.Domain.Contracts.Services;
 
-public interface IRateService : IBaseService
+public interface ISpecialtyService : IBaseService
 {
 }

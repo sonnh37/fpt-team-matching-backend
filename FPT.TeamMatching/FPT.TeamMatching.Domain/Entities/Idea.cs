@@ -27,7 +27,6 @@ public class Idea : BaseEntity
 
     public string? EnglishName { get; set; }
 
-
     public string? File { get; set; }
 
     public ProjectStatus? Status { get; set; }

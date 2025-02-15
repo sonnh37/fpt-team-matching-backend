@@ -17,6 +17,8 @@ using FPT.TeamMatching.Domain.Models.Results;
 using Profile = AutoMapper.Profile;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Feedbacks;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Ideas;
+using FPT.TeamMatching.Domain.Models.Requests.Commands.Professions;
+using FPT.TeamMatching.Domain.Models.Requests.Commands.Specialties;
 
 namespace FPT.TeamMatching.Domain.Configs.Mapping;
 
@@ -176,6 +178,22 @@ public class MappingProfile : Profile
         CreateMap<SkillProfile, SkillProfileResult>().ReverseMap();
         CreateMap<SkillProfile, SkillProfileCreateCommand>().ReverseMap();
         CreateMap<SkillProfile, SkillProfileUpdateCommand>().ReverseMap();
+
+        #endregion
+
+        #region Profession
+
+        CreateMap<Profession, ProfessionResult>().ReverseMap();
+        CreateMap<Profession, ProfessionCreateCommand>().ReverseMap();
+        CreateMap<Profession, ProfessionUpdateCommand>().ReverseMap();
+
+        #endregion
+
+        #region Specialty
+
+        CreateMap<Specialty, SpecialtyResult>().ReverseMap();
+        CreateMap<Specialty, SpecialtyCreateCommand>().ReverseMap();
+        CreateMap<Specialty, SpecialtyUpdateCommand>().ReverseMap();
 
         #endregion
 
