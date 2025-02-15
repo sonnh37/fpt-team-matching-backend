@@ -9,4 +9,6 @@ public class Specialty : BaseEntity
     public string? SpecialtyName { get; set; }
     
     public Profession? Profession { get; set; }
+    
+    public virtual ICollection<Idea> Ideas { get; set; } = new List<Idea>();
 }

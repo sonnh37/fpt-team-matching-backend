@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace FPT.TeamMatching.Data.Migrations
 {
     [DbContext(typeof(FPTMatchingDbContext))]
-    [Migration("20250215125719_UpdateIdeaWithProfessionAndSpecialty")]
-    partial class UpdateIdeaWithProfessionAndSpecialty
+    [Migration("20250215131406_UpdateProfessionAndSpecialty")]
+    partial class UpdateProfessionAndSpecialty
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -237,9 +237,6 @@ namespace FPT.TeamMatching.Data.Migrations
                     b.Property<bool?>("IsExistedTeam")
                         .HasColumnType("boolean");
 
-                    b.Property<string>("Major")
-                        .HasColumnType("text");
-
                     b.Property<int?>("MaxTeamSize")
                         .HasColumnType("integer");
 
@@ -247,6 +244,9 @@ namespace FPT.TeamMatching.Data.Migrations
                         .HasColumnType("text");
 
                     b.Property<Guid?>("SemesterId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("SpecialtyId")
                         .HasColumnType("uuid");
 
                     b.Property<string>("Status")
@@ -276,6 +276,8 @@ namespace FPT.TeamMatching.Data.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("SemesterId");
+
+                    b.HasIndex("SpecialtyId");
 
                     b.HasIndex("SubMentorId");
 
@@ -1146,6 +1148,10 @@ namespace FPT.TeamMatching.Data.Migrations
                         .WithMany("Ideas")
                         .HasForeignKey("SemesterId");
 
+                    b.HasOne("FPT.TeamMatching.Domain.Entities.Specialty", "Specialty")
+                        .WithMany("Ideas")
+                        .HasForeignKey("SpecialtyId");
+
                     b.HasOne("FPT.TeamMatching.Domain.Entities.User", "SubMentor")
                         .WithMany("IdeaOfSubMentors")
                         .HasForeignKey("SubMentorId");
@@ -1155,6 +1161,8 @@ namespace FPT.TeamMatching.Data.Migrations
                         .HasForeignKey("UserId");
 
                     b.Navigation("Semester");
+
+                    b.Navigation("Specialty");
 
                     b.Navigation("SubMentor");
 
@@ -1386,6 +1394,11 @@ namespace FPT.TeamMatching.Data.Migrations
                 });
 
             modelBuilder.Entity("FPT.TeamMatching.Domain.Entities.Semester", b =>
+                {
+                    b.Navigation("Ideas");
+                });
+
+            modelBuilder.Entity("FPT.TeamMatching.Domain.Entities.Specialty", b =>
                 {
                     b.Navigation("Ideas");
                 });
