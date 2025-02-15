@@ -15,7 +15,7 @@ public class KafkaProducer : IKafkaProducerConfig
     {
         var config = new ProducerConfig
         {
-            BootstrapServers = "localhost:29092"
+            BootstrapServers = "fpt.matching.kafka:9092"
         };
         _producer = new ProducerBuilder<string, string>(config).Build();
     }
