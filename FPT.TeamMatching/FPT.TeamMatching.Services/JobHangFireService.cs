@@ -56,7 +56,6 @@ public class JobHangFireService : IJobHangfireService
                 };
 
                 _unitOfWork.MessageRepository.AddMessage(newMessage);
-                 await _unitOfWork.SaveChanges();
 
                   consumer.Commit(consumeResult);
             }

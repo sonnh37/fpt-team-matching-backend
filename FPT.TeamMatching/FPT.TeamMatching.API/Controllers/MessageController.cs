@@ -9,25 +9,15 @@ namespace FPT.TeamMatching.API.Controllers;
 public class MessageController : ControllerBase
 {
     private readonly IMessageService _messageService;
-    private readonly IConversationMemberService _conversationMemberService;
-
-    public MessageController(IMessageService messageService, IConversationMemberService conversationMemberService)
+    public MessageController(IMessageService messageService)
     {
         _messageService = messageService;
-        _conversationMemberService = conversationMemberService;
     }
 
     [HttpGet("{conversationId:guid}")]
     public async Task<IActionResult> GetMessageAsync(Guid conversationId)
     {
         var msg = await _messageService.GetAllMessageInDay(conversationId);
-        return Ok(msg);
-    }
-    
-    [HttpGet("user/{userId:guid}")]
-    public async Task<IActionResult> GetConversationByUserId(Guid userId)
-    {
-        var msg = await _conversationMemberService.GetAllConversationsByUserId(userId);
         return Ok(msg);
     }
 }

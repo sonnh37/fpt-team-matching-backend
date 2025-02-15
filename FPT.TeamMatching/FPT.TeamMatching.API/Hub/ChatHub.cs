@@ -25,6 +25,20 @@ public class ChatHub : Microsoft.AspNetCore.SignalR.Hub
         _redis = redisConfig.GetConnection();
         _kafkaProducer = kafkaProducerConfig;
     }
+    public async Task SaveLastMessageToRedis(Guid? conversationId, Guid? senderId, string content, long timestamp)
+    {
+        string redisKey = $"conversation:last_message:{conversationId}";
+
+        var lastMessageData = new HashEntry[]
+        {
+            new HashEntry("senderId", senderId.ToString()),
+            new HashEntry("content", content),
+            new HashEntry("timestamp", timestamp.ToString()),
+            new HashEntry("isSeen", "0"),
+        };
+
+        await _redis.HashSetAsync(redisKey, lastMessageData);
+    }
 
     public async Task SendMessage(string message)
     {
@@ -61,6 +75,11 @@ public class ChatHub : Microsoft.AspNetCore.SignalR.Hub
             //5. Send message
             await Clients.Group(conn.ConversationId.ToString())
                 .SendAsync("ReceiveSpecificMessage", conn.UserId, message);
+            
+            //6. Lưu lại lasted message vào redis
+            await SaveLastMessageToRedis(conn.ConversationId, conn.UserId, message,
+                DateTimeOffset.UtcNow.ToUnixTimeSeconds()
+            );
         }
         catch (Exception e)
         {
@@ -99,7 +118,6 @@ public class ChatHub : Microsoft.AspNetCore.SignalR.Hub
                     UserId = conn.PartnerId.ToString(),
                 };
                 _unitOfWork.ConversationMemberRepository.Add(conversationPartner);
-                await _unitOfWork.SaveChanges();
                 // Gắn conversation ID vào cho request lại
                 conn.ConversationId = Guid.Parse(conversationEntity.Id);
             }

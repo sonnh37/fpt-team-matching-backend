@@ -6,6 +6,7 @@ public class ConversationMemberPartnerInfoResult
 
     public string? ConversationId { get; set; }
     
-    public List<PartnerInfoResult> PartnerInfoResults { get; set; }
+    public PartnerInfoResult PartnerInfoResults { get; set; }
+    public LastMessageResult LastMessageResult { get; set; }
 
 }

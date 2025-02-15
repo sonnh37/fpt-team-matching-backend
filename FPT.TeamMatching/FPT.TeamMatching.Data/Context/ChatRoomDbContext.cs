@@ -8,7 +8,7 @@ using MongoDB.EntityFrameworkCore.Extensions;
 
 namespace FPT.TeamMatching.Data.Context;
 
-public class ChatRoomDbContext : DbContext
+public class ChatRoomDbContext 
 {
     private readonly IMongoDatabase _database;
 
