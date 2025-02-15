@@ -16,6 +16,10 @@ public class Idea : BaseEntity
     public string? Title { get; set; }
 
     public string? IdeaCode { get; set; }
+    
+    public string? Description { get; set; }
+    
+    public string? Abbreviations { get; set; }
 
     public string? VietNamName { get; set; }
 

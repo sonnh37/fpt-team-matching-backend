@@ -346,6 +346,26 @@ public partial class FPTMatchingDbContext : BaseDbContext
             entity.HasOne(d => d.Reviewer).WithMany(p => p.IdeaReviews)
                 .HasForeignKey(d => d.ReviewerId);
         });
+        
+        modelBuilder.Entity<Specialty>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            entity.ToTable("Specialty");
+
+            entity.Property(e => e.Id).ValueGeneratedOnAdd()
+                .HasDefaultValueSql("gen_random_uuid()");
+
+            entity.HasOne(d => d.Profession).WithMany(p => p.Specialties)
+                .HasForeignKey(d => d.ProfessionId);
+        });
+
+        modelBuilder.Entity<Profession>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            entity.ToTable("Profession");
+        });
 
         OnModelCreatingPartial(modelBuilder);
     }
