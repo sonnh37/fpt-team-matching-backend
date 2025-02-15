@@ -3,6 +3,7 @@ using FPT.TeamMatching.Data.Context;
 using FPT.TeamMatching.Data.Repositories.Base;
 using FPT.TeamMatching.Domain.Contracts.Repositories;
 using FPT.TeamMatching.Domain.Entities;
+using FPT.TeamMatching.Domain.Models.Results;
 using FPT.TeamMatching.Domain.Utilities.Filters;
 using Microsoft.EntityFrameworkCore;
 
@@ -44,5 +45,19 @@ public class UserRepository : BaseRepository<User>, IUserRepository
             .SingleOrDefaultAsync();
 
         return user;
+    }
+
+    public async Task<List<PartnerInfoResult>> GetAllUsersWithNameOnly()
+    {
+        var users = await base.Context()
+            .Select(x => new PartnerInfoResult
+            {
+                Id = x.Id.ToString(),
+                LastName = x.LastName,
+                FirstName = x.FirstName,
+            }) 
+            .ToListAsync();
+
+        return users;
     }
 }

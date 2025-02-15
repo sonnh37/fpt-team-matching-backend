@@ -2,23 +2,28 @@
 using FPT.TeamMatching.Domain.Contracts.Repositories;
 using FPT.TeamMatching.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
+using MongoDB.Driver;
+using MongoDB.Driver.Linq;
+using Task = System.Threading.Tasks.Task;
 
 namespace FPT.TeamMatching.Data.Repositories;
 
 public class ConversationMemberRepository : IConversationMemberRepository
 {
-    private readonly ChatRoomDbContext _dbContext;
+    private readonly IMongoCollection<ConversationMember> _collection;
+    private readonly FPTMatchingDbContext _dbContext;
 
-    public ConversationMemberRepository(ChatRoomDbContext dbContext)
+    public ConversationMemberRepository(ChatRoomDbContext collection, FPTMatchingDbContext dbContext)
     {
+        _collection = collection.GetDatabase().GetCollection<ConversationMember>("conversationMembers");
         _dbContext = dbContext;
     }
 
-    public void Add(ConversationMember conversationMember)
+    public async Task Add(ConversationMember conversationMember)
     {
         try
         {
-            _dbContext.ConversationMembers.Add(conversationMember);
+            await _collection.InsertOneAsync(conversationMember);
         }
         catch (Exception e)
         {
@@ -31,7 +36,7 @@ public class ConversationMemberRepository : IConversationMemberRepository
     {
         try
         {
-            _dbContext.ConversationMembers.Remove(conversationMember);
+            _collection.FindOneAndDelete(member => member.Id == conversationMember.Id);
         }
         catch (Exception e)
         {
@@ -44,8 +49,7 @@ public class ConversationMemberRepository : IConversationMemberRepository
     {
         try
         {
-            return await _dbContext.ConversationMembers.FirstOrDefaultAsync(
-                x => x.Id == conversationMemberId.ToString());
+            return await _collection.Find(x => x.Id == conversationMemberId.ToString()).FirstOrDefaultAsync();
         }
         catch (Exception e)
         {
@@ -58,7 +62,7 @@ public class ConversationMemberRepository : IConversationMemberRepository
     {
         try
         {
-            return _dbContext.ConversationMembers.ToListAsync();
+            return _collection.Find(FilterDefinition<ConversationMember>.Empty).ToListAsync();
         }
         catch (Exception e)
         {
@@ -71,7 +75,16 @@ public class ConversationMemberRepository : IConversationMemberRepository
     {
         try
         {
-            return await _dbContext.ConversationMembers.Where(x => x.UserId == userId.ToString()).ToListAsync();
+            var userConversations = await _collection
+                .Find(c => c.UserId == userId.ToString())
+                .ToListAsync();
+
+            var conversationIds = userConversations.Select(c => c.ConversationId).ToList();
+
+            var partners = await _collection
+                .Find(c => conversationIds.Contains(c.ConversationId) && c.UserId != userId.ToString())
+                .ToListAsync();
+            return partners;
         }
         catch (Exception e)
         {
@@ -84,7 +97,7 @@ public class ConversationMemberRepository : IConversationMemberRepository
     {
         try
         {
-            return await _dbContext.ConversationMembers.Where(x => x.ConversationId == teamId.ToString()).ToListAsync();
+            return await _collection.Find(x => x.ConversationId == teamId.ToString()).ToListAsync();
         }
         catch (Exception e)
         {

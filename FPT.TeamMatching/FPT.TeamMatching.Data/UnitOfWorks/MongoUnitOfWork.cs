@@ -26,9 +26,4 @@ public class MongoUnitOfWork : IMongoUnitOfWork
 
     public IMessageRepository MessageRepository { get; }
 
-    public async Task<bool> SaveChanges(CancellationToken cancellationToken = default)
-    {
-        var result = await _dbContext.SaveChangesAsync(cancellationToken);
-        return result > 0;
-    }
 }

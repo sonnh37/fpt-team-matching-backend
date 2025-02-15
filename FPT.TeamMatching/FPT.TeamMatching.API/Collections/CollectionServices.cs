@@ -24,6 +24,7 @@ public static class CollectionServices
         services.AddTransient<IProfileStudentService, ProfileStudentService>();
         services.AddTransient<ISkillProfileService, SkillProfileService>();
         services.AddTransient<IMessageService, MessageService>();
+        services.AddTransient<IConversationMemberService, ConversationMemberService>();
 
         services.AddTransient<ChatHub>();
     }
