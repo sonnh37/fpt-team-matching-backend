@@ -4,7 +4,7 @@ namespace FPT.TeamMatching.Domain.Contracts.Repositories;
 
 public interface IConversationRepository
 {
-    void Add(Conversation conversation);
-    void Delete(Conversation conversation);
+    Task Add(Conversation conversation);
+    Task Delete(Conversation conversation);
     Task<Conversation> GetById(Guid conversationId);
 }

@@ -4,20 +4,19 @@ using FPT.TeamMatching.Domain.Contracts.UnitOfWorks;
 using FPT.TeamMatching.Domain.Entities;
 using FPT.TeamMatching.Domain.Models;
 using Newtonsoft.Json;
+using Task = System.Threading.Tasks.Task;
 
 namespace FPT.TeamMatching.Services;
 
 public class JobHangFireService : IJobHangfireService
 {
     private readonly IMongoUnitOfWork _unitOfWork;
-
     public JobHangFireService(IMongoUnitOfWork unitOfWork)
     {
         _unitOfWork = unitOfWork;
     }
-
     public void FireAndForgetJob()
-    {
+    {   
         Console.WriteLine("FireAndForgetJob");
     }
 
@@ -28,7 +27,7 @@ public class JobHangFireService : IJobHangfireService
             GroupId = "chat-consumer",
             BootstrapServers = "localhost:29092",
             AutoOffsetReset = AutoOffsetReset.Earliest,
-            EnableAutoCommit = false
+            EnableAutoCommit = false 
         };
 
         using var consumer = new ConsumerBuilder<string, string>(consumerConfig).Build();
@@ -38,10 +37,10 @@ public class JobHangFireService : IJobHangfireService
         {
             while (true)
             {
-                var consumeResult = consumer.Consume(TimeSpan.FromSeconds(2));
+                var consumeResult = consumer.Consume(TimeSpan.FromSeconds(2)); 
 
-                if (consumeResult == null)
-                    break;
+                if (consumeResult == null) 
+                    break; 
 
                 Console.WriteLine("Received a message");
 
@@ -53,14 +52,14 @@ public class JobHangFireService : IJobHangfireService
                     ConversationId = conversationId,
                     Content = message.Message,
                     SendById = message.UserId,
-                    CreatedDate = message.CreatedDate
+                    CreatedDate = message.CreatedDate,
                 };
 
                 _unitOfWork.MessageRepository.AddMessage(newMessage);
-                await _unitOfWork.SaveChanges();
 
-                consumer.Commit(consumeResult);
+                  consumer.Commit(consumeResult);
             }
+
         }
         catch (ConsumeException ex)
         {

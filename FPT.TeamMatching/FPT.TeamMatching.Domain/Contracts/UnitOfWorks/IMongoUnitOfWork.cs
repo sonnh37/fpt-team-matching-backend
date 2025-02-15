@@ -7,5 +7,4 @@ public interface IMongoUnitOfWork
     IConversationRepository ConversationRepository { get; }
     IConversationMemberRepository ConversationMemberRepository { get; }
     IMessageRepository MessageRepository { get; }
-    Task<bool> SaveChanges(CancellationToken cancellationToken = default);
 }

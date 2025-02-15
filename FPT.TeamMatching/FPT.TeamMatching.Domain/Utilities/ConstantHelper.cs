@@ -67,6 +67,7 @@ public static class Const
     public const string API_SKILLPROFILES = $"{BaseApi}/skill-profiles";
 
     public const string API_MESSAGE = $"{BaseApi}/message";
+    public const string API_CONVERSATION_MEMBER = $"{BaseApi}/conversation-members";
 
     public const string SortFieldDefault = "CreatedDate";
 

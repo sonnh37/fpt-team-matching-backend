@@ -12,16 +12,21 @@ public class Idea : BaseEntity
     public Guid? SubMentorId { get; set; }
 
     public IdeaType? Type { get; set; }
+    
+    public Guid? SpecialtyId { get; set; }
 
     public string? Title { get; set; }
 
     public string? IdeaCode { get; set; }
+    
+    public string? Description { get; set; }
+    
+    public string? Abbreviations { get; set; }
 
     public string? VietNamName { get; set; }
 
     public string? EnglishName { get; set; }
 
-    public string? Major { get; set; }
 
     public string? File { get; set; }
 
@@ -34,6 +39,8 @@ public class Idea : BaseEntity
     public virtual User? User { get; set; }
 
     public virtual User? SubMentor { get; set; }
+    
+    public virtual Specialty? Specialty { get; set; }
 
     public virtual Project? Project { get; set; }
 

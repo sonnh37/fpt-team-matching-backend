@@ -1,10 +1,11 @@
 ﻿using FPT.TeamMatching.Domain.Entities;
+using Task = System.Threading.Tasks.Task;
 
 namespace FPT.TeamMatching.Domain.Contracts.Repositories;
 
 public interface IConversationMemberRepository
 {
-    void Add(ConversationMember conversationMember);
+    Task Add(ConversationMember conversationMember);
     void Delete(ConversationMember conversationMember);
     Task<ConversationMember?> GetByIdAsync(Guid conversationMemberId);
     Task<List<ConversationMember>> GetAllAsync();
