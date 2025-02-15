@@ -9,9 +9,12 @@ public interface IUnitOfWork : IBaseUnitOfWork
     ILikeRepository LikeRepository { get; }
     ICommentRepository CommentRepository { get; }
     IRateRepository RateRepository { get; }
+    IIdeaRepository IdeaRepository { get; }
+    IIdeaReviewRepository IdeaReviewRepository { get; }
     IApplicationRepository ApplicationRepository { get; }
     ITeamMemberRepository TeamMemberRepository { get; }
     IProjectRepository ProjectRepository { get; }
+    IFeedbackRepository FeedbackRepository { get; }
     IReviewRepository ReviewRepository { get; }
     IInvitationRepository InvitationRepository { get; }
     IRefreshTokenRepository RefreshTokenRepository { get; }
@@ -20,4 +23,6 @@ public interface IUnitOfWork : IBaseUnitOfWork
     ISkillProfileRepository SkillProfileRepository { get; }
     IRoleRepository RoleRepository { get; }
     IUserXRoleRepository UserXRoleRepository { get; }
+    IProfessionRepository ProfessionRepository { get; }
+    ISpecialtyRepository SpecialtyRepository { get; }
 }

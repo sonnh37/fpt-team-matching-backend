@@ -7,7 +7,7 @@ using FPT.TeamMatching.Services.Bases;
 
 namespace FPT.TeamMatching.Services;
 
-public class RateService : BaseService<Rate>, IRateService
+public class RateService : BaseService<Rate>, ISpecialtyService
 {
     private readonly IRateRepository _service;
 

@@ -2,6 +2,6 @@
 
 namespace FPT.TeamMatching.Domain.Models.Requests.Commands.TeamMembers;
 
-public class TeamRestoreCommand : UpdateCommand
+public class TeamMemberRestoreCommand : UpdateCommand
 {
 }

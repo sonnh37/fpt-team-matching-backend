@@ -36,14 +36,14 @@ public class TeamMemberController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create([FromBody] TeamCreateCommand request)
+    public async Task<IActionResult> Create([FromBody] TeamMemberCreateCommand request)
     {
         var msg = await _teammemberservice.CreateOrUpdate<TeamMemberResult>(request);
         return Ok(msg);
     }
 
     [HttpPut]
-    public async Task<IActionResult> Update([FromBody] TeamUpdateCommand request)
+    public async Task<IActionResult> Update([FromBody] TeamMemberUpdateCommand request)
     {
         var businessResult = await _teammemberservice.CreateOrUpdate<TeamMemberResult>(request);
 
@@ -51,7 +51,7 @@ public class TeamMemberController : ControllerBase
     }
 
     [HttpPut("restore")]
-    public async Task<IActionResult> Restore([FromBody] TeamRestoreCommand command)
+    public async Task<IActionResult> Restore([FromBody] TeamMemberRestoreCommand command)
     {
         var businessResult = await _teammemberservice.Restore<TeamMemberResult>(command);
 
@@ -59,7 +59,7 @@ public class TeamMemberController : ControllerBase
     }
 
     [HttpDelete]
-    public async Task<IActionResult> Delete([FromQuery] TeamDeleteCommand request)
+    public async Task<IActionResult> Delete([FromQuery] TeamMemberDeleteCommand request)
     {
         var businessResult = await _teammemberservice.DeleteById(request.Id, request.IsPermanent);
 

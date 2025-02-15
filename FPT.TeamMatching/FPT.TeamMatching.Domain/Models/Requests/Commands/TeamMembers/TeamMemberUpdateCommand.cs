@@ -3,7 +3,7 @@ using FPT.TeamMatching.Domain.Models.Requests.Commands.Base;
 
 namespace FPT.TeamMatching.Domain.Models.Requests.Commands.TeamMembers;
 
-public class TeamUpdateCommand : UpdateCommand
+public class TeamMemberUpdateCommand : UpdateCommand
 {
     public Guid? ProjectId { get; set; }
 
