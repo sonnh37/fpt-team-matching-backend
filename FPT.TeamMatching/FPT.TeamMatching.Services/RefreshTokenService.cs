@@ -137,6 +137,8 @@ public class RefreshTokenService : BaseService<RefreshToken>, IRefreshTokenServi
         }
         else if (createOrUpdateCommand is RefreshTokenCreateCommand createCommand)
         {
+            
+            
             var httpContext = _httpContextAccessor.HttpContext;
             createCommand.UserAgent = httpContext.Request.Headers["User-Agent"].ToString() ?? "Unknown";
             createCommand.IpAddress = httpContext.Request.Headers["X-Forwarded-For"].FirstOrDefault()
@@ -145,6 +147,19 @@ public class RefreshTokenService : BaseService<RefreshToken>, IRefreshTokenServi
             createCommand.Expiry = DateTime.UtcNow.AddDays(_tokenSetting.RefreshTokenExpiryDays);
             entity = _mapper.Map<RefreshToken>(createCommand);
             if (entity == null) return null;
+            
+            var queryable = _refreshTokenRepository.GetQueryable();
+            var refreshToken = queryable.Where(rs => 
+                rs.UserId == createCommand.UserId && rs.IpAddress == createCommand.IpAddress).SingleOrDefault();
+
+            if (refreshToken != null)
+            {
+                // Logout any UserId ad IpAddress dup
+                _refreshTokenRepository.DeletePermanently(refreshToken);
+                var saveChanges_ = await _unitOfWork.SaveChanges();
+                if (!saveChanges_) return null;
+            }
+            
             entity.Id = Guid.NewGuid();
             InitializeBaseEntityForCreate(entity);
             _refreshTokenRepository.Add(entity);
