@@ -11,11 +11,26 @@ public static class IncludeHelper
     {
         return (queryable switch
         {
+            IQueryable<Idea> ideas => Idea(ideas) as IQueryable<TEntity>,
+            IQueryable<Profession> professions => Profession(professions) as IQueryable<TEntity>,
             IQueryable<User> users => User(users) as IQueryable<TEntity>,
             _ => queryable
         })!;
     }
 
+    private static IQueryable<Idea> Idea(IQueryable<Idea> queryable)
+    {
+
+        return queryable;
+    }
+    
+    private static IQueryable<Profession> Profession(IQueryable<Profession> queryable)
+    {
+        if (queryable.Any()) queryable = queryable.Include(m => m.Specialties);
+
+        return queryable;
+    }
+    
     private static IQueryable<User> User(IQueryable<User> queryable)
     {
         // queryable = queryable
