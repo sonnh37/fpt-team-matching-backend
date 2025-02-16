@@ -29,7 +29,7 @@ public class Idea : BaseEntity
 
     public string? File { get; set; }
 
-    public ProjectStatus? Status { get; set; }
+    public IdeaStatus? Status { get; set; }
 
     public bool? IsExistedTeam { get; set; }
 

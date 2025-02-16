@@ -1,15 +1,9 @@
-﻿using CloudinaryDotNet.Actions;
-using FPT.TeamMatching.Domain.Enums;
+﻿using FPT.TeamMatching.Domain.Enums;
 using FPT.TeamMatching.Domain.Models.Results.Bases;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace FPT.TeamMatching.Domain.Models.Results
 {
-    public class IdeaResult: Bases.BaseResult
+    public class IdeaResult: BaseResult
     {
         public Guid? UserId { get; set; }
 
@@ -35,7 +29,7 @@ namespace FPT.TeamMatching.Domain.Models.Results
 
         public string? File { get; set; }
 
-        public ProjectStatus? Status { get; set; }
+        public IdeaStatus? Status { get; set; }
 
         public bool? IsExistedTeam { get; set; }
 
