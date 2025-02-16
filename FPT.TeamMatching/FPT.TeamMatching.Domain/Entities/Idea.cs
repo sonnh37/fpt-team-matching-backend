@@ -15,8 +15,6 @@ public class Idea : BaseEntity
     
     public Guid? SpecialtyId { get; set; }
 
-    public string? Title { get; set; }
-
     public string? IdeaCode { get; set; }
     
     public string? Description { get; set; }
@@ -31,7 +29,11 @@ public class Idea : BaseEntity
 
     public IdeaStatus? Status { get; set; }
 
-    public bool? IsExistedTeam { get; set; }
+    public bool IsExistedTeam { get; set; }
+        
+    public bool IsEnterpriseTopic { get; set; }
+        
+    public string? EnterpriseName { get; set; }
 
     public int? MaxTeamSize { get; set; }
 

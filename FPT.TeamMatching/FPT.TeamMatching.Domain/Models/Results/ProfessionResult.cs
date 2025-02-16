@@ -10,5 +10,8 @@ namespace FPT.TeamMatching.Domain.Models.Results
     public class ProfessionResult: BaseResult
     {
         public string? ProfessionName { get; set; }
+        
+        public ICollection<SpecialtyResult> Specialties { get; set; } = new List<SpecialtyResult>();
+
     }
 }
