@@ -20,3 +20,8 @@ public enum ProjectStatus
     Approved_Council,
     Rejected_Council
 }
+
+public enum IdeaStatus
+{
+    
+}
