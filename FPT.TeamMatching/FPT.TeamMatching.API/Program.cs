@@ -158,7 +158,7 @@ builder.Services.AddAuthentication(x =>
         options.Events = new JwtBearerEvents
         {
             OnMessageReceived = context =>
-            {
+            { // httpContext
                 var accessToken = context.Request.Cookies["accessToken"];
                 if (!string.IsNullOrEmpty(accessToken)) context.Token = accessToken;
 
@@ -195,12 +195,14 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+// if (app.Environment.IsDevelopment())
+// {
+//     app.UseSwagger();
+//     app.UseSwaggerUI();
+// }
 
+app.UseSwagger();
+app.UseSwaggerUI();
 app.UseMiddleware<AuthenticationMiddleware>()
     .UseHttpsRedirection()
     .UseRouting()

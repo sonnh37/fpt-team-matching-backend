@@ -64,7 +64,5 @@ public class User : BaseEntity
 
     public virtual ICollection<SkillProfile> SkillProfiles { get; set; } = new List<SkillProfile>();
 
-    // public virtual ICollection<Task> Tasks { get; set; } = new List<Task>();
-
     public virtual ICollection<TeamMember> TeamMembers { get; set; } = new List<TeamMember>();
 }

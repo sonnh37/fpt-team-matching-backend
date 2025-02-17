@@ -20,8 +20,6 @@ namespace FPT.TeamMatching.Domain.Models.Requests.Commands.Ideas
 
         public Guid? SpecialtyId { get; set; }
 
-        public string? Title { get; set; }
-
         public string? IdeaCode { get; set; }
 
         public string? Description { get; set; }
@@ -34,9 +32,13 @@ namespace FPT.TeamMatching.Domain.Models.Requests.Commands.Ideas
 
         public string? File { get; set; }
 
-        public ProjectStatus? Status { get; set; }
+        public IdeaStatus? Status { get; set; }
 
-        public bool? IsExistedTeam { get; set; }
+        public bool IsExistedTeam { get; set; }
+        
+        public bool IsEnterpriseTopic { get; set; }
+        
+        public string? EnterpriseName { get; set; }
 
         public int? MaxTeamSize { get; set; }
     }

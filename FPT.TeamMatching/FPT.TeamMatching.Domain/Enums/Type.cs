@@ -29,4 +29,7 @@ public enum ProjectType
 
 public enum IdeaType
 {
+    Student,
+    Lecturer,
+    Enterprise
 }

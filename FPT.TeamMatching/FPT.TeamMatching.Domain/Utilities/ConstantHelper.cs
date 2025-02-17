@@ -57,6 +57,8 @@ public static class Const
     public const string API_COMMENTS = $"{BaseApi}/comments";
 
     public const string API_LIKES = $"{BaseApi}/likes";
+    
+    public const string API_AUTH = $"{BaseApi}/auth";
 
     public const string API_APPLICATIONS = $"{BaseApi}/applications";
 
