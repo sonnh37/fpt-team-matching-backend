@@ -1,4 +1,5 @@
-﻿using FPT.TeamMatching.Domain.Enums;
+﻿using FPT.TeamMatching.Domain.Entities;
+using FPT.TeamMatching.Domain.Enums;
 using FPT.TeamMatching.Domain.Models.Results.Bases;
 
 namespace FPT.TeamMatching.Domain.Models.Results;
@@ -22,4 +23,5 @@ public class ProjectResult : BaseResult
     public DateTimeOffset? StartDate { get; set; }
 
     public DateTimeOffset? EndDate { get; set; }
+
 }

@@ -15,7 +15,6 @@ public class ProjectController : ControllerBase
 {
     private readonly IProjectService _service;
 
-
     public ProjectController(IProjectService __service)
     {
         _service = __service;
@@ -65,4 +64,12 @@ public class ProjectController : ControllerBase
 
         return Ok(businessResult);
     }
+
+    [HttpGet("get-by-userId-login")]
+    public async Task<IActionResult> GetByUserIdLogin()
+    {
+        var businessResult = await _service.GetProjectByUserIdLogin();
+        return Ok(businessResult);
+    }
+
 }
