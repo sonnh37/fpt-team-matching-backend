@@ -39,21 +39,21 @@ public class ProjectService : BaseService<Project>, IProjectService
             var project = await _repository.GetProjectByUserIdLogin(Guid.Parse(userId));
             var result = _mapper.Map<ProjectResult>(project);
             if (result == null)
-                return new ResponseBuilder()
-                    .WithStatus(Const.FAIL_CODE)
-                    .WithMessage(Const.FAIL_SAVE_MSG).Build();
+                return new ResponseBuilder<ProjectResult>()
+                    .WithData(result)
+                    .WithStatus(Const.NOT_FOUND_CODE)
+                    .WithMessage(Const.NOT_FOUND_MSG)
+                    .Build();
 
-            var msg = new ResponseBuilder<ProjectResult>()
+            return new ResponseBuilder<ProjectResult>()
                 .WithData(result)
                 .WithStatus(Const.SUCCESS_CODE)
-                .WithMessage(Const.SUCCESS_SAVE_MSG)
+                .WithMessage(Const.SUCCESS_READ_MSG)
                 .Build();
-
-            return msg;
         }
         catch (Exception ex)
         {
-            var errorMessage = $"An error occurred while updating {typeof(Project).Name}: {ex.Message}";
+            var errorMessage = $"An error {typeof(ProjectResult).Name}: {ex.Message}";
             return new ResponseBuilder()
                 .WithStatus(Const.FAIL_CODE)
                 .WithMessage(errorMessage)
