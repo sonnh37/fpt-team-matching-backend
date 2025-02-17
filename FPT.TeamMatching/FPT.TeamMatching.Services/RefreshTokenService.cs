@@ -149,13 +149,16 @@ public class RefreshTokenService : BaseService<RefreshToken>, IRefreshTokenServi
             if (entity == null) return null;
             
             var queryable = _refreshTokenRepository.GetQueryable();
-            var refreshToken = queryable.Where(rs => 
-                rs.UserId == createCommand.UserId && rs.IpAddress == createCommand.IpAddress).SingleOrDefault();
+            var refreshTokens = queryable.Where(rs => 
+                rs.UserId == createCommand.UserId && rs.IpAddress == createCommand.IpAddress).ToList();
 
-            if (refreshToken != null)
+            if (refreshTokens.Any())
             {
                 // Logout any UserId ad IpAddress dup
-                _refreshTokenRepository.DeletePermanently(refreshToken);
+                foreach (var refreshToken in refreshTokens)
+                {
+                    _refreshTokenRepository.DeletePermanently(refreshToken);
+                }
                 var saveChanges_ = await _unitOfWork.SaveChanges();
                 if (!saveChanges_) return null;
             }
