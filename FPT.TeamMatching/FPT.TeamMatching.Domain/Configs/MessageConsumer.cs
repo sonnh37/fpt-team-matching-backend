@@ -18,7 +18,7 @@ public class MessageConsumer(IMongoUnitOfWork unitOfWork) : BackgroundService
         var config = new ConsumerConfig
         {
             GroupId = "message-group",
-            BootstrapServers = "localhost:29092",
+            BootstrapServers = "fpt.matching.kafka:9092",
             AutoOffsetReset = AutoOffsetReset.Earliest
         };
 
