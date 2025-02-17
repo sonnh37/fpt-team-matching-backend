@@ -3,6 +3,8 @@ using FPT.TeamMatching.Domain.Models.Requests.Commands.Projects;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Projects;
 using FPT.TeamMatching.Domain.Models.Results;
 using FPT.TeamMatching.Domain.Utilities;
+using FPT.TeamMatching.Services;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FPT.TeamMatching.API.Controllers;
@@ -52,6 +54,14 @@ public class ProjectController : ControllerBase
     public async Task<IActionResult> Delete([FromQuery] ProjectDeleteCommand request)
     {
         var businessResult = await _service.DeleteById(request.Id, request.IsPermanent);
+
+        return Ok(businessResult);
+    }
+
+    [HttpPut("restore")]
+    public async Task<IActionResult> Restore([FromBody] ProjectRestoreCommand command)
+    {
+        var businessResult = await _service.Restore<ProjectResult>(command);
 
         return Ok(businessResult);
     }

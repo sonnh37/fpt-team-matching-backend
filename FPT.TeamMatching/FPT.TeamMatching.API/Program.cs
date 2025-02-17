@@ -158,7 +158,7 @@ builder.Services.AddAuthentication(x =>
         options.Events = new JwtBearerEvents
         {
             OnMessageReceived = context =>
-            {
+            { // httpContext
                 var accessToken = context.Request.Cookies["accessToken"];
                 if (!string.IsNullOrEmpty(accessToken)) context.Token = accessToken;
 

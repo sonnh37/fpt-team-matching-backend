@@ -13,9 +13,9 @@ namespace FPT.TeamMatching.API.Controllers;
 [ApiController]
 public class RateController : ControllerBase
 {
-    private readonly IRateService _rateservice;
+    private readonly ISpecialtyService _rateservice;
 
-    public RateController(IRateService _service)
+    public RateController(ISpecialtyService _service)
     {
         _rateservice = _service;
     }

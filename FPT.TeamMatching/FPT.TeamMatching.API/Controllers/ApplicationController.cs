@@ -13,52 +13,52 @@ namespace FPT.TeamMatching.API.Controllers;
 [ApiController]
 public class ApplicationController : ControllerBase
 {
-    private readonly IApplicationService _jobservice;
+    private readonly IApplicationService _service;
 
-    public ApplicationController(IApplicationService _service)
+    public ApplicationController(IApplicationService __service)
     {
-        _jobservice = _service;
+        _service = __service;
     }
 
     [HttpGet]
     public async Task<IActionResult> GetAll([FromQuery] ApplicationGetAllQuery query)
     {
-        var msg = await _jobservice.GetAll<ApplicationResult>(query);
+        var msg = await _service.GetAll<ApplicationResult>(query);
         return Ok(msg);
     }
 
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetById([FromRoute] Guid id)
     {
-        var msg = await _jobservice.GetById<ApplicationResult>(id);
+        var msg = await _service.GetById<ApplicationResult>(id);
         return Ok(msg);
     }
 
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] ApplicationCreateCommand request)
     {
-        var msg = await _jobservice.CreateOrUpdate<ApplicationResult>(request);
+        var msg = await _service.CreateOrUpdate<ApplicationResult>(request);
         return Ok(msg);
     }
 
     [HttpPut]
     public async Task<IActionResult> Update([FromBody] ApplicationUpdateCommand request)
     {
-        var businessResult = await _jobservice.CreateOrUpdate<ApplicationResult>(request);
+        var businessResult = await _service.CreateOrUpdate<ApplicationResult>(request);
         return Ok(businessResult);
     }
 
     [HttpPut("restore")]
     public async Task<IActionResult> Restore([FromBody] ApplicationRestoreCommand command)
     {
-        var businessResult = await _jobservice.Restore<ApplicationResult>(command);
+        var businessResult = await _service.Restore<ApplicationResult>(command);
         return Ok(businessResult);
     }
 
     [HttpDelete]
     public async Task<IActionResult> Delete([FromQuery] ApplicationDeleteCommand request)
     {
-        var businessResult = await _jobservice.DeleteById(request.Id, request.IsPermanent);
+        var businessResult = await _service.DeleteById(request.Id, request.IsPermanent);
 
         return Ok(businessResult);
     }

@@ -15,8 +15,8 @@ public class RefreshTokenRepository : BaseRepository<RefreshToken>, IRefreshToke
 
     public async Task<RefreshToken?> GetByRefreshTokenAsync(string refreshToken)
     {
-        var key = refreshToken.ToLower().Trim();
-        var queryable = GetQueryable();
+        var key = refreshToken.Trim();
+        var queryable = GetQueryable(m => m.Token == key);
         var entity = await queryable.SingleOrDefaultAsync();
 
         return entity;

@@ -46,20 +46,28 @@ public static class Const
 
     public const string API_PROJECTS = $"{BaseApi}/projects";
 
-    public const string API_PROJECT_ACTIVITIES = $"{BaseApi}/project-activities";
-
-    public const string API_TASKS = $"{BaseApi}/tasks";
-
     public const string API_REVIEWS = $"{BaseApi}/reviews";
 
-    public const string API_LECTURER_FEEDBACKS = $"{BaseApi}/lecturer-feedbacks";
+    public const string API_FEEDBACKS = $"{BaseApi}/feedbacks";
 
-    public const string API_INVITATION_USERS = $"{BaseApi}/invitation-users";
+    public const string API_INVITATIONS = $"{BaseApi}/invitations";
+
     public const string API_BLOGS = $"{BaseApi}/blogs";
+
     public const string API_COMMENTS = $"{BaseApi}/comments";
+
     public const string API_LIKES = $"{BaseApi}/likes";
+    
+    public const string API_AUTH = $"{BaseApi}/auth";
+
     public const string API_APPLICATIONS = $"{BaseApi}/applications";
+
     public const string API_RATES = $"{BaseApi}/rates";
+
+    public const string API_IDEAS = $"{BaseApi}/ideas";
+
+    public const string API_IDEA_REVIEWS = $"{BaseApi}/idea-reviews";
+
     public const string API_TEAM_MEMBERS = $"{BaseApi}/team-members";
 
     public const string API_NOTIFICATIONS = $"{BaseApi}/notifications";
@@ -68,12 +76,13 @@ public static class Const
 
     public const string API_SKILLPROFILES = $"{BaseApi}/skill-profiles";
 
-    public const string? API_VERIFY_QUALIFIED = $"{BaseApi}/verify-qualified";
-
-    public const string API_VERIFY_SEMESTER = $"{BaseApi}/verify-semester";
-
     public const string API_MESSAGE = $"{BaseApi}/message";
+
     public const string API_CONVERSATION_MEMBER = $"{BaseApi}/conversation-members";
+
+    public const string API_PROFESSIONS = $"{BaseApi}/professions";
+
+    public const string API_SPECIALTIES = $"{BaseApi}/specialties";
 
     public const string SortFieldDefault = "CreatedDate";
 

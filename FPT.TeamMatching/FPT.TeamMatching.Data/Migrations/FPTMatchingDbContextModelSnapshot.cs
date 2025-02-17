@@ -207,13 +207,22 @@ namespace FPT.TeamMatching.Data.Migrations
                         .HasColumnType("uuid")
                         .HasDefaultValueSql("gen_random_uuid()");
 
+                    b.Property<string>("Abbreviations")
+                        .HasColumnType("text");
+
                     b.Property<string>("CreatedBy")
                         .HasColumnType("text");
 
                     b.Property<DateTimeOffset?>("CreatedDate")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<string>("Description")
+                        .HasColumnType("text");
+
                     b.Property<string>("EnglishName")
+                        .HasColumnType("text");
+
+                    b.Property<string>("EnterpriseName")
                         .HasColumnType("text");
 
                     b.Property<string>("File")
@@ -225,11 +234,11 @@ namespace FPT.TeamMatching.Data.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
 
-                    b.Property<bool?>("IsExistedTeam")
+                    b.Property<bool>("IsEnterpriseTopic")
                         .HasColumnType("boolean");
 
-                    b.Property<string>("Major")
-                        .HasColumnType("text");
+                    b.Property<bool>("IsExistedTeam")
+                        .HasColumnType("boolean");
 
                     b.Property<int?>("MaxTeamSize")
                         .HasColumnType("integer");
@@ -240,14 +249,14 @@ namespace FPT.TeamMatching.Data.Migrations
                     b.Property<Guid?>("SemesterId")
                         .HasColumnType("uuid");
 
+                    b.Property<Guid?>("SpecialtyId")
+                        .HasColumnType("uuid");
+
                     b.Property<string>("Status")
                         .HasColumnType("text");
 
                     b.Property<Guid?>("SubMentorId")
                         .HasColumnType("uuid");
-
-                    b.Property<string>("Title")
-                        .HasColumnType("text");
 
                     b.Property<string>("Type")
                         .HasColumnType("text");
@@ -267,6 +276,8 @@ namespace FPT.TeamMatching.Data.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("SemesterId");
+
+                    b.HasIndex("SpecialtyId");
 
                     b.HasIndex("SubMentorId");
 
@@ -451,6 +462,38 @@ namespace FPT.TeamMatching.Data.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Notification", (string)null);
+                });
+
+            modelBuilder.Entity("FPT.TeamMatching.Domain.Entities.Profession", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("text");
+
+                    b.Property<DateTimeOffset?>("CreatedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Note")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ProfessionName")
+                        .HasColumnType("text");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("text");
+
+                    b.Property<DateTimeOffset?>("UpdatedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Profession", (string)null);
                 });
 
             modelBuilder.Entity("FPT.TeamMatching.Domain.Entities.ProfileStudent", b =>
@@ -858,6 +901,44 @@ namespace FPT.TeamMatching.Data.Migrations
                     b.ToTable("SkillProfile", (string)null);
                 });
 
+            modelBuilder.Entity("FPT.TeamMatching.Domain.Entities.Specialty", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("text");
+
+                    b.Property<DateTimeOffset?>("CreatedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Note")
+                        .HasColumnType("text");
+
+                    b.Property<Guid?>("ProfessionId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("SpecialtyName")
+                        .HasColumnType("text");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("text");
+
+                    b.Property<DateTimeOffset?>("UpdatedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProfessionId");
+
+                    b.ToTable("Specialty", (string)null);
+                });
+
             modelBuilder.Entity("FPT.TeamMatching.Domain.Entities.TeamMember", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1067,6 +1148,10 @@ namespace FPT.TeamMatching.Data.Migrations
                         .WithMany("Ideas")
                         .HasForeignKey("SemesterId");
 
+                    b.HasOne("FPT.TeamMatching.Domain.Entities.Specialty", "Specialty")
+                        .WithMany("Ideas")
+                        .HasForeignKey("SpecialtyId");
+
                     b.HasOne("FPT.TeamMatching.Domain.Entities.User", "SubMentor")
                         .WithMany("IdeaOfSubMentors")
                         .HasForeignKey("SubMentorId");
@@ -1076,6 +1161,8 @@ namespace FPT.TeamMatching.Data.Migrations
                         .HasForeignKey("UserId");
 
                     b.Navigation("Semester");
+
+                    b.Navigation("Specialty");
 
                     b.Navigation("SubMentor");
 
@@ -1222,6 +1309,15 @@ namespace FPT.TeamMatching.Data.Migrations
                     b.Navigation("ProfileStudent");
                 });
 
+            modelBuilder.Entity("FPT.TeamMatching.Domain.Entities.Specialty", b =>
+                {
+                    b.HasOne("FPT.TeamMatching.Domain.Entities.Profession", "Profession")
+                        .WithMany("Specialties")
+                        .HasForeignKey("ProfessionId");
+
+                    b.Navigation("Profession");
+                });
+
             modelBuilder.Entity("FPT.TeamMatching.Domain.Entities.TeamMember", b =>
                 {
                     b.HasOne("FPT.TeamMatching.Domain.Entities.Project", "Project")
@@ -1268,6 +1364,11 @@ namespace FPT.TeamMatching.Data.Migrations
                     b.Navigation("Project");
                 });
 
+            modelBuilder.Entity("FPT.TeamMatching.Domain.Entities.Profession", b =>
+                {
+                    b.Navigation("Specialties");
+                });
+
             modelBuilder.Entity("FPT.TeamMatching.Domain.Entities.ProfileStudent", b =>
                 {
                     b.Navigation("SkillProfiles");
@@ -1293,6 +1394,11 @@ namespace FPT.TeamMatching.Data.Migrations
                 });
 
             modelBuilder.Entity("FPT.TeamMatching.Domain.Entities.Semester", b =>
+                {
+                    b.Navigation("Ideas");
+                });
+
+            modelBuilder.Entity("FPT.TeamMatching.Domain.Entities.Specialty", b =>
                 {
                     b.Navigation("Ideas");
                 });

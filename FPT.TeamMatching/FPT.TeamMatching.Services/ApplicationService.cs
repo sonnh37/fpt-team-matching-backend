@@ -7,6 +7,7 @@ using FPT.TeamMatching.Services.Bases;
 
 namespace FPT.TeamMatching.Services;
 
+
 public class ApplicationService : BaseService<Application>, IApplicationService
 {
     private readonly IApplicationRepository _service;

@@ -2,6 +2,6 @@
 
 namespace FPT.TeamMatching.Domain.Models.Requests.Commands.TeamMembers;
 
-public class TeamDeleteCommand : DeleteCommand
+public class TeamMemberDeleteCommand : DeleteCommand
 {
 }

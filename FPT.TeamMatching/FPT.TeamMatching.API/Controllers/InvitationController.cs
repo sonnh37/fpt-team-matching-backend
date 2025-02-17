@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace FPT.TeamMatching.API.Controllers;
 
-[Route(Const.API_INVITATION_USERS)]
+[Route(Const.API_INVITATIONS)]
 [ApiController]
 public class InvitationController : ControllerBase
 {
@@ -52,6 +52,14 @@ public class InvitationController : ControllerBase
     public async Task<IActionResult> Delete([FromQuery] InvitationDeleteCommand request)
     {
         var businessResult = await _service.DeleteById(request.Id, request.IsPermanent);
+
+        return Ok(businessResult);
+    }
+
+    [HttpPut("restore")]
+    public async Task<IActionResult> Restore([FromBody] InvitationRestoreCommand command)
+    {
+        var businessResult = await _service.Restore<InvitationResult>(command);
 
         return Ok(businessResult);
     }
