@@ -1,12 +1,14 @@
 ﻿using FPT.TeamMatching.Domain.Contracts.Services;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Users;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Users;
+using FPT.TeamMatching.Domain.Utilities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FPT.TeamMatching.API.Controllers;
 
-[Route("auth")]
+[Route(Const.API_AUTH)]
+[ApiController]
 public class AuthController : ControllerBase
 {
     private readonly IAuthService _authService;
