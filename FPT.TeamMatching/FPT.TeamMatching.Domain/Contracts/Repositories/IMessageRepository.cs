@@ -7,5 +7,5 @@ public interface IMessageRepository
 {
     Task AddMessage(Message message);
     Task<Message> GetMessageByIdAsync(Guid id);
-    Task<List<Message>> GetMessageByConversationId(Guid conversationId);
+    Task<List<Message>> GetMessageByConversationId(Guid conversationId, int pageNumber, int pageSize);
 }

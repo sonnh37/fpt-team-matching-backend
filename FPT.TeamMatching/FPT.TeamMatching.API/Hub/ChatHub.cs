@@ -5,6 +5,7 @@ using FPT.TeamMatching.Domain.Configs;
 using FPT.TeamMatching.Domain.Contracts.UnitOfWorks;
 using FPT.TeamMatching.Domain.Entities;
 using FPT.TeamMatching.Domain.Models;
+using FPT.TeamMatching.Domain.Utilities.Redis;
 using Microsoft.AspNetCore.SignalR;
 using Quartz.Util;
 using StackExchange.Redis;
@@ -17,30 +18,18 @@ public class ChatHub : Microsoft.AspNetCore.SignalR.Hub
     private readonly IMapper _mapper;
     private readonly IDatabase _redis;
     private readonly IMongoUnitOfWork _unitOfWork;
+    private readonly RedisUtil _redisUtil;
 
     public ChatHub(IMongoUnitOfWork unitOfWork, IMapper mapper, RedisConfig redisConfig,
-        IKafkaProducerConfig kafkaProducerConfig)
+        IKafkaProducerConfig kafkaProducerConfig, RedisUtil redisUtil)
     {
         _unitOfWork = unitOfWork;
         _mapper = mapper;
         _redis = redisConfig.GetConnection();
         _kafkaProducer = kafkaProducerConfig;
+        _redisUtil = redisUtil;
     }
-    public async Task SaveLastMessageToRedis(Guid? conversationId, Guid? senderId, string content, long timestamp)
-    {
-        string redisKey = $"conversation:last_message:{conversationId}";
-
-        var lastMessageData = new HashEntry[]
-        {
-            new HashEntry("senderId", senderId.ToString()),
-            new HashEntry("content", content),
-            new HashEntry("timestamp", timestamp.ToString()),
-            new HashEntry("isSeen", "0"),
-        };
-
-        await _redis.HashSetAsync(redisKey, lastMessageData);
-    }
-
+    
     public async Task SendMessage(string message)
     {
         try
@@ -75,11 +64,11 @@ public class ChatHub : Microsoft.AspNetCore.SignalR.Hub
 
             //5. Send message
             await Clients.Group(conn.ConversationId.ToString())
-                .SendAsync("ReceiveSpecificMessage", conn.UserId, message);
+                .SendAsync("ReceiveSpecificMessage", conn.UserId, message, conn.ConversationId);
             
             //6. Lưu lại lasted message vào redis
-            await SaveLastMessageToRedis(conn.ConversationId, conn.UserId, message,
-                DateTimeOffset.UtcNow.ToUnixTimeSeconds()
+            await _redisUtil.SaveLastMessageToRedis(conn.ConversationId, conn.UserId, message,
+                DateTimeOffset.UtcNow.ToUnixTimeSeconds(), "0"
             );
         }
         catch (Exception e)

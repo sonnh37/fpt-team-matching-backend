@@ -8,6 +8,7 @@ using FPT.TeamMatching.Domain.Configs.Mapping;
 using FPT.TeamMatching.Domain.Contracts.Hangfire;
 using FPT.TeamMatching.Domain.Contracts.Services;
 using FPT.TeamMatching.Domain.Models;
+using FPT.TeamMatching.Domain.Utilities.Redis;
 using FPT.TeamMatching.Services;
 using Hangfire;
 using Hangfire.PostgreSql;
@@ -118,7 +119,7 @@ builder.Services.AddScoped<CloudinaryConfig>();
 #region Redis
 
 builder.Services.AddSingleton<RedisConfig>();
-
+builder.Services.AddSingleton<RedisUtil>();
 #endregion
 
 #region Config-Authentication_Authorization
