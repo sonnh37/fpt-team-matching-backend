@@ -41,7 +41,7 @@ public static class FilterHelper
                 m.Specialty != null && m.Specialty.Profession != null &&
                 m.Specialty.Profession.Id == query.ProfessionId);
         }
-
+        
         queryable = BaseFilterHelper.Base(queryable, query);
 
         return queryable;
@@ -49,6 +49,20 @@ public static class FilterHelper
 
     private static IQueryable<User>? User(IQueryable<User> queryable, UserGetAllQuery query)
     {
+        if (query.Role != null)
+        {
+            queryable = queryable.Where(m =>
+                 m.UserXRoles.Any(uxr => uxr.Role != null && uxr.Role.RoleName == query.Role));
+        }
+        
+        if (!string.IsNullOrEmpty(query.EmailOrFullname))
+        {
+            queryable = queryable.Where(m =>
+                m.LastName != null && m.FirstName != null && ((m.Email != null && m.Email.Contains(query.EmailOrFullname.Trim().ToLower())) ||
+                                                              (m.LastName.Trim().ToLower() + " " + m.FirstName.Trim().ToLower()).Contains(query.EmailOrFullname.Trim().ToLower()))
+            );
+        }
+        
         queryable = BaseFilterHelper.Base(queryable, query);
 
         return queryable;
