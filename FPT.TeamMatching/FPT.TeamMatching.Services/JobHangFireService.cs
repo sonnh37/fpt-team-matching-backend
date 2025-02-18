@@ -25,7 +25,7 @@ public class JobHangFireService : IJobHangfireService
         var consumerConfig = new ConsumerConfig
         {
             GroupId = "chat-consumer",
-            BootstrapServers = "localhost:29092",
+            BootstrapServers = "fpt.matching.kafka:9092",
             AutoOffsetReset = AutoOffsetReset.Earliest,
             EnableAutoCommit = false 
         };

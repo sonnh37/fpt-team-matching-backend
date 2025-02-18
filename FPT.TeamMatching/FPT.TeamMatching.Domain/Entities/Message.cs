@@ -1,4 +1,5 @@
-﻿using MongoDB.Bson.Serialization.Attributes;
+﻿using System.Text.Json.Serialization;
+using MongoDB.Bson.Serialization.Attributes;
 
 namespace FPT.TeamMatching.Domain.Entities;
 
@@ -13,5 +14,7 @@ public class Message
     [BsonElement] public string? Content { get; set; }
     [BsonElement] public DateTime? CreatedDate { get; set; }
 
-    [BsonIgnore] public virtual Conversation? Conversation { get; set; }
+    [BsonIgnore] 
+    [JsonIgnore]
+    public virtual Conversation? Conversation { get; set; }
 }

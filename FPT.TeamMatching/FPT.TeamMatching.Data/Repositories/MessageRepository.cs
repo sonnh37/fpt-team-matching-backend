@@ -42,11 +42,15 @@ public class MessageRepository : IMessageRepository
         }
     }
 
-    public async Task<List<Message>> GetMessageByConversationId(Guid conversationId)
+    public async Task<List<Message>> GetMessageByConversationId(Guid conversationId, int pageNumber, int pageSize)
     {
         try
         {
-            return await _collection.Find(x => x.ConversationId == conversationId.ToString()).ToListAsync();
+            Console.WriteLine(pageNumber);
+            Console.WriteLine(pageSize);
+            var result = await _collection.Find(x => x.ConversationId == conversationId.ToString()).ToListAsync();
+            result = result.OrderByDescending(x => x.CreatedDate).Skip((pageNumber - 1) * pageSize).Take(pageSize).OrderBy(c => c.CreatedDate).ToList();
+            return result;
         }
         catch (Exception e)
         {

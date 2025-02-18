@@ -10,7 +10,7 @@ public class MessageConsumer(IMongoUnitOfWork unitOfWork) : BackgroundService
 {
     protected override Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        return Task.Run(() => { _ = ConsumeAsync("order-topic", stoppingToken); }, stoppingToken);
+        return Task.Run(() => { _ = ConsumeAsync("chat.message", stoppingToken); }, stoppingToken);
     }
 
     public async Task ConsumeAsync(string topic, CancellationToken stoppingToken)
@@ -31,17 +31,6 @@ public class MessageConsumer(IMongoUnitOfWork unitOfWork) : BackgroundService
 
             var message = JsonConvert.DeserializeObject<Message>(consumeResult.Message.Value);
             unitOfWork.MessageRepository.AddMessage(message);
-            // using var scope = scopeFactory.CreateScope();
-            // var dbContext = scope.ServiceProvider.GetRequiredService<InvoiceDbContext>();
-            //
-            // var invoiceEntity = new InvoiceModel
-            // {
-            //     Id = (Guid)order.InvoiceId,
-            //     PaymentAmount = order.TotalPrice,
-            //     PaymentDate = DateTime.Now,
-            // };
-            // dbContext.Invoice.Add(invoiceEntity);
-            // await dbContext.SaveChangesAsync();
         }
 
         consumer.Close();
