@@ -24,6 +24,8 @@ public static class FilterHelper
 
     private static IQueryable<Idea>? Idea(IQueryable<Idea> queryable, IdeaGetAllQuery query)
     {
+        if (query.IsExistedTeam != null) queryable = queryable.Where(m => query.IsExistedTeam.Value == m.IsExistedTeam);
+
         if (!string.IsNullOrEmpty(query.EnglishName))
         {
             queryable = queryable.Where(m =>
@@ -42,6 +44,14 @@ public static class FilterHelper
                 m.Specialty.Profession.Id == query.ProfessionId);
         }
 
+        if (query.Type != null)
+        {
+            queryable = queryable.Where(m =>
+                m.User != null && m.User.UserXRoles.Any(uxr =>
+                    uxr.Role != null && uxr.Role.RoleName != null &&
+                    uxr.Role.RoleName.ToLower().Trim() == query.Type.ToString()!.ToLower().Trim()));
+        }
+
         queryable = BaseFilterHelper.Base(queryable, query);
 
         return queryable;
@@ -49,6 +59,22 @@ public static class FilterHelper
 
     private static IQueryable<User>? User(IQueryable<User> queryable, UserGetAllQuery query)
     {
+        if (!string.IsNullOrEmpty(query.Role))
+        {
+            queryable = queryable.Where(m =>
+                m.UserXRoles.Any(uxr => uxr.Role != null && uxr.Role.RoleName == query.Role));
+        }
+
+        if (!string.IsNullOrEmpty(query.EmailOrFullname))
+        {
+            queryable = queryable.Where(m =>
+                m.LastName != null && m.FirstName != null &&
+                ((m.Email != null && m.Email.Contains(query.EmailOrFullname.Trim().ToLower())) ||
+                 (m.LastName.Trim().ToLower() + " " + m.FirstName.Trim().ToLower()).Contains(query.EmailOrFullname
+                     .Trim().ToLower()))
+            );
+        }
+
         queryable = BaseFilterHelper.Base(queryable, query);
 
         return queryable;

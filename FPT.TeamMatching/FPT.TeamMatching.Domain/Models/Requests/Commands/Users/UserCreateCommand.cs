@@ -13,6 +13,8 @@ public class UserCreateCommand : CreateCommand
 
     public string? Password { get; set; }
 
+    public string? Avatar { get; set; }
+
     public string? FirstName { get; set; }
 
     public string? LastName { get; set; }
@@ -24,4 +26,6 @@ public class UserCreateCommand : CreateCommand
     public string? Phone { get; set; }
 
     public string? Address { get; set; }
+
+    public string? Department { get; set; }
 }

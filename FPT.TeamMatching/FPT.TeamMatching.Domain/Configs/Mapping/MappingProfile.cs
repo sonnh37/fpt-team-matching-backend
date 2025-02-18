@@ -196,6 +196,14 @@ public class MappingProfile : Profile
         CreateMap<Specialty, SpecialtyUpdateCommand>().ReverseMap();
 
         #endregion
+        
+        #region Semester
+
+        CreateMap<Semester, SemesterResult>().ReverseMap();
+        // CreateMap<Semester, SemesterCreateCommand>().ReverseMap();
+        // CreateMap<Semester, SemesterUpdateCommand>().ReverseMap();
+
+        #endregion
 
     }
 }

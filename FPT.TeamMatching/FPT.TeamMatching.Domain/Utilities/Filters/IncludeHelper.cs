@@ -20,23 +20,25 @@ public static class IncludeHelper
 
     private static IQueryable<Idea> Idea(IQueryable<Idea> queryable)
     {
-
+        queryable = queryable.Include(m => m.User)
+            .ThenInclude(u => u.UserXRoles)
+            .ThenInclude(ur => ur.Role);
         return queryable;
     }
-    
+
     private static IQueryable<Profession> Profession(IQueryable<Profession> queryable)
     {
-        if (queryable.Any()) queryable = queryable.Include(m => m.Specialties);
+        queryable = queryable.Include(m => m.Specialties);
 
         return queryable;
     }
-    
+
     private static IQueryable<User> User(IQueryable<User> queryable)
     {
         // queryable = queryable
         //     .Include(m => m.Tasks);
 
-        if (queryable.Any()) queryable = queryable.Include(m => m.UserXRoles).ThenInclude(x => x.Role);
+        queryable = queryable.Include(m => m.UserXRoles).ThenInclude(x => x.Role);
 
         return queryable;
     }
