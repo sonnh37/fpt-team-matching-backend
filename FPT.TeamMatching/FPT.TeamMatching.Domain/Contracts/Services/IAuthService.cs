@@ -18,7 +18,5 @@ public interface IAuthService
 
     Task<BusinessResult> Logout(UserLogoutCommand userLogoutCommand);
 
-    Task<BusinessResult> RegisterByGoogleAsync(UserCreateByGoogleTokenCommand request);
-
-    Task<BusinessResult> LoginByGoogleTokenAsync(VerifyGoogleTokenRequest request);
+    Task<BusinessResult> LoginByGoogleTokenAsync(AuthByGoogleTokenQuery request);
 }

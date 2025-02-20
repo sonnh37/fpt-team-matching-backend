@@ -38,8 +38,11 @@ public class UserService : BaseService<User>, IUserService
                     .Build();
 
             // set password
-            var passwordHash = BCrypt.Net.BCrypt.HashPassword(command.Password);
-            command.Password = passwordHash;
+            if (command.Password != null)
+            {
+                var passwordHash = BCrypt.Net.BCrypt.HashPassword(command.Password);
+                command.Password = passwordHash;
+            }
 
             var res = await CreateOrUpdate<UserResult>(command);
 

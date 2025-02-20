@@ -7,6 +7,7 @@ using AutoMapper;
 using FPT.TeamMatching.Domain.Contracts.Repositories;
 using FPT.TeamMatching.Domain.Contracts.Services;
 using FPT.TeamMatching.Domain.Contracts.UnitOfWorks;
+using FPT.TeamMatching.Domain.Entities;
 using FPT.TeamMatching.Domain.Models;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.RefreshTokens;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Users;
@@ -15,6 +16,11 @@ using FPT.TeamMatching.Domain.Models.Responses;
 using FPT.TeamMatching.Domain.Models.Results;
 using FPT.TeamMatching.Domain.Models.Results.Bases;
 using FPT.TeamMatching.Domain.Utilities;
+using Google.Apis.Auth;
+using Google.Apis.Auth.OAuth2;
+using Google.Apis.Oauth2.v2;
+using Google.Apis.Oauth2.v2.Data;
+using Google.Apis.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
@@ -24,7 +30,6 @@ namespace FPT.TeamMatching.Services;
 
 public class AuthService : IAuthService
 {
-    private readonly string _clientId;
     private readonly IConfiguration _configuration;
     protected readonly IHttpContextAccessor _httpContextAccessor;
     protected readonly IMapper _mapper;
@@ -84,11 +89,20 @@ public class AuthService : IAuthService
     public BusinessResult Login(AuthQuery query)
     {
         var user = _userRepository.GetUserByUsernameOrEmail(query.Account).Result;
+        
         if (user == null)
             return new ResponseBuilder()
                 .WithStatus(Const.NOT_FOUND_CODE)
-                .WithMessage(Const.NOT_FOUND_MSG)
+                .WithMessage("Not found email")
                 .Build();
+
+        if (user.Department != query.Department)
+        {
+            return new ResponseBuilder()
+                .WithStatus(Const.NOT_FOUND_CODE)
+                .WithMessage("Not found department")
+                .Build(); 
+        }
 
         if (!BCrypt.Net.BCrypt.Verify(query.Password, user.Password))
             return new ResponseBuilder()
@@ -326,15 +340,206 @@ public class AuthService : IAuthService
     }
 
 
-    public Task<BusinessResult> RegisterByGoogleAsync(UserCreateByGoogleTokenCommand request)
+    #region login google
+
+    // private async Task<GoogleJsonWebSignature.Payload> VerifyGoogleToken(string token)
+    // {
+    //     var settings = new GoogleJsonWebSignature.ValidationSettings()
+    //     {
+    //         Audience = new List<string> { _clientId }
+    //     };
+    //
+    //     GoogleJsonWebSignature.Payload payload = await GoogleJsonWebSignature.ValidateAsync(token, settings);
+    //     return payload;
+    // }
+    
+    private async Task<Userinfo> VerifyGoogleAccessToken(string accessToken)
     {
-        throw new NotImplementedException();
+        var oauthService = new Oauth2Service(new BaseClientService.Initializer
+        {
+            HttpClientInitializer = GoogleCredential.FromAccessToken(accessToken),
+            // ApplicationName = "main"
+        });
+
+        // Lấy thông tin user từ Google
+        Userinfo userInfo = await oauthService.Userinfo.Get().ExecuteAsync();
+
+        return userInfo; // Trả về object có sẵn từ thư viện
     }
 
-    public Task<BusinessResult> LoginByGoogleTokenAsync(VerifyGoogleTokenRequest request)
+
+    public async Task<BusinessResult> LoginByGoogleTokenAsync(AuthByGoogleTokenQuery request)
     {
-        throw new NotImplementedException();
+        var payload = await VerifyGoogleAccessToken(request.Token!);
+        if (payload == null)
+        {
+            return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage("Error token google.")
+                .Build(); 
+        }
+        var user = await _userRepository.GetByEmail(payload.Email);
+        var result = _mapper.Map<UserResult>(user);
+        if (result == null)
+        {
+            // register
+            UserCreateCommand _userCreateCommand = new UserCreateCommand
+            {
+                Username = payload.Id,
+                Email = payload.Email,
+                FirstName = payload.GivenName,
+                LastName = payload.FamilyName,
+                Avatar = payload.Picture,
+                Department = request.Department,
+            };
+            var res = await _userService.Create(_userCreateCommand);
+
+            if (res.Status != 1)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("Error while saving refresh token.")
+                    .Build();
+            }
+
+            result = res.Data as UserResult;
+            result = result;
+        }
+        else
+        {
+            if (result.Department != request.Department)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(Const.NOT_FOUND_CODE)
+                    .WithMessage("Not found department")
+                    .Build(); 
+            }
+        }
+
+        using (var rsa = new RSACryptoServiceProvider(2048))
+        {
+            try
+            {
+                var publicKey = rsa.ToXmlString(false);
+
+                var kid = Convert.ToBase64String(SHA256.HashData(Encoding.UTF8.GetBytes(publicKey)));
+
+                var accessToken = CreateToken(result, rsa, "AccessToken", kid);
+
+                var refreshTokenValue = CreateToken(result, rsa, "RefreshToken", kid);
+
+                var refreshTokenCreateCommand = new RefreshTokenCreateCommand
+                {
+                    UserId = result.Id,
+                    Token = refreshTokenValue,
+                    PublicKey = publicKey,
+                    KeyId = kid
+                };
+
+                var res = _refreshTokenService.CreateOrUpdate<RefreshTokenResult>(refreshTokenCreateCommand).Result;
+
+                if (res.Status != 1)
+                    return new ResponseBuilder()
+                        .WithStatus(Const.FAIL_CODE)
+                        .WithMessage(Const.FAIL_SAVE_MSG)
+                        .Build();
+
+                var refreshToken = res.Data as RefreshTokenResult;
+
+                if (refreshToken == null)
+                    return new ResponseBuilder()
+                        .WithStatus(Const.FAIL_CODE)
+                        .WithMessage("Error while saving refresh token.")
+                        .Build();
+
+                SaveHttpOnlyCookie(accessToken, refreshToken.Token!);
+
+                return new ResponseBuilder()
+                    .WithStatus(Const.SUCCESS_CODE)
+                    .WithMessage("Login successful.")
+                    .Build();
+            }
+            finally
+            {
+                rsa.PersistKeyInCsp = false;
+            }
+        }
     }
+
+    // public async Task<BusinessResult> FindAccountRegisteredByGoogle(VerifyGoogleTokenRequest request)
+    // {
+    //     var verifyGoogleToken = new VerifyGoogleTokenRequest
+    //     {
+    //         Token = request.Token
+    //     };
+    //
+    //     var response = VerifyGoogleTokenAsync(verifyGoogleToken).Result;
+    //
+    //     if (response.Status != Const.SUCCESS_CODE)
+    //     {
+    //         return response;
+    //     }
+    //
+    //     var payload = response.Data as GoogleJsonWebSignature.Payload;
+    //     var user = await _userRepository.GetByEmail(payload.Email);
+    //     var userResult = _mapper.Map<UserResult>(user);
+    //     if (userResult == null)
+    //     {
+    //         return new BusinessResult(Const.SUCCESS_CODE, "Email has not registered by google", null);
+    //     }
+    //
+    //     return new BusinessResult(Const.SUCCESS_CODE, "Email has registered by google", userResult);
+    // }
+    //
+    // public async Task<BusinessResult> RegisterByGoogleAsync(UserCreateByGoogleTokenCommand request)
+    // {
+    //     var verifyGoogleToken = new VerifyGoogleTokenRequest
+    //     {
+    //         Token = request.Token
+    //     };
+    //
+    //     var response = VerifyGoogleTokenAsync(verifyGoogleToken).Result;
+    //
+    //     if (response.Status != Const.SUCCESS_CODE)
+    //     {
+    //         return response;
+    //     }
+    //
+    //     var payload = response.Data as GoogleJsonWebSignature.Payload;
+    //     var user = await _userRepository.GetByEmail(payload.Email);
+    //
+    //     if (user != null)
+    //     {
+    //         return new BusinessResult(Const.FAIL_CODE, "Email has existed in server");
+    //     }
+    //
+    //     //string base64Image = await GetBase64ImageFromUrl(payload.Picture);
+    //     var passwordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
+    //     UserCreateCommand _user = new UserCreateCommand
+    //     {
+    //         Username = payload.Subject,
+    //         Email = payload.Email,
+    //         Password = passwordHash,
+    //         FirstName = payload.GivenName,
+    //         LastName = payload.FamilyName,
+    //         Role = Role.Customer,
+    //         Avatar = payload.Picture
+    //     };
+    //
+    //     var _response = await AddUser(_user);
+    //     var _userAdded = _response.Data as User;
+    //     var userResult = _mapper.Map<UserResult>(_userAdded);
+    //     var (token, expiration) = CreateToken(userResult);
+    //     var loginResponse = new LoginResponse(token, expiration);
+    //
+    //     return new ResponseBuilder<LoginResponse>()
+    //         .WithData(loginResponse)
+    //         .WithStatus(Const.SUCCESS_CODE)
+    //         .WithMessage(Const.SUCCESS_LOGIN_MSG)
+    //         .Build();
+    // }
+
+    #endregion
 
     private string NormalizeIpAddress(string ipAddress)
     {
