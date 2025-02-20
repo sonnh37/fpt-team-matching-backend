@@ -9,6 +9,6 @@ public enum InvitationStatus
     
 public enum InvitationType
 {
-    Invite,
+    RequestToJoin,
     JoinRequest,
 }

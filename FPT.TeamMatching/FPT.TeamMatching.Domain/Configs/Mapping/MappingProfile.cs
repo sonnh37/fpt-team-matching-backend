@@ -144,9 +144,9 @@ public class MappingProfile : Profile
 
         #region Invitation
 
-        //CreateMap<Invitation, InvitationResult>().ReverseMap();
-        //CreateMap<Invitation, InvitationCreateCommand>().ReverseMap();
-        //CreateMap<Invitation, InvitationUpdateCommand>().ReverseMap();
+        CreateMap<Invitation, InvitationResult>().ReverseMap();
+        CreateMap<Invitation, InvitationCreateCommand>().ReverseMap();
+        CreateMap<Invitation, InvitationUpdateCommand>().ReverseMap();
 
         #endregion
 

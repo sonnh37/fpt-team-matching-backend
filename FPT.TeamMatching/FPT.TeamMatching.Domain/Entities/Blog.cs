@@ -17,7 +17,7 @@ public class Blog : BaseEntity
 
     public virtual ICollection<Comment> Comments { get; set; } = new List<Comment>();
 
-    public virtual ICollection<BlogCv> Applications { get; set; } = new List<BlogCv>();
+    public virtual ICollection<BlogCv> BlogCvs { get; set; } = new List<BlogCv>();
 
     public virtual ICollection<Like> Likes { get; set; } = new List<Like>();
 

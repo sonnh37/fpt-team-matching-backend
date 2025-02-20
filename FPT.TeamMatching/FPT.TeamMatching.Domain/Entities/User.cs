@@ -44,7 +44,7 @@ public class User : BaseEntity
 
     public virtual ICollection<Invitation> InvitationOfReceivers { get; set; } = new List<Invitation>();
 
-    public virtual ICollection<BlogCv> Applications { get; set; } = new List<BlogCv>();
+    public virtual ICollection<BlogCv> BlogCvs { get; set; } = new List<BlogCv>();
 
     public virtual ICollection<Like> Likes { get; set; } = new List<Like>();
 

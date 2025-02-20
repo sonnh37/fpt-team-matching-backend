@@ -17,7 +17,7 @@ public partial class FPTMatchingDbContext : BaseDbContext
 
     public virtual DbSet<Invitation> Invitations { get; set; }
 
-    public virtual DbSet<BlogCv> Applications { get; set; }
+    public virtual DbSet<BlogCv> BlogCvs { get; set; }
 
     public virtual DbSet<Like> Likes { get; set; }
 
@@ -106,16 +106,16 @@ public partial class FPTMatchingDbContext : BaseDbContext
         {
             entity.HasKey(e => e.Id);
 
-            entity.ToTable("Application");
+            entity.ToTable("BlogCv");
 
             entity.Property(e => e.Id).ValueGeneratedOnAdd()
                 .HasDefaultValueSql("gen_random_uuid()");
             entity.Property(e => e.FileCv).HasMaxLength(1);
 
-            entity.HasOne(d => d.Blog).WithMany(p => p.Applications)
+            entity.HasOne(d => d.Blog).WithMany(p => p.BlogCvs)
                 .HasForeignKey(d => d.BlogId);
 
-            entity.HasOne(d => d.User).WithMany(p => p.Applications)
+            entity.HasOne(d => d.User).WithMany(p => p.BlogCvs)
                 .HasForeignKey(d => d.UserId);
         });
 
