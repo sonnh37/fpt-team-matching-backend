@@ -1,8 +1,8 @@
 ﻿using FPT.TeamMatching.Domain.Models.Requests.Queries.Base;
 
-namespace FPT.TeamMatching.Domain.Models.Requests.Queries.Applications;
+namespace FPT.TeamMatching.Domain.Models.Requests.Queries.BlogCvs;
 
-public class ApplicationGetAllQuery : GetQueryableQuery
+public class BlogCvGetAllQuery : GetQueryableQuery
 {
     public Guid? UserId { get; set; }
 

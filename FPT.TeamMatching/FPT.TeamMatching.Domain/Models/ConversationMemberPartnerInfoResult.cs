@@ -1,4 +1,4 @@
-namespace FPT.TeamMatching.Domain.Models.Results;
+namespace FPT.TeamMatching.Domain.Models;
 
 public class ConversationMemberPartnerInfoResult
 {

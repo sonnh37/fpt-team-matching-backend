@@ -3,7 +3,7 @@ using FPT.TeamMatching.Domain.Entities;
 
 namespace FPT.TeamMatching.Domain.Contracts.Repositories;
 
-public interface IApplicationRepository : IBaseRepository<Application>
+public interface IBlogCvRepository : IBaseRepository<BlogCv>
 {
 
 }

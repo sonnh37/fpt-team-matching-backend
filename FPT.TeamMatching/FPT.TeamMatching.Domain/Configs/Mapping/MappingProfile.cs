@@ -1,5 +1,5 @@
 ﻿using FPT.TeamMatching.Domain.Entities;
-using FPT.TeamMatching.Domain.Models.Requests.Commands.Applications;
+using FPT.TeamMatching.Domain.Models.Requests.Commands.BlogCvs;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Blogs;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Comments;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Invitations;
@@ -102,11 +102,11 @@ public class MappingProfile : Profile
 
         #endregion
 
-        #region Application
+        #region BlogCv
 
-        CreateMap<Application, ApplicationResult>().ReverseMap();
-        CreateMap<Application, ApplicationCreateCommand>().ReverseMap();
-        CreateMap<Application, ApplicationUpdateCommand>().ReverseMap();
+        CreateMap<BlogCv, BlogCvResult>().ReverseMap();
+        CreateMap<BlogCv, BlogCvCreateCommand>().ReverseMap();
+        CreateMap<BlogCv, BlogCvUpdateCommand>().ReverseMap();
 
         #endregion
 

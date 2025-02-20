@@ -1,8 +1,8 @@
 ﻿using FPT.TeamMatching.Domain.Models.Requests.Commands.Base;
 
-namespace FPT.TeamMatching.Domain.Models.Requests.Commands.Applications;
+namespace FPT.TeamMatching.Domain.Models.Requests.Commands.BlogCvs;
 
-public class ApplicationCreateCommand : CreateCommand
+public class BlogCvCreateCommand : CreateCommand
 {
     public Guid? UserId { get; set; }
 

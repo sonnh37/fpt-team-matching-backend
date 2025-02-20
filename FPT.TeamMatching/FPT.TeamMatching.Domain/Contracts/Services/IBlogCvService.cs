@@ -2,7 +2,7 @@
 
 namespace FPT.TeamMatching.Domain.Contracts.Services
 {
-    public interface IApplicationService : IBaseService
+    public interface IBlogCvService : IBaseService
     {
 
     }

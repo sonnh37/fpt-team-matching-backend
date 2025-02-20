@@ -17,7 +17,7 @@ public partial class FPTMatchingDbContext : BaseDbContext
 
     public virtual DbSet<Invitation> Invitations { get; set; }
 
-    public virtual DbSet<Application> Applications { get; set; }
+    public virtual DbSet<BlogCv> Applications { get; set; }
 
     public virtual DbSet<Like> Likes { get; set; }
 
@@ -102,7 +102,7 @@ public partial class FPTMatchingDbContext : BaseDbContext
                 .HasForeignKey(d => d.ReceiverId);
         });
 
-        modelBuilder.Entity<Application>(entity =>
+        modelBuilder.Entity<BlogCv>(entity =>
         {
             entity.HasKey(e => e.Id);
 

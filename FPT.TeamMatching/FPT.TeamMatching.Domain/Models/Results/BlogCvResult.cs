@@ -2,7 +2,7 @@
 
 namespace FPT.TeamMatching.Domain.Models.Results;
 
-public class ApplicationResult : BaseResult
+public class BlogCvResult : BaseResult
 {
     public Guid? UserId { get; set; }
 

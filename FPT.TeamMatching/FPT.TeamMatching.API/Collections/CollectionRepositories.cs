@@ -22,7 +22,7 @@ public static class CollectionRepositories
         services.AddScoped<ILikeRepository, LikeRepository>();
         services.AddScoped<ICommentRepository, CommentRepository>();
         services.AddScoped<IRateRepository, RateRepository>();
-        services.AddScoped<IApplicationRepository, ApplicationRepository>();
+        services.AddScoped<IBlogCvRepository, BlogCvRepository>();
         services.AddScoped<ITeamMemberRepository, TeamMemberRepository>();
         services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
         services.AddScoped<INotificationRepository, NotificationRepository>();
