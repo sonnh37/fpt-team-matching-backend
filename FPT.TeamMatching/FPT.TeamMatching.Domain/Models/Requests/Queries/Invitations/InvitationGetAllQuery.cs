@@ -9,11 +9,12 @@ public class InvitationGetAllQuery : GetQueryableQuery
 
     public Guid? SenderId { get; set; }
 
-    public Guid? ReceiverId { get; set; }
+    public Guid? ReceiverId { get; set; }   
 
     public InvitationStatus? Status { get; set; }
 
     public InvitationType? Type { get; set; }
 
     public string? Content { get; set; }
+
 }

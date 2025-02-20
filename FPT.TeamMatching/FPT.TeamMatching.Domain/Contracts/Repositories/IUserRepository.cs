@@ -1,5 +1,6 @@
 ﻿using FPT.TeamMatching.Domain.Contracts.Repositories.Bases;
 using FPT.TeamMatching.Domain.Entities;
+using FPT.TeamMatching.Domain.Models;
 using FPT.TeamMatching.Domain.Models.Results;
 
 namespace FPT.TeamMatching.Domain.Contracts.Repositories;

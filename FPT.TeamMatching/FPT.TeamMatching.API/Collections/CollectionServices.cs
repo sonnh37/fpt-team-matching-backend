@@ -13,7 +13,7 @@ public static class CollectionServices
         services.AddTransient<ILikeService, LikeService>();
         services.AddTransient<ICommentService, CommentService>();
         services.AddTransient<ISpecialtyService, RateService>();
-        services.AddTransient<IApplicationService, ApplicationService>();
+        services.AddTransient<IBlogCvService, BlogCvService>();
         services.AddTransient<ITeamMemberService, TeamMemberService>();
         services.AddTransient<IAuthService, AuthService>();
         services.AddTransient<IReviewService, ReviewService>();

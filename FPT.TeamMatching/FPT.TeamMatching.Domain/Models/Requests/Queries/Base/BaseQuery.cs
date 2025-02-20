@@ -38,7 +38,3 @@ public class GetByIdQuery : BaseQuery
 {
     public Guid? Id { get; set; }
 }
-
-public class GetAllQuery : GetQueryableQuery
-{
-}

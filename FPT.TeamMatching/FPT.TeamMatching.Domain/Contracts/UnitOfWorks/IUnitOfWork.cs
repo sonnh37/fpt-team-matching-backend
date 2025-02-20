@@ -11,7 +11,7 @@ public interface IUnitOfWork : IBaseUnitOfWork
     IRateRepository RateRepository { get; }
     IIdeaRepository IdeaRepository { get; }
     IIdeaReviewRepository IdeaReviewRepository { get; }
-    IApplicationRepository ApplicationRepository { get; }
+    IBlogCvRepository BlogCvRepository { get; }
     ITeamMemberRepository TeamMemberRepository { get; }
     IProjectRepository ProjectRepository { get; }
     IFeedbackRepository FeedbackRepository { get; }

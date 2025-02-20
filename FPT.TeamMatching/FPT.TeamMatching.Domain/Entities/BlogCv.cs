@@ -2,7 +2,7 @@
 
 namespace FPT.TeamMatching.Domain.Entities;
 
-public class Application : BaseEntity
+public class BlogCv : BaseEntity
 {
     public Guid? UserId { get; set; }
 

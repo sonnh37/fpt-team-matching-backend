@@ -5,9 +5,9 @@ using FPT.TeamMatching.Domain.Entities;
 
 namespace FPT.TeamMatching.Data.Repositories;
 
-public class ApplicationRepository : BaseRepository<Application>, IApplicationRepository
+public class BlogCvRepository : BaseRepository<BlogCv>, IBlogCvRepository
 {
-    public ApplicationRepository(FPTMatchingDbContext dbContext) : base(dbContext)
+    public BlogCvRepository(FPTMatchingDbContext dbContext) : base(dbContext)
     {
     }
 }

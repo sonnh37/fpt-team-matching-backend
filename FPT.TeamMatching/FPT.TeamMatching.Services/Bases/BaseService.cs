@@ -34,90 +34,7 @@ public abstract class BaseService<TEntity> : BaseService, IBaseService
         _baseRepository = _unitOfWork.GetRepositoryByEntity<TEntity>();
         _httpContextAccessor ??= new HttpContextAccessor();
     }
-
-    public BusinessResult GetUserByCookie()
-    {
-        try
-        {
-            if (_httpContextAccessor?.HttpContext == null ||
-                !_httpContextAccessor.HttpContext.User.Identity.IsAuthenticated)
-                return HandlerNotFound("Not login yet");
-
-            // Lấy thông tin UserId từ Claims
-            var userIdClaim = _httpContextAccessor.HttpContext.User.FindFirst("Id")?.Value;
-            if (string.IsNullOrEmpty(userIdClaim))
-                return HandlerNotFound("No user claim found");
-
-            // Lấy thêm thông tin User từ database nếu cần
-            var userId = Guid.Parse(userIdClaim);
-            var user = _unitOfWork.UserRepository.GetById(userId).Result;
-            var userResult = _mapper.Map<UserResult>(user);
-
-            if (userResult == null) return HandlerNotFound();
-
-            return new ResponseBuilder<UserResult>()
-                .WithData(userResult)
-                .WithStatus(Const.SUCCESS_CODE)
-                .WithMessage(Const.SUCCESS_READ_MSG)
-                .Build();
-        }
-        catch (Exception ex)
-        {
-            return HandlerError(ex.Message);
-        }
-    }
-
-    public User? GetUser()
-    {
-        try
-        {
-            if (_httpContextAccessor?.HttpContext == null ||
-                !_httpContextAccessor.HttpContext.User.Identity.IsAuthenticated)
-                return null;
-
-            // Lấy thông tin UserId từ Claims
-            var userIdClaim = _httpContextAccessor.HttpContext.User.FindFirst("Id")?.Value;
-            if (string.IsNullOrEmpty(userIdClaim))
-                return null;
-
-            // Lấy thêm thông tin User từ database nếu cần
-            var userId = Guid.Parse(userIdClaim);
-            var user = _unitOfWork.UserRepository.GetById(userId).Result;
-
-            return user;
-        }
-        catch (Exception ex)
-        {
-            // Log lỗi nếu cần thiết
-            return null;
-        }
-    }
-
-    public BusinessResult HandlerError(string message)
-    {
-        var errorMessage = $"An error {typeof(TEntity).Name}: {message}";
-        return new ResponseBuilder()
-            .WithStatus(Const.FAIL_CODE)
-            .WithMessage(errorMessage)
-            .Build();
-    }
-
-    public BusinessResult HandlerNotFound(string message = Const.NOT_FOUND_MSG)
-    {
-        return new ResponseBuilder()
-            .WithStatus(Const.NOT_FOUND_CODE)
-            .WithMessage(message)
-            .Build();
-    }
-
-    public BusinessResult HandlerFail(string message)
-    {
-        return new ResponseBuilder()
-            .WithStatus(Const.FAIL_CODE)
-            .WithMessage(message)
-            .Build();
-    }
-
+    
     #region Queries
 
     public async Task<BusinessResult> GetById<TResult>(Guid id) where TResult : BaseResult
@@ -447,4 +364,89 @@ public abstract class BaseService<TEntity> : BaseService, IBaseService
     }
 
     #endregion
+
+    // public BusinessResult GetUserByCookie()
+    // {
+    //     try
+    //     {
+    //         if (_httpContextAccessor?.HttpContext == null ||
+    //             !_httpContextAccessor.HttpContext.User.Identity.IsAuthenticated)
+    //             return HandlerNotFound("Not login yet");
+    //
+    //         // Lấy thông tin UserId từ Claims
+    //         var userIdClaim = _httpContextAccessor.HttpContext.User.FindFirst("Id")?.Value;
+    //         if (string.IsNullOrEmpty(userIdClaim))
+    //             return HandlerNotFound("No user claim found");
+    //
+    //         // Lấy thêm thông tin User từ database nếu cần
+    //         var userId = Guid.Parse(userIdClaim);
+    //         var user = _unitOfWork.UserRepository.GetById(userId).Result;
+    //         var userResult = _mapper.Map<UserResult>(user);
+    //
+    //         if (userResult == null) return HandlerNotFound();
+    //
+    //         return new ResponseBuilder<UserResult>()
+    //             .WithData(userResult)
+    //             .WithStatus(Const.SUCCESS_CODE)
+    //             .WithMessage(Const.SUCCESS_READ_MSG)
+    //             .Build();
+    //     }
+    //     catch (Exception ex)
+    //     {
+    //         return HandlerError(ex.Message);
+    //     }
+    // }
+
+    public User? GetUser()
+    {
+        try
+        {
+            if (_httpContextAccessor?.HttpContext == null ||
+                !_httpContextAccessor.HttpContext.User.Identity.IsAuthenticated)
+                return null;
+
+            // Lấy thông tin UserId từ Claims
+            var userIdClaim = _httpContextAccessor.HttpContext.User.FindFirst("Id")?.Value;
+            if (string.IsNullOrEmpty(userIdClaim))
+                return null;
+
+            // Lấy thêm thông tin User từ database nếu cần
+            var userId = Guid.Parse(userIdClaim);
+            var user = _unitOfWork.UserRepository.GetById(userId).Result;
+
+            return user;
+        }
+        catch (Exception ex)
+        {
+            // Log lỗi nếu cần thiết
+            return null;
+        }
+    }
+
+    public BusinessResult HandlerError(string message)
+    {
+        var errorMessage = $"An error {typeof(TEntity).Name}: {message}";
+        return new ResponseBuilder()
+            .WithStatus(Const.FAIL_CODE)
+            .WithMessage(errorMessage)
+            .Build();
+    }
+
+    public BusinessResult HandlerNotFound(string message = Const.NOT_FOUND_MSG)
+    {
+        return new ResponseBuilder()
+            .WithStatus(Const.NOT_FOUND_CODE)
+            .WithMessage(message)
+            .Build();
+    }
+
+    public BusinessResult HandlerFail(string message)
+    {
+        return new ResponseBuilder()
+            .WithStatus(Const.FAIL_CODE)
+            .WithMessage(message)
+            .Build();
+    }
+
+    
 }

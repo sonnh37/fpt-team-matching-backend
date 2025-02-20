@@ -9,7 +9,7 @@ public class Invitation : BaseEntity
 
     public Guid? SenderId { get; set; }
 
-    public Guid? ReceiverId { get; set; }
+    public Guid? ReceiverId { get; set; }   
 
     public InvitationStatus? Status { get; set; }
 

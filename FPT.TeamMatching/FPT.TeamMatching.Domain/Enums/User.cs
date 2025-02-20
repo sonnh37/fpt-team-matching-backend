@@ -8,3 +8,18 @@ public enum Department
     DaNang,
     QuyNhon
 }
+
+public enum Gender
+{
+    Male,
+    Female,
+    Other
+}
+
+public enum Role
+{
+    Student,
+    Lecturer,
+    Manager,
+    Admin
+}

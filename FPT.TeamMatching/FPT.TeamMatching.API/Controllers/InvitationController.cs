@@ -13,7 +13,6 @@ public class InvitationController : ControllerBase
 {
     private readonly IInvitationService _service;
 
-
     public InvitationController(IInvitationService __service)
     {
         _service = __service;
@@ -23,6 +22,13 @@ public class InvitationController : ControllerBase
     public async Task<IActionResult> GetAll([FromQuery] InvitationGetAllQuery query)
     {
         var msg = await _service.GetAll<InvitationResult>(query);
+        return Ok(msg);
+    }
+    
+    [HttpGet("get-user-invitations-by-type")]
+    public async Task<IActionResult> GetUserInvitationsByType([FromQuery] InvitationGetByTypeQuery query)
+    {
+        var msg = await _service.GetUserInvitationsByType(query);
         return Ok(msg);
     }
 

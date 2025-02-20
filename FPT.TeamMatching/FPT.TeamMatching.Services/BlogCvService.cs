@@ -8,12 +8,12 @@ using FPT.TeamMatching.Services.Bases;
 namespace FPT.TeamMatching.Services;
 
 
-public class ApplicationService : BaseService<Application>, IApplicationService
+public class BlogCvService : BaseService<BlogCv>, IBlogCvService
 {
-    private readonly IApplicationRepository _service;
+    private readonly IBlogCvRepository _service;
 
-    public ApplicationService(IMapper mapper, IUnitOfWork unitOfWork) : base(mapper, unitOfWork)
+    public BlogCvService(IMapper mapper, IUnitOfWork unitOfWork) : base(mapper, unitOfWork)
     {
-        _service = _unitOfWork.ApplicationRepository;
+        _service = _unitOfWork.BlogCvRepository;
     }
 }
