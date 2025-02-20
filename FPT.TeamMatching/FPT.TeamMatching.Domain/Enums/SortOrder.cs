@@ -1,4 +1,4 @@
-﻿namespace FPT.TeamMatching.Domain.Enums;
+namespace FPT.TeamMatching.Domain.Enums;
 
 public enum SortOrder
 {
