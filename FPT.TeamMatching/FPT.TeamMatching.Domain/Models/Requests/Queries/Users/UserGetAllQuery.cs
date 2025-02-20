@@ -25,7 +25,7 @@ public class UserGetAllQuery : GetQueryableQuery
 
     public string? Address { get; set; }
     
-    public string? Department { get; set; }
+    public Department? Department { get; set; }
     
     public string? Role { get; set; }
     

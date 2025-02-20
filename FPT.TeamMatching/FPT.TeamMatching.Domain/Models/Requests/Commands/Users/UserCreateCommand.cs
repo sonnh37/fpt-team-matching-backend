@@ -27,5 +27,5 @@ public class UserCreateCommand : CreateCommand
 
     public string? Address { get; set; }
 
-    public string? Department { get; set; }
+    public Department? Department { get; set; }
 }

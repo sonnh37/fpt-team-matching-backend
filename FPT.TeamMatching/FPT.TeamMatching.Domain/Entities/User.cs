@@ -27,7 +27,7 @@ public class User : BaseEntity
 
     public string? Address { get; set; }
 
-    public string? Department { get; set; }
+    public Department? Department { get; set; }
 
     public virtual ICollection<Blog> Blogs { get; set; } = new List<Blog>();
 

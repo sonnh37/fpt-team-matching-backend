@@ -87,13 +87,13 @@ public class AuthController : ControllerBase
     //     return Ok(businessResult);
     // }
     //
-    // [AllowAnonymous]
-    // [HttpPost("login-by-google")]
-    // public async Task<IActionResult> LoginByGoogle([FromBody] AuthByGoogleTokenQuery request)
-    // {
-    //     var businessResult = await _mediator.Send(request);
-    //     return Ok(businessResult);
-    // }
+    [AllowAnonymous]
+    [HttpPost("login-by-google")]
+    public async Task<IActionResult> LoginByGoogle([FromBody] AuthByGoogleTokenQuery request)
+    {
+        var businessResult = await _authService.LoginByGoogleTokenAsync(request);
+        return Ok(businessResult);
+    }
     //
     // [AllowAnonymous]
     // [HttpPost("register-by-google")]
