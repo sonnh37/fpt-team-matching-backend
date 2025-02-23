@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace FPT.TeamMatching.Domain.Contracts.Repositories
 {
-    public interface IIdeaReviewRepository: IBaseRepository<IdeaReview>
+    public interface IIdeaRequestRepository: IBaseRepository<IdeaRequest>
     {
     }
 }

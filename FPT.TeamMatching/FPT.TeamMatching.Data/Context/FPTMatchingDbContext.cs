@@ -45,7 +45,7 @@ public partial class FPTMatchingDbContext : BaseDbContext
 
     public virtual DbSet<Idea> Ideas { get; set; }
 
-    public virtual DbSet<IdeaReview> IdeaReviews { get; set; }
+    public virtual DbSet<IdeaRequest> IdeaReviews { get; set; }
 
     public virtual DbSet<UserXRole> UserXRoles { get; set; }
 
@@ -334,7 +334,7 @@ public partial class FPTMatchingDbContext : BaseDbContext
                 .HasForeignKey(d => d.SpecialtyId);
         });
 
-        modelBuilder.Entity<IdeaReview>(entity =>
+        modelBuilder.Entity<IdeaRequest>(entity =>
         {
             entity.HasKey(e => e.Id);
 

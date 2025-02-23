@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace FPT.TeamMatching.Domain.Contracts.Services
 {
-    public interface IIdeaReviewService: IBaseService
+    public interface IIdeaRequestService: IBaseService
     {
     }
 }

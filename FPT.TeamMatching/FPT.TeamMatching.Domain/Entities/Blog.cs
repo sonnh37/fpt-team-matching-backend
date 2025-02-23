@@ -13,8 +13,6 @@ public class Blog : BaseEntity
 
     public BlogType? Type { get; set; }
 
-    public int? Quantity { get; set; }
-
     public virtual ICollection<Comment> Comments { get; set; } = new List<Comment>();
 
     public virtual ICollection<BlogCv> BlogCvs { get; set; } = new List<BlogCv>();

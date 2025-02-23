@@ -47,6 +47,6 @@ namespace FPT.TeamMatching.Domain.Models.Results
 
         public virtual SemesterResult? Semester { get; set; }
 
-        public virtual ICollection<IdeaReviewResult> IdeaReviews { get; set; } = new List<IdeaReviewResult>();
+        public virtual ICollection<IdeaRequestResult> IdeaReviews { get; set; } = new List<IdeaRequestResult>();
     }
 }

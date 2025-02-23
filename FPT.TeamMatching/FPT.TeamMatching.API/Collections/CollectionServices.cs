@@ -28,7 +28,7 @@ public static class CollectionServices
         services.AddTransient<IConversationMemberService, ConversationMemberService>();
         services.AddTransient<IProfessionService, ProfessionService>();
         services.AddTransient<ISpecialtyService, SpecialtyService>();
-        services.AddTransient<IIdeaReviewService, IdeaReviewService>();
+        services.AddTransient<IIdeaRequestService, IdeaRequestService>();
         services.AddTransient<IIdeaService, IdeaService>();
 
         services.AddTransient<ChatHub>();

@@ -7,12 +7,12 @@ using FPT.TeamMatching.Services.Bases;
 
 namespace FPT.TeamMatching.Services;
 
-public class IdeaReviewService : BaseService<IdeaReview>, IIdeaReviewService
+public class IdeaRequestService : BaseService<IdeaRequest>, IIdeaRequestService
 {
-    private readonly IIdeaReviewRepository _repository;
+    private readonly IIdeaRequestRepository _repository;
 
-    public IdeaReviewService(IMapper mapper, IUnitOfWork unitOfWork) : base(mapper, unitOfWork)
+    public IdeaRequestService(IMapper mapper, IUnitOfWork unitOfWork) : base(mapper, unitOfWork)
     {
-        _repository = unitOfWork.IdeaReviewRepository;
+        _repository = unitOfWork.IdeaRequestRepository;
     }
 }

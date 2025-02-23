@@ -112,9 +112,9 @@ public class MappingProfile : Profile
 
         #region IdeaReview
 
-        CreateMap<IdeaReview, IdeaReviewResult>().ReverseMap();
-        CreateMap<IdeaReview, IdeaCreateCommand>().ReverseMap();
-        CreateMap<IdeaReview, IdeaUpdateCommand>().ReverseMap();
+        CreateMap<IdeaRequest, IdeaRequestResult>().ReverseMap();
+        CreateMap<IdeaRequest, IdeaCreateCommand>().ReverseMap();
+        CreateMap<IdeaRequest, IdeaUpdateCommand>().ReverseMap();
 
         #endregion
 

@@ -31,7 +31,7 @@ public class User : BaseEntity
 
     public virtual ICollection<Blog> Blogs { get; set; } = new List<Blog>();
 
-    public virtual ICollection<IdeaReview> IdeaReviews { get; set; } = new List<IdeaReview>();
+    public virtual ICollection<IdeaRequest> IdeaReviews { get; set; } = new List<IdeaRequest>();
 
     public virtual ICollection<Idea> IdeaOfUsers { get; set; } = new List<Idea>();
 
