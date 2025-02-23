@@ -7,12 +7,18 @@ using System.Threading.Tasks;
 
 namespace FPT.TeamMatching.Domain.Models.Results
 {
-    public class IdeaReviewResult: BaseResult
+    public class IdeaRequestResult: BaseResult
     {
         public Guid? IdeaId { get; set; }
 
         public Guid? ReviewerId { get; set; }
 
+        public string? Content { get; set; }
+
         public DateTimeOffset? ProcessDate { get; set; }
+
+        public IdeaResult? Idea { get; set; }
+
+        public UserResult? Reviewer { get; set; }
     }
 }

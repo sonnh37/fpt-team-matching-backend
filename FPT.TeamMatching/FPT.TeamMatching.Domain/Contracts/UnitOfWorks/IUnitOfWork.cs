@@ -10,7 +10,7 @@ public interface IUnitOfWork : IBaseUnitOfWork
     ICommentRepository CommentRepository { get; }
     IRateRepository RateRepository { get; }
     IIdeaRepository IdeaRepository { get; }
-    IIdeaReviewRepository IdeaReviewRepository { get; }
+    IIdeaRequestRepository IdeaRequestRepository { get; }
     IBlogCvRepository BlogCvRepository { get; }
     ITeamMemberRepository TeamMemberRepository { get; }
     IProjectRepository ProjectRepository { get; }

@@ -2,11 +2,13 @@
 
 namespace FPT.TeamMatching.Domain.Entities;
 
-public class IdeaReview : BaseEntity
+public class IdeaRequest : BaseEntity
 {
     public Guid? IdeaId { get; set; }
 
     public Guid? ReviewerId { get; set; }
+    
+    public string? Content { get; set; }
 
     public DateTimeOffset? ProcessDate { get; set; }
 

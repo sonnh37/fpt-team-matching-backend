@@ -12,6 +12,4 @@ public class BlogUpdateCommand : UpdateCommand
     public string? Content { get; set; }
 
     public BlogType? Type { get; set; }
-
-    public int? Quantity { get; set; }
 }

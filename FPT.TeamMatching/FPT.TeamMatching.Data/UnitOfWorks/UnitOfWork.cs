@@ -16,7 +16,7 @@ public class UnitOfWork : BaseUnitOfWork<FPTMatchingDbContext>, IUnitOfWork
     public ICommentRepository CommentRepository => GetRepository<ICommentRepository>();
     public IRateRepository RateRepository => GetRepository<IRateRepository>();
     public IIdeaRepository IdeaRepository => GetRepository<IIdeaRepository>();
-    public IIdeaReviewRepository IdeaReviewRepository => GetRepository<IIdeaReviewRepository>();
+    public IIdeaRequestRepository IdeaRequestRepository => GetRepository<IIdeaRequestRepository>();
     public IBlogCvRepository BlogCvRepository => GetRepository<IBlogCvRepository>();
     public ITeamMemberRepository TeamMemberRepository => GetRepository<ITeamMemberRepository>();
     public IReviewRepository ReviewRepository => GetRepository<IReviewRepository>();

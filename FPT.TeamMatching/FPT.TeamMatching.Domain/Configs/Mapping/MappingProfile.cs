@@ -110,11 +110,11 @@ public class MappingProfile : Profile
 
         #endregion
 
-        #region IdeaReview
+        #region IdeaRequest
 
-        CreateMap<IdeaReview, IdeaReviewResult>().ReverseMap();
-        CreateMap<IdeaReview, IdeaCreateCommand>().ReverseMap();
-        CreateMap<IdeaReview, IdeaUpdateCommand>().ReverseMap();
+        CreateMap<IdeaRequest, IdeaRequestResult>().ReverseMap();
+        CreateMap<IdeaRequest, IdeaCreateCommand>().ReverseMap();
+        CreateMap<IdeaRequest, IdeaUpdateCommand>().ReverseMap();
 
         #endregion
 

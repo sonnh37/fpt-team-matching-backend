@@ -12,6 +12,4 @@ public class BlogCreateCommand : CreateCommand
     public string? Content { get; set; }
 
     public BlogType? Type { get; set; }
-
-    public int? Quantity { get; set; }
 }
