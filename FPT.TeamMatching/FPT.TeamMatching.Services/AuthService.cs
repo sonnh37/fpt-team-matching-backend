@@ -89,25 +89,31 @@ public class AuthService : IAuthService
     public BusinessResult Login(AuthQuery query)
     {
         var user = _userRepository.GetUserByUsernameOrEmail(query.Account).Result;
-        
+
         if (user == null)
             return new ResponseBuilder()
                 .WithStatus(Const.NOT_FOUND_CODE)
-                .WithMessage("Not found email")
+                .WithMessage("Email is not found.")
                 .Build();
 
         if (user.Department != query.Department)
         {
             return new ResponseBuilder()
-                .WithStatus(Const.NOT_FOUND_CODE)
-                .WithMessage("Not found department")
-                .Build(); 
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage("Your account does not have access to the system")
+                .Build();
         }
+
+        if (user.Password == null)
+            return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage("Your account does not set up the password yet.")
+                .Build();
 
         if (!BCrypt.Net.BCrypt.Verify(query.Password, user.Password))
             return new ResponseBuilder()
-                .WithStatus(Const.NOT_FOUND_CODE)
-                .WithMessage("The password does not match.")
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage("Password is invalid.")
                 .Build();
 
         var result = _mapper.Map<UserResult>(user);
@@ -352,7 +358,7 @@ public class AuthService : IAuthService
     //     GoogleJsonWebSignature.Payload payload = await GoogleJsonWebSignature.ValidateAsync(token, settings);
     //     return payload;
     // }
-    
+
     private async Task<Userinfo> VerifyGoogleAccessToken(string accessToken)
     {
         var oauthService = new Oauth2Service(new BaseClientService.Initializer
@@ -376,8 +382,9 @@ public class AuthService : IAuthService
             return new ResponseBuilder()
                 .WithStatus(Const.FAIL_CODE)
                 .WithMessage("Error token google.")
-                .Build(); 
+                .Build();
         }
+
         var user = await _userRepository.GetByEmail(payload.Email);
         var result = _mapper.Map<UserResult>(user);
         if (result == null)
@@ -411,8 +418,8 @@ public class AuthService : IAuthService
             {
                 return new ResponseBuilder()
                     .WithStatus(Const.NOT_FOUND_CODE)
-                    .WithMessage("Not found department")
-                    .Build(); 
+                    .WithMessage("Your account does not have access to the system")
+                    .Build();
             }
         }
 
