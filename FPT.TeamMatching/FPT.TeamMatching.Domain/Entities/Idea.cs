@@ -47,5 +47,5 @@ public class Idea : BaseEntity
 
     public virtual Semester? Semester { get; set; }
 
-    public virtual ICollection<IdeaRequest> IdeaReviews { get; set; } = new List<IdeaRequest>();
+    public virtual ICollection<IdeaRequest> IdeaRequests { get; set; } = new List<IdeaRequest>();
 }
