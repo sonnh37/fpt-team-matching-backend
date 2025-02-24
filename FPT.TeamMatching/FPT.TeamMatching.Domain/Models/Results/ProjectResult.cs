@@ -8,6 +8,8 @@ public class ProjectResult : BaseResult
 {
     public Guid? LeaderId { get; set; }
 
+    public Guid? IdeaId { get; set; }
+
     public string? TeamName { get; set; }
 
     public string? Name { get; set; }
@@ -23,5 +25,15 @@ public class ProjectResult : BaseResult
     public DateTimeOffset? StartDate { get; set; }
 
     public DateTimeOffset? EndDate { get; set; }
+
+    public  UserResult? Leader { get; set; }
+
+    public  IdeaResult? Idea { get; set; }
+
+    public  ICollection<InvitationResult> Invitations { get; set; } = new List<InvitationResult>();
+
+    public  ICollection<ReviewResult> Reviews { get; set; } = new List<ReviewResult>();
+
+    public  ICollection<TeamMemberResult> TeamMembers { get; set; } = new List<TeamMemberResult>();
 
 }
