@@ -37,16 +37,16 @@ namespace FPT.TeamMatching.Domain.Models.Results
 
         public int? MaxTeamSize { get; set; }
 
-        public virtual UserResult? User { get; set; }
+        public  UserResult? User { get; set; }
 
-        public virtual UserResult? SubMentor { get; set; }
+        public  UserResult? SubMentor { get; set; }
     
-        public virtual SpecialtyResult? Specialty { get; set; }
+        public  SpecialtyResult? Specialty { get; set; }
 
-        public virtual ProjectResult? Project { get; set; }
+        public  ProjectResult? Project { get; set; }
 
-        public virtual SemesterResult? Semester { get; set; }
+        public  SemesterResult? Semester { get; set; }
 
-        public virtual ICollection<IdeaRequestResult> IdeaRequests { get; set; } = new List<IdeaRequestResult>();
+        public  ICollection<IdeaRequestResult> IdeaRequests { get; set; } = new List<IdeaRequestResult>();
     }
 }
