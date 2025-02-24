@@ -1,4 +1,5 @@
-﻿using FPT.TeamMatching.Domain.Models.Results.Bases;
+﻿using FPT.TeamMatching.Domain.Entities;
+using FPT.TeamMatching.Domain.Models.Results.Bases;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,5 +13,10 @@ namespace FPT.TeamMatching.Domain.Models.Results
         public Guid? ProfessionId { get; set; }
 
         public string? SpecialtyName { get; set; }
+        public ProfessionResult? Profession { get; set; }
+
+        public  ICollection<IdeaResult> Ideas { get; set; } = new List<IdeaResult>();
+
+
     }
 }

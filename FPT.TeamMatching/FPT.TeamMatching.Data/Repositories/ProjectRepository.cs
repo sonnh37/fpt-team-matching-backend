@@ -21,7 +21,7 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
         if (teamMember != null)
         {
             var project = await _context.Projects.Where(e => e.Id == teamMember.ProjectId)
-                                                .Include(e => e.TeamMembers).Include(e => e.Idea)
+                                                .Include(e => e.TeamMembers).ThenInclude(e=>e.User).Include(e => e.Idea).ThenInclude(e=>e.Specialty).ThenInclude(e=>e.Profession)
                                                 .FirstOrDefaultAsync();
             if (project != null)
             {
