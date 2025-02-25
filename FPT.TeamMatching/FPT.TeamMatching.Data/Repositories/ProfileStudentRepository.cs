@@ -18,6 +18,6 @@ public class ProfileStudentRepository : BaseRepository<ProfileStudent>, IProfile
 
     public async Task<ProfileStudent> GetProfileByUserId(Guid userId)
     {
-        return await _dbContext.Profiles.FirstOrDefaultAsync(x => x.UserId == userId);
+        return await _dbContext.ProfileStudents.FirstOrDefaultAsync(x => x.UserId == userId);
     }
 }

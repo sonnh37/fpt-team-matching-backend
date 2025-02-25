@@ -5,5 +5,5 @@ namespace FPT.TeamMatching.Domain.Contracts.Repositories;
 
 public interface IProfileStudentRepository : IBaseRepository<ProfileStudent>
 {
-    Task<ProfileStudent> GetProfileByUserId(Guid userId);
+    Task<ProfileStudent?> GetProfileByUserId(Guid userId);
 }
