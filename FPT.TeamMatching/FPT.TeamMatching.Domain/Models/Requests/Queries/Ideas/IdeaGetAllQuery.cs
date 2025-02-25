@@ -10,20 +10,21 @@ namespace FPT.TeamMatching.Domain.Models.Requests.Queries.Ideas
 {
     public class IdeaGetAllQuery : GetQueryableQuery
     {
-        public Guid? UserId { get; set; }
+        public Guid? OwnerId { get; set; }
 
         public Guid? SemesterId { get; set; }
 
+        public Guid? MentorId { get; set; }
         public Guid? SubMentorId { get; set; }
 
         public IdeaType? Type { get; set; }
-
+    
         public Guid? SpecialtyId { get; set; }
 
         public string? IdeaCode { get; set; }
-
+    
         public string? Description { get; set; }
-
+    
         public string? Abbreviations { get; set; }
 
         public string? VietNamName { get; set; }
@@ -41,6 +42,7 @@ namespace FPT.TeamMatching.Domain.Models.Requests.Queries.Ideas
         public string? EnterpriseName { get; set; }
 
         public int? MaxTeamSize { get; set; }
+
         
         // add more to get query
         

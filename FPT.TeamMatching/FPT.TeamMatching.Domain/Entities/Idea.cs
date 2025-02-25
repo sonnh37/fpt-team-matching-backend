@@ -36,7 +36,7 @@ public class Idea : BaseEntity
         
     public string? EnterpriseName { get; set; }
 
-    public int? MaxTeamSize { get; set; }
+    public int MaxTeamSize { get; set; }
 
     public virtual User? Owner { get; set; }
 
