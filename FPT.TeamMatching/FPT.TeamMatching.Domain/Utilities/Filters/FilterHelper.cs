@@ -73,6 +73,11 @@ public static class FilterHelper
             queryable = queryable.Where(m => m.Status == query.Status);
         }
 
+        if (query.IsExistedTeam != null)
+        {
+            queryable = queryable.Where(m => m.IsExistedTeam == query.IsExistedTeam.Value);
+        }
+
         queryable = BaseFilterHelper.Base(queryable, query);
 
         return queryable;
