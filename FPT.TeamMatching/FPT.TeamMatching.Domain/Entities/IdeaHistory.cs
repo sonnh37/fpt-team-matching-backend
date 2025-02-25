@@ -11,7 +11,7 @@ public class IdeaHistory : BaseEntity
     
     public string? FileUpdate { get; set; }
     
-    public IdeaRequestStatus? Status { get; set; }
+    public IdeaHistoryStatus? Status { get; set; }
 
     public int ReviewStage  { get; set; }
 

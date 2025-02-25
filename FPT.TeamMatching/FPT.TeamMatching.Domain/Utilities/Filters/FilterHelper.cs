@@ -1,5 +1,6 @@
 ﻿using FPT.TeamMatching.Domain.Entities;
 using FPT.TeamMatching.Domain.Entities.Base;
+using FPT.TeamMatching.Domain.Enums;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Base;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Ideas;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Invitations;
@@ -65,6 +66,11 @@ public static class FilterHelper
                 m.Owner != null && m.Owner.UserXRoles.Any(uxr =>
                     uxr.Role != null && uxr.Role.RoleName != null &&
                     uxr.Role.RoleName.ToLower().Trim() == query.Type.ToString()!.ToLower().Trim()));
+        }
+
+        if (query.Status != null)
+        {
+            queryable = queryable.Where(m => m.Status == query.Status);
         }
 
         queryable = BaseFilterHelper.Base(queryable, query);
