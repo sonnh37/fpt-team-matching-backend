@@ -45,8 +45,8 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
             
             queryable = query.Type switch
             {
-                InvitationType.JoinRequest => queryable.Where(m => m.ReceiverId == userId),
-                InvitationType.RequestToJoin => queryable.Where(m => m.SenderId == userId),
+                InvitationType.SentByMe => queryable.Where(m => m.SenderId == userId),
+                InvitationType.ReceivedByTeam => queryable.Where(m => m.ReceiverId == userId),
                 _ => queryable
             };
 

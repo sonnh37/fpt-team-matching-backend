@@ -13,8 +13,6 @@ public class ProjectGetAllQuery : GetQueryableQuery
 
     public string? Name { get; set; }
 
-    public ProjectType? Type { get; set; }
-
     public string? Description { get; set; }
 
     public ProjectStatus? Status { get; set; }

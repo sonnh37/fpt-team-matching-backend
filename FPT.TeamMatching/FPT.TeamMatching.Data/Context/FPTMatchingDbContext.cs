@@ -11,45 +11,53 @@ public partial class FPTMatchingDbContext : BaseDbContext
     {
     }
 
-    public virtual DbSet<Blog> Blogs { get; set; }
+    public virtual DbSet<Blog> Blogs { get; set; } //
 
-    public virtual DbSet<Comment> Comments { get; set; }
+    public virtual DbSet<Comment> Comments { get; set; } //
 
-    public virtual DbSet<Invitation> Invitations { get; set; }
+    public virtual DbSet<Invitation> Invitations { get; set; } //
 
-    public virtual DbSet<BlogCv> BlogCvs { get; set; }
+    public virtual DbSet<BlogCv> BlogCvs { get; set; }//
 
-    public virtual DbSet<Like> Likes { get; set; }
+    public virtual DbSet<Like> Likes { get; set; } //
 
-    public virtual DbSet<Feedback> Feedbacks { get; set; }
+    public virtual DbSet<Feedback> Feedbacks { get; set; } //
 
-    public virtual DbSet<Notification> Notifications { get; set; }
+    public virtual DbSet<Notification> Notifications { get; set; } //
+    
+    public virtual DbSet<Profession> Professions { get; set; } //
+    
+    public virtual DbSet<Specialty> Specialties { get; set; } //
 
-    public virtual DbSet<ProfileStudent> Profiles { get; set; }
+    public virtual DbSet<ProfileStudent> ProfileStudents { get; set; } //
 
-    public virtual DbSet<Project> Projects { get; set; }
+    public virtual DbSet<Project> Projects { get; set; } //
 
-    public virtual DbSet<Rate> Rates { get; set; }
+    public virtual DbSet<Rate> Rates { get; set; } //
 
-    public virtual DbSet<RefreshToken> RefreshTokens { get; set; }
+    public virtual DbSet<RefreshToken> RefreshTokens { get; set; } //
 
-    public virtual DbSet<Review> Reviews { get; set; }
+    public virtual DbSet<Review> Reviews { get; set; } //
 
-    public virtual DbSet<SkillProfile> SkillProfiles { get; set; }
+    public virtual DbSet<SkillProfile> SkillProfiles { get; set; } //
 
-    public virtual DbSet<TeamMember> TeamMembers { get; set; }
+    public virtual DbSet<TeamMember> TeamMembers { get; set; } //
 
-    public virtual DbSet<User> Users { get; set; }
+    public virtual DbSet<User> Users { get; set; } //
 
-    public virtual DbSet<Semester> Semesters { get; set; }
+    public virtual DbSet<Semester> Semesters { get; set; } //
 
-    public virtual DbSet<Idea> Ideas { get; set; }
+    public virtual DbSet<Idea> Ideas { get; set; } //
 
-    public virtual DbSet<IdeaRequest> IdeaRequests { get; set; }
+    public virtual DbSet<IdeaRequest> IdeaRequests { get; set; } //
 
-    public virtual DbSet<UserXRole> UserXRoles { get; set; }
+    public virtual DbSet<UserXRole> UserXRoles { get; set; } //
 
-    public virtual DbSet<Role> Roles { get; set; }
+    public virtual DbSet<Role> Roles { get; set; } //
+    
+    public virtual DbSet<IdeaHistory> IdeaHistories { get; set; } //
+    
+    public virtual DbSet<IdeaHistoryRequest> IdeaHistoryRequests { get; set; } //
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -321,8 +329,11 @@ public partial class FPTMatchingDbContext : BaseDbContext
             entity.Property(e => e.Id).ValueGeneratedOnAdd()
                 .HasDefaultValueSql("gen_random_uuid()");
 
-            entity.HasOne(d => d.User).WithMany(p => p.IdeaOfUsers)
-                .HasForeignKey(d => d.UserId);
+            entity.HasOne(d => d.Owner).WithMany(p => p.IdeaOfOwners)
+                .HasForeignKey(d => d.OwnerId);
+            
+            entity.HasOne(d => d.Mentor).WithMany(p => p.IdeaOfMentors)
+                .HasForeignKey(d => d.MentorId);
 
             entity.HasOne(d => d.SubMentor).WithMany(p => p.IdeaOfSubMentors)
                 .HasForeignKey(d => d.SubMentorId);
@@ -346,7 +357,39 @@ public partial class FPTMatchingDbContext : BaseDbContext
             entity.HasOne(d => d.Idea).WithMany(p => p.IdeaRequests)
                 .HasForeignKey(d => d.IdeaId);
 
-            entity.HasOne(d => d.Reviewer).WithMany(p => p.IdeaRequests)
+            entity.HasOne(d => d.Reviewer).WithMany(p => p.IdeaRequestOfReviewers)
+                .HasForeignKey(d => d.ReviewerId);
+        });
+        
+        modelBuilder.Entity<IdeaHistory>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            entity.ToTable("IdeaHistory");
+
+            entity.Property(e => e.Id).ValueGeneratedOnAdd()
+                .HasDefaultValueSql("gen_random_uuid()");
+
+            entity.HasOne(d => d.Idea).WithMany(p => p.IdeaHistories)
+                .HasForeignKey(d => d.IdeaId);
+            
+            entity.HasOne(d => d.Council).WithMany(p => p.IdeaHistoryOfCouncils)
+                .HasForeignKey(d => d.CouncilId);
+        });
+
+        modelBuilder.Entity<IdeaHistoryRequest>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            entity.ToTable("IdeaHistoryRequest");
+
+            entity.Property(e => e.Id).ValueGeneratedOnAdd()
+                .HasDefaultValueSql("gen_random_uuid()");
+
+            entity.HasOne(d => d.IdeaHistory).WithMany(p => p.IdeaHistoryRequests)
+                .HasForeignKey(d => d.IdeaHistoryId);
+
+            entity.HasOne(d => d.Reviewer).WithMany(p => p.IdeaHistoryRequestOfReviewers)
                 .HasForeignKey(d => d.ReviewerId);
         });
         

@@ -5,10 +5,11 @@ namespace FPT.TeamMatching.Domain.Entities;
 
 public class Idea : BaseEntity
 {
-    public Guid? UserId { get; set; }
+    public Guid? OwnerId { get; set; }
 
     public Guid? SemesterId { get; set; }
 
+    public Guid? MentorId { get; set; }
     public Guid? SubMentorId { get; set; }
 
     public IdeaType? Type { get; set; }
@@ -37,8 +38,10 @@ public class Idea : BaseEntity
 
     public int? MaxTeamSize { get; set; }
 
-    public virtual User? User { get; set; }
+    public virtual User? Owner { get; set; }
 
+    public virtual User? Mentor { get; set; }
+    
     public virtual User? SubMentor { get; set; }
     
     public virtual Specialty? Specialty { get; set; }
@@ -48,4 +51,6 @@ public class Idea : BaseEntity
     public virtual Semester? Semester { get; set; }
 
     public virtual ICollection<IdeaRequest> IdeaRequests { get; set; } = new List<IdeaRequest>();
+    
+    public virtual ICollection<IdeaHistory> IdeaHistories { get; set; } = new List<IdeaHistory>();
 }

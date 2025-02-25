@@ -62,7 +62,7 @@ public static class FilterHelper
         if (query.Type != null)
         {
             queryable = queryable.Where(m =>
-                m.User != null && m.User.UserXRoles.Any(uxr =>
+                m.Owner != null && m.Owner.UserXRoles.Any(uxr =>
                     uxr.Role != null && uxr.Role.RoleName != null &&
                     uxr.Role.RoleName.ToLower().Trim() == query.Type.ToString()!.ToLower().Trim()));
         }
