@@ -11,11 +11,11 @@ namespace FPT.TeamMatching.API.Controllers;
 
 [Route(Const.API_APPLICATIONS)]
 [ApiController]
-public class ApplicationController : ControllerBase
+public class BlogCvController : ControllerBase
 {
     private readonly IBlogCvService _service;
 
-    public ApplicationController(IBlogCvService __service)
+    public BlogCvController(IBlogCvService __service)
     {
         _service = __service;
     }

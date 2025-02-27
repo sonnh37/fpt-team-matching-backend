@@ -65,7 +65,7 @@ public class ProjectController : ControllerBase
         return Ok(businessResult);
     }
 
-    [HttpGet("get-by-userId-login")]
+    [HttpGet("get-by-user-id")]
     public async Task<IActionResult> GetByUserIdLogin()
     {
         var businessResult = await _service.GetProjectByUserIdLogin();

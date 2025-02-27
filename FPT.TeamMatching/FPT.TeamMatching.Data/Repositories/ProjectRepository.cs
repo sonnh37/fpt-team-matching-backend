@@ -3,6 +3,7 @@ using FPT.TeamMatching.Data.Context;
 using FPT.TeamMatching.Data.Repositories.Base;
 using FPT.TeamMatching.Domain.Contracts.Repositories;
 using FPT.TeamMatching.Domain.Entities;
+using FPT.TeamMatching.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace FPT.TeamMatching.Data.Repositories;
@@ -21,7 +22,14 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
         if (teamMember != null)
         {
             var project = await _context.Projects.Where(e => e.Id == teamMember.ProjectId)
-                                                .Include(e => e.TeamMembers).ThenInclude(e=>e.User).Include(e => e.Idea).ThenInclude(e=>e.Specialty).ThenInclude(e=>e.Profession)
+                                                .Include(e => e.TeamMembers)
+                                                .ThenInclude(e => e.User).Include(e => e.Idea)
+                                                .ThenInclude(e => e.Specialty)
+                                                .ThenInclude(e => e.Profession)
+                                                .Include(e => e.Invitations.Where(e1 => e1.Status != null && e1.Type != null && e1.SenderId != null
+                                                                                &&(e1.Status.Value == InvitationStatus.Pending
+                                                                                && e1.Type.Value == InvitationType.SentByMe
+                                                                                && e1.SenderId == userId)))
                                                 .FirstOrDefaultAsync();
             if (project != null)
             {
