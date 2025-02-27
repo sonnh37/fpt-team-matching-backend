@@ -84,6 +84,10 @@ public static class Const
 
     public const string API_SPECIALTIES = $"{BaseApi}/specialties";
 
+    public const string API_IDEA_HISTORIES = $"{BaseApi}/idea-history";
+
+    public const string API_IDEA_HISTORY_REQUESTS = $"{BaseApi}/idea-history-requests";
+
     public const string SortFieldDefault = "CreatedDate";
 
     public const string HANGFIRE = $"{BaseApi}/hangfire";

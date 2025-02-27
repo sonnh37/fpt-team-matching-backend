@@ -8,6 +8,7 @@ namespace FPT.TeamMatching.Data.Repositories;
 
 public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
 {
+    private readonly FPTMatchingDbContext _dbContext;
     public IdeaRepository(FPTMatchingDbContext dbContext, IMapper mapper) : base(dbContext, mapper)
     {
     }

@@ -54,15 +54,22 @@ public class IdeaController : ControllerBase
     {
         var businessResult = await _service.DeleteById(request.Id, request.IsPermanent);
 
-            return Ok(businessResult);
-        }
-
-        [HttpPut("restore")]
-        public async Task<IActionResult> Restore([FromBody] IdeaRestoreCommand command)
-        {
-            var businessResult = await _service.Restore<IdeaResult>(command);
-
-            return Ok(businessResult);
-        }
+        return Ok(businessResult);
     }
+
+    [HttpPut("restore")]
+    public async Task<IActionResult> Restore([FromBody] IdeaRestoreCommand command)
+    {
+        var businessResult = await _service.Restore<IdeaResult>(command);
+
+        return Ok(businessResult);
+    }
+
+    [HttpPost("create-pending")]
+    public async Task<IActionResult> CreatePending([FromBody] IdeaCreatePendingCommand request)
+    {
+        var msg = await _service.CreatePending(request);
+        return Ok(msg);
+    }
+}
 

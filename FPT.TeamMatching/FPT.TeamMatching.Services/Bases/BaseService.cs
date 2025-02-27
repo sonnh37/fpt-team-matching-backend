@@ -412,7 +412,7 @@ public abstract class BaseService<TEntity> : BaseService, IBaseService
 
             // Lấy thêm thông tin User từ database nếu cần
             var userId = Guid.Parse(userIdClaim);
-            var user = _unitOfWork.UserRepository.GetById(userId).Result;
+            var user = _unitOfWork.UserRepository.GetById(userId, true).Result;
 
             return user;
         }

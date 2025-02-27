@@ -19,6 +19,8 @@ using FPT.TeamMatching.Domain.Models.Requests.Commands.Feedbacks;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Ideas;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Professions;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Specialties;
+using FPT.TeamMatching.Domain.Models.Requests.Commands.IdeaHistories;
+using FPT.TeamMatching.Domain.Models.Requests.Commands.IdeaHistoryRequests;
 
 namespace FPT.TeamMatching.Domain.Configs.Mapping;
 
@@ -98,6 +100,7 @@ public class MappingProfile : Profile
 
         CreateMap<Idea, IdeaResult>().ReverseMap();
         CreateMap<Idea, IdeaCreateCommand>().ReverseMap();
+        CreateMap<Idea, IdeaCreatePendingCommand>().ReverseMap();
         CreateMap<Idea, IdeaUpdateCommand>().ReverseMap();
 
         #endregion
@@ -196,12 +199,28 @@ public class MappingProfile : Profile
         CreateMap<Specialty, SpecialtyUpdateCommand>().ReverseMap();
 
         #endregion
-        
+
         #region Semester
 
         CreateMap<Semester, SemesterResult>().ReverseMap();
-        // CreateMap<Semester, SemesterCreateCommand>().ReverseMap();
-        // CreateMap<Semester, SemesterUpdateCommand>().ReverseMap();
+        //CreateMap<Semester, SemesterCreateCommand>().ReverseMap();
+        //CreateMap<Semester, SemesterUpdateCommand>().ReverseMap();
+
+        #endregion
+
+        #region IdeaHistory
+
+        CreateMap<IdeaHistory, IdeaHistoryResult>().ReverseMap();
+        CreateMap<IdeaHistory, IdeaHistoryCreateCommand>().ReverseMap();
+        CreateMap<IdeaHistory, IdeaHistoryUpdateCommand>().ReverseMap();
+
+        #endregion
+
+        #region IdeaHistoryRequest
+
+        CreateMap<IdeaHistoryRequest, IdeaHistoryRequestResult>().ReverseMap();
+        CreateMap<IdeaHistoryRequest, IdeaHistoryRequestCreateCommand>().ReverseMap();
+        CreateMap<IdeaHistoryRequest, IdeaHistoryRequestUpdateCommand>().ReverseMap();
 
         #endregion
 
