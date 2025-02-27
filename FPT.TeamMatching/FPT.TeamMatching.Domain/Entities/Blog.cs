@@ -10,6 +10,8 @@ public class Blog : BaseEntity
     public string? Title { get; set; }
 
     public string? Content { get; set; }
+    
+    public string? SkillRequired { get; set; }
 
     public BlogType? Type { get; set; }
 
