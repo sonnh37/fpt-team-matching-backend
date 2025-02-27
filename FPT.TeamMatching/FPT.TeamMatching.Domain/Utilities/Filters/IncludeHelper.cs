@@ -25,10 +25,10 @@ public static class IncludeHelper
         queryable = queryable.Include(m => m.Project);
         queryable = queryable.Include(m => m.Sender);
         queryable = queryable.Include(m => m.Receiver);
-        
+
         return queryable;
     }
-    
+
     private static IQueryable<Idea> Idea(IQueryable<Idea> queryable)
     {
         queryable = queryable.Include(m => m.Owner)
@@ -50,7 +50,10 @@ public static class IncludeHelper
         // queryable = queryable
         //     .Include(m => m.Tasks);
 
-        queryable = queryable.Include(m => m.UserXRoles).ThenInclude(x => x.Role);
+        queryable = queryable
+            .Include(m => m.UserXRoles)
+            .ThenInclude(x => x.Role)
+            .Include(m => m.Notifications);
 
         return queryable;
     }
@@ -60,7 +63,8 @@ public static class IncludeHelper
         // queryable = queryable
         //     .Include(m => m.Tasks);
 
-        queryable = queryable.Include(e => e.TeamMembers).ThenInclude(e => e.User).Include(e => e.Idea).ThenInclude(e => e.Specialty).ThenInclude(e => e.Profession);
+        queryable = queryable.Include(e => e.TeamMembers).ThenInclude(e => e.User).Include(e => e.Idea)
+            .ThenInclude(e => e.Specialty).ThenInclude(e => e.Profession);
 
         return queryable;
     }

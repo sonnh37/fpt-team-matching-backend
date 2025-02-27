@@ -19,6 +19,7 @@ public class NotificationRepository : BaseRepository<Notification>, INotificatio
     public async Task<List<Notification>> GetAllNotificationByUserId(Guid userId)
     {
         var result = await _dbContext.Notifications.Where(x => x.UserId == userId)
+            .Include(m => m.User)
             .ToListAsync();
 
         return result;
