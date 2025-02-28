@@ -5,5 +5,5 @@ namespace FPT.TeamMatching.Domain.Contracts.Repositories;
 
 public interface IInvitationRepository : IBaseRepository<Invitation>
 {
-
+    Task<Invitation?> GetInvitationOfUserByProjectId(Guid projectId, Guid userId);
 }
