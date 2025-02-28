@@ -100,23 +100,21 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
             bool isSucess = await StudentCreateAsync(command);
             if (isSucess)
             {
-                return new ResponseBuilder<Invitation>()
-                                .WithStatus(Const.SUCCESS_CODE)
-                                .WithMessage(Const.SUCCESS_SAVE_MSG)
-                                .Build();
+                return new ResponseBuilder()
+                    .WithStatus(Const.SUCCESS_CODE)
+                    .WithMessage(Const.SUCCESS_SAVE_MSG);
             }
-            return new ResponseBuilder<Invitation>()
-                                .WithStatus(Const.FAIL_CODE)
-                                .WithMessage(Const.FAIL_SAVE_MSG)
-                                .Build();
+
+            return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage(Const.FAIL_SAVE_MSG);
         }
         catch (Exception ex)
         {
             var errorMessage = $"An error occurred in {typeof(InvitationResult).Name}: {ex.Message}";
             return new ResponseBuilder()
                 .WithStatus(Const.FAIL_CODE)
-                .WithMessage(errorMessage)
-                .Build();
+                .WithMessage(errorMessage);
         }
     }
 
@@ -127,23 +125,21 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
             bool isSucess = await TeamCreateAsync(command);
             if (isSucess)
             {
-                return new ResponseBuilder<Invitation>()
-                                .WithStatus(Const.SUCCESS_CODE)
-                                .WithMessage(Const.SUCCESS_SAVE_MSG)
-                                .Build();
+                return new ResponseBuilder()
+                    .WithStatus(Const.SUCCESS_CODE)
+                    .WithMessage(Const.SUCCESS_SAVE_MSG);
             }
-            return new ResponseBuilder<Invitation>()
-                                .WithStatus(Const.FAIL_CODE)
-                                .WithMessage(Const.FAIL_SAVE_MSG)
-                                .Build();
+
+            return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage(Const.FAIL_SAVE_MSG);
         }
         catch (Exception ex)
         {
             var errorMessage = $"An error occurred in {typeof(InvitationResult).Name}: {ex.Message}";
             return new ResponseBuilder()
                 .WithStatus(Const.FAIL_CODE)
-                .WithMessage(errorMessage)
-                .Build();
+                .WithMessage(errorMessage);
         }
     }
 

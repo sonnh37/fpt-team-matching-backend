@@ -40,22 +40,20 @@ public class ProjectService : BaseService<Project>, IProjectService
                 var project = await _repository.GetProjectByUserIdLogin(Guid.Parse(userId));
                 var result = _mapper.Map<ProjectResult>(project);
                 if (result == null)
-                    return new ResponseBuilder<ProjectResult>()
+                    return new ResponseBuilder()
                         .WithData(result)
                         .WithStatus(Const.NOT_FOUND_CODE)
-                        .WithMessage(Const.NOT_FOUND_MSG)
-                        .Build();
+                        .WithMessage(Const.NOT_FOUND_MSG);
 
-                return new ResponseBuilder<ProjectResult>()
+                return new ResponseBuilder()
                     .WithData(result)
                     .WithStatus(Const.SUCCESS_CODE)
-                    .WithMessage(Const.SUCCESS_READ_MSG)
-                    .Build();
+                    .WithMessage(Const.SUCCESS_READ_MSG);
             }
+
             return new ResponseBuilder()
-                    .WithStatus(Const.FAIL_CODE)
-                    .WithMessage(Const.FAIL_READ_MSG)
-                    .Build();
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage(Const.FAIL_READ_MSG);
         }
         catch (Exception ex)
         {
