@@ -8,15 +8,11 @@ using System.Threading.Tasks;
 
 namespace FPT.TeamMatching.Domain.Models.Requests.Commands.Ideas
 {
-    public class IdeaCreatePendingCommand: CreateCommand
+    public class IdeaLecturerCreatePendingCommand: CreateCommand
     {
         public Guid? SemesterId { get; set; }
 
-        public Guid? MentorId { get; set; }
-
         public Guid? SubMentorId { get; set; }
-
-        public IdeaType? Type { get; set; }
 
         public Guid? SpecialtyId { get; set; }
 
