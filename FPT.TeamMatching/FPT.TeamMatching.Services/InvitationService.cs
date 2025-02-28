@@ -4,6 +4,7 @@ using FPT.TeamMatching.Domain.Contracts.Services;
 using FPT.TeamMatching.Domain.Contracts.UnitOfWorks;
 using FPT.TeamMatching.Domain.Entities;
 using FPT.TeamMatching.Domain.Enums;
+using FPT.TeamMatching.Domain.Models.Requests.Commands.Invitations;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Invitations;
 using FPT.TeamMatching.Domain.Models.Responses;
 using FPT.TeamMatching.Domain.Models.Results;
@@ -16,12 +17,54 @@ namespace FPT.TeamMatching.Services;
 
 public class InvitationService : BaseService<Invitation>, IInvitationService
 {
-    private readonly IInvitationRepository _repository;
+    private readonly IInvitationRepository _invitationRepository;
+    private readonly IProjectRepository _projectRepository;
 
     public InvitationService(IMapper mapper, IUnitOfWork unitOfWork) : base(mapper, unitOfWork)
     {
-        _repository = unitOfWork.InvitationRepository;
+        _invitationRepository = unitOfWork.InvitationRepository;
+        _projectRepository = unitOfWork.ProjectRepository;
     }
+
+    public Task<BusinessResult> CreateInvitationPending(InvitationCreatePendingCommand command)
+    {
+        throw new NotImplementedException();
+    }
+
+    //public async Task<BusinessResult> CreateInvitationPending(InvitationCreatePendingCommand command)
+    //{
+    //    try
+    //    {
+    //        var invitation = _mapper.Map<Invitation>(command);
+    //        var user = GetUser();
+    //        var project = await _projectRepository.GetById((Guid)command.ProjectId);
+    //        if (project != null && user != null)
+    //        {
+    //            invitation.Id = Guid.NewGuid();
+    //            invitation.Status = InvitationStatus.Pending;
+    //            InitializeBaseEntityForCreate(invitation);
+    //            if (command.Type == InvitationType.SentByStudent)
+    //            {
+    //                invitation.SenderId = user.Id;
+    //                invitation.ReceiverId = project.LeaderId;
+
+    //            }
+    //            else if (command.Type == InvitationType.SendByTeam)
+    //            {
+    //                invitation.SenderId = project.LeaderId;
+    //                //invitation.ReceiverId = ;
+    //            }
+    //        }
+    //    }
+    //    catch (Exception ex)
+    //    {
+    //        var errorMessage = $"An error occurred in {typeof(InvitationResult).Name}: {ex.Message}";
+    //        return new ResponseBuilder()
+    //            .WithStatus(Const.FAIL_CODE)
+    //            .WithMessage(errorMessage)
+    //            .Build();
+    //    }
+    //}
 
     public async Task<BusinessResult> GetUserInvitationsByType(InvitationGetByTypeQuery query)
     {
@@ -36,17 +79,17 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
                     .Build();
             var userId = Guid.Parse(userIdClaim);
             // get by type
-            var queryable = _repository.GetQueryable(m => m.Type == query.Type);
+            var queryable = _invitationRepository.GetQueryable(m => m.Type == query.Type);
             queryable = IncludeHelper.Apply(queryable);
             // type: joinRequest 
             // => verify userId with receiver
             // type: requestToJoin 
             // => verify userId with sender
-            
+
             queryable = query.Type switch
             {
-                InvitationType.SentByMe => queryable.Where(m => m.SenderId == userId),
-                InvitationType.ReceivedByTeam => queryable.Where(m => m.ReceiverId == userId),
+                InvitationType.SentByStudent => queryable.Where(m => m.SenderId == userId),
+                InvitationType.SendByTeam => queryable.Where(m => m.ReceiverId == userId),
                 _ => queryable
             };
 
@@ -69,7 +112,7 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
             }
 
             var totalOrigin = queryable.Count();
-            var result = await _repository.ApplySortingAndPaging(queryable, query);
+            var result = await _invitationRepository.ApplySortingAndPaging(queryable, query);
             // create results table response
             results = _mapper.Map<List<InvitationResult>>(result);
             var tableResponse = new ResultsTableResponse<InvitationResult>

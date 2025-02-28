@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace FPT.TeamMatching.API.Controllers;
 
-[Route(Const.API_APPLICATIONS)]
+[Route(Const.API_BLOGCVS)]
 [ApiController]
 public class BlogCvController : ControllerBase
 {

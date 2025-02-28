@@ -1,4 +1,4 @@
-using CloudinaryDotNet.Actions;
+using FPT.TeamMatching.Domain.Models.Results.Bases;
 
 namespace FPT.TeamMatching.Domain.Models.Results;
 
