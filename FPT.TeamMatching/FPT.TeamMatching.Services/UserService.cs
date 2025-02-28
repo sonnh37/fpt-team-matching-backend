@@ -35,7 +35,7 @@ public class UserService : BaseService<User>, IUserService
                 return new ResponseBuilder()
                     .WithStatus(Const.FAIL_CODE)
                     .WithMessage("The email has already been registered.")
-                    .Build();
+                    ;
 
             // set password
             if (command.Password != null)
@@ -65,11 +65,10 @@ public class UserService : BaseService<User>, IUserService
             if (!isSaveChanges)
                 return HandlerFail(Const.FAIL_SAVE_MSG);
 
-            var msg = new ResponseBuilder<UserResult>()
+            var msg = new ResponseBuilder()
                 .WithData(userResult)
                 .WithStatus(Const.SUCCESS_CODE)
-                .WithMessage(Const.SUCCESS_SAVE_MSG)
-                .Build();
+                .WithMessage(Const.SUCCESS_SAVE_MSG);
 
             return msg;
         }

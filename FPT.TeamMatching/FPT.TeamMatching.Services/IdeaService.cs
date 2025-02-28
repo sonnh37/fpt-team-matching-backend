@@ -34,12 +34,11 @@ public class IdeaService : BaseService<Idea>, IIdeaService
             if (!createSucess)
                 return new ResponseBuilder()
                     .WithStatus(Const.FAIL_CODE)
-                    .WithMessage(Const.FAIL_SAVE_MSG).Build();
+                    .WithMessage(Const.FAIL_SAVE_MSG);
 
-            var msg = new ResponseBuilder<Idea>()
+            var msg = new ResponseBuilder()
                 .WithStatus(Const.SUCCESS_CODE)
-                .WithMessage(Const.SUCCESS_SAVE_MSG)
-                .Build();
+                .WithMessage(Const.SUCCESS_SAVE_MSG);
 
             return msg;
         }
@@ -48,10 +47,8 @@ public class IdeaService : BaseService<Idea>, IIdeaService
             var errorMessage = $"An error occurred while updating : {ex.Message}";
             return new ResponseBuilder()
                 .WithStatus(Const.FAIL_CODE)
-                .WithMessage(errorMessage)
-                .Build();
+                .WithMessage(errorMessage);
         }
-
     }
 
     public async Task<BusinessResult> GetAll<TResult>(IdeaGetAllQuery query) where TResult : BaseResult
@@ -85,6 +82,7 @@ public class IdeaService : BaseService<Idea>, IIdeaService
             user.CreatedBy = user.Email;
             user.UpdatedBy = user.Email;
         }
+
         bool isStudent = user.UserXRoles.Any(e => e.Role != null && e.Role.RoleName == "Student");
         if (isStudent)
         {
@@ -94,6 +92,7 @@ public class IdeaService : BaseService<Idea>, IIdeaService
         {
             ideaRequest.Status = IdeaRequestStatus.CouncilPending;
         }
+
         _ideaRequestRepository.Add(ideaRequest);
 
         bool saveChange = await _unitOfWork.SaveChanges();

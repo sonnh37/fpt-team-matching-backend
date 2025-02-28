@@ -103,27 +103,34 @@ public class ProfileStudentService : IProfileStudentService
         }
     }
 
-    public async Task<BusinessResult> GetAllProfiles(ProfileStudentGetAllQuery x)
+    public async Task<BusinessResult> GetAllProfiles(ProfileStudentGetAllQuery query)
     {
         try
         {
-            if (!x.IsPagination)
-            {
-                var profiles = await _unitOfWork.ProfileStudentRepository.GetAll();
-                var profilesResult = _mapper.Map<List<ProfileStudent>, List<ProfileStudentResult>>(profiles);
-                return new BusinessResult(Const.SUCCESS_CODE, Const.SUCCESS_SAVE_MSG, profilesResult);
-            }
+            var (data, total) = await _unitOfWork.SkillProfileRepository.GetData(query);
 
-            var tuple = await _unitOfWork.ProfileStudentRepository.GetPaged(x);
-            var results = _mapper.Map<List<ProfileStudentResult>>(tuple.Item1);
+            var results = _mapper.Map<List<SkillProfile>>(data);
 
-            var tableResponse = new ResultsTableResponse<ProfileStudentResult>
-            {
-                GetQueryableQuery = x,
-                Item = (results, tuple.Item2)
-            };
+            if (results.Count == 0)
+                return new ResponseBuilder()
+                    .WithData(results)
+                    .WithStatus(Const.NOT_FOUND_CODE)
+                    .WithMessage(Const.NOT_FOUND_MSG);
 
-            return new BusinessResult(Const.SUCCESS_CODE, Const.SUCCESS_READ_MSG, tableResponse);
+            // GetAll 
+            if (!query.IsPagination)
+                return new ResponseBuilder()
+                    .WithData(results)
+                    .WithStatus(Const.SUCCESS_CODE)
+                    .WithMessage(Const.SUCCESS_READ_MSG);
+
+            // GetAll with paginationvar
+            var tableResponse = new PaginatedResult(query, results, total);
+
+            return new ResponseBuilder()
+                    .WithData(tableResponse)
+                    .WithStatus(Const.SUCCESS_CODE)
+                    .WithMessage(Const.SUCCESS_READ_MSG);
         }
         catch (Exception e)
         {

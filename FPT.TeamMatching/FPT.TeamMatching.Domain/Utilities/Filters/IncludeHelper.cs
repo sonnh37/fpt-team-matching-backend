@@ -16,6 +16,7 @@ public static class IncludeHelper
             IQueryable<Profession> professions => Profession(professions) as IQueryable<TEntity>,
             IQueryable<User> users => User(users) as IQueryable<TEntity>,
             IQueryable<Invitation> invitations => Invitation(invitations) as IQueryable<TEntity>,
+            IQueryable<Notification> notifications => Notification(notifications) as IQueryable<TEntity>,
             _ => queryable
         })!;
     }
@@ -41,6 +42,13 @@ public static class IncludeHelper
     private static IQueryable<Profession> Profession(IQueryable<Profession> queryable)
     {
         queryable = queryable.Include(m => m.Specialties);
+
+        return queryable;
+    }
+    
+    private static IQueryable<Notification>? Notification(IQueryable<Notification> queryable)
+    {
+        queryable = queryable.Include(m => m.User);
 
         return queryable;
     }

@@ -99,6 +99,8 @@ public static class Const
     public const int PageNumberDefault = 1;
 
     public const bool IsPagination = false;
+    
+    public const bool IsPermanent = false;
 
     public const int PageSizeDefault = 10;
 

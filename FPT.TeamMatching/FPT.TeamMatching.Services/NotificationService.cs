@@ -1,7 +1,9 @@
 using AutoMapper;
+using FPT.TeamMatching.Domain.Contracts.Repositories;
 using FPT.TeamMatching.Domain.Contracts.Services;
 using FPT.TeamMatching.Domain.Contracts.UnitOfWorks;
 using FPT.TeamMatching.Domain.Entities;
+using FPT.TeamMatching.Domain.Enums;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Base;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Notifications;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Notifications;
@@ -9,14 +11,20 @@ using FPT.TeamMatching.Domain.Models.Responses;
 using FPT.TeamMatching.Domain.Models.Results;
 using FPT.TeamMatching.Domain.Models.Results.Bases;
 using FPT.TeamMatching.Domain.Utilities;
+using FPT.TeamMatching.Domain.Utilities.Filters;
 using FPT.TeamMatching.Services.Bases;
+using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
 
 namespace FPT.TeamMatching.Services;
 
 public class NotificationService : BaseService<Notification>, INotificationService
 {
+    private readonly INotificationRepository _notificationRepository;
+
     public NotificationService(IUnitOfWork unitOfWork, IMapper mapper) : base(mapper, unitOfWork)
     {
+        _notificationRepository = unitOfWork.NotificationRepository;
     }
 
     public new async Task<BusinessResult> CreateOrUpdate<TResult>(CreateOrUpdateCommand createOrUpdateCommand)
@@ -29,13 +37,12 @@ public class NotificationService : BaseService<Notification>, INotificationServi
             if (result == null)
                 return new ResponseBuilder()
                     .WithStatus(Const.FAIL_CODE)
-                    .WithMessage(Const.FAIL_SAVE_MSG).Build();
+                    .WithMessage(Const.FAIL_SAVE_MSG);
 
-            var msg = new ResponseBuilder<TResult>()
+            var msg = new ResponseBuilder()
                 .WithData(result)
                 .WithStatus(Const.SUCCESS_CODE)
-                .WithMessage(Const.SUCCESS_SAVE_MSG)
-                .Build();
+                .WithMessage(Const.SUCCESS_SAVE_MSG);
 
             return msg;
         }
@@ -44,8 +51,7 @@ public class NotificationService : BaseService<Notification>, INotificationServi
             var errorMessage = $"An error occurred while updating {typeof(NotificationResult).Name}: {ex.Message}";
             return new ResponseBuilder()
                 .WithStatus(Const.FAIL_CODE)
-                .WithMessage(errorMessage)
-                .Build();
+                .WithMessage(errorMessage);
         }
     }
 
@@ -59,7 +65,7 @@ public class NotificationService : BaseService<Notification>, INotificationServi
             _mapper.Map(updateCommand, entity);
 
             string userId = _httpContextAccessor.HttpContext.User.FindFirst("Id").Value ?? string.Empty;
-            if (!string.IsNullOrWhiteSpace(userId)) return null;
+            if (string.IsNullOrWhiteSpace(userId)) return null;
             entity.UserId = Guid.Parse(userId);
 
             InitializeBaseEntityForUpdate(entity);
@@ -73,7 +79,7 @@ public class NotificationService : BaseService<Notification>, INotificationServi
 
             // Find claim userId
             string userId = _httpContextAccessor.HttpContext.User.FindFirst("Id").Value ?? string.Empty;
-            if (!string.IsNullOrWhiteSpace(userId)) return null;
+            if (string.IsNullOrWhiteSpace(userId)) return null;
             entity.UserId = Guid.Parse(userId);
 
             InitializeBaseEntityForCreate(entity);
@@ -81,7 +87,13 @@ public class NotificationService : BaseService<Notification>, INotificationServi
         }
 
         var saveChanges = await _unitOfWork.SaveChanges();
-        return saveChanges ? entity : default;
+        if (saveChanges)
+        {
+            // get lại lấy include userId
+            return await _unitOfWork.NotificationRepository.GetById(entity.Id);
+        }
+
+        return null;
     }
 
     public async Task<BusinessResult> GenerateNotification(NotificationCreateCommand notification)
@@ -164,21 +176,30 @@ public class NotificationService : BaseService<Notification>, INotificationServi
             // Tại sao ko gọi user ra include notification
             // Vì ở user nếu như include thì sẽ gồm những include khác dẫn đến lấy những liệu ko lq
             // Có thể gọi riêng user chỉ include notification nó thôi cũng đc, nhưng đang làm  service repo của notif
-            var notifications = await _unitOfWork.NotificationRepository.GetAllNotificationByUserId(userId);
-            if (!notifications.Any()) return HandlerNotFound();
+            var (data, total) = await _notificationRepository.GetDataByCurrentUser(query, userId);
+                
+            var results = _mapper.Map<List<NotificationResult>>(data);
 
-            if (query.IsRead.HasValue)
-            {
-                notifications = notifications.Where(m => m.IsRead == query.IsRead.Value).ToList();
-            }
+            if (results.Count == 0)
+                return new ResponseBuilder()
+                    .WithData(results)
+                    .WithStatus(Const.NOT_FOUND_CODE)
+                    .WithMessage(Const.NOT_FOUND_MSG);
 
-            var notificationResults = _mapper.Map<List<NotificationResult>>(notifications);
-            return new ResponseBuilder<NotificationResult>()
-                .WithData(notificationResults)
+            // GetAll 
+            if (!query.IsPagination)
+                return new ResponseBuilder()
+                    .WithData(results)
+                    .WithStatus(Const.SUCCESS_CODE)
+                    .WithMessage(Const.SUCCESS_READ_MSG);
+            
+            // GetAll with pagination
+            var tableResponse = new PaginatedResult(query, results, total);
+
+            return new ResponseBuilder()
+                .WithData(tableResponse)
                 .WithStatus(Const.SUCCESS_CODE)
-                .WithMessage(Const.SUCCESS_READ_MSG)
-                .Build();
-            ;
+                .WithMessage(Const.SUCCESS_READ_MSG);
         }
         catch (Exception e)
         {

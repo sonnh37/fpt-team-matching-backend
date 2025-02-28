@@ -93,28 +93,24 @@ public class AuthService : IAuthService
         if (user == null)
             return new ResponseBuilder()
                 .WithStatus(Const.NOT_FOUND_CODE)
-                .WithMessage("Email is not found.")
-                .Build();
+                .WithMessage("Email is not found.");
 
         if (user.Department != query.Department)
         {
             return new ResponseBuilder()
                 .WithStatus(Const.FAIL_CODE)
-                .WithMessage("Your account does not have access to the system")
-                .Build();
+                .WithMessage("Your account does not have access to the system");
         }
 
         if (user.Password == null)
             return new ResponseBuilder()
                 .WithStatus(Const.FAIL_CODE)
-                .WithMessage("Your account does not set up the password yet.")
-                .Build();
+                .WithMessage("Your account does not set up the password yet.");
 
         if (!BCrypt.Net.BCrypt.Verify(query.Password, user.Password))
             return new ResponseBuilder()
                 .WithStatus(Const.FAIL_CODE)
-                .WithMessage("Password is invalid.")
-                .Build();
+                .WithMessage("Password is invalid.");
 
         var result = _mapper.Map<UserResult>(user);
 
@@ -148,24 +144,24 @@ public class AuthService : IAuthService
 
                 if (res.Status != 1)
                     return new ResponseBuilder()
-                        .WithStatus(Const.FAIL_CODE)
-                        .WithMessage(Const.FAIL_SAVE_MSG)
-                        .Build();
+                            .WithStatus(Const.FAIL_CODE)
+                            .WithMessage(Const.FAIL_SAVE_MSG)
+                        ;
 
                 var refreshToken = res.Data as RefreshTokenResult;
 
                 if (refreshToken == null)
                     return new ResponseBuilder()
-                        .WithStatus(Const.FAIL_CODE)
-                        .WithMessage("Error while saving refresh token.")
-                        .Build();
+                            .WithStatus(Const.FAIL_CODE)
+                            .WithMessage("Error while saving refresh token.")
+                        ;
 
                 SaveHttpOnlyCookie(accessToken, refreshToken.Token!);
 
                 return new ResponseBuilder()
-                    .WithStatus(Const.SUCCESS_CODE)
-                    .WithMessage("Login successful.")
-                    .Build();
+                        .WithStatus(Const.SUCCESS_CODE)
+                        .WithMessage("Login successful.")
+                    ;
             }
             finally
             {
@@ -227,26 +223,26 @@ public class AuthService : IAuthService
             var refreshTokenEntity = await _refreshTokenRepository.GetByRefreshTokenAsync(request.RefreshToken!);
             if (refreshTokenEntity == null)
                 return new ResponseBuilder()
-                    .WithStatus(Const.NOT_FOUND_CODE)
-                    .WithMessage("Refresh token not found.")
-                    .Build();
+                        .WithStatus(Const.NOT_FOUND_CODE)
+                        .WithMessage("Refresh token not found.")
+                    ;
 
             // Bước 2: Xác thực chữ ký JWT bằng public key
             var isValid = ValidateJwtSignature(request.RefreshToken, refreshTokenEntity.PublicKey);
             if (!isValid)
                 return new ResponseBuilder()
-                    .WithStatus(Const.FAIL_CODE)
-                    .WithMessage("Invalid refresh token signature.")
-                    .Build();
+                        .WithStatus(Const.FAIL_CODE)
+                        .WithMessage("Invalid refresh token signature.")
+                    ;
 
             // Bước 3: Kiểm tra IP của request có khớp với IP đã lưu không
             var businessResult = _refreshTokenService.ValidateRefreshTokenIpMatch();
 
             if (businessResult.Status != 1)
                 return new ResponseBuilder()
-                    .WithStatus(Const.FAIL_CODE)
-                    .WithMessage("IP address mismatch.")
-                    .Build();
+                        .WithStatus(Const.FAIL_CODE)
+                        .WithMessage("IP address mismatch.")
+                    ;
 
             // Bước 4: Tạo cặp khóa RSA mới
             using (var rsa = new RSACryptoServiceProvider(2048))
@@ -277,9 +273,9 @@ public class AuthService : IAuthService
                     var isSaveChanges = await _unitOfWork.SaveChanges();
                     if (!isSaveChanges)
                         return new ResponseBuilder()
-                            .WithStatus(Const.FAIL_CODE)
-                            .WithMessage("Refresh token validation failed when saving changes.")
-                            .Build();
+                                .WithStatus(Const.FAIL_CODE)
+                                .WithMessage("Refresh token validation failed when saving changes.")
+                            ;
 
                     // Bước 8: Lưu access token vào cookie (nếu cần)
                     SaveHttpOnlyCookie(newAccessToken, newRefreshToken);
@@ -291,11 +287,10 @@ public class AuthService : IAuthService
                         RefreshToken = newRefreshToken
                     };
 
-                    return new ResponseBuilder<TokenResult>()
+                    return new ResponseBuilder()
                         .WithData(tokenResult)
                         .WithStatus(Const.SUCCESS_CODE)
-                        .WithMessage("Token refreshed successfully.")
-                        .Build();
+                        .WithMessage("Token refreshed successfully.");
                 }
                 finally
                 {
@@ -307,8 +302,7 @@ public class AuthService : IAuthService
         {
             return new ResponseBuilder()
                 .WithStatus(Const.FAIL_CODE)
-                .WithMessage(ex.Message)
-                .Build();
+                .WithMessage(ex.Message);
         }
     }
 
@@ -320,9 +314,9 @@ public class AuthService : IAuthService
                 .GetByRefreshTokenAsync(userLogoutCommand.RefreshToken ?? string.Empty);
             if (userRefreshToken == null)
                 return new ResponseBuilder()
-                    .WithStatus(Const.NOT_FOUND_CODE)
-                    .WithMessage("You are not logged in, please log in to continue.")
-                    .Build();
+                        .WithStatus(Const.NOT_FOUND_CODE)
+                        .WithMessage("You are not logged in, please log in to continue.")
+                    ;
             _refreshTokenRepository.DeletePermanently(userRefreshToken);
 
             var isSaved = await _unitOfWork.SaveChanges();
@@ -333,15 +327,13 @@ public class AuthService : IAuthService
 
             return new ResponseBuilder()
                 .WithStatus(Const.SUCCESS_CODE)
-                .WithMessage("The account has been logged out.")
-                .Build();
+                .WithMessage("The account has been logged out.");
         }
         catch (Exception e)
         {
             return new ResponseBuilder()
                 .WithStatus(Const.FAIL_CODE)
-                .WithMessage(e.Message)
-                .Build();
+                .WithMessage(e.Message);
         }
     }
 
@@ -381,8 +373,7 @@ public class AuthService : IAuthService
         {
             return new ResponseBuilder()
                 .WithStatus(Const.FAIL_CODE)
-                .WithMessage("Error token google.")
-                .Build();
+                .WithMessage("Error token google.");
         }
 
         var user = await _userRepository.GetByEmail(payload.Email);
@@ -404,9 +395,9 @@ public class AuthService : IAuthService
             if (res.Status != 1)
             {
                 return new ResponseBuilder()
-                    .WithStatus(Const.FAIL_CODE)
-                    .WithMessage("Error while saving refresh token.")
-                    .Build();
+                        .WithStatus(Const.FAIL_CODE)
+                        .WithMessage("Error while saving refresh token.")
+                    ;
             }
 
             result = res.Data as UserResult;
@@ -417,9 +408,9 @@ public class AuthService : IAuthService
             if (result.Department != request.Department)
             {
                 return new ResponseBuilder()
-                    .WithStatus(Const.NOT_FOUND_CODE)
-                    .WithMessage("Your account does not have access to the system")
-                    .Build();
+                        .WithStatus(Const.NOT_FOUND_CODE)
+                        .WithMessage("Your account does not have access to the system")
+                    ;
             }
         }
 
@@ -447,24 +438,24 @@ public class AuthService : IAuthService
 
                 if (res.Status != 1)
                     return new ResponseBuilder()
-                        .WithStatus(Const.FAIL_CODE)
-                        .WithMessage(Const.FAIL_SAVE_MSG)
-                        .Build();
+                            .WithStatus(Const.FAIL_CODE)
+                            .WithMessage(Const.FAIL_SAVE_MSG)
+                        ;
 
                 var refreshToken = res.Data as RefreshTokenResult;
 
                 if (refreshToken == null)
                     return new ResponseBuilder()
-                        .WithStatus(Const.FAIL_CODE)
-                        .WithMessage("Error while saving refresh token.")
-                        .Build();
+                            .WithStatus(Const.FAIL_CODE)
+                            .WithMessage("Error while saving refresh token.")
+                        ;
 
                 SaveHttpOnlyCookie(accessToken, refreshToken.Token!);
 
                 return new ResponseBuilder()
-                    .WithStatus(Const.SUCCESS_CODE)
-                    .WithMessage("Login successful.")
-                    .Build();
+                        .WithStatus(Const.SUCCESS_CODE)
+                        .WithMessage("Login successful.")
+                    ;
             }
             finally
             {
@@ -543,7 +534,7 @@ public class AuthService : IAuthService
     //         .WithData(loginResponse)
     //         .WithStatus(Const.SUCCESS_CODE)
     //         .WithMessage(Const.SUCCESS_LOGIN_MSG)
-    //         .Build();
+    //         ;
     // }
 
     #endregion
@@ -607,7 +598,7 @@ public class AuthService : IAuthService
     //         .WithData(tokenResult)
     //         .WithStatus(Const.SUCCESS_CODE)
     //         .WithMessage(Const.SUCCESS_LOGIN_MSG)
-    //         .Build();
+    //         ;
     // }
 
     protected async Task<BusinessResult> GetUserByToken(string accessToken)
@@ -615,8 +606,7 @@ public class AuthService : IAuthService
         if (string.IsNullOrEmpty(accessToken))
             return new ResponseBuilder()
                 .WithStatus(Const.NOT_FOUND_CODE)
-                .WithMessage("No access token provided")
-                .Build();
+                .WithMessage("No access token provided");
 
         var tokenHandler = new JwtSecurityTokenHandler();
         var jwtToken = tokenHandler.ReadJwtToken(accessToken);
@@ -625,8 +615,7 @@ public class AuthService : IAuthService
         if (string.IsNullOrEmpty(userId))
             return new ResponseBuilder()
                 .WithStatus(Const.NOT_FOUND_CODE)
-                .WithMessage("Error the access token provided")
-                .Build();
+                .WithMessage("Error the access token provided");
 
         var businessResult = await _userService.GetById<UserResult>(Guid.Parse(userId));
 
@@ -686,8 +675,7 @@ public class AuthService : IAuthService
         if (refreshToken == null)
             return new ResponseBuilder()
                 .WithStatus(Const.NOT_FOUND_CODE)
-                .WithMessage("You are not logged in, please log in to continue.")
-                .Build();
+                .WithMessage("You are not logged in, please log in to continue.");
 
         var businessResult = _refreshTokenService.ValidateRefreshTokenIpMatch();
         return businessResult;
@@ -701,9 +689,9 @@ public class AuthService : IAuthService
             var userId = GetUserIdFromClaims();
             if (!userId.HasValue)
                 return new ResponseBuilder()
-                    .WithStatus(Const.NOT_FOUND_CODE)
-                    .WithMessage("No user found.")
-                    .Build();
+                        .WithStatus(Const.NOT_FOUND_CODE)
+                        .WithMessage("No user found.")
+                    ;
 
             // Lấy thông tin người dùng từ database
             var userResult = await _userService.GetById<UserResult>(userId.Value);
@@ -713,8 +701,7 @@ public class AuthService : IAuthService
         {
             return new ResponseBuilder()
                 .WithStatus(Const.FAIL_CODE)
-                .WithMessage(ex.Message)
-                .Build();
+                .WithMessage(ex.Message);
         }
     }
 
