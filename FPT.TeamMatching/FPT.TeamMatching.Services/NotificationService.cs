@@ -64,11 +64,11 @@ public class NotificationService : BaseService<Notification>, INotificationServi
             if (entity == null) return null;
             _mapper.Map(updateCommand, entity);
 
-            string userId = _httpContextAccessor.HttpContext.User.FindFirst("Id").Value ?? string.Empty;
-            if (string.IsNullOrWhiteSpace(userId)) return null;
-            entity.UserId = Guid.Parse(userId);
+            var userId = GetUserIdFromClaims();
+            if (userId == null) return null;
+            entity.UserId = userId;
 
-            InitializeBaseEntityForUpdate(entity);
+            await SetBaseEntityForUpdate(entity);
             _unitOfWork.NotificationRepository.Update(entity);
         }
         else if (createOrUpdateCommand is NotificationCreateCommand createCommand)
@@ -78,11 +78,11 @@ public class NotificationService : BaseService<Notification>, INotificationServi
             entity.Id = Guid.NewGuid();
 
             // Find claim userId
-            string userId = _httpContextAccessor.HttpContext.User.FindFirst("Id").Value ?? string.Empty;
-            if (string.IsNullOrWhiteSpace(userId)) return null;
-            entity.UserId = Guid.Parse(userId);
+            var userId = GetUserIdFromClaims();
+            if (userId == null) return null;
+            entity.UserId = userId;
 
-            InitializeBaseEntityForCreate(entity);
+            await SetBaseEntityForCreation(entity);
             _unitOfWork.NotificationRepository.Add(entity);
         }
 
@@ -168,10 +168,10 @@ public class NotificationService : BaseService<Notification>, INotificationServi
     {
         try
         {
-            var userIdClaim = _httpContextAccessor.HttpContext.User.FindFirst("Id").Value ?? string.Empty;
-            if (string.IsNullOrWhiteSpace(userIdClaim))
+            var userIdClaim = GetUserIdFromClaims();
+            if (userIdClaim == null)
                 return HandlerFail("Not logged in");
-            var userId = Guid.Parse(userIdClaim);
+            var userId = userIdClaim.Value;
 
             // Tại sao ko gọi user ra include notification
             // Vì ở user nếu như include thì sẽ gồm những include khác dẫn đến lấy những liệu ko lq

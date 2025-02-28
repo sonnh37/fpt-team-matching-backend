@@ -34,10 +34,10 @@ public class ProjectService : BaseService<Project>, IProjectService
     {
         try
         {
-            var userId = _httpContextAccessor.HttpContext?.User.FindFirst("Id")?.Value;
+            var userId = GetUserIdFromClaims();
             if (userId != null)
             {
-                var project = await _repository.GetProjectByUserIdLogin(Guid.Parse(userId));
+                var project = await _repository.GetProjectByUserIdLogin(userId.Value);
                 var result = _mapper.Map<ProjectResult>(project);
                 if (result == null)
                     return new ResponseBuilder()

@@ -39,10 +39,10 @@ public class IdeaService : BaseService<Idea>, IIdeaService
     {
         try
         {
-            var userId = _httpContextAccessor.HttpContext?.User.FindFirst("Id")?.Value;
+            var userId = GetUserIdFromClaims();
             if (userId != null)
             {
-                var ideas = await _ideaRepository.GetIdeasByUserId(Guid.Parse(userId));
+                var ideas = await _ideaRepository.GetIdeasByUserId(userId.Value);
                 var result = _mapper.Map<IList<IdeaResult>>(ideas);
                 if (result == null)
                     return new ResponseBuilder()
@@ -73,7 +73,7 @@ public class IdeaService : BaseService<Idea>, IIdeaService
     {
         try
         {
-            bool createSucess = await LecturerCreateAsync(idea);
+            var createSucess = await LecturerCreateAsync(idea);
             if (!createSucess)
                 return new ResponseBuilder()
                     .WithStatus(Const.FAIL_CODE)
@@ -123,37 +123,35 @@ public class IdeaService : BaseService<Idea>, IIdeaService
     {
         var ideaEntity = _mapper.Map<Idea>(ideaCreateCommand);
         var semester = await _semesterRepository.GetUpComingSemester();
+        if (semester == null) return false;
         if (ideaEntity == null) return false;
-        var user = GetUser();
+        var userId = GetUserIdFromClaims();
+        if (userId == null) return false;
         ideaEntity.Id = Guid.NewGuid();
         ideaEntity.Status = IdeaStatus.Pending;
-        ideaEntity.OwnerId = user.Id;
+        ideaEntity.OwnerId = userId;
         ideaEntity.SemesterId = semester.Id;
         ideaEntity.Type = IdeaType.Student;
         ideaEntity.IsExistedTeam = true;
         ideaEntity.IsEnterpriseTopic = false;
-        InitializeBaseEntityForCreate(ideaEntity);
+        await SetBaseEntityForCreation(ideaEntity);
         _ideaRepository.Add(ideaEntity);
 
-        var idea = _ideaRepository.GetById(ideaEntity.Id);
+        var idea = await _ideaRepository.GetById(ideaEntity.Id);
         if (idea == null) return false;
-        IdeaRequest ideaRequest = new IdeaRequest
+        var ideaRequest = new IdeaRequest
         {
             Id = Guid.NewGuid(),
             IdeaId = ideaEntity.Id,
             IsDeleted = false,
             CreatedDate = DateTime.UtcNow,
             UpdatedDate = DateTime.UtcNow,
+            Status = IdeaRequestStatus.MentorPending
         };
-        if (user != null)
-        {
-            user.CreatedBy = user.Email;
-            user.UpdatedBy = user.Email;
-        }
-        ideaRequest.Status = IdeaRequestStatus.MentorPending;
+        await SetBaseEntityForCreation(ideaRequest);
         _ideaRequestRepository.Add(ideaRequest);
 
-        bool saveChange = await _unitOfWork.SaveChanges();
+        var saveChange = await _unitOfWork.SaveChanges();
         return saveChange;
     }
 
@@ -161,34 +159,29 @@ public class IdeaService : BaseService<Idea>, IIdeaService
     {
         var ideaEntity = _mapper.Map<Idea>(ideaCreateCommand);
         if (ideaEntity == null) return false;
-        var user = GetUser();
+        var userId = GetUserIdFromClaims();
         ideaEntity.Id = Guid.NewGuid();
         ideaEntity.Status = IdeaStatus.Pending;
-        ideaEntity.OwnerId = user.Id;
-        ideaEntity.MentorId = user.Id;
+        ideaEntity.OwnerId = userId;
+        ideaEntity.MentorId = userId;
         ideaEntity.Type = IdeaType.Lecturer;
-        InitializeBaseEntityForCreate(ideaEntity);
+        await SetBaseEntityForCreation(ideaEntity);
         _ideaRepository.Add(ideaEntity);
 
-        var idea = _ideaRepository.GetById(ideaEntity.Id);
+        var idea = await _ideaRepository.GetById(ideaEntity.Id);
         if (idea == null) return false;
-        IdeaRequest ideaRequest = new IdeaRequest
+        var ideaRequest = new IdeaRequest
         {
             Id = Guid.NewGuid(),
             IdeaId = ideaEntity.Id,
             IsDeleted = false,
             CreatedDate = DateTime.UtcNow,
             UpdatedDate = DateTime.UtcNow,
+            Status = IdeaRequestStatus.CouncilPending
         };
-        if (user != null)
-        {
-            user.CreatedBy = user.Email;
-            user.UpdatedBy = user.Email;
-        }
-        ideaRequest.Status = IdeaRequestStatus.CouncilPending;
         _ideaRequestRepository.Add(ideaRequest);
 
-        bool saveChange = await _unitOfWork.SaveChanges();
+        var saveChange = await _unitOfWork.SaveChanges();
         return saveChange;
     }
 }
