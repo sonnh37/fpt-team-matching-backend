@@ -24,6 +24,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddLogging();
 
 #region Core services
+
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
     options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
@@ -32,9 +33,11 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddAutoMapper(typeof(MappingProfile));
+
 #endregion
 
 #region Database
+
 var dbDataSource = new NpgsqlDataSourceBuilder(builder.Configuration.GetConnectionString("DefaultConnection")).Build();
 builder.Services.AddDbContext<FPTMatchingDbContext>(options =>
 {
@@ -43,9 +46,11 @@ builder.Services.AddDbContext<FPTMatchingDbContext>(options =>
     options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
 });
 builder.Services.AddSingleton<ChatRoomDbContext>();
+
 #endregion
 
 #region Authentication & Authorization
+
 builder.Services.Configure<TokenSetting>(builder.Configuration.GetSection("TokenSetting"));
 builder.Services.AddAuthentication(x =>
     {
@@ -88,9 +93,11 @@ builder.Services.AddAuthentication(x =>
         };
     });
 builder.Services.AddAuthorization();
+
 #endregion
 
 #region CORS
+
 builder.Services.AddCors(options =>
 {
     var frontendDomains = builder.Configuration.GetValue<string>("Frontend:Domain")?.Split(',');
@@ -103,17 +110,23 @@ builder.Services.AddCors(options =>
             .AllowAnyMethod();
     });
 });
+
 #endregion
 
 #region SignalR
+
 builder.Services.AddSignalR();
+
 #endregion
 
 #region Kafka
+
 builder.Services.AddScoped<IKafkaProducerConfig, KafkaProducer>();
+
 #endregion
 
 #region Hangfire
+
 builder.Services.AddHangfire(config =>
 {
     config.UseSimpleAssemblyNameTypeSerializer()
@@ -122,21 +135,28 @@ builder.Services.AddHangfire(config =>
 });
 builder.Services.AddHangfireServer();
 builder.Services.AddScoped<IJobHangfireService, JobHangFireService>();
+
 #endregion
 
 #region Cloudinary
+
 builder.Services.AddScoped<CloudinaryConfig>();
+
 #endregion
 
 #region Redis
+
 builder.Services.AddSingleton<RedisConfig>();
 builder.Services.AddSingleton<RedisUtil>();
+
 #endregion
 
 #region Custom Repositories & Services
+
 builder.Services.AddCollectionRepositories();
 builder.Services.AddCollectionServices();
-#endregion 
+
+#endregion
 
 // -----------------app-------------------------
 

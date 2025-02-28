@@ -8,7 +8,7 @@ namespace FPT.TeamMatching.Data.Repositories;
 
 public class ReviewRepository : BaseRepository<Review>, IReviewRepository
 {
-    public ReviewRepository(FPTMatchingDbContext dbContext, IMapper mapper) : base(dbContext, mapper)
+    public ReviewRepository(FPTMatchingDbContext dbContext) : base(dbContext)
     {
     }
 }

@@ -9,7 +9,7 @@ namespace FPT.TeamMatching.Data.Repositories;
 
 public class RefreshTokenRepository : BaseRepository<RefreshToken>, IRefreshTokenRepository
 {
-    public RefreshTokenRepository(FPTMatchingDbContext dbContext, IMapper mapper) : base(dbContext, mapper)
+    public RefreshTokenRepository(FPTMatchingDbContext dbContext) : base(dbContext)
     {
     }
 

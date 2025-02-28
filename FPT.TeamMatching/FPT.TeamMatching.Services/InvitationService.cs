@@ -32,13 +32,15 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
         try
         {
             bool hasSent = true;
-            var user = GetUser();
+            var user = await GetUserAsync();
+            if (user == null) return HandlerFail("Not logged in");
             var i = await _invitationRepository.GetInvitationOfUserByProjectId(projectId, user.Id);
             if (i == null)
             {
                 hasSent = false;
                 return new BusinessResult(Const.SUCCESS_CODE, Const.SUCCESS_READ_MSG, hasSent);
             }
+
             return new BusinessResult(Const.SUCCESS_CODE, Const.SUCCESS_READ_MSG, hasSent);
         }
         catch (Exception ex)
@@ -58,8 +60,8 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
             var userIdClaim = _httpContextAccessor.HttpContext.User.FindFirst("Id")?.Value;
             if (string.IsNullOrEmpty(userIdClaim))
                 return new ResponseBuilder()
-                    .WithStatus(Const.FAIL_CODE)
-                    .WithMessage("You need to authenticate with TeamMatching.")
+                        .WithStatus(Const.FAIL_CODE)
+                        .WithMessage("You need to authenticate with TeamMatching.")
                     ;
             var userId = Guid.Parse(userIdClaim);
             // get by type
@@ -77,29 +79,19 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
                 _ => queryable
             };
 
-            if (!query.IsPagination)
-            {
-                var allData = await queryable.ToListAsync();
-                results = _mapper.Map<List<InvitationResult>>(allData);
-                if (!results.Any())
-                    return new ResponseBuilder()
-                        .WithData(results)
-                        .WithStatus(Const.NOT_FOUND_CODE)
-                        .WithMessage(Const.NOT_FOUND_MSG)
-                        ;
+            var (data, total) = await _invitationRepository.GetData(query);
 
+            results = _mapper.Map<List<InvitationResult>>(data);
+
+            // GetAll 
+            if (!query.IsPagination)
                 return new ResponseBuilder()
                     .WithData(results)
                     .WithStatus(Const.SUCCESS_CODE)
-                    .WithMessage(Const.SUCCESS_READ_MSG)
-                    ;
-            }
+                    .WithMessage(Const.SUCCESS_READ_MSG);
 
-            var totalOrigin = queryable.Count();
-            var result = await _invitationRepository.ApplySortingAndPaging(queryable, query);
-            // create results table response
-            results = _mapper.Map<List<InvitationResult>>(result);
-            var tableResponse = new PaginatedResult(query, results, totalOrigin);
+            // GetAll with pagination
+            var tableResponse = new PaginatedResult(query, results, total);
 
             return new ResponseBuilder()
                 .WithData(tableResponse)
@@ -168,37 +160,42 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
     private async Task<bool> StudentCreateAsync(InvitationStudentCreatePendingCommand command)
     {
         var invitation = _mapper.Map<Invitation>(command);
-        var user = GetUser();
+        var user = await GetUserAsync();
+        if (user == null) return false;
         var project = await _projectRepository.GetById((Guid)command.ProjectId);
-        if (project != null && user != null)
+        if (project != null)
         {
             invitation.Status = InvitationStatus.Pending;
             invitation.SenderId = user.Id;
             invitation.ReceiverId = project.LeaderId;
             invitation.Type = InvitationType.SentByStudent;
-            InitializeBaseEntityForCreate(invitation);
+            await SetBaseEntityForCreation(invitation);
             _invitationRepository.Add(invitation);
             bool saveChange = await _unitOfWork.SaveChanges();
             return saveChange;
         }
+
         return false;
     }
 
     private async Task<bool> TeamCreateAsync(InvitationTeamCreatePendingCommand command)
     {
         var invitation = _mapper.Map<Invitation>(command);
-        var user = GetUser();
-        var project = await _projectRepository.GetById((Guid)command.ProjectId);
-        if (project != null && user != null)
+        var user = await GetUserAsync();
+        if (user == null) return false;
+        if (command.ProjectId == null) return false;
+        var project = await _projectRepository.GetById(command.ProjectId.Value);
+        if (project != null)
         {
             invitation.Status = InvitationStatus.Pending;
             invitation.SenderId = user.Id;
             invitation.Type = InvitationType.SendByTeam;
-            InitializeBaseEntityForCreate(invitation);
+            await SetBaseEntityForCreation(invitation);
             _invitationRepository.Add(invitation);
             bool saveChange = await _unitOfWork.SaveChanges();
             return saveChange;
         }
+
         return false;
     }
 }
