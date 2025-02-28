@@ -24,7 +24,7 @@ public class InvitationController : ControllerBase
         var msg = await _service.GetAll<InvitationResult>(query);
         return Ok(msg);
     }
-    
+
     [HttpGet("get-user-invitations-by-type")]
     public async Task<IActionResult> GetUserInvitationsByType([FromQuery] InvitationGetByTypeQuery query)
     {
@@ -82,5 +82,25 @@ public class InvitationController : ControllerBase
     {
         var msg = await _service.TeamCreatePending(request);
         return Ok(msg);
+    }
+
+    [HttpGet("check-if-student-sent-invitation/{projectId:guid}")]
+    public async Task<IActionResult> CheckIfStudentSendInvitation([FromRoute] Guid projectId)
+    {
+        var msg = await _service.CheckIfStudentSendInvitation(projectId);
+        bool hasSent = (bool)msg.Data;
+        if (hasSent)
+            return Ok(new
+            {
+                status = msg.Status,
+                message = "Invitation has been sent!",
+                hasSent = hasSent
+            });
+        return Ok(new
+        {
+            status = msg.Status,
+            message = "Invitation has not been sent!",
+            hasSent = hasSent
+        });
     }
 }

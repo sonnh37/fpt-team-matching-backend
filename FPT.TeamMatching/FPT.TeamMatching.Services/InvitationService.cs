@@ -27,6 +27,29 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
         _projectRepository = unitOfWork.ProjectRepository;
     }
 
+    public async Task<BusinessResult> CheckIfStudentSendInvitation(Guid projectId)
+    {
+        try
+        {
+            bool hasSent = true;
+            var user = GetUser();
+            var i = await _invitationRepository.GetInvitationOfUserByProjectId(projectId, user.Id);
+            if (i == null)
+            {
+                hasSent = false;
+                return new BusinessResult(Const.SUCCESS_CODE, Const.SUCCESS_READ_MSG, hasSent);
+            }
+            return new BusinessResult(Const.SUCCESS_CODE, Const.SUCCESS_READ_MSG, hasSent);
+        }
+        catch (Exception ex)
+        {
+            var errorMessage = $"An error occurred in {typeof(InvitationResult).Name}: {ex.Message}";
+            return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage(errorMessage)
+                .Build();
+        }
+    }
 
     public async Task<BusinessResult> GetUserInvitationsByType(InvitationGetByTypeQuery query)
     {
