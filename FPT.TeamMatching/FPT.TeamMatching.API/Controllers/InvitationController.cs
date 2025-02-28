@@ -69,4 +69,18 @@ public class InvitationController : ControllerBase
 
         return Ok(businessResult);
     }
+
+    [HttpPost("send-by-student")]
+    public async Task<IActionResult> StudentCreate([FromBody] InvitationStudentCreatePendingCommand request)
+    {
+        var msg = await _service.StudentCreatePending(request);
+        return Ok(msg);
+    }
+
+    [HttpPost("sent-by-team")]
+    public async Task<IActionResult> TeamCreate([FromBody] InvitationTeamCreatePendingCommand request)
+    {
+        var msg = await _service.TeamCreatePending(request);
+        return Ok(msg);
+    }
 }

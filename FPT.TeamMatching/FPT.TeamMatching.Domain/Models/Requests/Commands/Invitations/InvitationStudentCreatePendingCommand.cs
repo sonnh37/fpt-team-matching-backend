@@ -8,11 +8,9 @@ using System.Threading.Tasks;
 
 namespace FPT.TeamMatching.Domain.Models.Requests.Commands.Invitations
 {
-    public class InvitationCreatePendingCommand: CreateCommand
+    public class InvitationStudentCreatePendingCommand: CreateCommand
     {
         public Guid? ProjectId { get; set; }
-
-        public InvitationType? Type { get; set; }
 
         public string? Content { get; set; }
     }

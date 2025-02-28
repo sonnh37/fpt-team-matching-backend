@@ -12,6 +12,7 @@ using FPT.TeamMatching.Domain.Utilities;
 using FPT.TeamMatching.Domain.Utilities.Filters;
 using FPT.TeamMatching.Services.Bases;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace FPT.TeamMatching.Services;
 
@@ -26,45 +27,6 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
         _projectRepository = unitOfWork.ProjectRepository;
     }
 
-    public Task<BusinessResult> CreateInvitationPending(InvitationCreatePendingCommand command)
-    {
-        throw new NotImplementedException();
-    }
-
-    //public async Task<BusinessResult> CreateInvitationPending(InvitationCreatePendingCommand command)
-    //{
-    //    try
-    //    {
-    //        var invitation = _mapper.Map<Invitation>(command);
-    //        var user = GetUser();
-    //        var project = await _projectRepository.GetById((Guid)command.ProjectId);
-    //        if (project != null && user != null)
-    //        {
-    //            invitation.Id = Guid.NewGuid();
-    //            invitation.Status = InvitationStatus.Pending;
-    //            InitializeBaseEntityForCreate(invitation);
-    //            if (command.Type == InvitationType.SentByStudent)
-    //            {
-    //                invitation.SenderId = user.Id;
-    //                invitation.ReceiverId = project.LeaderId;
-
-    //            }
-    //            else if (command.Type == InvitationType.SendByTeam)
-    //            {
-    //                invitation.SenderId = project.LeaderId;
-    //                //invitation.ReceiverId = ;
-    //            }
-    //        }
-    //    }
-    //    catch (Exception ex)
-    //    {
-    //        var errorMessage = $"An error occurred in {typeof(InvitationResult).Name}: {ex.Message}";
-    //        return new ResponseBuilder()
-    //            .WithStatus(Const.FAIL_CODE)
-    //            .WithMessage(errorMessage)
-    //            .Build();
-    //    }
-    //}
 
     public async Task<BusinessResult> GetUserInvitationsByType(InvitationGetByTypeQuery query)
     {
@@ -143,5 +105,96 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
                 .WithMessage(errorMessage)
                 .Build();
         }
+    }
+
+    public async Task<BusinessResult> StudentCreatePending(InvitationStudentCreatePendingCommand command)
+    {
+        try
+        {
+            bool isSucess = await StudentCreateAsync(command);
+            if (isSucess)
+            {
+                return new ResponseBuilder<Invitation>()
+                                .WithStatus(Const.SUCCESS_CODE)
+                                .WithMessage(Const.SUCCESS_SAVE_MSG)
+                                .Build();
+            }
+            return new ResponseBuilder<Invitation>()
+                                .WithStatus(Const.FAIL_CODE)
+                                .WithMessage(Const.FAIL_SAVE_MSG)
+                                .Build();
+        }
+        catch (Exception ex)
+        {
+            var errorMessage = $"An error occurred in {typeof(InvitationResult).Name}: {ex.Message}";
+            return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage(errorMessage)
+                .Build();
+        }
+    }
+
+    public async Task<BusinessResult> TeamCreatePending(InvitationTeamCreatePendingCommand command)
+    {
+        try
+        {
+            bool isSucess = await TeamCreateAsync(command);
+            if (isSucess)
+            {
+                return new ResponseBuilder<Invitation>()
+                                .WithStatus(Const.SUCCESS_CODE)
+                                .WithMessage(Const.SUCCESS_SAVE_MSG)
+                                .Build();
+            }
+            return new ResponseBuilder<Invitation>()
+                                .WithStatus(Const.FAIL_CODE)
+                                .WithMessage(Const.FAIL_SAVE_MSG)
+                                .Build();
+        }
+        catch (Exception ex)
+        {
+            var errorMessage = $"An error occurred in {typeof(InvitationResult).Name}: {ex.Message}";
+            return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage(errorMessage)
+                .Build();
+        }
+    }
+
+    private async Task<bool> StudentCreateAsync(InvitationStudentCreatePendingCommand command)
+    {
+        var invitation = _mapper.Map<Invitation>(command);
+        var user = GetUser();
+        var project = await _projectRepository.GetById((Guid)command.ProjectId);
+        if (project != null && user != null)
+        {
+            invitation.Status = InvitationStatus.Pending;
+            invitation.SenderId = user.Id;
+            invitation.ReceiverId = project.LeaderId;
+            invitation.Type = InvitationType.SentByStudent;
+            InitializeBaseEntityForCreate(invitation);
+            _invitationRepository.Add(invitation);
+            bool saveChange = await _unitOfWork.SaveChanges();
+            return saveChange;
+        }
+        return false;
+    }
+
+    private async Task<bool> TeamCreateAsync(InvitationTeamCreatePendingCommand command)
+    {
+        var invitation = _mapper.Map<Invitation>(command);
+        var user = GetUser();
+        var project = await _projectRepository.GetById((Guid)command.ProjectId);
+        if (project != null && user != null)
+        {
+            invitation.Status = InvitationStatus.Pending;
+            invitation.SenderId = user.Id;
+            invitation.Type = InvitationType.SendByTeam;
+            InitializeBaseEntityForCreate(invitation);
+            _invitationRepository.Add(invitation);
+            bool saveChange = await _unitOfWork.SaveChanges();
+            return saveChange;
+        }
+        return false;
     }
 }

@@ -151,7 +151,8 @@ public class MappingProfile : Profile
 
         CreateMap<Invitation, InvitationResult>().ReverseMap();
         CreateMap<Invitation, InvitationCreateCommand>().ReverseMap();
-        CreateMap<Invitation, InvitationCreatePendingCommand>().ReverseMap();
+        CreateMap<Invitation, InvitationTeamCreatePendingCommand>().ReverseMap();
+        CreateMap<Invitation, InvitationStudentCreatePendingCommand>().ReverseMap();
         CreateMap<Invitation, InvitationUpdateCommand>().ReverseMap();
 
         #endregion
