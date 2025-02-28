@@ -1,7 +1,7 @@
 using System.Text.Json.Serialization;
 using DotNetEnv;
 using FPT.TeamMatching.API.Collections;
-using FPT.TeamMatching.API.Hub;
+using FPT.TeamMatching.API.Hubs;
 using FPT.TeamMatching.Data.Context;
 using FPT.TeamMatching.Domain.Configs;
 using FPT.TeamMatching.Domain.Configs.Mapping;
@@ -213,5 +213,6 @@ app.UseMiddleware<AuthenticationMiddleware>()
     .UseHangfireDashboard();
 
 app.MapHub<ChatHub>("/chat");
+app.MapHub<NotificationHub>("/notification");
 app.MapControllers();
 app.Run();

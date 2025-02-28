@@ -45,30 +45,27 @@ public class IdeaService : BaseService<Idea>, IIdeaService
                 var ideas = await _ideaRepository.GetIdeasByUserId(Guid.Parse(userId));
                 var result = _mapper.Map<IList<IdeaResult>>(ideas);
                 if (result == null)
-                    return new ResponseBuilder<IdeaResult>()
+                    return new ResponseBuilder()
                         .WithData(result)
                         .WithStatus(Const.NOT_FOUND_CODE)
-                        .WithMessage(Const.NOT_FOUND_MSG)
-                        .Build();
+                        .WithMessage(Const.NOT_FOUND_MSG);
 
-                return new ResponseBuilder<IdeaResult>()
+                return new ResponseBuilder()
                     .WithData(result)
                     .WithStatus(Const.SUCCESS_CODE)
-                    .WithMessage(Const.SUCCESS_READ_MSG)
-                    .Build();
+                    .WithMessage(Const.SUCCESS_READ_MSG);
             }
+
             return new ResponseBuilder()
-                    .WithStatus(Const.FAIL_CODE)
-                    .WithMessage(Const.FAIL_READ_MSG)
-                    .Build();
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage(Const.FAIL_READ_MSG);
         }
         catch (Exception ex)
         {
             var errorMessage = $"An error {typeof(IdeaResult).Name}: {ex.Message}";
             return new ResponseBuilder()
                 .WithStatus(Const.FAIL_CODE)
-                .WithMessage(errorMessage)
-                .Build();
+                .WithMessage(errorMessage);
         }
     }
 
@@ -80,12 +77,11 @@ public class IdeaService : BaseService<Idea>, IIdeaService
             if (!createSucess)
                 return new ResponseBuilder()
                     .WithStatus(Const.FAIL_CODE)
-                    .WithMessage(Const.FAIL_SAVE_MSG).Build();
+                    .WithMessage(Const.FAIL_SAVE_MSG);
 
-            var msg = new ResponseBuilder<Idea>()
+            var msg = new ResponseBuilder()
                 .WithStatus(Const.SUCCESS_CODE)
-                .WithMessage(Const.SUCCESS_SAVE_MSG)
-                .Build();
+                .WithMessage(Const.SUCCESS_SAVE_MSG);
 
             return msg;
         }
@@ -94,8 +90,7 @@ public class IdeaService : BaseService<Idea>, IIdeaService
             var errorMessage = $"An error occurred while updating : {ex.Message}";
             return new ResponseBuilder()
                 .WithStatus(Const.FAIL_CODE)
-                .WithMessage(errorMessage)
-                .Build();
+                .WithMessage(errorMessage);
         }
     }
 
@@ -107,12 +102,11 @@ public class IdeaService : BaseService<Idea>, IIdeaService
             if (!createSucess)
                 return new ResponseBuilder()
                     .WithStatus(Const.FAIL_CODE)
-                    .WithMessage(Const.FAIL_SAVE_MSG).Build();
+                    .WithMessage(Const.FAIL_SAVE_MSG);
 
-            var msg = new ResponseBuilder<Idea>()
+            var msg = new ResponseBuilder()
                 .WithStatus(Const.SUCCESS_CODE)
-                .WithMessage(Const.SUCCESS_SAVE_MSG)
-                .Build();
+                .WithMessage(Const.SUCCESS_SAVE_MSG);
 
             return msg;
         }
@@ -121,8 +115,7 @@ public class IdeaService : BaseService<Idea>, IIdeaService
             var errorMessage = $"An error occurred while updating : {ex.Message}";
             return new ResponseBuilder()
                 .WithStatus(Const.FAIL_CODE)
-                .WithMessage(errorMessage)
-                .Build();
+                .WithMessage(errorMessage);
         }
     }
 

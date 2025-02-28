@@ -1,62 +1,16 @@
 ﻿using FPT.TeamMatching.Domain.Enums;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Base;
+using FPT.TeamMatching.Domain.Models.Results.Bases;
 
 namespace FPT.TeamMatching.Domain.Models.Responses;
 
-public class LoginResponse
+public class PaginatedResult
 {
-    public LoginResponse()
+    public PaginatedResult()
     {
     }
 
-    public LoginResponse(string? token, string? expiration)
-    {
-        Token = token;
-        Expiration = expiration;
-    }
-
-    public string? Token { get; set; }
-    public string? Expiration { get; set; }
-}
-
-public class ResultResponse<TResult> where TResult : class
-{
-    public ResultResponse()
-    {
-    }
-
-    public ResultResponse(TResult? result = null)
-    {
-        Result = result;
-    }
-
-    public TResult? Result { get; set; }
-}
-
-public class ResultsResponse<TResult> where TResult : class
-{
-    public ResultsResponse()
-    {
-    }
-
-    public ResultsResponse(IEnumerable<TResult>? results = null)
-    {
-        Results = results ?? [];
-        TotalRecords = results?.Count() ?? 0;
-    }
-
-    public IEnumerable<TResult>? Results { get; set; }
-
-    public int TotalRecords { get; set; }
-}
-
-public class PagedResponse<TResult> where TResult : class
-{
-    public PagedResponse()
-    {
-    }
-
-    public PagedResponse(GetQueryableQuery pagedQuery, IEnumerable<TResult>? results = null, int? totalOrigin = null)
+    public PaginatedResult(GetQueryableQuery pagedQuery, IEnumerable<object>? results = null, int? totalOrigin = null)
     {
         PageNumber = totalOrigin != null ? pagedQuery.PageNumber : null;
         PageSize = totalOrigin != null ? pagedQuery.PageSize : null;
@@ -70,7 +24,7 @@ public class PagedResponse<TResult> where TResult : class
             : null;
     }
 
-    public IEnumerable<TResult>? Results { get; }
+    public IEnumerable<object>? Results { get; }
 
     public int? TotalPages { get; protected set; }
 

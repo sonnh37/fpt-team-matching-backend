@@ -57,13 +57,12 @@ public class RefreshTokenService : BaseService<RefreshToken>, IRefreshTokenServi
             if (result == null)
                 return new ResponseBuilder()
                     .WithStatus(Const.FAIL_CODE)
-                    .WithMessage(Const.FAIL_SAVE_MSG).Build();
+                    .WithMessage(Const.FAIL_SAVE_MSG);
 
-            var msg = new ResponseBuilder<TResult>()
+            var msg = new ResponseBuilder()
                 .WithData(result)
                 .WithStatus(Const.SUCCESS_CODE)
-                .WithMessage(Const.SUCCESS_SAVE_MSG)
-                .Build();
+                .WithMessage(Const.SUCCESS_SAVE_MSG);
 
             return msg;
         }
@@ -72,8 +71,7 @@ public class RefreshTokenService : BaseService<RefreshToken>, IRefreshTokenServi
             var errorMessage = $"An error occurred while updating {typeof(RefreshToken).Name}: {ex.Message}";
             return new ResponseBuilder()
                 .WithStatus(Const.FAIL_CODE)
-                .WithMessage(errorMessage)
-                .Build();
+                .WithMessage(errorMessage);
         }
     }
 
@@ -90,21 +88,19 @@ public class RefreshTokenService : BaseService<RefreshToken>, IRefreshTokenServi
         if (storedRefreshToken == null || storedRefreshToken.Expiry < DateTime.UtcNow)
             return new ResponseBuilder()
                 .WithStatus(Const.FAIL_CODE)
-                .WithMessage("Your session has expired. Please log in again.")
-                .Build();
+                .WithMessage("Your session has expired. Please log in again.");
 
         if (storedRefreshToken.IpAddress != ipAddress)
             return new ResponseBuilder()
                 .WithStatus(Const.FAIL_CODE)
-                .WithMessage("Warning!! someone trying to get token.")
-                .Build();
+                .WithMessage("Warning!! someone trying to get token.");
 
         var refreshTokenResult = _mapper.Map<RefreshTokenResult>(storedRefreshToken);
-        return new ResponseBuilder<RefreshTokenResult>()
+        return new ResponseBuilder()
             .WithData(refreshTokenResult)
             .WithStatus(Const.SUCCESS_CODE)
             .WithMessage(Const.SUCCESS_READ_MSG)
-            .Build();
+            ;
     }
 
     private string NormalizeIpAddress(string ipAddress)
