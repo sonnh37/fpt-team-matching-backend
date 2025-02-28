@@ -34,7 +34,7 @@ public abstract class BaseService<TEntity> : BaseService, IBaseService
         _baseRepository = _unitOfWork.GetRepositoryByEntity<TEntity>();
         _httpContextAccessor ??= new HttpContextAccessor();
     }
-    
+
     #region Queries
 
     public async Task<BusinessResult> GetById<TResult>(Guid id) where TResult : BaseResult
@@ -44,25 +44,22 @@ public abstract class BaseService<TEntity> : BaseService, IBaseService
             var entity = await _baseRepository.GetById(id, true);
             var result = _mapper.Map<TResult>(entity);
             if (result == null)
-                return new ResponseBuilder<TResult>()
-                    .WithData(result)
+                return new ResponseBuilder()
                     .WithStatus(Const.NOT_FOUND_CODE)
                     .WithMessage(Const.NOT_FOUND_MSG)
-                    .Build();
+                    ;
 
-            return new ResponseBuilder<TResult>()
+            return new ResponseBuilder()
                 .WithData(result)
                 .WithStatus(Const.SUCCESS_CODE)
-                .WithMessage(Const.SUCCESS_READ_MSG)
-                .Build();
+                .WithMessage(Const.SUCCESS_READ_MSG);
         }
         catch (Exception ex)
         {
             var errorMessage = $"An error {typeof(TResult).Name}: {ex.Message}";
             return new ResponseBuilder()
                 .WithStatus(Const.FAIL_CODE)
-                .WithMessage(errorMessage)
-                .Build();
+                .WithMessage(errorMessage);
         }
     }
 
@@ -73,82 +70,65 @@ public abstract class BaseService<TEntity> : BaseService, IBaseService
             var entities = await _baseRepository.GetAll();
             var results = _mapper.Map<List<TResult>>(entities);
             if (!results.Any())
-                return new ResponseBuilder<TResult>()
+                return new ResponseBuilder()
                     .WithData(results)
                     .WithStatus(Const.NOT_FOUND_CODE)
                     .WithMessage(Const.NOT_FOUND_MSG)
-                    .Build();
+                    ;
 
-            return new ResponseBuilder<TResult>()
+            return new ResponseBuilder()
                 .WithData(results)
                 .WithStatus(Const.SUCCESS_CODE)
-                .WithMessage(Const.SUCCESS_READ_MSG)
-                .Build();
+                .WithMessage(Const.SUCCESS_READ_MSG);
         }
         catch (Exception ex)
         {
             var errorMessage = $"An error {typeof(TResult).Name}: {ex.Message}";
             return new ResponseBuilder()
                 .WithStatus(Const.FAIL_CODE)
-                .WithMessage(errorMessage)
-                .Build();
+                .WithMessage(errorMessage);
         }
     }
 
-    public async Task<BusinessResult> GetAll<TResult>(GetQueryableQuery x) where TResult : BaseResult
+    public async Task<BusinessResult> GetAll<TResult>(GetQueryableQuery query) where TResult : BaseResult
     {
         try
         {
             List<TResult>? results;
 
-            if (!x.IsPagination)
-            {
-                var allData = await _baseRepository.GetAll(x);
-                results = _mapper.Map<List<TResult>>(allData);
-                if (!results.Any())
-                    return new ResponseBuilder<TResult>()
-                        .WithData(results)
-                        .WithStatus(Const.NOT_FOUND_CODE)
-                        .WithMessage(Const.NOT_FOUND_MSG)
-                        .Build();
+            var (data, total) = await _baseRepository.GetData(query);
 
-                return new ResponseBuilder<TResult>()
+            results = _mapper.Map<List<TResult>>(data);
+
+            if (results.Count == 0) 
+                return new ResponseBuilder()
+                    .WithData(results)
+                    .WithStatus(Const.NOT_FOUND_CODE)
+                    .WithMessage(Const.NOT_FOUND_MSG)
+                    ;
+
+            // GetAll 
+            if (!query.IsPagination)
+                return new ResponseBuilder()
                     .WithData(results)
                     .WithStatus(Const.SUCCESS_CODE)
                     .WithMessage(Const.SUCCESS_READ_MSG)
-                    .Build();
-            }
+                    ;
+            
+            // GetAll with pagination
+            var tableResponse = new PaginatedResult(query, results, total);
 
-            var tuple = await _baseRepository.GetPaged(x);
-            // create results table response
-            results = _mapper.Map<List<TResult>>(tuple.Item1);
-            var tableResponse = new ResultsTableResponse<TResult>
-            {
-                GetQueryableQuery = x,
-                Item = (results, tuple.Item2)
-            };
-
-            if (!results.Any())
-                return new ResponseBuilder<TResult>()
-                    .WithData(tableResponse)
-                    .WithStatus(Const.NOT_FOUND_CODE)
-                    .WithMessage(Const.NOT_FOUND_MSG)
-                    .Build();
-
-
-            return new ResponseBuilder<TResult>()
+            return new ResponseBuilder()
                 .WithData(tableResponse)
                 .WithStatus(Const.SUCCESS_CODE)
-                .WithMessage(Const.SUCCESS_READ_MSG)
-                .Build();
+                .WithMessage(Const.SUCCESS_READ_MSG);
         }
         catch (Exception ex)
         {
             var errorMessage = $"An error occurred in {typeof(TResult).Name}: {ex.Message}";
             return new ResponseBuilder()
                 .WithStatus(Const.FAIL_CODE)
-                .WithMessage(errorMessage)
-                .Build();
+                .WithMessage(errorMessage);
         }
     }
 
@@ -166,13 +146,12 @@ public abstract class BaseService<TEntity> : BaseService, IBaseService
             if (result == null)
                 return new ResponseBuilder()
                     .WithStatus(Const.FAIL_CODE)
-                    .WithMessage(Const.FAIL_SAVE_MSG).Build();
+                    .WithMessage(Const.FAIL_SAVE_MSG);
 
-            var msg = new ResponseBuilder<TResult>()
+            var msg = new ResponseBuilder()
                 .WithData(result)
                 .WithStatus(Const.SUCCESS_CODE)
-                .WithMessage(Const.SUCCESS_SAVE_MSG)
-                .Build();
+                .WithMessage(Const.SUCCESS_SAVE_MSG);
 
             return msg;
         }
@@ -181,8 +160,7 @@ public abstract class BaseService<TEntity> : BaseService, IBaseService
             var errorMessage = $"An error occurred while updating {typeof(TEntity).Name}: {ex.Message}";
             return new ResponseBuilder()
                 .WithStatus(Const.FAIL_CODE)
-                .WithMessage(errorMessage)
-                .Build();
+                .WithMessage(errorMessage);
         }
     }
 
@@ -197,22 +175,20 @@ public abstract class BaseService<TEntity> : BaseService, IBaseService
                 return new ResponseBuilder()
                     .WithStatus(Const.FAIL_CODE)
                     .WithMessage(Const.FAIL_SAVE_MSG)
-                    .Build();
+                    ;
 
 
-            return new ResponseBuilder<TResult>()
+            return new ResponseBuilder()
                 .WithData(result)
                 .WithStatus(Const.SUCCESS_CODE)
-                .WithMessage(Const.SUCCESS_SAVE_MSG)
-                .Build();
+                .WithMessage(Const.SUCCESS_SAVE_MSG);
         }
         catch (Exception ex)
         {
             var errorMessage = $"An error occurred while updating {typeof(TEntity).Name}: {ex.Message}";
             return new ResponseBuilder()
                 .WithStatus(Const.FAIL_CODE)
-                .WithMessage(errorMessage)
-                .Build();
+                .WithMessage(errorMessage);
         }
     }
 
@@ -227,11 +203,11 @@ public abstract class BaseService<TEntity> : BaseService, IBaseService
                     ? new ResponseBuilder()
                         .WithStatus(Const.SUCCESS_CODE)
                         .WithMessage(Const.SUCCESS_DELETE_MSG)
-                        .Build()
+                        
                     : new ResponseBuilder()
                         .WithStatus(Const.FAIL_CODE)
                         .WithMessage(Const.FAIL_DELETE_MSG)
-                        .Build();
+                        ;
             }
 
             var entity = await DeleteEntity(id);
@@ -240,11 +216,11 @@ public abstract class BaseService<TEntity> : BaseService, IBaseService
                 ? new ResponseBuilder()
                     .WithStatus(Const.SUCCESS_CODE)
                     .WithMessage(Const.SUCCESS_SAVE_MSG)
-                    .Build()
+                    
                 : new ResponseBuilder()
                     .WithStatus(Const.FAIL_CODE)
                     .WithMessage(Const.FAIL_SAVE_MSG)
-                    .Build();
+                    ;
         }
         catch (DbUpdateException dbEx)
         {
@@ -254,7 +230,7 @@ public abstract class BaseService<TEntity> : BaseService, IBaseService
                 return new ResponseBuilder()
                     .WithStatus(Const.FAIL_CODE)
                     .WithMessage(errorMessage)
-                    .Build();
+                    ;
             }
 
             throw;
@@ -264,8 +240,7 @@ public abstract class BaseService<TEntity> : BaseService, IBaseService
             var errorMessage = $"An error occurred while deleting {typeof(TEntity).Name} with ID {id}: {ex.Message}";
             return new ResponseBuilder()
                 .WithStatus(Const.FAIL_CODE)
-                .WithMessage(errorMessage)
-                .Build();
+                .WithMessage(errorMessage);
         }
     }
 
@@ -389,7 +364,7 @@ public abstract class BaseService<TEntity> : BaseService, IBaseService
     //             .WithData(userResult)
     //             .WithStatus(Const.SUCCESS_CODE)
     //             .WithMessage(Const.SUCCESS_READ_MSG)
-    //             .Build();
+    //             ;
     //     }
     //     catch (Exception ex)
     //     {
@@ -429,7 +404,7 @@ public abstract class BaseService<TEntity> : BaseService, IBaseService
         return new ResponseBuilder()
             .WithStatus(Const.FAIL_CODE)
             .WithMessage(errorMessage)
-            .Build();
+            ;
     }
 
     public BusinessResult HandlerNotFound(string message = Const.NOT_FOUND_MSG)
@@ -437,7 +412,7 @@ public abstract class BaseService<TEntity> : BaseService, IBaseService
         return new ResponseBuilder()
             .WithStatus(Const.NOT_FOUND_CODE)
             .WithMessage(message)
-            .Build();
+            ;
     }
 
     public BusinessResult HandlerFail(string message)
@@ -445,8 +420,6 @@ public abstract class BaseService<TEntity> : BaseService, IBaseService
         return new ResponseBuilder()
             .WithStatus(Const.FAIL_CODE)
             .WithMessage(message)
-            .Build();
+            ;
     }
-
-    
 }

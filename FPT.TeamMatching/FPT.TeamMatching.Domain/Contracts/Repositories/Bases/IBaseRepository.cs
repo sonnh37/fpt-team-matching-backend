@@ -22,9 +22,7 @@ public interface IBaseRepository<TEntity> : IBaseRepository
 
     Task<List<TEntity>> GetAll();
 
-    Task<List<TEntity>> GetAll(GetQueryableQuery query);
-
-    Task<(List<TEntity>, int)> GetPaged(GetQueryableQuery query);
+    Task<(List<TEntity>, int)> GetData(GetQueryableQuery query);
 
     Task<List<TEntity>> ApplySortingAndPaging(IQueryable<TEntity> queryable, GetQueryableQuery pagedQuery);
 

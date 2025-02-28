@@ -1,6 +1,7 @@
-﻿using FPT.TeamMatching.API.Hub;
+﻿using FPT.TeamMatching.API.Hubs;
 using FPT.TeamMatching.Domain.Contracts.Services;
 using FPT.TeamMatching.Services;
+using Microsoft.AspNetCore.SignalR;
 
 namespace FPT.TeamMatching.API.Collections;
 
@@ -33,6 +34,7 @@ public static class CollectionServices
         services.AddTransient<IIdeaService, IdeaService>();
         services.AddTransient<IIdeaHistoryService, IdeaHistoryService>();
         services.AddTransient<IIdeaHistoryRequestService, IdeaHistoryRequestService>();
+        services.AddSingleton<IUserIdProvider, CustomUserIdProvider>();
 
         services.AddTransient<ChatHub>();
     }

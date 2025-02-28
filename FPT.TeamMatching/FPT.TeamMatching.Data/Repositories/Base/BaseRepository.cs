@@ -59,7 +59,7 @@ public class BaseRepository<TEntity> : IBaseRepository<TEntity> where TEntity : 
         return await DbSet.AnyAsync(t => t.Id.Equals(id));
     }
 
-    private static IQueryable<TEntity> Sort(IQueryable<TEntity> queryable, GetQueryableQuery getAllQuery)
+    protected static IQueryable<TEntity> Sort(IQueryable<TEntity> queryable, GetQueryableQuery getAllQuery)
     {
         if (!queryable.Any()) return queryable;
 
@@ -143,28 +143,31 @@ public class BaseRepository<TEntity> : IBaseRepository<TEntity> where TEntity : 
     }
 
     // get with pagination ( filter )
-    public async Task<(List<TEntity>, int)> GetPaged(GetQueryableQuery query)
+    public async Task<(List<TEntity>, int)> GetData(GetQueryableQuery query)
     {
         var queryable = GetQueryable();
         queryable = IncludeHelper.Apply(queryable);
         queryable = FilterHelper.Apply(queryable, query);
-        var totalOrigin = queryable.Count();
-        var results = await ApplySortingAndPaging(queryable, query);
+        
+        if (queryable == null) return ([], -1);
 
-        return (results, totalOrigin);
-    }
-
-    // get all with no pagination ( filter )
-    public async Task<List<TEntity>> GetAll(GetQueryableQuery query)
-    {
-        var queryable = GetQueryable();
-        queryable = IncludeHelper.Apply(queryable);
-        queryable = FilterHelper.Apply(queryable, query);
-        queryable = Sort(queryable, query);
-
-        var results = await queryable.ToListAsync();
-
-        return results;
+        if (query.IsPagination)
+        {
+            // Tổng số count sau khi  filter khi chưa lọc trang
+            var totalOrigin = queryable.Count();
+            // Sắp sếp
+            queryable = Sort(queryable, query);
+            // Lọc trang
+            var results = await GetQueryablePagination(queryable, query).ToListAsync();
+            
+            return (results, totalOrigin);
+        }
+        else
+        {
+            queryable = Sort(queryable, query);
+            var results = await queryable.ToListAsync();
+            return (results, results.Count);
+        }
     }
 
     public virtual async Task<TEntity?> GetById(Guid id, bool isInclude = false)
@@ -219,9 +222,11 @@ public class BaseRepository<TEntity> : IBaseRepository<TEntity> where TEntity : 
         return dbSet;
     }
 
-    private IQueryable<TEntity> GetQueryablePagination(IQueryable<TEntity> queryable, GetQueryableQuery getAllQuery)
+    protected IQueryable<TEntity> GetQueryablePagination(IQueryable<TEntity> queryable, GetQueryableQuery query)
     {
-        queryable = queryable.Skip((getAllQuery.PageNumber - 1) * getAllQuery.PageSize).Take(getAllQuery.PageSize);
+        queryable = queryable
+            .Skip((query.PageNumber - 1) * query.PageSize)
+            .Take(query.PageSize);
 
         return queryable;
     }
