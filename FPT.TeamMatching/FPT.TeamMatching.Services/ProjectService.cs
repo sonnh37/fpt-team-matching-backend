@@ -35,20 +35,27 @@ public class ProjectService : BaseService<Project>, IProjectService
         try
         {
             var userId = _httpContextAccessor.HttpContext?.User.FindFirst("Id")?.Value;
-            
-            var project = await _repository.GetProjectByUserIdLogin(Guid.Parse(userId));
-            var result = _mapper.Map<ProjectResult>(project);
-            if (result == null)
-                return new ResponseBuilder()
-                    .WithData(result)
-                    .WithStatus(Const.NOT_FOUND_CODE)
-                    .WithMessage(Const.NOT_FOUND_MSG)
-                    ;
+            if (userId != null)
+            {
+                var project = await _repository.GetProjectByUserIdLogin(Guid.Parse(userId));
+                var result = _mapper.Map<ProjectResult>(project);
+                if (result == null)
+                    return new ResponseBuilder<ProjectResult>()
+                        .WithData(result)
+                        .WithStatus(Const.NOT_FOUND_CODE)
+                        .WithMessage(Const.NOT_FOUND_MSG)
+                        .Build();
 
+                return new ResponseBuilder<ProjectResult>()
+                    .WithData(result)
+                    .WithStatus(Const.SUCCESS_CODE)
+                    .WithMessage(Const.SUCCESS_READ_MSG)
+                    .Build();
+            }
             return new ResponseBuilder()
-                .WithData(result)
-                .WithStatus(Const.SUCCESS_CODE)
-                .WithMessage(Const.SUCCESS_READ_MSG);
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage(Const.FAIL_READ_MSG)
+                    .Build();
         }
         catch (Exception ex)
         {

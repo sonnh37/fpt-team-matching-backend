@@ -31,6 +31,7 @@ public class UnitOfWork : BaseUnitOfWork<FPTMatchingDbContext>, IUnitOfWork
     public IFeedbackRepository FeedbackRepository => GetRepository<IFeedbackRepository>();
     public IProfessionRepository ProfessionRepository => GetRepository<IProfessionRepository>();
     public ISpecialtyRepository SpecialtyRepository => GetRepository<ISpecialtyRepository>();
+    public ISemesterRepository SemesterRepository => GetRepository<ISemesterRepository>();
     public IIdeaHistoryRepository IdeaHistoryRepository => GetRepository<IIdeaHistoryRepository>();
     public IIdeaHistoryRequestRepository IdeaHistoryRequestRepository => GetRepository<IIdeaHistoryRequestRepository>();
 }

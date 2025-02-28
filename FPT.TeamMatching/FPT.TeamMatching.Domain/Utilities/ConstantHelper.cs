@@ -60,7 +60,7 @@ public static class Const
     
     public const string API_AUTH = $"{BaseApi}/auth";
 
-    public const string API_APPLICATIONS = $"{BaseApi}/applications";
+    public const string API_BLOGCVS = $"{BaseApi}/blog-cvs";
 
     public const string API_RATES = $"{BaseApi}/rates";
 
@@ -84,7 +84,9 @@ public static class Const
 
     public const string API_SPECIALTIES = $"{BaseApi}/specialties";
 
-    public const string API_IDEA_HISTORIES = $"{BaseApi}/idea-history";
+    public const string API_SEMESTERS = $"{BaseApi}/semesters";
+
+    public const string API_IDEA_HISTORIES = $"{BaseApi}/idea-histories";
 
     public const string API_IDEA_HISTORY_REQUESTS = $"{BaseApi}/idea-history-requests";
 

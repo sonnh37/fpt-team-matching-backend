@@ -25,6 +25,7 @@ public interface IUnitOfWork : IBaseUnitOfWork
     IUserXRoleRepository UserXRoleRepository { get; }
     IProfessionRepository ProfessionRepository { get; }
     ISpecialtyRepository SpecialtyRepository { get; }
+    ISemesterRepository SemesterRepository { get; }
     IIdeaHistoryRepository IdeaHistoryRepository { get; }
     IIdeaHistoryRequestRepository IdeaHistoryRequestRepository { get; }
 }
