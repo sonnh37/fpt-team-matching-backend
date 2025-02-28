@@ -46,8 +46,7 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
             var errorMessage = $"An error occurred in {typeof(InvitationResult).Name}: {ex.Message}";
             return new ResponseBuilder()
                 .WithStatus(Const.FAIL_CODE)
-                .WithMessage(errorMessage)
-                .Build();
+                .WithMessage(errorMessage);
         }
     }
 
