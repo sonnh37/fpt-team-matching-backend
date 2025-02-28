@@ -14,7 +14,7 @@ public class NotificationRepository : BaseRepository<Notification>, INotificatio
 {
     private readonly FPTMatchingDbContext _dbContext;
 
-    public NotificationRepository(FPTMatchingDbContext context, IMapper mapper) : base(context, mapper)
+    public NotificationRepository(FPTMatchingDbContext context) : base(context)
     {
         _dbContext = context;
     }

@@ -12,7 +12,7 @@ namespace FPT.TeamMatching.Data.Repositories;
 
 public class UserRepository : BaseRepository<User>, IUserRepository
 {
-    public UserRepository(FPTMatchingDbContext dbContext, IMapper mapper) : base(dbContext, mapper)
+    public UserRepository(FPTMatchingDbContext dbContext) : base(dbContext)
     {
     }
 
@@ -50,7 +50,7 @@ public class UserRepository : BaseRepository<User>, IUserRepository
 
     public async Task<List<PartnerInfoResult>> GetAllUsersWithNameOnly()
     {
-        var users = await base.Context()
+        var users = await GetQueryable()
             .Select(x => new PartnerInfoResult
             {
                 Id = x.Id.ToString(),

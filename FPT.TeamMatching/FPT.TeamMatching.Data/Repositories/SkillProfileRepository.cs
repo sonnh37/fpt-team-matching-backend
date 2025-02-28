@@ -10,7 +10,7 @@ public class SkillProfileRepository : BaseRepository<SkillProfile>, ISkillProfil
 {
     private readonly FPTMatchingDbContext _dbContext;
 
-    public SkillProfileRepository(IMapper mapper, FPTMatchingDbContext dbContext) : base(dbContext, mapper)
+    public SkillProfileRepository(FPTMatchingDbContext dbContext) : base(dbContext)
     {
         _dbContext = dbContext;
     }

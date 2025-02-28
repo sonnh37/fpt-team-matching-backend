@@ -8,7 +8,7 @@ namespace FPT.TeamMatching.Data.Repositories;
 
 public class FeedbackRepository : BaseRepository<Feedback>, IFeedbackRepository
 {
-    public FeedbackRepository(FPTMatchingDbContext dbContext, IMapper mapper) : base(dbContext, mapper)
+    public FeedbackRepository(FPTMatchingDbContext dbContext) : base(dbContext)
     {
     }
 }

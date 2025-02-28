@@ -14,7 +14,7 @@ namespace FPT.TeamMatching.Data.Repositories
 {
     public class SpecialtyRepository : BaseRepository<Specialty>, ISpecialtyRepository
     {
-        public SpecialtyRepository(FPTMatchingDbContext dbContext, IMapper mapper) : base(dbContext, mapper)
+        public SpecialtyRepository(FPTMatchingDbContext dbContext) : base(dbContext)
         {
         }
     }

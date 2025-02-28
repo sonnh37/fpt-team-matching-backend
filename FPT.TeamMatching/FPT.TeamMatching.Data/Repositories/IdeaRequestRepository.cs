@@ -8,7 +8,7 @@ namespace FPT.TeamMatching.Data.Repositories;
 
 public class IdeaRequestRepository : BaseRepository<IdeaRequest>, IIdeaRequestRepository
 {
-    public IdeaRequestRepository(FPTMatchingDbContext dbContext, IMapper mapper) : base(dbContext, mapper)
+    public IdeaRequestRepository(FPTMatchingDbContext dbContext) : base(dbContext)
     {
     }
 }

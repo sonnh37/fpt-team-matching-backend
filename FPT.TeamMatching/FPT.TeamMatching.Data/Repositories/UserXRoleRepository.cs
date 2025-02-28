@@ -8,7 +8,7 @@ namespace FPT.TeamMatching.Data.Repositories;
 
 public class UserXRoleRepository : BaseRepository<UserXRole>, IUserXRoleRepository
 {
-    public UserXRoleRepository(FPTMatchingDbContext dbContext, IMapper mapper) : base(dbContext, mapper)
+    public UserXRoleRepository(FPTMatchingDbContext dbContext) : base(dbContext)
     {
     }
 }

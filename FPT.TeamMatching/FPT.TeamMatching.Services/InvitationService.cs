@@ -76,30 +76,20 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
                 InvitationType.SendByTeam => queryable.Where(m => m.ReceiverId == userId),
                 _ => queryable
             };
+            
+            var (data, total) = await _invitationRepository.GetData(query);
 
+            results = _mapper.Map<List<InvitationResult>>(data);
+
+            // GetAll 
             if (!query.IsPagination)
-            {
-                var allData = await queryable.ToListAsync();
-                results = _mapper.Map<List<InvitationResult>>(allData);
-                if (!results.Any())
-                    return new ResponseBuilder()
-                        .WithData(results)
-                        .WithStatus(Const.NOT_FOUND_CODE)
-                        .WithMessage(Const.NOT_FOUND_MSG)
-                        ;
-
                 return new ResponseBuilder()
-                    .WithData(results)
-                    .WithStatus(Const.SUCCESS_CODE)
-                    .WithMessage(Const.SUCCESS_READ_MSG)
-                    ;
-            }
-
-            var totalOrigin = queryable.Count();
-            var result = await _invitationRepository.ApplySortingAndPaging(queryable, query);
-            // create results table response
-            results = _mapper.Map<List<InvitationResult>>(result);
-            var tableResponse = new PaginatedResult(query, results, totalOrigin);
+                        .WithData(results)
+                        .WithStatus(Const.SUCCESS_CODE)
+                        .WithMessage(Const.SUCCESS_READ_MSG);
+            
+            // GetAll with pagination
+            var tableResponse = new PaginatedResult(query, results, total);
 
             return new ResponseBuilder()
                 .WithData(tableResponse)
