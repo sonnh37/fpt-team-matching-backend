@@ -11,4 +11,6 @@ public class Specialty : BaseEntity
     public Profession? Profession { get; set; }
     
     public virtual ICollection<Idea> Ideas { get; set; } = new List<Idea>();
+    
+    public virtual ICollection<ProfileStudent> ProfileStudents { get; set; } = new List<ProfileStudent>();
 }

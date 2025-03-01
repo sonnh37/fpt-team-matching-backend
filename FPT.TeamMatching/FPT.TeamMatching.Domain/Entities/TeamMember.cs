@@ -16,8 +16,8 @@ public class TeamMember : BaseEntity
     public DateTimeOffset? LeaveDate { get; set; }
 
     public virtual Project? Project { get; set; }
-
-    public virtual ICollection<Rate> Rates { get; set; } = new List<Rate>();
-
+    
     public virtual User? User { get; set; }
+    
+    public virtual ICollection<Rate> Rates { get; set; } = new List<Rate>();
 }
