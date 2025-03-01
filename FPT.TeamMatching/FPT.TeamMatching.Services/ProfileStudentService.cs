@@ -29,11 +29,11 @@ public class ProfileStudentService : IProfileStudentService
         try
         {
             //1. Kiểm tra user có tồn tại không
-            var foundUser = await _unitOfWork.UserRepository.GetById(profileStudent.UserId);
+            var foundUser = await _unitOfWork.UserRepository.GetById(profileStudent.UserId!.Value);
             if (foundUser == null || foundUser.IsDeleted) throw new Exception("User Not Found");
 
             //2. Thêm CV vào storage
-            var cloudinaryResult = await _cloudinary.UploadCVImage(profileStudent.FileCv, profileStudent.UserId);
+            var cloudinaryResult = await _cloudinary.UploadCVImage(profileStudent.FileCv, profileStudent.UserId.Value);
 
             //3. Add Profile
             var profileEntity = _mapper.Map<ProfileStudentCreateCommand, ProfileStudent>(profileStudent);
@@ -76,11 +76,11 @@ public class ProfileStudentService : IProfileStudentService
             if (foundProfile == null || foundProfile.IsDeleted) throw new Exception("Profile Not Found");
 
             //2. Kiểm tra user đó còn tồn tại hay bị khoá hay không
-            var foundUser = await _unitOfWork.UserRepository.GetById(profileStudent.UserId);
+            var foundUser = await _unitOfWork.UserRepository.GetById(profileStudent.UserId!.Value);
             if (foundUser == null || foundUser.IsDeleted) throw new Exception("User Not Found");
 
             //3. Override profile CV trong storage
-            var cloudinaryResult = await _cloudinary.UploadCVImage(profileStudent.FileCv, profileStudent.UserId);
+            var cloudinaryResult = await _cloudinary.UploadCVImage(profileStudent.FileCv, profileStudent.UserId.Value);
 
             //4. Update profile
             var profileEntity = _mapper.Map<ProfileStudentUpdateCommand, ProfileStudent>(profileStudent);
