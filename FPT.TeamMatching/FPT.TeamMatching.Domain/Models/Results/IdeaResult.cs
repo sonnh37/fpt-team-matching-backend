@@ -52,5 +52,8 @@ namespace FPT.TeamMatching.Domain.Models.Results
         public SemesterResult? Semester { get; set; }
 
         public ICollection<IdeaRequestResult> IdeaRequests { get; set; } = new List<IdeaRequestResult>();
+        
+        public ICollection<IdeaHistoryResult> IdeaHistories { get; set; } = new List<IdeaHistoryResult>();
+
     }
 }
