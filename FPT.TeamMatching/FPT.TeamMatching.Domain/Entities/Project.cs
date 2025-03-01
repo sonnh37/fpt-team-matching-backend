@@ -32,4 +32,6 @@ public class Project : BaseEntity
     public virtual ICollection<Review> Reviews { get; set; } = new List<Review>();
 
     public virtual ICollection<TeamMember> TeamMembers { get; set; } = new List<TeamMember>();
+    
+    public virtual ICollection<Blog> Blogs { get; set; } = new List<Blog>();
 }
