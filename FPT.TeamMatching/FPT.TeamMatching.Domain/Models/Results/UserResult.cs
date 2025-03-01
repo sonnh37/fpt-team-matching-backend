@@ -11,8 +11,6 @@ public class UserResult : BaseResult
 
     public string? Username { get; set; }
 
-    public string? Password { get; set; }
-
     public string? Avatar { get; set; }
 
     public string? FirstName { get; set; }
@@ -29,7 +27,48 @@ public class UserResult : BaseResult
 
     public Department? Department { get; set; }
 
-    public virtual ICollection<BlogResult> Blogs { get; set; } = new List<BlogResult>();
+    public ICollection<BlogResult> Blogs { get; set; } = new List<BlogResult>();
 
-    public virtual ICollection<UserXRoleResult> UserXRoles { get; set; } = new List<UserXRoleResult>();
+    public ICollection<IdeaRequestResult> IdeaRequestOfReviewers { get; set; } = new List<IdeaRequestResult>();
+
+    public ICollection<IdeaHistoryRequestResult> IdeaHistoryRequestOfReviewers { get; set; } =
+        new List<IdeaHistoryRequestResult>();
+
+    public ICollection<IdeaResult> IdeaOfOwners { get; set; } = new List<IdeaResult>();
+
+    public ICollection<IdeaResult> IdeaOfMentors { get; set; } = new List<IdeaResult>();
+
+    public ICollection<IdeaResult> IdeaOfSubMentors { get; set; } = new List<IdeaResult>();
+
+    public ICollection<IdeaHistoryResult> IdeaHistoryOfCouncils { get; set; } = new List<IdeaHistoryResult>();
+
+    public ICollection<UserXRoleResult> UserXRoles { get; set; } = new List<UserXRoleResult>();
+
+    public ICollection<CommentResult> Comments { get; set; } = new List<CommentResult>();
+
+    public ICollection<InvitationResult> InvitationOfSenders { get; set; } = new List<InvitationResult>();
+
+    public ICollection<InvitationResult> InvitationOfReceivers { get; set; } = new List<InvitationResult>();
+
+    public ICollection<BlogCvResult> BlogCvs { get; set; } = new List<BlogCvResult>();
+
+    public ICollection<LikeResult> Likes { get; set; } = new List<LikeResult>();
+
+    public ICollection<NotificationResult> Notifications { get; set; } = new List<NotificationResult>();
+
+    public ProfileStudentResult? ProfileStudent { get; set; }
+
+    public ICollection<ProjectResult> Projects { get; set; } = new List<ProjectResult>();
+
+    public ICollection<ProjectResult> ProjectOfLeaders { get; set; } = new List<ProjectResult>();
+
+    public ICollection<RateResult> RateBys { get; set; } = new List<RateResult>();
+
+    public ICollection<RateResult> RateFors { get; set; } = new List<RateResult>();
+
+    public ICollection<RefreshTokenResult> RefreshTokens { get; set; } = new List<RefreshTokenResult>();
+
+    public ICollection<SkillProfileResult> SkillProfiles { get; set; } = new List<SkillProfileResult>();
+
+    public ICollection<TeamMemberResult> TeamMembers { get; set; } = new List<TeamMemberResult>();
 }

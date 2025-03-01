@@ -37,7 +37,7 @@ namespace FPT.TeamMatching.Domain.Models.Results
 
         public string? EnterpriseName { get; set; }
 
-        public int? MaxTeamSize { get; set; }
+        public int MaxTeamSize { get; set; }
 
         public UserResult? Owner { get; set; }
 

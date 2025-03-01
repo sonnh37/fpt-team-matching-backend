@@ -6,9 +6,17 @@ public class ReviewResult : BaseResult
 {
     public Guid? ProjectId { get; set; }
 
-    public string? Title { get; set; }
+    public int Number { get; set; }
 
-    public string? Question { get; set; }
+    public string? Description { get; set; }
 
-    public string? Document { get; set; }
+    public string? FileUpload { get; set; }
+
+    public string? Reviewer1 { get; set; }
+
+    public string? Reviewer2 { get; set; }
+
+    public ProjectResult? Project { get; set; }
+
+    public ICollection<FeedbackResult> Feedbacks { get; set; } = new List<FeedbackResult>();
 }
