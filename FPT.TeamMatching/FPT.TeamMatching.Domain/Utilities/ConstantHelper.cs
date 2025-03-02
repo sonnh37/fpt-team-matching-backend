@@ -93,6 +93,8 @@ public static class Const
     public const string SortFieldDefault = "CreatedDate";
 
     public const string HANGFIRE = $"{BaseApi}/hangfire";
+    
+    public const string API_HUBS = $"{BaseApi}/api_hubs";
 
     #endregion
 
