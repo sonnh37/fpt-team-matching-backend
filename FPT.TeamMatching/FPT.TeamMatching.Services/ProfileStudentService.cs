@@ -8,19 +8,17 @@ using FPT.TeamMatching.Domain.Models.Requests.Queries.ProfileStudents;
 using FPT.TeamMatching.Domain.Models.Responses;
 using FPT.TeamMatching.Domain.Models.Results;
 using FPT.TeamMatching.Domain.Utilities;
+using FPT.TeamMatching.Services.Bases;
 
 namespace FPT.TeamMatching.Services;
 
-public class ProfileStudentService : IProfileStudentService
+public class ProfileStudentService : BaseService<ProfileStudent>, IProfileStudentService
 {
     private readonly CloudinaryConfig _cloudinary;
-    private readonly IMapper _mapper;
-    private readonly IUnitOfWork _unitOfWork;
 
-    public ProfileStudentService(IUnitOfWork unitOfWork, IMapper mapper, CloudinaryConfig cloudinary)
+    public ProfileStudentService(IUnitOfWork unitOfWork, IMapper mapper, CloudinaryConfig cloudinary) : base(mapper,
+        unitOfWork)
     {
-        _unitOfWork = unitOfWork;
-        _mapper = mapper;
         _cloudinary = cloudinary;
     }
 
@@ -128,9 +126,9 @@ public class ProfileStudentService : IProfileStudentService
             var tableResponse = new PaginatedResult(query, results, total);
 
             return new ResponseBuilder()
-                    .WithData(tableResponse)
-                    .WithStatus(Const.SUCCESS_CODE)
-                    .WithMessage(Const.SUCCESS_READ_MSG);
+                .WithData(tableResponse)
+                .WithStatus(Const.SUCCESS_CODE)
+                .WithMessage(Const.SUCCESS_READ_MSG);
         }
         catch (Exception e)
         {
@@ -162,6 +160,28 @@ public class ProfileStudentService : IProfileStudentService
             //2. Get data
             var profile = await _unitOfWork.ProfileStudentRepository.GetProfileByUserId(userId);
             if (profile == null) throw new Exception("User Does Not Have Profile");
+
+            var profileResult = _mapper.Map<SkillProfileResult>(profile);
+            return new BusinessResult(Const.SUCCESS_CODE, Const.SUCCESS_SAVE_MSG, profileResult);
+        }
+        catch (Exception e)
+        {
+            return new BusinessResult(Const.FAIL_CODE, e.Message);
+        }
+    }
+
+    public async Task<BusinessResult> GetProfileByCurrentUser()
+    {
+        try
+        {
+            var userIdClaim = GetUserIdFromClaims();
+            if (userIdClaim == null)
+                return HandlerFail("Not logged in");
+            var userId = userIdClaim.Value;
+
+            //2. Get data
+            var profile = await _unitOfWork.ProfileStudentRepository.GetProfileByUserId(userId);
+            if (profile == null) return HandlerNotFound("User Does Not Have Profile");
 
             var profileResult = _mapper.Map<SkillProfileResult>(profile);
             return new BusinessResult(Const.SUCCESS_CODE, Const.SUCCESS_SAVE_MSG, profileResult);

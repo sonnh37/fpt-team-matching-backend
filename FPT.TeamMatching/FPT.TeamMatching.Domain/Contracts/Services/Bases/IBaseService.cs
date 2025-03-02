@@ -13,8 +13,6 @@ public interface IBaseService
 {
     Task<BusinessResult> GetAll<TResult>() where TResult : BaseResult;
 
-    // BusinessResult GetUserByCookie();
-
     Task<BusinessResult> GetAll<TResult>(GetQueryableQuery query) where TResult : BaseResult;
 
     Task<BusinessResult> GetById<TResult>(Guid id) where TResult : BaseResult;

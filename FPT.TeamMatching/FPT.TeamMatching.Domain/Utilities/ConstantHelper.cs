@@ -72,7 +72,7 @@ public static class Const
 
     public const string API_NOTIFICATIONS = $"{BaseApi}/notifications";
 
-    public const string API_PROFILES = $"{BaseApi}/profiles";
+    public const string API_PROFILE_STUDENTS = $"{BaseApi}/profile-students";
 
     public const string API_SKILLPROFILES = $"{BaseApi}/skill-profiles";
 
