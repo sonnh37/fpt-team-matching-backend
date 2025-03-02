@@ -14,7 +14,7 @@ namespace FPT.TeamMatching.Data.Repositories
 {
     public class ProfessionRepository : BaseRepository<Profession>, IProfessionRepository
     {
-        public ProfessionRepository(FPTMatchingDbContext dbContext, IMapper mapper) : base(dbContext, mapper)
+        public ProfessionRepository(FPTMatchingDbContext dbContext) : base(dbContext)
         {
         }
     }

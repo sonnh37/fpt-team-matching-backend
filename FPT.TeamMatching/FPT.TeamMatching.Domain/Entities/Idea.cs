@@ -10,6 +10,7 @@ public class Idea : BaseEntity
     public Guid? SemesterId { get; set; }
 
     public Guid? MentorId { get; set; }
+
     public Guid? SubMentorId { get; set; }
 
     public IdeaType? Type { get; set; }
@@ -36,7 +37,7 @@ public class Idea : BaseEntity
         
     public string? EnterpriseName { get; set; }
 
-    public int? MaxTeamSize { get; set; }
+    public int MaxTeamSize { get; set; }
 
     public virtual User? Owner { get; set; }
 

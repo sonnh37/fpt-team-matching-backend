@@ -9,4 +9,8 @@ public class BlogCvResult : BaseResult
     public Guid? BlogId { get; set; }
 
     public string? FileCv { get; set; }
+    
+    public BlogResult? Blog { get; set; }
+
+    public UserResult? User { get; set; }
 }

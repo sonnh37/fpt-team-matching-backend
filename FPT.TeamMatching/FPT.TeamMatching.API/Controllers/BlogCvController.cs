@@ -9,13 +9,13 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace FPT.TeamMatching.API.Controllers;
 
-[Route(Const.API_APPLICATIONS)]
+[Route(Const.API_BLOGCVS)]
 [ApiController]
-public class ApplicationController : ControllerBase
+public class BlogCvController : ControllerBase
 {
     private readonly IBlogCvService _service;
 
-    public ApplicationController(IBlogCvService __service)
+    public BlogCvController(IBlogCvService __service)
     {
         _service = __service;
     }

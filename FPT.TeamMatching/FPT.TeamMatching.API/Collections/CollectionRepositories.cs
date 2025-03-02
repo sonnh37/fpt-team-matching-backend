@@ -35,5 +35,9 @@ public static class CollectionRepositories
         services.AddScoped<IUserXRoleRepository, UserXRoleRepository>();
         services.AddScoped<IProfessionRepository, ProfessionRepository>();
         services.AddScoped<ISpecialtyRepository, SpecialtyRepository>();
+        services.AddScoped<ISemesterRepository, SemesterRepository>();
+        services.AddScoped<IIdeaHistoryRepository, IdeaHistoryRepository>();
+        services.AddScoped<IIdeaHistoryRequestRepository, IdeaHistoryRequestRepository>();
+
     }
 }

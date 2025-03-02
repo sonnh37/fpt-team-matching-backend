@@ -1,4 +1,6 @@
-﻿namespace FPT.TeamMatching.Domain.Models.Requests.Commands.Base;
+﻿using FPT.TeamMatching.Domain.Utilities;
+
+namespace FPT.TeamMatching.Domain.Models.Requests.Commands.Base;
 
 public abstract class BaseCommand
 {
@@ -21,5 +23,5 @@ public class DeleteCommand : BaseCommand
 {
     public Guid Id { get; set; }
 
-    public bool IsPermanent { get; set; }
+    public bool IsPermanent { get; set; } = Const.IsPermanent;
 }

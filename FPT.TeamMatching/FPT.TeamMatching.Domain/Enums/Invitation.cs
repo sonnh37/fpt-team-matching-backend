@@ -9,6 +9,6 @@ public enum InvitationStatus
     
 public enum InvitationType
 {
-    SentByMe,       
-    ReceivedByTeam
+    SentByStudent,       
+    SendByTeam
 }

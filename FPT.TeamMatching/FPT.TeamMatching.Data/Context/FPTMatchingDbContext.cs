@@ -61,7 +61,6 @@ public partial class FPTMatchingDbContext : BaseDbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        // modelBuilder.Ignore<Task>(); 
         modelBuilder.Entity<Blog>(entity =>
         {
             entity.HasKey(e => e.Id);
@@ -73,6 +72,9 @@ public partial class FPTMatchingDbContext : BaseDbContext
 
             entity.HasOne(d => d.User).WithMany(p => p.Blogs)
                 .HasForeignKey(d => d.UserId);
+            
+            entity.HasOne(d => d.Project).WithMany(p => p.Blogs)
+                .HasForeignKey(d => d.ProjectId);
         });
 
         modelBuilder.Entity<Comment>(entity =>
@@ -182,6 +184,12 @@ public partial class FPTMatchingDbContext : BaseDbContext
 
             entity.HasOne(d => d.User).WithOne(p => p.ProfileStudent)
                 .HasForeignKey<ProfileStudent>(d => d.UserId);
+            
+            entity.HasOne(d => d.Specialty).WithMany(p => p.ProfileStudents)
+                .HasForeignKey(d => d.SpecialtyId);
+            
+            entity.HasOne(d => d.Semester).WithMany(p => p.ProfileStudents)
+                .HasForeignKey(d => d.SemesterId);
         });
 
         modelBuilder.Entity<Project>(entity =>

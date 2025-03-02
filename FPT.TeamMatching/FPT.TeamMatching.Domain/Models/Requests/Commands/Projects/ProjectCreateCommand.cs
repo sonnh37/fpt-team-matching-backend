@@ -7,6 +7,8 @@ public class ProjectCreateCommand : CreateCommand
 {
     public Guid? LeaderId { get; set; }
 
+    public Guid? IdeaId { get; set; }
+
     public string? TeamName { get; set; }
 
     public string? Name { get; set; }

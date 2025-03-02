@@ -15,6 +15,7 @@ namespace FPT.TeamMatching.Domain.Models.Requests.Commands.Ideas
         public Guid? SemesterId { get; set; }
 
         public Guid? MentorId { get; set; }
+
         public Guid? SubMentorId { get; set; }
 
         public IdeaType? Type { get; set; }

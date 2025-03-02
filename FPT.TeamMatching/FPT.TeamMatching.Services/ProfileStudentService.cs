@@ -29,11 +29,11 @@ public class ProfileStudentService : IProfileStudentService
         try
         {
             //1. Kiểm tra user có tồn tại không
-            var foundUser = await _unitOfWork.UserRepository.GetById(profileStudent.UserId);
+            var foundUser = await _unitOfWork.UserRepository.GetById(profileStudent.UserId!.Value);
             if (foundUser == null || foundUser.IsDeleted) throw new Exception("User Not Found");
 
             //2. Thêm CV vào storage
-            var cloudinaryResult = await _cloudinary.UploadCVImage(profileStudent.FileCv, profileStudent.UserId);
+            var cloudinaryResult = await _cloudinary.UploadCVImage(profileStudent.FileCv, profileStudent.UserId.Value);
 
             //3. Add Profile
             var profileEntity = _mapper.Map<ProfileStudentCreateCommand, ProfileStudent>(profileStudent);
@@ -76,11 +76,11 @@ public class ProfileStudentService : IProfileStudentService
             if (foundProfile == null || foundProfile.IsDeleted) throw new Exception("Profile Not Found");
 
             //2. Kiểm tra user đó còn tồn tại hay bị khoá hay không
-            var foundUser = await _unitOfWork.UserRepository.GetById(profileStudent.UserId);
+            var foundUser = await _unitOfWork.UserRepository.GetById(profileStudent.UserId!.Value);
             if (foundUser == null || foundUser.IsDeleted) throw new Exception("User Not Found");
 
             //3. Override profile CV trong storage
-            var cloudinaryResult = await _cloudinary.UploadCVImage(profileStudent.FileCv, profileStudent.UserId);
+            var cloudinaryResult = await _cloudinary.UploadCVImage(profileStudent.FileCv, profileStudent.UserId.Value);
 
             //4. Update profile
             var profileEntity = _mapper.Map<ProfileStudentUpdateCommand, ProfileStudent>(profileStudent);
@@ -103,27 +103,34 @@ public class ProfileStudentService : IProfileStudentService
         }
     }
 
-    public async Task<BusinessResult> GetAllProfiles(ProfileStudentGetAllQuery x)
+    public async Task<BusinessResult> GetAllProfiles(ProfileStudentGetAllQuery query)
     {
         try
         {
-            if (!x.IsPagination)
-            {
-                var profiles = await _unitOfWork.ProfileStudentRepository.GetAll();
-                var profilesResult = _mapper.Map<List<ProfileStudent>, List<ProfileStudentResult>>(profiles);
-                return new BusinessResult(Const.SUCCESS_CODE, Const.SUCCESS_SAVE_MSG, profilesResult);
-            }
+            var (data, total) = await _unitOfWork.SkillProfileRepository.GetData(query);
 
-            var tuple = await _unitOfWork.ProfileStudentRepository.GetPaged(x);
-            var results = _mapper.Map<List<ProfileStudentResult>>(tuple.Item1);
+            var results = _mapper.Map<List<SkillProfile>>(data);
 
-            var tableResponse = new ResultsTableResponse<ProfileStudentResult>
-            {
-                GetQueryableQuery = x,
-                Item = (results, tuple.Item2)
-            };
+            if (results.Count == 0)
+                return new ResponseBuilder()
+                    .WithData(results)
+                    .WithStatus(Const.NOT_FOUND_CODE)
+                    .WithMessage(Const.NOT_FOUND_MSG);
 
-            return new BusinessResult(Const.SUCCESS_CODE, Const.SUCCESS_READ_MSG, tableResponse);
+            // GetAll 
+            if (!query.IsPagination)
+                return new ResponseBuilder()
+                    .WithData(results)
+                    .WithStatus(Const.SUCCESS_CODE)
+                    .WithMessage(Const.SUCCESS_READ_MSG);
+
+            // GetAll with paginationvar
+            var tableResponse = new PaginatedResult(query, results, total);
+
+            return new ResponseBuilder()
+                    .WithData(tableResponse)
+                    .WithStatus(Const.SUCCESS_CODE)
+                    .WithMessage(Const.SUCCESS_READ_MSG);
         }
         catch (Exception e)
         {

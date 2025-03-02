@@ -1,6 +1,7 @@
-﻿using FPT.TeamMatching.API.Hub;
+﻿using FPT.TeamMatching.API.Hubs;
 using FPT.TeamMatching.Domain.Contracts.Services;
 using FPT.TeamMatching.Services;
+using Microsoft.AspNetCore.SignalR;
 
 namespace FPT.TeamMatching.API.Collections;
 
@@ -28,9 +29,13 @@ public static class CollectionServices
         services.AddTransient<IConversationMemberService, ConversationMemberService>();
         services.AddTransient<IProfessionService, ProfessionService>();
         services.AddTransient<ISpecialtyService, SpecialtyService>();
+        services.AddTransient<ISemesterService, SemesterService>();
         services.AddTransient<IIdeaRequestService, IdeaRequestService>();
         services.AddTransient<IIdeaService, IdeaService>();
-        services.AddTransient<IApiHubService, ApiHubService>();
+        services.AddTransient<IIdeaHistoryService, IdeaHistoryService>();
+        services.AddTransient<IIdeaHistoryRequestService, IdeaHistoryRequestService>();
+        services.AddSingleton<IUserIdProvider, CustomUserIdProvider>();
+
         services.AddTransient<ChatHub>();
     }
 }

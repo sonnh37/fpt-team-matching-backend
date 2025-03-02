@@ -10,9 +10,9 @@ using Microsoft.AspNetCore.SignalR;
 using Quartz.Util;
 using StackExchange.Redis;
 
-namespace FPT.TeamMatching.API.Hub;
+namespace FPT.TeamMatching.API.Hubs;
 
-public class ChatHub : Microsoft.AspNetCore.SignalR.Hub
+public class ChatHub : Hub
 {
     private readonly IKafkaProducerConfig _kafkaProducer;
     private readonly IMapper _mapper;

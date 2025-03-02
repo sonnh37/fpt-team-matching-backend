@@ -54,15 +54,36 @@ public class IdeaController : ControllerBase
     {
         var businessResult = await _service.DeleteById(request.Id, request.IsPermanent);
 
-            return Ok(businessResult);
-        }
-
-        [HttpPut("restore")]
-        public async Task<IActionResult> Restore([FromBody] IdeaRestoreCommand command)
-        {
-            var businessResult = await _service.Restore<IdeaResult>(command);
-
-            return Ok(businessResult);
-        }
+        return Ok(businessResult);
     }
+
+    [HttpPut("restore")]
+    public async Task<IActionResult> Restore([FromBody] IdeaRestoreCommand command)
+    {
+        var businessResult = await _service.Restore<IdeaResult>(command);
+
+        return Ok(businessResult);
+    }
+
+    [HttpPost("student-create-pending")]
+    public async Task<IActionResult> CreatePending([FromBody] IdeaStudentCreatePendingCommand request)
+    {
+        var msg = await _service.StudentCreatePending(request);
+        return Ok(msg);
+    }
+
+    [HttpPost("lecturer-create-pending")]
+    public async Task<IActionResult> CreatePending([FromBody] IdeaLecturerCreatePendingCommand request)
+    {
+        var msg = await _service.LecturerCreatePending(request);
+        return Ok(msg);
+    }
+
+    [HttpGet("get-by-user-id")]
+    public async Task<IActionResult> GetByUserIdLogin()
+    {
+        var businessResult = await _service.GetIdeasByUserId();
+        return Ok(businessResult);
+    }
+}
 

@@ -14,7 +14,6 @@ public class GetQueryableQuery : BaseQuery
 
     public DateTime? ToDate { get; set; }
 
-
     [Required] public bool IsPagination { get; set; } = Const.IsPagination;
 
     public Guid? Id { get; set; }

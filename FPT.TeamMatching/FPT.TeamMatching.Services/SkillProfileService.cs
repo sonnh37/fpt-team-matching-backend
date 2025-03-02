@@ -104,27 +104,36 @@ public class SkillProfileService : ISkillProfileService
         }
     }
 
-    public async Task<BusinessResult> GetSkillProfiles(SkillProfileGetAllQuery x)
+    public async Task<BusinessResult> GetSkillProfiles(SkillProfileGetAllQuery query)
     {
         try
         {
-            if (!x.IsPagination)
-            {
-                var profiles = await _unitOfWork.SkillProfileRepository.GetAll();
-                var profilesResult = _mapper.Map<List<SkillProfileResult>>(profiles);
-                return new BusinessResult(Const.SUCCESS_CODE, Const.SUCCESS_READ_MSG, profilesResult);
-            }
+            var (data, total) = await _unitOfWork.SkillProfileRepository.GetData(query);
 
-            var tuple = await _unitOfWork.SkillProfileRepository.GetPaged(x);
-            var result = _mapper.Map<List<SkillProfileResult>>(tuple.Item1);
+            var results = _mapper.Map<List<SkillProfile>>(data);
 
-            var tableResponse = new ResultsTableResponse<SkillProfileResult>
-            {
-                GetQueryableQuery = x,
-                Item = (result, tuple.Item2)
-            };
+            if (results.Count == 0)
+                return new ResponseBuilder()
+                    .WithData(results)
+                    .WithStatus(Const.NOT_FOUND_CODE)
+                    .WithMessage(Const.NOT_FOUND_MSG)
+                    ;
 
-            return new BusinessResult(Const.SUCCESS_CODE, Const.SUCCESS_READ_MSG, tableResponse);
+            // GetAll 
+            if (!query.IsPagination)
+                return new ResponseBuilder()
+                    .WithData(results)
+                    .WithStatus(Const.SUCCESS_CODE)
+                    .WithMessage(Const.SUCCESS_READ_MSG)
+                    ;
+            
+            // GetAll with pagination
+            var tableResponse = new PaginatedResult(query, results, total);
+            
+            return new ResponseBuilder()
+                .WithData(tableResponse)
+                .WithStatus(Const.SUCCESS_CODE)
+                .WithMessage(Const.SUCCESS_READ_MSG);
         }
         catch (Exception e)
         {

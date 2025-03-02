@@ -1,8 +1,10 @@
 ﻿using FPT.TeamMatching.Domain.Entities;
 using FPT.TeamMatching.Domain.Entities.Base;
+using FPT.TeamMatching.Domain.Enums;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Base;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Ideas;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Invitations;
+using FPT.TeamMatching.Domain.Models.Requests.Queries.Notifications;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Users;
 
 namespace FPT.TeamMatching.Domain.Utilities.Filters;
@@ -25,6 +27,19 @@ public static class FilterHelper
     }
 
     private static IQueryable<Invitation>? Invitation(IQueryable<Invitation> queryable, InvitationGetAllQuery query)
+    {
+        if (query.Type != null)
+        {
+            queryable = queryable.Where(m =>
+                m.Type != null && m.Type == query.Type);
+        }
+
+        queryable = BaseFilterHelper.Base(queryable, query);
+
+        return queryable;
+    }
+    
+    private static IQueryable<Notification>? Notification(IQueryable<Notification> queryable, NotificationGetAllQuery query)
     {
         if (query.Type != null)
         {
@@ -65,6 +80,16 @@ public static class FilterHelper
                 m.Owner != null && m.Owner.UserXRoles.Any(uxr =>
                     uxr.Role != null && uxr.Role.RoleName != null &&
                     uxr.Role.RoleName.ToLower().Trim() == query.Type.ToString()!.ToLower().Trim()));
+        }
+
+        if (query.Status != null)
+        {
+            queryable = queryable.Where(m => m.Status == query.Status);
+        }
+
+        if (query.IsExistedTeam != null)
+        {
+            queryable = queryable.Where(m => m.IsExistedTeam == query.IsExistedTeam.Value);
         }
 
         queryable = BaseFilterHelper.Base(queryable, query);

@@ -3,12 +3,57 @@ using FPT.TeamMatching.Data.Context;
 using FPT.TeamMatching.Data.Repositories.Base;
 using FPT.TeamMatching.Domain.Contracts.Repositories;
 using FPT.TeamMatching.Domain.Entities;
+using FPT.TeamMatching.Domain.Enums;
+using FPT.TeamMatching.Domain.Models.Requests.Queries.Invitations;
+using FPT.TeamMatching.Domain.Utilities.Filters;
+using Microsoft.EntityFrameworkCore;
 
 namespace FPT.TeamMatching.Data.Repositories;
 
 public class InvitationRepository : BaseRepository<Invitation>, IInvitationRepository
 {
-    public InvitationRepository(FPTMatchingDbContext dbContext, IMapper mapper) : base(dbContext, mapper)
+    private readonly FPTMatchingDbContext _dbContext;
+    public InvitationRepository(FPTMatchingDbContext dbContext) : base(dbContext)
     {
+        _dbContext = dbContext;
+    }
+
+    public async Task<Invitation?> GetInvitationOfUserByProjectId(Guid projectId, Guid userId)
+    {
+        var i = await _dbContext.Invitations.Where(e => e.Status != null 
+                                            && e.ProjectId == projectId 
+                                            && e.SenderId == userId 
+                                            && e.Status.Value == InvitationStatus.Pending)
+                                            .SingleOrDefaultAsync();
+        return i;
+    }
+    
+    public async Task<(List<Invitation>, int)> GetUserInvitationsByType(InvitationGetByTypeQuery query, Guid userId)
+    {
+        var queryable = GetQueryable(m => m.Type == query.Type);
+        queryable = query.Type switch
+        {
+            InvitationType.SentByStudent => queryable.Where(m => m.SenderId == userId),
+            InvitationType.SendByTeam => queryable.Where(m => m.ReceiverId == userId),
+            _ => queryable
+        };
+        
+        if (query.IsPagination)
+        {
+            // Tổng số count sau khi  filter khi chưa lọc trang
+            var totalOrigin = queryable.Count();
+            // Sắp sếp
+            queryable = Sort(queryable, query);
+            // Lọc trang
+            var results = await GetQueryablePagination(queryable, query).ToListAsync();
+            
+            return (results, totalOrigin);
+        }
+        else
+        {
+            queryable = Sort(queryable, query);
+            var results = await queryable.ToListAsync();
+            return (results, results.Count);
+        }
     }
 }

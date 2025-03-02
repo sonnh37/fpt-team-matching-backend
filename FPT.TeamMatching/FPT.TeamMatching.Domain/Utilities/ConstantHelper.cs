@@ -60,7 +60,7 @@ public static class Const
     
     public const string API_AUTH = $"{BaseApi}/auth";
 
-    public const string API_APPLICATIONS = $"{BaseApi}/applications";
+    public const string API_BLOGCVS = $"{BaseApi}/blog-cvs";
 
     public const string API_RATES = $"{BaseApi}/rates";
 
@@ -83,7 +83,12 @@ public static class Const
     public const string API_PROFESSIONS = $"{BaseApi}/professions";
 
     public const string API_SPECIALTIES = $"{BaseApi}/specialties";
-    public const string API_HUBS = $"{BaseApi}/api_hubs";
+
+    public const string API_SEMESTERS = $"{BaseApi}/semesters";
+
+    public const string API_IDEA_HISTORIES = $"{BaseApi}/idea-histories";
+
+    public const string API_IDEA_HISTORY_REQUESTS = $"{BaseApi}/idea-history-requests";
 
     public const string SortFieldDefault = "CreatedDate";
 
@@ -96,6 +101,8 @@ public static class Const
     public const int PageNumberDefault = 1;
 
     public const bool IsPagination = false;
+    
+    public const bool IsPermanent = false;
 
     public const int PageSizeDefault = 10;
 

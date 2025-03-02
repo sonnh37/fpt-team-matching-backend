@@ -13,77 +13,12 @@ namespace FPT.TeamMatching.Data.Repositories.Base;
 public class BaseRepository<TEntity> : IBaseRepository<TEntity> where TEntity : BaseEntity
 {
     private readonly DbContext _dbContext;
-    protected readonly IMapper Mapper;
 
     public BaseRepository(DbContext dbContext)
     {
         _dbContext = dbContext;
     }
-
-    public BaseRepository(DbContext dbContext, IMapper mapper) : this(dbContext)
-    {
-        Mapper = mapper;
-    }
-
-    public DbSet<TEntity> DbSet
-    {
-        get
-        {
-            var dbSet = GetDbSet<TEntity>();
-            return dbSet;
-        }
-    }
-
-    public virtual void CheckCancellationToken(CancellationToken cancellationToken = default)
-    {
-        if (cancellationToken.IsCancellationRequested)
-            throw new OperationCanceledException("Request was cancelled");
-    }
-
-    public async Task<List<TEntity>> ApplySortingAndPaging(IQueryable<TEntity> queryable, GetQueryableQuery getAllQuery)
-    {
-        queryable = Sort(queryable, getAllQuery);
-
-        if (queryable.Any()) queryable = GetQueryablePagination(queryable, getAllQuery);
-
-        return await queryable.ToListAsync();
-    }
-
-    public DbSet<TEntity> Context()
-    {
-        return DbSet;
-    }
-
-    public async Task<bool> IsExistById(Guid id)
-    {
-        return await DbSet.AnyAsync(t => t.Id.Equals(id));
-    }
-
-    private static IQueryable<TEntity> Sort(IQueryable<TEntity> queryable, GetQueryableQuery getAllQuery)
-    {
-        if (!queryable.Any()) return queryable;
-
-        var parameter = Expression.Parameter(typeof(TEntity), "o");
-        var property = typeof(TEntity).GetProperty(getAllQuery.SortField ?? "",
-            BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
-
-        if (property == null)
-            // If the property doesn't exist, default to sorting by Id
-            property = typeof(TEntity).GetProperty("CreatedDate");
-
-        var propertyAccess = Expression.MakeMemberAccess(parameter, property);
-        var orderByExp = Expression.Lambda(propertyAccess, parameter);
-
-        var methodName = getAllQuery.SortOrder == SortOrder.Ascending ? "OrderBy" : "OrderByDescending";
-        var resultExp = Expression.Call(typeof(Queryable), methodName,
-            new[] { typeof(TEntity), property.PropertyType },
-            queryable.Expression, Expression.Quote(orderByExp));
-
-        queryable = queryable.Provider.CreateQuery<TEntity>(resultExp);
-
-        return queryable;
-    }
-
+    
     #region Commands
 
     public void Add(TEntity entity)
@@ -133,38 +68,39 @@ public class BaseRepository<TEntity> : IBaseRepository<TEntity> where TEntity : 
 
     #region Queries
 
-    // get all
+    // Get with pagination ( filter )
+    public async Task<(List<TEntity>, int)> GetData(GetQueryableQuery query)
+    {
+        var queryable = GetQueryable();
+        queryable = IncludeHelper.Apply(queryable);
+        queryable = FilterHelper.Apply(queryable, query);
+
+        if (query.IsPagination)
+        {
+            // Tổng số count sau khi  filter khi chưa lọc trang
+            var totalOrigin = queryable.Count();
+            // Sắp sếp
+            queryable = Sort(queryable, query);
+            // Lọc trang
+            var results = await GetQueryablePagination(queryable, query).ToListAsync();
+
+            return (results, totalOrigin);
+        }
+        else
+        {
+            queryable = Sort(queryable, query);
+            var results = await queryable.ToListAsync();
+            return (results, results.Count);
+        }
+    }
+
+    // Get all
     public async Task<List<TEntity>> GetAll()
     {
         var queryable = GetQueryable();
         queryable = IncludeHelper.Apply(queryable);
         var result = await queryable.ToListAsync();
         return result;
-    }
-
-    // get with pagination ( filter )
-    public async Task<(List<TEntity>, int)> GetPaged(GetQueryableQuery query)
-    {
-        var queryable = GetQueryable();
-        queryable = IncludeHelper.Apply(queryable);
-        queryable = FilterHelper.Apply(queryable, query);
-        var totalOrigin = queryable.Count();
-        var results = await ApplySortingAndPaging(queryable, query);
-
-        return (results, totalOrigin);
-    }
-
-    // get all with no pagination ( filter )
-    public async Task<List<TEntity>> GetAll(GetQueryableQuery query)
-    {
-        var queryable = GetQueryable();
-        queryable = IncludeHelper.Apply(queryable);
-        queryable = FilterHelper.Apply(queryable, query);
-        queryable = Sort(queryable, query);
-
-        var results = await queryable.ToListAsync();
-
-        return results;
     }
 
     public virtual async Task<TEntity?> GetById(Guid id, bool isInclude = false)
@@ -176,20 +112,38 @@ public class BaseRepository<TEntity> : IBaseRepository<TEntity> where TEntity : 
         return entity;
     }
 
-    public virtual async Task<TEntity?> GetByIdNoInclude(Guid id)
+    protected IQueryable<TEntity> GetQueryablePagination(IQueryable<TEntity> queryable, GetQueryableQuery query)
     {
-        var queryable = GetQueryable(x => x.Id == id);
-        var entity = await queryable.FirstOrDefaultAsync();
+        queryable = queryable
+            .Skip((query.PageNumber - 1) * query.PageSize)
+            .Take(query.PageSize);
 
-        return entity;
+        return queryable;
     }
 
-    public virtual async Task<IList<TEntity>> GetByIds(IList<Guid> ids)
+    protected static IQueryable<TEntity> Sort(IQueryable<TEntity> queryable, GetQueryableQuery getAllQuery)
     {
-        var queryable = GetQueryable(x => ids.Contains(x.Id));
-        var entity = await queryable.ToListAsync();
+        if (!queryable.Any()) return queryable;
 
-        return entity;
+        var parameter = Expression.Parameter(typeof(TEntity), "o");
+        var property = typeof(TEntity).GetProperty(getAllQuery.SortField ?? "",
+            BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
+
+        if (property == null)
+            // If the property doesn't exist, default to sorting by Id
+            property = typeof(TEntity).GetProperty("CreatedDate");
+
+        var propertyAccess = Expression.MakeMemberAccess(parameter, property);
+        var orderByExp = Expression.Lambda(propertyAccess, parameter);
+
+        var methodName = getAllQuery.SortOrder == SortOrder.Ascending ? "OrderBy" : "OrderByDescending";
+        var resultExp = Expression.Call(typeof(Queryable), methodName,
+            new[] { typeof(TEntity), property.PropertyType },
+            queryable.Expression, Expression.Quote(orderByExp));
+
+        queryable = queryable.Provider.CreateQuery<TEntity>(resultExp);
+
+        return queryable;
     }
 
     public IQueryable<TEntity> GetQueryable(CancellationToken cancellationToken = default)
@@ -199,12 +153,6 @@ public class BaseRepository<TEntity> : IBaseRepository<TEntity> where TEntity : 
         return queryable;
     }
 
-    public IQueryable<T> GetQueryable<T>()
-        where T : BaseEntity
-    {
-        IQueryable<T> queryable = GetDbSet<T>(); // like DbSet in this
-        return queryable;
-    }
 
     public IQueryable<TEntity> GetQueryable(Expression<Func<TEntity, bool>> predicate)
     {
@@ -213,24 +161,27 @@ public class BaseRepository<TEntity> : IBaseRepository<TEntity> where TEntity : 
         return queryable;
     }
 
-    private DbSet<T> GetDbSet<T>() where T : BaseEntity
+    private IQueryable<T> GetQueryable<T>()
+        where T : BaseEntity
     {
-        var dbSet = _dbContext.Set<T>();
-        return dbSet;
-    }
-
-    private IQueryable<TEntity> GetQueryablePagination(IQueryable<TEntity> queryable, GetQueryableQuery getAllQuery)
-    {
-        queryable = queryable.Skip((getAllQuery.PageNumber - 1) * getAllQuery.PageSize).Take(getAllQuery.PageSize);
-
+        IQueryable<T> queryable = _dbContext.Set<T>();
         return queryable;
     }
 
-    public async Task<long> GetTotalCount()
+    #endregion
+    
+    private DbSet<TEntity> DbSet
     {
-        var result = await GetQueryable().LongCountAsync();
-        return result;
+        get
+        {
+            var dbSet = _dbContext.Set<TEntity>();
+            return dbSet;
+        }
     }
 
-    #endregion
+    public virtual void CheckCancellationToken(CancellationToken cancellationToken = default)
+    {
+        if (cancellationToken.IsCancellationRequested)
+            throw new OperationCanceledException("Request was cancelled");
+    }
 }
