@@ -1,4 +1,4 @@
-﻿using FPT.TeamMatching.Domain.Entities;
+using FPT.TeamMatching.Domain.Entities;
 using FPT.TeamMatching.Domain.Enums;
 using FPT.TeamMatching.Domain.Models.Results.Bases;
 
@@ -26,7 +26,7 @@ public class ProjectResult : BaseResult
 
     public UserResult? Leader { get; set; }
 
-    public IdeaRequestResult? Idea { get; set; }
+    public IdeaResult? Idea { get; set; }
 
     public ICollection<BlogResult> Blogs { get; set; } = new List<BlogResult>();
 
