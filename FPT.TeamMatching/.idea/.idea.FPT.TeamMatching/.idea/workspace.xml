@@ -11,9 +11,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f62f3ccc-9b4d-4505-966f-06bc6afa4622" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/FPT.TeamMatching.API/Controllers/ApiHubController.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/FPT.TeamMatching.Domain/Contracts/Services/IAPIHubsService.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/FPT.TeamMatching.Services/APIHubsService.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.FPT.TeamMatching/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.FPT.TeamMatching/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/FPT.TeamMatching.API/.env" beforeDir="false" afterPath="$PROJECT_DIR$/FPT.TeamMatching.API/.env" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/FPT.TeamMatching.API/Collections/CollectionServices.cs" beforeDir="false" afterPath="$PROJECT_DIR$/FPT.TeamMatching.API/Collections/CollectionServices.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/FPT.TeamMatching.Domain/Utilities/ConstantHelper.cs" beforeDir="false" afterPath="$PROJECT_DIR$/FPT.TeamMatching.Domain/Utilities/ConstantHelper.cs" afterDir="false" />
@@ -66,10 +64,16 @@
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/c130f8cd6df446628293287aa6f52d203e674cd78c37e0b68d492d45e2964226/DefaultHubDispatcher.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$APPLICATION_CONFIG_DIR$/resharper-host/SourcesCache/f5fd859586a667391c6d43f988e05378862517b92754f54858d9642b23a1a9be/TokenValidationResult.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/FPT.TeamMatching.Data/Repositories/ConversationRepository.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/FPT.TeamMatching.Domain/Contracts/Services/IAPIHubsService.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/FPT.TeamMatching.Domain/Contracts/Services/IConversationMemberService.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/FPT.TeamMatching.Domain/Contracts/Services/IMessageService.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/FPT.TeamMatching.Domain/Models/PartnerInfoResult.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="mock://C:/Users/loctodale/RiderProjects/fpt-team-matching-backend/FPT.TeamMatching/FPT.TeamMatching.Domain/Models/Requests/Commands/Base/BaseCommand.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock://C:/Users/loctodale/RiderProjects/fpt-team-matching-backend/FPT.TeamMatching/FPT.TeamMatching.Domain/Models/Requests/Commands/Base/BaseCommand.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/FPT.TeamMatching.Domain/Models/Requests/Commands/Base/BaseCommand.cs" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/FPT.TeamMatching.Domain/Models/Responses/BusinessResult.cs" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/FPT.TeamMatching.Domain/Utilities/ConstantHelper.cs" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/FPT.TeamMatching.Services/ConversationMemberService.cs" root0="FORCE_HIGHLIGHTING" />
-    <setting file="mock://C:/Users/loctodale/RiderProjects/fpt-team-matching-backend/FPT.TeamMatching/FPT.TeamMatching.Services/JobHangFireService.cs" root0="SKIP_HIGHLIGHTING" />
   </component>
   <component name="KubernetesApiPersistence">{}</component>
   <component name="KubernetesApiProvider">{
@@ -90,21 +94,21 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    ".NET Launch Settings Profile.FPT.TeamMatching.API: http.executor": "Run",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "loctodale-save",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "preferences.pluginManager",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;.NET Launch Settings Profile.FPT.TeamMatching.API: http.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;loctodale-save&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RunManager" selected=".NET Launch Settings Profile.FPT.TeamMatching.API: http">
     <configuration name="FPT.TeamMatching.API: IIS Express" type="LaunchSettings" factoryName=".NET Launch Settings Profile">
       <option name="LAUNCH_PROFILE_PROJECT_FILE_PATH" value="$PROJECT_DIR$/FPT.TeamMatching.API/FPT.TeamMatching.API.csproj" />
