@@ -33,7 +33,7 @@ public class ProfileStudentController : ControllerBase
         return Ok(msg);
     }
 
-    [HttpGet("user/{id:guid}")]
+    [HttpGet("/user/{id:guid}")]
     public async Task<IActionResult> GetProfileUser([FromRoute] Guid id)
     {
         var msg = await _profileStudentService.GetProfileByUserId(id);

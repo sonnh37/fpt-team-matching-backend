@@ -1,4 +1,4 @@
-﻿using FPT.TeamMatching.Domain.Enums;
+using FPT.TeamMatching.Domain.Enums;
 
 namespace FPT.TeamMatching.Domain.Utilities;
 
