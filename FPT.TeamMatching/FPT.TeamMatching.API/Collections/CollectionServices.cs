@@ -30,7 +30,7 @@ public static class CollectionServices
         services.AddTransient<ISpecialtyService, SpecialtyService>();
         services.AddTransient<IIdeaRequestService, IdeaRequestService>();
         services.AddTransient<IIdeaService, IdeaService>();
-
+        services.AddTransient<IApiHubService, ApiHubService>();
         services.AddTransient<ChatHub>();
     }
 }

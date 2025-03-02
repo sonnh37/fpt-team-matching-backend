@@ -83,6 +83,7 @@ public static class Const
     public const string API_PROFESSIONS = $"{BaseApi}/professions";
 
     public const string API_SPECIALTIES = $"{BaseApi}/specialties";
+    public const string API_HUBS = $"{BaseApi}/api_hubs";
 
     public const string SortFieldDefault = "CreatedDate";
 
