@@ -112,17 +112,7 @@ public class IdeaRequestService : BaseService<IdeaRequest>, IIdeaRequestService
                 }
                 if (ideaRequestOld.Status == IdeaRequestStatus.MentorApproved)
                 {
-                    //tao idea request moi cho council
-                    //var newIdeaRquest = new IdeaRequest
-                    //{
-                    //    Id = Guid.NewGuid(),
-                    //    IdeaId = idea.Id,
-                    //    Status = IdeaRequestStatus.CouncilPending,
-                    //    CreatedBy = user.Email,
-                    //    CreatedDate = DateTime.UtcNow,
-                    //    IsDeleted = false,
-                    //};
-                    //_ideaRequestRepository.Add(newIdeaRquest);
+                    
                 }
                 _ideaRepository.Update(idea);
 
