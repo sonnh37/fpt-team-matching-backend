@@ -135,12 +135,11 @@ public class IdeaService : BaseService<Idea>, IIdeaService
         InitializeBaseEntityForCreate(ideaEntity);
         _ideaRepository.Add(ideaEntity);
 
-        var idea = _ideaRepository.GetById(ideaEntity.Id);
-        if (idea == null) return false;
         IdeaRequest ideaRequest = new IdeaRequest
         {
             Id = Guid.NewGuid(),
             IdeaId = ideaEntity.Id,
+            ReviewerId = ideaEntity.MentorId,
             IsDeleted = false,
             CreatedDate = DateTime.UtcNow,
             UpdatedDate = DateTime.UtcNow,
@@ -166,12 +165,17 @@ public class IdeaService : BaseService<Idea>, IIdeaService
         ideaEntity.Status = IdeaStatus.Pending;
         ideaEntity.OwnerId = user.Id;
         ideaEntity.MentorId = user.Id;
-        ideaEntity.Type = IdeaType.Lecturer;
+        if (ideaEntity.IsEnterpriseTopic == true)
+        {
+            ideaEntity.Type = IdeaType.Enterprise;
+        }
+        else
+        {
+            ideaEntity.Type = IdeaType.Lecturer;
+        }
         InitializeBaseEntityForCreate(ideaEntity);
         _ideaRepository.Add(ideaEntity);
 
-        var idea = _ideaRepository.GetById(ideaEntity.Id);
-        if (idea == null) return false;
         IdeaRequest ideaRequest = new IdeaRequest
         {
             Id = Guid.NewGuid(),

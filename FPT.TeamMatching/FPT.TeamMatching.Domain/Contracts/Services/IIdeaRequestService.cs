@@ -1,4 +1,6 @@
 ﻿using FPT.TeamMatching.Domain.Contracts.Services.Bases;
+using FPT.TeamMatching.Domain.Models.Requests.Commands.IdeaRequests;
+using FPT.TeamMatching.Domain.Models.Responses;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,5 +11,7 @@ namespace FPT.TeamMatching.Domain.Contracts.Services
 {
     public interface IIdeaRequestService: IBaseService
     {
+        Task<BusinessResult> LecturerResponse(IdeaRequestLecturerOrCouncilResponseCommand command);
+        Task<BusinessResult> CouncilResponse(IdeaRequestLecturerOrCouncilResponseCommand command);
     }
 }
