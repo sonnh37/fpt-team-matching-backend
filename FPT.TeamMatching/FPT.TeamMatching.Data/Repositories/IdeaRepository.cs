@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using FPT.TeamMatching.Data.Context;
 using FPT.TeamMatching.Data.Repositories.Base;
 using FPT.TeamMatching.Domain.Contracts.Repositories;

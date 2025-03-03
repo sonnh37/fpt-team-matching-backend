@@ -36,6 +36,7 @@ public static class CollectionServices
         services.AddTransient<IIdeaHistoryRequestService, IdeaHistoryRequestService>();
         services.AddSingleton<IUserIdProvider, CustomUserIdProvider>();
 
+        services.AddTransient<IApiHubService, ApiHubService>();
         services.AddTransient<ChatHub>();
     }
 }

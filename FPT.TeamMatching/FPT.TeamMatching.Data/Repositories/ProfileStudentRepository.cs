@@ -11,7 +11,7 @@ public class ProfileStudentRepository : BaseRepository<ProfileStudent>, IProfile
 {
     private readonly FPTMatchingDbContext _dbContext;
 
-    public ProfileStudentRepository(IMapper mapper, FPTMatchingDbContext dbContext) : base(dbContext, mapper)
+    public ProfileStudentRepository(FPTMatchingDbContext dbContext) : base(dbContext)
     {
         _dbContext = dbContext;
     }

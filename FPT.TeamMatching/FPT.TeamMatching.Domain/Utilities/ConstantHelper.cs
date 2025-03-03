@@ -1,4 +1,4 @@
-﻿using FPT.TeamMatching.Domain.Enums;
+using FPT.TeamMatching.Domain.Enums;
 
 namespace FPT.TeamMatching.Domain.Utilities;
 
@@ -72,7 +72,7 @@ public static class Const
 
     public const string API_NOTIFICATIONS = $"{BaseApi}/notifications";
 
-    public const string API_PROFILES = $"{BaseApi}/profiles";
+    public const string API_PROFILE_STUDENTS = $"{BaseApi}/profile-students";
 
     public const string API_SKILLPROFILES = $"{BaseApi}/skill-profiles";
 
@@ -93,6 +93,8 @@ public static class Const
     public const string SortFieldDefault = "CreatedDate";
 
     public const string HANGFIRE = $"{BaseApi}/hangfire";
+    
+    public const string API_HUBS = $"{BaseApi}/api_hubs";
 
     #endregion
 

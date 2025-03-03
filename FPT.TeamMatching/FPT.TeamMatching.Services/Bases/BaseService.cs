@@ -45,8 +45,8 @@ public abstract class BaseService<TEntity> : BaseService, IBaseService
             var result = _mapper.Map<TResult>(entity);
             if (result == null)
                 return new ResponseBuilder()
-                    .WithStatus(Const.NOT_FOUND_CODE)
-                    .WithMessage(Const.NOT_FOUND_MSG)
+                        .WithStatus(Const.NOT_FOUND_CODE)
+                        .WithMessage(Const.NOT_FOUND_MSG)
                     ;
 
             return new ResponseBuilder()
@@ -71,9 +71,9 @@ public abstract class BaseService<TEntity> : BaseService, IBaseService
             var results = _mapper.Map<List<TResult>>(entities);
             if (!results.Any())
                 return new ResponseBuilder()
-                    .WithData(results)
-                    .WithStatus(Const.NOT_FOUND_CODE)
-                    .WithMessage(Const.NOT_FOUND_MSG)
+                        .WithData(results)
+                        .WithStatus(Const.NOT_FOUND_CODE)
+                        .WithMessage(Const.NOT_FOUND_MSG)
                     ;
 
             return new ResponseBuilder()
@@ -100,21 +100,21 @@ public abstract class BaseService<TEntity> : BaseService, IBaseService
 
             results = _mapper.Map<List<TResult>>(data);
 
-            if (results.Count == 0) 
+            if (results.Count == 0)
                 return new ResponseBuilder()
-                    .WithData(results)
-                    .WithStatus(Const.NOT_FOUND_CODE)
-                    .WithMessage(Const.NOT_FOUND_MSG)
+                        .WithData(results)
+                        .WithStatus(Const.NOT_FOUND_CODE)
+                        .WithMessage(Const.NOT_FOUND_MSG)
                     ;
 
             // GetAll 
             if (!query.IsPagination)
                 return new ResponseBuilder()
-                    .WithData(results)
-                    .WithStatus(Const.SUCCESS_CODE)
-                    .WithMessage(Const.SUCCESS_READ_MSG)
+                        .WithData(results)
+                        .WithStatus(Const.SUCCESS_CODE)
+                        .WithMessage(Const.SUCCESS_READ_MSG)
                     ;
-            
+
             // GetAll with pagination
             var tableResponse = new PaginatedResult(query, results, total);
 
@@ -173,8 +173,8 @@ public abstract class BaseService<TEntity> : BaseService, IBaseService
             var result = _mapper.Map<TResult>(entity);
             if (result == null)
                 return new ResponseBuilder()
-                    .WithStatus(Const.FAIL_CODE)
-                    .WithMessage(Const.FAIL_SAVE_MSG)
+                        .WithStatus(Const.FAIL_CODE)
+                        .WithMessage(Const.FAIL_SAVE_MSG)
                     ;
 
 
@@ -203,11 +203,9 @@ public abstract class BaseService<TEntity> : BaseService, IBaseService
                     ? new ResponseBuilder()
                         .WithStatus(Const.SUCCESS_CODE)
                         .WithMessage(Const.SUCCESS_DELETE_MSG)
-                        
                     : new ResponseBuilder()
                         .WithStatus(Const.FAIL_CODE)
-                        .WithMessage(Const.FAIL_DELETE_MSG)
-                        ;
+                        .WithMessage(Const.FAIL_DELETE_MSG);
             }
 
             var entity = await DeleteEntity(id);
@@ -216,11 +214,9 @@ public abstract class BaseService<TEntity> : BaseService, IBaseService
                 ? new ResponseBuilder()
                     .WithStatus(Const.SUCCESS_CODE)
                     .WithMessage(Const.SUCCESS_SAVE_MSG)
-                    
                 : new ResponseBuilder()
                     .WithStatus(Const.FAIL_CODE)
-                    .WithMessage(Const.FAIL_SAVE_MSG)
-                    ;
+                    .WithMessage(Const.FAIL_SAVE_MSG);
         }
         catch (DbUpdateException dbEx)
         {
@@ -228,8 +224,8 @@ public abstract class BaseService<TEntity> : BaseService, IBaseService
             {
                 var errorMessage = "Không thể xóa vì dữ liệu đang được tham chiếu ở bảng khác.";
                 return new ResponseBuilder()
-                    .WithStatus(Const.FAIL_CODE)
-                    .WithMessage(errorMessage)
+                        .WithStatus(Const.FAIL_CODE)
+                        .WithMessage(errorMessage)
                     ;
             }
 
@@ -254,7 +250,7 @@ public abstract class BaseService<TEntity> : BaseService, IBaseService
 
             _mapper.Map(updateCommand, entity);
 
-            InitializeBaseEntityForUpdate(entity);
+            await SetBaseEntityForUpdate(entity);
             _baseRepository.Update(entity);
         }
         else
@@ -262,39 +258,34 @@ public abstract class BaseService<TEntity> : BaseService, IBaseService
             entity = _mapper.Map<TEntity>(createOrUpdateCommand);
             if (entity == null) return null;
             entity.Id = Guid.NewGuid();
-            InitializeBaseEntityForCreate(entity);
+            await SetBaseEntityForCreation(entity);
             _baseRepository.Add(entity);
         }
 
         var saveChanges = await _unitOfWork.SaveChanges();
-        return saveChanges ? entity : default;
+        return saveChanges ? entity : null;
     }
 
     protected async Task<TEntity?> RestoreEntity(UpdateCommand updateCommand)
     {
-        TEntity? entity;
-
-        entity = await _baseRepository.GetById(updateCommand.Id);
+        var entity = await _baseRepository.GetById(updateCommand.Id);
         if (entity == null) return null;
 
-        // update isdeleted
         entity.IsDeleted = false;
 
-        InitializeBaseEntityForUpdate(entity);
+        await SetBaseEntityForUpdate(entity);
         _baseRepository.Update(entity);
 
 
         var saveChanges = await _unitOfWork.SaveChanges();
-        return saveChanges ? entity : default;
+        return saveChanges ? entity : null;
     }
 
-
-    protected void InitializeBaseEntityForCreate(TEntity? entity)
+    protected async Task SetBaseEntityForCreation<T>(T? entity) where T : BaseEntity
     {
         if (entity == null) return;
 
-        var user = GetUser();
-
+        var user = await GetUserAsync();
         entity.CreatedDate = DateTime.UtcNow;
         entity.UpdatedDate = DateTime.UtcNow;
         entity.IsDeleted = false;
@@ -304,12 +295,11 @@ public abstract class BaseService<TEntity> : BaseService, IBaseService
         entity.UpdatedBy = user.Email;
     }
 
-    protected void InitializeBaseEntityForUpdate(TEntity? entity)
+    protected async Task SetBaseEntityForUpdate<T>(T? entity) where T : BaseEntity
     {
         if (entity == null) return;
 
-        var user = GetUser();
-
+        var user = await GetUserAsync();
         entity.UpdatedDate = DateTime.UtcNow;
 
         if (user == null) return;
@@ -324,7 +314,8 @@ public abstract class BaseService<TEntity> : BaseService, IBaseService
         _baseRepository.Delete(entity);
 
         var saveChanges = await _unitOfWork.SaveChanges();
-        return saveChanges ? entity : default;
+
+        return saveChanges ? entity : null;
     }
 
     private async Task<bool> DeleteEntityPermanently(Guid id)
@@ -340,86 +331,63 @@ public abstract class BaseService<TEntity> : BaseService, IBaseService
 
     #endregion
 
-    // public BusinessResult GetUserByCookie()
-    // {
-    //     try
-    //     {
-    //         if (_httpContextAccessor?.HttpContext == null ||
-    //             !_httpContextAccessor.HttpContext.User.Identity.IsAuthenticated)
-    //             return HandlerNotFound("Not login yet");
-    //
-    //         // Lấy thông tin UserId từ Claims
-    //         var userIdClaim = _httpContextAccessor.HttpContext.User.FindFirst("Id")?.Value;
-    //         if (string.IsNullOrEmpty(userIdClaim))
-    //             return HandlerNotFound("No user claim found");
-    //
-    //         // Lấy thêm thông tin User từ database nếu cần
-    //         var userId = Guid.Parse(userIdClaim);
-    //         var user = _unitOfWork.UserRepository.GetById(userId).Result;
-    //         var userResult = _mapper.Map<UserResult>(user);
-    //
-    //         if (userResult == null) return HandlerNotFound();
-    //
-    //         return new ResponseBuilder<UserResult>()
-    //             .WithData(userResult)
-    //             .WithStatus(Const.SUCCESS_CODE)
-    //             .WithMessage(Const.SUCCESS_READ_MSG)
-    //             ;
-    //     }
-    //     catch (Exception ex)
-    //     {
-    //         return HandlerError(ex.Message);
-    //     }
-    // }
-
-    public User? GetUser()
+    protected async Task<User?> GetUserAsync()
     {
         try
         {
-            if (_httpContextAccessor?.HttpContext == null ||
-                !_httpContextAccessor.HttpContext.User.Identity.IsAuthenticated)
+            if (!IsUserAuthenticated())
                 return null;
 
-            // Lấy thông tin UserId từ Claims
-            var userIdClaim = _httpContextAccessor.HttpContext.User.FindFirst("Id")?.Value;
-            if (string.IsNullOrEmpty(userIdClaim))
+            var userId = GetUserIdFromClaims();
+            if (userId == null)
                 return null;
 
-            // Lấy thêm thông tin User từ database nếu cần
-            var userId = Guid.Parse(userIdClaim);
-            var user = _unitOfWork.UserRepository.GetById(userId, true).Result;
-
-            return user;
+            return await _unitOfWork.UserRepository.GetById(userId.Value, true);
         }
         catch (Exception ex)
         {
-            // Log lỗi nếu cần thiết
             return null;
         }
     }
 
-    public BusinessResult HandlerError(string message)
+    private bool IsUserAuthenticated()
+    {
+        return _httpContextAccessor?.HttpContext != null &&
+               _httpContextAccessor.HttpContext.User.Identity?.IsAuthenticated == true;
+    }
+
+    protected Guid? GetUserIdFromClaims()
+    {
+        if (_httpContextAccessor.HttpContext == null) return null;
+        var userIdClaim = _httpContextAccessor.HttpContext.User.FindFirst("Id")?.Value;
+        if (string.IsNullOrEmpty(userIdClaim))
+            return null;
+
+        if (Guid.TryParse(userIdClaim, out var userId))
+            return userId;
+
+        return null;
+    }
+
+    protected BusinessResult HandlerError(string message)
     {
         var errorMessage = $"An error {typeof(TEntity).Name}: {message}";
         return new ResponseBuilder()
             .WithStatus(Const.FAIL_CODE)
-            .WithMessage(errorMessage)
-            ;
+            .WithMessage(errorMessage);
     }
 
-    public BusinessResult HandlerNotFound(string message = Const.NOT_FOUND_MSG)
+    protected BusinessResult HandlerNotFound(string message = Const.NOT_FOUND_MSG)
     {
         return new ResponseBuilder()
             .WithStatus(Const.NOT_FOUND_CODE)
-            .WithMessage(message)
-            ;
+            .WithMessage(message);
     }
 
-    public BusinessResult HandlerFail(string message)
+    protected BusinessResult HandlerFail(string message)
     {
         return new ResponseBuilder()
             .WithStatus(Const.FAIL_CODE)
-            .WithMessage(message)
-            ;
+            .WithMessage(message);
     }
 }

@@ -1,4 +1,4 @@
-﻿using FPT.TeamMatching.Domain.Contracts.Services.Bases;
+using FPT.TeamMatching.Domain.Contracts.Services.Bases;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.IdeaRequests;
 using FPT.TeamMatching.Domain.Models.Responses;
 using System;

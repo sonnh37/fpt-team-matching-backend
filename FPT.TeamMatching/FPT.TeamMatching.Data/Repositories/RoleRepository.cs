@@ -8,7 +8,7 @@ namespace FPT.TeamMatching.Data.Repositories;
 
 public class RoleRepository : BaseRepository<Role>, IRoleRepository
 {
-    public RoleRepository(FPTMatchingDbContext dbContext, IMapper mapper) : base(dbContext, mapper)
+    public RoleRepository(FPTMatchingDbContext dbContext) : base(dbContext)
     {
     }
 }

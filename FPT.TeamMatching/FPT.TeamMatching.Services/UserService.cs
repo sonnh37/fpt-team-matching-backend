@@ -34,8 +34,7 @@ public class UserService : BaseService<User>, IUserService
             if (user != null)
                 return new ResponseBuilder()
                     .WithStatus(Const.FAIL_CODE)
-                    .WithMessage("The email has already been registered.")
-                    ;
+                    .WithMessage("The email has already been registered.");
 
             // set password
             if (command.Password != null)

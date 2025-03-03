@@ -1,4 +1,4 @@
-﻿using FPT.TeamMatching.Domain.Entities;
+using FPT.TeamMatching.Domain.Entities;
 using FPT.TeamMatching.Domain.Enums;
 using FPT.TeamMatching.Domain.Models.Results.Bases;
 
@@ -24,14 +24,15 @@ public class ProjectResult : BaseResult
 
     public DateTimeOffset? EndDate { get; set; }
 
-    public  UserResult? Leader { get; set; }
+    public UserResult? Leader { get; set; }
 
-    public  IdeaResult? Idea { get; set; }
+    public IdeaResult? Idea { get; set; }
 
-    public  ICollection<InvitationResult> Invitations { get; set; } = new List<InvitationResult>();
+    public ICollection<BlogResult> Blogs { get; set; } = new List<BlogResult>();
 
-    public  ICollection<ReviewResult> Reviews { get; set; } = new List<ReviewResult>();
+    public ICollection<InvitationResult> Invitations { get; set; } = new List<InvitationResult>();
 
-    public  ICollection<TeamMemberResult> TeamMembers { get; set; } = new List<TeamMemberResult>();
+    public ICollection<ReviewResult> Reviews { get; set; } = new List<ReviewResult>();
 
+    public ICollection<TeamMemberResult> TeamMembers { get; set; } = new List<TeamMemberResult>();
 }

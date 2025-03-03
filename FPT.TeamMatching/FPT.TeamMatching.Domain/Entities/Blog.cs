@@ -6,6 +6,8 @@ namespace FPT.TeamMatching.Domain.Entities;
 public class Blog : BaseEntity
 {
     public Guid? UserId { get; set; }
+    
+    public Guid? ProjectId { get; set; }
 
     public string? Title { get; set; }
 
@@ -22,4 +24,6 @@ public class Blog : BaseEntity
     public virtual ICollection<Like> Likes { get; set; } = new List<Like>();
 
     public virtual User? User { get; set; }
+    
+    public virtual Project? Project { get; set; }
 }

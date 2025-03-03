@@ -1,4 +1,4 @@
-﻿using FPT.TeamMatching.Domain.Enums;
+using FPT.TeamMatching.Domain.Enums;
 using FPT.TeamMatching.Domain.Models.Results.Bases;
 
 namespace FPT.TeamMatching.Domain.Models.Results
@@ -37,7 +37,7 @@ namespace FPT.TeamMatching.Domain.Models.Results
 
         public string? EnterpriseName { get; set; }
 
-        public int? MaxTeamSize { get; set; }
+        public int MaxTeamSize { get; set; }
 
         public UserResult? Owner { get; set; }
 
@@ -52,5 +52,8 @@ namespace FPT.TeamMatching.Domain.Models.Results
         public SemesterResult? Semester { get; set; }
 
         public ICollection<IdeaRequestResult> IdeaRequests { get; set; } = new List<IdeaRequestResult>();
+        
+        public ICollection<IdeaHistoryResult> IdeaHistories { get; set; } = new List<IdeaHistoryResult>();
+
     }
 }

@@ -11,6 +11,8 @@ public class SemesterResult : BaseResult
     public DateTimeOffset? StartDate { get; set; }
 
     public DateTimeOffset? EndDate { get; set; }
-
-    public virtual ICollection<IdeaResult> Ideas { get; set; } = new List<IdeaResult>();
+    
+    public ICollection<IdeaResult> Ideas { get; set; } = new List<IdeaResult>();
+    
+    public ICollection<ProfileStudentResult> ProfileStudents { get; set; } = new List<ProfileStudentResult>();
 }
