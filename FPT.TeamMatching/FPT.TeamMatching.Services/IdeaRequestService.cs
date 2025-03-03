@@ -31,17 +31,20 @@ public class IdeaRequestService : BaseService<IdeaRequest>, IIdeaRequestService
     {
         try
         {
+            var user = await GetUserAsync();
             var ideaRequest = _mapper.Map<IdeaRequest>(command);
             var ideaRequestOld = await _ideaRequestRepository.GetById(ideaRequest.Id);
             if (ideaRequestOld != null)
             {
                 ideaRequestOld.Status = ideaRequest.Status;
                 ideaRequestOld.Content = ideaRequest.Content;
-                ideaRequestOld.ProcessDate = DateTime.Now;
-
+                ideaRequestOld.ProcessDate = DateTime.UtcNow;
+                ideaRequestOld.ReviewerId = user.Id;
+                await SetBaseEntityForUpdate(ideaRequestOld);
                 _ideaRequestRepository.Update(ideaRequestOld);
+                
+                var idea = await _ideaRepository.GetById(ideaRequestOld.IdeaId.Value);
 
-                var idea = await _ideaRepository.GetById((Guid)ideaRequestOld.IdeaId);
                 if (ideaRequestOld.Status == IdeaRequestStatus.CouncilRejected)
                 {
                     idea.Status = IdeaStatus.Rejected;
@@ -50,21 +53,23 @@ public class IdeaRequestService : BaseService<IdeaRequest>, IIdeaRequestService
                 {
                     idea.Status = IdeaStatus.Approved;
 
-                    //Gen idea code 
-                    var semester = await _semesterRepository.GetById((Guid)idea.SemesterId);
-                    var semesterCode = semester.SemesterCode;
+                    ////Gen idea code 
+                    //var semester = await _semesterRepository.GetById((Guid)idea.SemesterId);
+                    //var semesterCode = semester.SemesterCode;
 
-                    //lấy số thứ tự đề tài lớn nhất của kì học 
-                    var maxNumber = await _ideaRepository.MaxNumberOfSemester((Guid)idea.SemesterId);
+                    ////lấy số thứ tự đề tài lớn nhất của kì học 
+                    //var maxNumber = await _ideaRepository.MaxNumberOfSemester((Guid)idea.SemesterId);
 
-                    // Tạo số thứ tự tiếp theo
-                    int nextNumber = maxNumber + 1;
+                    //// Tạo số thứ tự tiếp theo
+                    //int nextNumber = maxNumber + 1;
 
-                    // Tạo mã Idea mới theo định dạng: semesterCode + "SE" + số thứ tự (2 chữ số)
-                    string newIdeaCode = $"{semesterCode}SE{nextNumber:D2}";
+                    //// Tạo mã Idea mới theo định dạng: semesterCode + "SE" + số thứ tự (2 chữ số)
+                    //string newIdeaCode = $"{semesterCode}SE{nextNumber:D2}";
 
-                    idea.IdeaCode = newIdeaCode;
+                    //idea.IdeaCode = newIdeaCode;
                 }
+
+                await SetBaseEntityForUpdate(idea);
                 _ideaRepository.Update(idea);
 
                 bool saveChange = await _unitOfWork.SaveChanges();
@@ -95,7 +100,6 @@ public class IdeaRequestService : BaseService<IdeaRequest>, IIdeaRequestService
     {
         try
         {
-            var user = await GetUserAsync();
             var ideaRequest = _mapper.Map<IdeaRequest>(command);
             var ideaRequestOld = await _ideaRequestRepository.GetById(ideaRequest.Id);
             if (ideaRequestOld != null)
@@ -103,17 +107,16 @@ public class IdeaRequestService : BaseService<IdeaRequest>, IIdeaRequestService
                 ideaRequestOld.Status = ideaRequest.Status;
                 ideaRequestOld.Content = ideaRequest.Content;
                 ideaRequestOld.ProcessDate = DateTime.UtcNow;
+                await SetBaseEntityForUpdate(ideaRequestOld); 
                 _ideaRequestRepository.Update(ideaRequestOld);
 
-                var idea = await _ideaRepository.GetById((Guid)ideaRequestOld.IdeaId);
+                var idea = await _ideaRepository.GetById(ideaRequestOld.IdeaId.Value);
+                if (idea == null) return HandlerFail("Idea not found");
                 if (ideaRequestOld.Status == IdeaRequestStatus.MentorRejected)
                 {
                     idea.Status = IdeaStatus.Rejected;
                 }
-                if (ideaRequestOld.Status == IdeaRequestStatus.MentorApproved)
-                {
-                    
-                }
+                await SetBaseEntityForUpdate(idea);
                 _ideaRepository.Update(idea);
 
                 bool saveChange = await _unitOfWork.SaveChanges();
