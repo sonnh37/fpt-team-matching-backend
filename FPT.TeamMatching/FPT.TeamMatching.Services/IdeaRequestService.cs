@@ -95,7 +95,7 @@ public class IdeaRequestService : BaseService<IdeaRequest>, IIdeaRequestService
     {
         try
         {
-            var user = GetUser();
+            var user = await GetUserAsync();
             var ideaRequest = _mapper.Map<IdeaRequest>(command);
             var ideaRequestOld = await _ideaRequestRepository.GetById(ideaRequest.Id);
             if (ideaRequestOld != null)
