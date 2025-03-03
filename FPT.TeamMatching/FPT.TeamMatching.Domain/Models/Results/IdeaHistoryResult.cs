@@ -21,5 +21,11 @@ namespace FPT.TeamMatching.Domain.Models.Results
         public IdeaHistoryStatus? Status { get; set; }
 
         public int ReviewStage { get; set; }
+        
+        public IdeaResult? Idea { get; set; }
+
+        public UserResult? Council { get; set; }
+    
+        public ICollection<IdeaHistoryRequestResult> IdeaHistoryRequests { get; set; } = new List<IdeaHistoryRequestResult>();
     }
 }

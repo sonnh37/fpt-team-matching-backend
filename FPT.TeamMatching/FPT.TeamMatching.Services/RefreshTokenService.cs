@@ -20,17 +20,8 @@ namespace FPT.TeamMatching.Services;
 
 public class RefreshTokenService : BaseService<RefreshToken>, IRefreshTokenService
 {
-    private readonly string _clientId;
-    private readonly IConfiguration _configuration;
-    private readonly int _expAccessToken;
-    private readonly int _expRefreshToken;
-    protected readonly IHttpContextAccessor _httpContextAccessor;
-    protected readonly IMapper _mapper;
     private readonly IRefreshTokenRepository _refreshTokenRepository;
-    protected readonly TokenSetting _tokenSetting;
-    protected readonly IUnitOfWork _unitOfWork;
-    private readonly IUserRepository _userRepository;
-    private readonly IUserService _userService;
+    private readonly TokenSetting _tokenSetting;
 
     public RefreshTokenService(IMapper mapper,
         IUnitOfWork unitOfWork,
@@ -38,16 +29,11 @@ public class RefreshTokenService : BaseService<RefreshToken>, IRefreshTokenServi
         IOptions<TokenSetting> tokenSetting
     ) : base(mapper, unitOfWork)
     {
-        _mapper = mapper;
-        _unitOfWork = unitOfWork;
-        _httpContextAccessor ??= new HttpContextAccessor();
         _tokenSetting = tokenSetting.Value;
-        _userRepository = _unitOfWork.UserRepository;
-        _userService = userService;
         _refreshTokenRepository = _unitOfWork.RefreshTokenRepository;
     }
 
-    public async Task<BusinessResult> CreateOrUpdate<TResult>(CreateOrUpdateCommand createOrUpdateCommand)
+    public new async Task<BusinessResult> CreateOrUpdate<TResult>(CreateOrUpdateCommand createOrUpdateCommand)
         where TResult : BaseResult
     {
         try
@@ -77,9 +63,9 @@ public class RefreshTokenService : BaseService<RefreshToken>, IRefreshTokenServi
 
     public BusinessResult ValidateRefreshTokenIpMatch()
     {
-        var ipAddress = _httpContextAccessor.HttpContext.Request.Headers["X-Forwarded-For"].FirstOrDefault()
-                        ?? _httpContextAccessor.HttpContext.Connection.RemoteIpAddress?.ToString() ?? "0.0.0.0";
-        var refreshToken = _httpContextAccessor.HttpContext.Request.Cookies["refreshToken"];
+        var ipAddress = _httpContextAccessor.HttpContext?.Request.Headers["X-Forwarded-For"].FirstOrDefault()
+                        ?? _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString() ?? "0.0.0.0";
+        var refreshToken = _httpContextAccessor.HttpContext?.Request.Cookies["refreshToken"];
 
         ipAddress = NormalizeIpAddress(ipAddress);
         // Kiểm tra refreshToken và IP address
@@ -99,8 +85,7 @@ public class RefreshTokenService : BaseService<RefreshToken>, IRefreshTokenServi
         return new ResponseBuilder()
             .WithData(refreshTokenResult)
             .WithStatus(Const.SUCCESS_CODE)
-            .WithMessage(Const.SUCCESS_READ_MSG)
-            ;
+            .WithMessage(Const.SUCCESS_READ_MSG);
     }
 
     private string NormalizeIpAddress(string ipAddress)
@@ -118,7 +103,7 @@ public class RefreshTokenService : BaseService<RefreshToken>, IRefreshTokenServi
         return ipAddress;
     }
 
-    protected async Task<RefreshToken?> CreateOrUpdateEntity(CreateOrUpdateCommand createOrUpdateCommand)
+    protected new async Task<RefreshToken?> CreateOrUpdateEntity(CreateOrUpdateCommand createOrUpdateCommand)
     {
         RefreshToken? entity = null;
         if (createOrUpdateCommand is RefreshTokenUpdateCommand updateCommand)
@@ -128,7 +113,7 @@ public class RefreshTokenService : BaseService<RefreshToken>, IRefreshTokenServi
 
             _mapper.Map(updateCommand, entity);
 
-            InitializeBaseEntityForUpdate(entity);
+            await SetBaseEntityForUpdate(entity);
             _refreshTokenRepository.Update(entity);
         }
         else if (createOrUpdateCommand is RefreshTokenCreateCommand createCommand)
@@ -160,11 +145,11 @@ public class RefreshTokenService : BaseService<RefreshToken>, IRefreshTokenServi
             }
             
             entity.Id = Guid.NewGuid();
-            InitializeBaseEntityForCreate(entity);
+            await SetBaseEntityForCreation(entity);
             _refreshTokenRepository.Add(entity);
         }
 
         var saveChanges = await _unitOfWork.SaveChanges();
-        return saveChanges ? entity : default;
+        return saveChanges ? entity : null;
     }
 }

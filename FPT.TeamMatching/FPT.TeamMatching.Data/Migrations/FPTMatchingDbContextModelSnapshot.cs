@@ -44,6 +44,9 @@ namespace FPT.TeamMatching.Data.Migrations
                     b.Property<string>("Note")
                         .HasColumnType("text");
 
+                    b.Property<Guid?>("ProjectId")
+                        .HasColumnType("uuid");
+
                     b.Property<string>("SkillRequired")
                         .HasColumnType("text");
 
@@ -63,6 +66,8 @@ namespace FPT.TeamMatching.Data.Migrations
                         .HasColumnType("uuid");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("ProjectId");
 
                     b.HasIndex("UserId");
 
@@ -645,14 +650,14 @@ namespace FPT.TeamMatching.Data.Migrations
                     b.Property<bool>("IsQualifiedForAcademicProject")
                         .HasColumnType("boolean");
 
-                    b.Property<string>("Major")
-                        .HasColumnType("text");
-
                     b.Property<string>("Note")
                         .HasColumnType("text");
 
-                    b.Property<string>("Semester")
-                        .HasColumnType("text");
+                    b.Property<Guid?>("SemesterId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("SpecialtyId")
+                        .HasColumnType("uuid");
 
                     b.Property<string>("UpdatedBy")
                         .HasColumnType("text");
@@ -664,6 +669,10 @@ namespace FPT.TeamMatching.Data.Migrations
                         .HasColumnType("uuid");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("SemesterId");
+
+                    b.HasIndex("SpecialtyId");
 
                     b.HasIndex("UserId")
                         .IsUnique();
@@ -1205,9 +1214,15 @@ namespace FPT.TeamMatching.Data.Migrations
 
             modelBuilder.Entity("FPT.TeamMatching.Domain.Entities.Blog", b =>
                 {
+                    b.HasOne("FPT.TeamMatching.Domain.Entities.Project", "Project")
+                        .WithMany("Blogs")
+                        .HasForeignKey("ProjectId");
+
                     b.HasOne("FPT.TeamMatching.Domain.Entities.User", "User")
                         .WithMany("Blogs")
                         .HasForeignKey("UserId");
+
+                    b.Navigation("Project");
 
                     b.Navigation("User");
                 });
@@ -1376,9 +1391,21 @@ namespace FPT.TeamMatching.Data.Migrations
 
             modelBuilder.Entity("FPT.TeamMatching.Domain.Entities.ProfileStudent", b =>
                 {
+                    b.HasOne("FPT.TeamMatching.Domain.Entities.Semester", "Semester")
+                        .WithMany("ProfileStudents")
+                        .HasForeignKey("SemesterId");
+
+                    b.HasOne("FPT.TeamMatching.Domain.Entities.Specialty", "Specialty")
+                        .WithMany("ProfileStudents")
+                        .HasForeignKey("SpecialtyId");
+
                     b.HasOne("FPT.TeamMatching.Domain.Entities.User", "User")
                         .WithOne("ProfileStudent")
                         .HasForeignKey("FPT.TeamMatching.Domain.Entities.ProfileStudent", "UserId");
+
+                    b.Navigation("Semester");
+
+                    b.Navigation("Specialty");
 
                     b.Navigation("User");
                 });
@@ -1528,6 +1555,8 @@ namespace FPT.TeamMatching.Data.Migrations
 
             modelBuilder.Entity("FPT.TeamMatching.Domain.Entities.Project", b =>
                 {
+                    b.Navigation("Blogs");
+
                     b.Navigation("Invitations");
 
                     b.Navigation("Reviews");
@@ -1548,11 +1577,15 @@ namespace FPT.TeamMatching.Data.Migrations
             modelBuilder.Entity("FPT.TeamMatching.Domain.Entities.Semester", b =>
                 {
                     b.Navigation("Ideas");
+
+                    b.Navigation("ProfileStudents");
                 });
 
             modelBuilder.Entity("FPT.TeamMatching.Domain.Entities.Specialty", b =>
                 {
                     b.Navigation("Ideas");
+
+                    b.Navigation("ProfileStudents");
                 });
 
             modelBuilder.Entity("FPT.TeamMatching.Domain.Entities.TeamMember", b =>

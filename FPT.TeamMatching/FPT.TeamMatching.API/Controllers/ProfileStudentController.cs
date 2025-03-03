@@ -7,9 +7,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace FPT.TeamMatching.API.Controllers;
 
-[Route(Const.API_PROFILES)]
+[Route(Const.API_PROFILE_STUDENTS)]
 [ApiController]
-[AllowAnonymous]
+[Authorize]
 public class ProfileStudentController : ControllerBase
 {
     private readonly IProfileStudentService _profileStudentService;
@@ -37,6 +37,13 @@ public class ProfileStudentController : ControllerBase
     public async Task<IActionResult> GetProfileUser([FromRoute] Guid id)
     {
         var msg = await _profileStudentService.GetProfileByUserId(id);
+        return Ok(msg);
+    }
+    
+    [HttpGet("user/me")]
+    public async Task<IActionResult> GetProfileCurrentUser()
+    {
+        var msg = await _profileStudentService.GetProfileByCurrentUser();
         return Ok(msg);
     }
 
