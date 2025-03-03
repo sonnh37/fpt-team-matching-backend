@@ -57,29 +57,16 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
         try
         {
             List<InvitationResult>? results;
-            var userIdClaim = _httpContextAccessor.HttpContext.User.FindFirst("Id")?.Value;
-            if (string.IsNullOrEmpty(userIdClaim))
+            var userIdClaim = GetUserIdFromClaims();
+            
+            if (userIdClaim == null)
                 return new ResponseBuilder()
-                        .WithStatus(Const.FAIL_CODE)
-                        .WithMessage("You need to authenticate with TeamMatching.")
-                    ;
-            var userId = Guid.Parse(userIdClaim);
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("You need to authenticate with TeamMatching.");
+            
+            var userId = userIdClaim.Value;
             // get by type
-            var queryable = _invitationRepository.GetQueryable(m => m.Type == query.Type);
-            queryable = IncludeHelper.Apply(queryable);
-            // type: joinRequest 
-            // => verify userId with receiver
-            // type: requestToJoin 
-            // => verify userId with sender
-
-            queryable = query.Type switch
-            {
-                InvitationType.SentByStudent => queryable.Where(m => m.SenderId == userId),
-                InvitationType.SendByTeam => queryable.Where(m => m.ReceiverId == userId),
-                _ => queryable
-            };
-
-            var (data, total) = await _invitationRepository.GetData(query);
+            var (data, total) = await _invitationRepository.GetUserInvitationsByType(query, userId);
 
             results = _mapper.Map<List<InvitationResult>>(data);
 
