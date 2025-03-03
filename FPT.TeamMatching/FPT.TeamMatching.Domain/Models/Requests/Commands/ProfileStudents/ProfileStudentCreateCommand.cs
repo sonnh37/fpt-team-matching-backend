@@ -23,5 +23,7 @@ public class ProfileStudentCreateCommand : CreateCommand
 
     public string? Interest { get; set; }
 
-    public IFormFile? FileCv { get; set; }
+    public string? FileCv { get; set; }
+    public string? Json {get; set;}
+    public string? FullSkill {get; set;}
 }
