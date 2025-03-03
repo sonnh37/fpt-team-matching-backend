@@ -53,14 +53,30 @@ public class IdeaRequestController : ControllerBase
     {
         var businessResult = await _service.DeleteById(request.Id, request.IsPermanent);
 
-            return Ok(businessResult);
-        }
-
-        [HttpPut("restore")]
-        public async Task<IActionResult> Restore([FromBody] IdeaRequestRestoreCommand command)
-        {
-            var businessResult = await _service.Restore<IdeaRequestResult>(command);
-
-            return Ok(businessResult);
-        }
+        return Ok(businessResult);
     }
+
+    [HttpPut("restore")]
+    public async Task<IActionResult> Restore([FromBody] IdeaRequestRestoreCommand command)
+    {
+        var businessResult = await _service.Restore<IdeaRequestResult>(command);
+
+        return Ok(businessResult);
+    }
+
+    [HttpPut("lecturer-response")]
+    public async Task<IActionResult> LecturerResponse([FromBody] IdeaRequestLecturerOrCouncilResponseCommand request)
+    {
+        var businessResult = await _service.LecturerResponse(request);
+
+        return Ok(businessResult);
+    }
+
+    [HttpPut("council-response")]
+    public async Task<IActionResult> CouncilResponse([FromBody] IdeaRequestLecturerOrCouncilResponseCommand request)
+    {
+        var businessResult = await _service.CouncilResponse(request);
+
+        return Ok(businessResult);
+    }
+}

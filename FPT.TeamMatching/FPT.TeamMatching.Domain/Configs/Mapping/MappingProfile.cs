@@ -22,6 +22,7 @@ using FPT.TeamMatching.Domain.Models.Requests.Commands.Specialties;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.IdeaHistories;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.IdeaHistoryRequests;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Semester;
+using FPT.TeamMatching.Domain.Models.Requests.Commands.IdeaRequests;
 
 namespace FPT.TeamMatching.Domain.Configs.Mapping;
 
@@ -120,6 +121,7 @@ public class MappingProfile : Profile
         CreateMap<IdeaRequest, IdeaRequestResult>().ReverseMap();
         CreateMap<IdeaRequest, IdeaCreateCommand>().ReverseMap();
         CreateMap<IdeaRequest, IdeaUpdateCommand>().ReverseMap();
+        CreateMap<IdeaRequest, IdeaRequestLecturerOrCouncilResponseCommand>().ReverseMap();
 
         #endregion
 
