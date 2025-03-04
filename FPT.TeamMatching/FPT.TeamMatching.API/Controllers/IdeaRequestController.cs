@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace FPT.TeamMatching.API.Controllers;
 
-[Route(Const.API_IDEA_REVIEWS)]
+[Route(Const.API_IDEA_REQUESTS)]
 [ApiController]
 public class IdeaRequestController : ControllerBase
 {
@@ -23,6 +23,13 @@ public class IdeaRequestController : ControllerBase
     public async Task<IActionResult> GetAll([FromQuery] IdeaRequestGetAllQuery query)
     {
         var msg = await _service.GetAll<IdeaRequestResult>(query);
+        return Ok(msg);
+    }
+    
+    [HttpGet("get-all-by-status")]
+    public async Task<IActionResult> GetAll([FromQuery] IdeaRequestGetAllByStatusQuery query)
+    {
+        var msg = await _service.GetAllIdeaRequestByType(query);
         return Ok(msg);
     }
 

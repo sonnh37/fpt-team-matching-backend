@@ -66,7 +66,7 @@ public static class Const
 
     public const string API_IDEAS = $"{BaseApi}/ideas";
 
-    public const string API_IDEA_REVIEWS = $"{BaseApi}/idea-reviews";
+    public const string API_IDEA_REQUESTS = $"{BaseApi}/idea-requests";
 
     public const string API_TEAM_MEMBERS = $"{BaseApi}/team-members";
 

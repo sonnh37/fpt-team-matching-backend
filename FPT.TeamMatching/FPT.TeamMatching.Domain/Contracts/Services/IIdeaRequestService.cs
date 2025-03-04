@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using FPT.TeamMatching.Domain.Models.Requests.Queries.IdeaRequests;
 
 namespace FPT.TeamMatching.Domain.Contracts.Services
 {
@@ -13,5 +14,6 @@ namespace FPT.TeamMatching.Domain.Contracts.Services
     {
         Task<BusinessResult> LecturerResponse(IdeaRequestLecturerOrCouncilResponseCommand command);
         Task<BusinessResult> CouncilResponse(IdeaRequestLecturerOrCouncilResponseCommand command);
+        Task<BusinessResult> GetAllIdeaRequestByType(IdeaRequestGetAllByStatusQuery query);
     }
 }

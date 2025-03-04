@@ -11,6 +11,7 @@ using FPT.TeamMatching.Domain.Utilities;
 using FPT.TeamMatching.Services.Bases;
 using Microsoft.EntityFrameworkCore;
 using System.Text.RegularExpressions;
+using FPT.TeamMatching.Domain.Models.Requests.Queries.IdeaRequests;
 
 namespace FPT.TeamMatching.Services;
 
@@ -26,6 +27,40 @@ public class IdeaRequestService : BaseService<IdeaRequest>, IIdeaRequestService
         _ideaRepository = unitOfWork.IdeaRepository;
         _semesterRepository = unitOfWork.SemesterRepository;
     }
+    
+    public async Task<BusinessResult> GetAllIdeaRequestByType(IdeaRequestGetAllByStatusQuery query)
+    {
+        try
+        {
+            // get by type
+            var (data, total) = await _ideaRequestRepository.GetDataByStatus(query);
+
+            var results = _mapper.Map<List<IdeaRequestResult>>(data);
+
+            // GetAll 
+            if (!query.IsPagination)
+                return new ResponseBuilder()
+                    .WithData(results)
+                    .WithStatus(Const.SUCCESS_CODE)
+                    .WithMessage(Const.SUCCESS_READ_MSG);
+
+            // GetAll with pagination
+            var tableResponse = new PaginatedResult(query, results, total);
+
+            return new ResponseBuilder()
+                .WithData(tableResponse)
+                .WithStatus(Const.SUCCESS_CODE)
+                .WithMessage(Const.SUCCESS_READ_MSG);
+        }
+        catch (Exception ex)
+        {
+            var errorMessage = $"An error occurred in {typeof(IdeaRequestResult).Name}: {ex.Message}";
+            return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage(errorMessage);
+        }
+    }
+
 
     public async Task<BusinessResult> CouncilResponse(IdeaRequestLecturerOrCouncilResponseCommand command)
     {
