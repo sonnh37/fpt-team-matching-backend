@@ -19,7 +19,7 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
 
     public async Task<Project?> GetProjectByUserIdLogin(Guid userId)
     {
-        var teamMember = await _context.TeamMembers.Where(e => e.UserId == userId && e.LeaveDate == null)
+        var teamMember = await _context.TeamMembers.Where(e => e.UserId == userId && e.LeaveDate == null && e.IsDeleted == false)
             .FirstOrDefaultAsync();
         if (teamMember != null)
         {

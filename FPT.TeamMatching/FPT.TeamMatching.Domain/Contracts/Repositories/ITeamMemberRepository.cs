@@ -5,4 +5,5 @@ namespace FPT.TeamMatching.Domain.Contracts.Repositories;
 
 public interface ITeamMemberRepository : IBaseRepository<TeamMember>
 {
+    Task<TeamMember?> GetTeamMemberActiveByUserId(Guid userId);
 }

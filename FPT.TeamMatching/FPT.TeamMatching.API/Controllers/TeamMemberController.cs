@@ -65,4 +65,12 @@ public class TeamMemberController : ControllerBase
 
         return Ok(businessResult);
     }
+    
+    [HttpDelete("current-user-leave")]
+    public async Task<IActionResult> LeaveTeamMemberByCurrentUser()
+    {
+        var businessResult = await _teammemberservice.LeaveByCurrentUser();
+
+        return Ok(businessResult);
+    }
 }
