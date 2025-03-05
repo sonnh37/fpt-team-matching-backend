@@ -25,6 +25,13 @@ public class IdeaRequestController : ControllerBase
         var msg = await _service.GetAll<IdeaRequestResult>(query);
         return Ok(msg);
     }
+    
+    [HttpGet("get-all-by-status")]
+    public async Task<IActionResult> GetAll([FromQuery] IdeaRequestGetAllByStatusQuery query)
+    {
+        var msg = await _service.GetAllIdeaRequestByType(query);
+        return Ok(msg);
+    }
 
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetById([FromRoute] Guid id)
