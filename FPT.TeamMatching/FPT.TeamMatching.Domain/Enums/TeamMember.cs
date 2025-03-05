@@ -7,3 +7,10 @@ public enum TeamMemberRole
     Mentor,
     SubMentor
 }
+
+public enum TeamMemberStatus
+{
+    InProgress,  
+    Passed,     
+    Failed     
+}

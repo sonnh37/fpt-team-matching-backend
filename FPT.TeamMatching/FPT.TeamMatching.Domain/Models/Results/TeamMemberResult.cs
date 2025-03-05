@@ -7,7 +7,7 @@ namespace FPT.TeamMatching.Domain.Models.Results;
 public class TeamMemberResult : BaseResult
 {
     public Guid? UserId { get; set; }
-    
+
     public Guid? ProjectId { get; set; }
 
     public TeamMemberRole? Role { get; set; }
@@ -15,6 +15,8 @@ public class TeamMemberResult : BaseResult
     public DateTimeOffset? JoinDate { get; set; }
 
     public DateTimeOffset? LeaveDate { get; set; }
+    
+    public TeamMemberStatus? Status { get; set; }
     
     public UserResult? User { get; set; }
     

@@ -8,6 +8,8 @@ public class SemesterResult : BaseResult
 
     public string? SemesterName { get; set; }
 
+    public string? SemesterPrefixName { get; set; }
+
     public DateTimeOffset? StartDate { get; set; }
 
     public DateTimeOffset? EndDate { get; set; }

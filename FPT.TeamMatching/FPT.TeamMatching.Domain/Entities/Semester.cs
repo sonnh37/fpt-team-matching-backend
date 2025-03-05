@@ -8,10 +8,12 @@ public class Semester : BaseEntity
 
     public string? SemesterName { get; set; }
 
+    public string? SemesterPrefixName { get; set; }
+
     public DateTimeOffset? StartDate { get; set; }
 
     public DateTimeOffset? EndDate { get; set; }
-
+    
     public virtual ICollection<Idea> Ideas { get; set; } = new List<Idea>();
     
     public virtual ICollection<ProfileStudent> ProfileStudents { get; set; } = new List<ProfileStudent>();

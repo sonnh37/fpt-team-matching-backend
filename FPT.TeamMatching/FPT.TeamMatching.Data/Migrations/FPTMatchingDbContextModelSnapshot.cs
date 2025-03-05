@@ -959,6 +959,9 @@ namespace FPT.TeamMatching.Data.Migrations
                     b.Property<string>("SemesterName")
                         .HasColumnType("text");
 
+                    b.Property<string>("SemesterPrefixName")
+                        .HasColumnType("text");
+
                     b.Property<DateTimeOffset?>("StartDate")
                         .HasColumnType("timestamp with time zone");
 
@@ -1086,6 +1089,9 @@ namespace FPT.TeamMatching.Data.Migrations
                         .HasColumnType("uuid");
 
                     b.Property<string>("Role")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Status")
                         .HasColumnType("text");
 
                     b.Property<string>("UpdatedBy")
