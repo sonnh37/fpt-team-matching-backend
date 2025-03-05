@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace FPT.TeamMatching.API.Controllers;
 
-[Route(Const.API_IDEA_REVIEWS)]
+[Route(Const.API_IDEA_REQUESTS)]
 [ApiController]
 public class IdeaRequestController : ControllerBase
 {
