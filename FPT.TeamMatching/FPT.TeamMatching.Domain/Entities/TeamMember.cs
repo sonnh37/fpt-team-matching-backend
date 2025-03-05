@@ -14,6 +14,8 @@ public class TeamMember : BaseEntity
     public DateTimeOffset? JoinDate { get; set; }
 
     public DateTimeOffset? LeaveDate { get; set; }
+    
+    public TeamMemberStatus? Status { get; set; }
 
     public virtual Project? Project { get; set; }
     
