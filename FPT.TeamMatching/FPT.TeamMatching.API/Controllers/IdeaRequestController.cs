@@ -26,10 +26,10 @@ public class IdeaRequestController : ControllerBase
         return Ok(msg);
     }
     
-    [HttpGet("get-all-by-status")]
-    public async Task<IActionResult> GetAll([FromQuery] IdeaRequestGetAllByStatusQuery query)
+    [HttpGet("by-status-and-idea-id")]
+    public async Task<IActionResult> GetAllByListStatusAndIdea([FromQuery] IdeaRequestGetAllByStatusQuery query)
     {
-        var msg = await _service.GetAllIdeaRequestByType(query);
+        var msg = await _service.GetAllByListStatusAndIdea(query);
         return Ok(msg);
     }
 

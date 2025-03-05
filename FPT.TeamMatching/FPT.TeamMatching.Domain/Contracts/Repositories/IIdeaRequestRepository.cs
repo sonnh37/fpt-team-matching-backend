@@ -11,7 +11,7 @@ namespace FPT.TeamMatching.Domain.Contracts.Repositories
 {
     public interface IIdeaRequestRepository: IBaseRepository<IdeaRequest>
     {
-        Task<(List<IdeaRequest>, int)> GetDataByStatus(IdeaRequestGetAllByStatusQuery query);
+        Task<(List<IdeaRequest>, int)> GetDataByListStatusAndIdea(IdeaRequestGetAllByStatusQuery query);
 
     }
 }

@@ -16,10 +16,11 @@ public class IdeaRequestRepository : BaseRepository<IdeaRequest>, IIdeaRequestRe
     {
     }
 
-    public async Task<(List<IdeaRequest>, int)> GetDataByStatus(IdeaRequestGetAllByStatusQuery query)
+    public async Task<(List<IdeaRequest>, int)> GetDataByListStatusAndIdea(IdeaRequestGetAllByStatusQuery query)
     {
         var queryable = GetQueryable();
-        queryable = queryable.Where(m => m.Status != null && query.StatusList.Contains(m.Status.Value));
+        queryable = queryable.Where(m =>
+            m.Status != null && (query.StatusList.Contains(m.Status.Value) && m.IdeaId == query.IdeaId));
 
         queryable = queryable.Include(m => m.Idea)
             .Include(m => m.Reviewer);
