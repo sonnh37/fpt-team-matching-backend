@@ -94,13 +94,13 @@ public class InvitationController : ControllerBase
             {
                 status = msg.Status,
                 message = "Invitation has been sent!",
-                hasSent = hasSent
+                data = hasSent
             });
         return Ok(new
         {
             status = msg.Status,
             message = "Invitation has not been sent!",
-            hasSent = hasSent
+            data = hasSent
         });
     }
 }
