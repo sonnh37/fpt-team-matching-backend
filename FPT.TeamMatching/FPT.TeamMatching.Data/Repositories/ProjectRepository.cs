@@ -47,4 +47,12 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
             return null;
         }
     }
+
+    public async Task<List<Project>?> GetProjectsStartingNow()
+    {
+        return await _context.Projects
+            .Where(p => p.Idea.Semester != null 
+                        && p.Idea.Semester.StartDate == DateTime.UtcNow.Date)
+            .ToListAsync();
+    }
 }

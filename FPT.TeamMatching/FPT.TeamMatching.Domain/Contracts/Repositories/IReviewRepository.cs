@@ -5,4 +5,6 @@ namespace FPT.TeamMatching.Domain.Contracts.Repositories;
 
 public interface IReviewRepository : IBaseRepository<Review>
 {
+    Task<List<Review>?> GetByProjectId(Guid projectId);
+
 }

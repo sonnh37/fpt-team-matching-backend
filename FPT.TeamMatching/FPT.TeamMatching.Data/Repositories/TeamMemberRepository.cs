@@ -8,8 +8,10 @@ namespace FPT.TeamMatching.Data.Repositories;
 
 public class TeamMemberRepository : BaseRepository<TeamMember>, ITeamMemberRepository
 {
+    private readonly FPTMatchingDbContext _dbContext;
     public TeamMemberRepository(FPTMatchingDbContext dbContext) : base(dbContext)
     {
+        _dbContext = dbContext;
     }
 
     // Get teammber mà user đang active
@@ -17,5 +19,13 @@ public class TeamMemberRepository : BaseRepository<TeamMember>, ITeamMemberRepos
     {
         var queryable = GetQueryable(m => m.UserId == userId && m.IsDeleted == false);
         return queryable.FirstOrDefaultAsync();
+    }
+
+    public async Task<List<TeamMember>> GetTeamMemberByUserId(Guid userId)
+    {
+        var teamMembers = await _dbContext.TeamMembers.Where(e => e.UserId == userId 
+                                                        && e.IsDeleted == false)
+                                                        .ToListAsync();
+        return teamMembers;
     }
 }
