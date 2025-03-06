@@ -14,6 +14,6 @@ namespace FPT.TeamMatching.Domain.Contracts.Services
     {
         Task<BusinessResult> LecturerResponse(IdeaRequestLecturerOrCouncilResponseCommand command);
         Task<BusinessResult> CouncilResponse(IdeaRequestLecturerOrCouncilResponseCommand command);
-        Task<BusinessResult> GetAllIdeaRequestByType(IdeaRequestGetAllByStatusQuery query);
+        Task<BusinessResult> GetAllByListStatusAndIdea(IdeaRequestGetAllByStatusQuery query);
     }
 }

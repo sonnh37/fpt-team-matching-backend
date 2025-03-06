@@ -28,12 +28,13 @@ public class IdeaRequestService : BaseService<IdeaRequest>, IIdeaRequestService
         _semesterRepository = unitOfWork.SemesterRepository;
     }
     
-    public async Task<BusinessResult> GetAllIdeaRequestByType(IdeaRequestGetAllByStatusQuery query)
+    public async Task<BusinessResult> GetAllByListStatusAndIdea(IdeaRequestGetAllByStatusQuery query)
     {
         try
         {
+            var userId = GetUserIdFromClaims();
             // get by type
-            var (data, total) = await _ideaRequestRepository.GetDataByStatus(query);
+            var (data, total) = await _ideaRequestRepository.GetDataByListStatusAndIdea(query);
 
             var results = _mapper.Map<List<IdeaRequestResult>>(data);
 

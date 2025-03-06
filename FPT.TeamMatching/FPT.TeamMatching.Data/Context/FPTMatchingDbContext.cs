@@ -222,9 +222,6 @@ public partial class FPTMatchingDbContext : BaseDbContext
 
             entity.HasOne(d => d.RateFor).WithMany(p => p.RateFors)
                 .HasForeignKey(d => d.RateForId);
-
-            entity.HasOne(d => d.TeamMember).WithMany(p => p.Rates)
-                .HasForeignKey(d => d.TeamMemberId);
         });
 
         modelBuilder.Entity<RefreshToken>(entity =>

@@ -16,6 +16,8 @@ public class BlogResult : BaseResult
     public string? SkillRequired { get; set; }
 
     public BlogType? Type { get; set; }
+    
+    public BlogStatus? Status { get; set; }
 
     public ICollection<CommentResult> Comments { get; set; } = new List<CommentResult>();
 
