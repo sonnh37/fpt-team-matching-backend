@@ -54,4 +54,19 @@ public class ReviewController : ControllerBase
 
         return Ok(businessResult);
     }
+
+    [HttpGet("get-by-projectId/{projectId:guid}")]
+    public async Task<IActionResult> GetByProjectId([FromRoute] Guid projectId)
+    {
+        var msg = await _service.GetByProjectId(projectId);
+        return Ok(msg);
+    }
+
+    [HttpPut("council-assign-reviewers")]
+    public async Task<IActionResult> CouncilAssignReviewers([FromBody] CouncilAssignReviewers request)
+    {
+        var businessResult = await _service.AssignReviewers(request);
+
+        return Ok(businessResult);
+    }
 }

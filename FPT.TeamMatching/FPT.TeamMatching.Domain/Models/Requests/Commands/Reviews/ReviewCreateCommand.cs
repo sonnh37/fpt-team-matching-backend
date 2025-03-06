@@ -6,9 +6,5 @@ public class ReviewCreateCommand : CreateCommand
 {
     public Guid? ProjectId { get; set; }
 
-    public string? Title { get; set; }
-
-    public string? Question { get; set; }
-
-    public string? Document { get; set; }
+    public int Number { get; set; }
 }
