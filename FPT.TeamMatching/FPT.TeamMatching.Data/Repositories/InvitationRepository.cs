@@ -23,7 +23,8 @@ public class InvitationRepository : BaseRepository<Invitation>, IInvitationRepos
         var i = await _dbContext.Invitations.Where(e => e.Status != null 
                                             && e.ProjectId == projectId 
                                             && e.SenderId == userId 
-                                            && e.Status.Value == InvitationStatus.Pending)
+                                            && e.Status.Value == InvitationStatus.Pending
+                                            && e.IsDeleted == false)
                                             .SingleOrDefaultAsync();
         return i;
     }

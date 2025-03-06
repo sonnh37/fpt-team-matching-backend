@@ -17,11 +17,13 @@ public class ReviewService : BaseService<Review>, IReviewService
 {
     private readonly IReviewRepository _reviewRepository;
     private readonly IUserRepository _userRepository;
+    private readonly IProjectRepository _projectRepository;
 
     public ReviewService(IMapper mapper, IUnitOfWork unitOfWork) : base(mapper, unitOfWork)
     {
         _reviewRepository = unitOfWork.ReviewRepository;
         _userRepository = unitOfWork.UserRepository;
+        _projectRepository = unitOfWork.ProjectRepository;
     }
 
     public async Task<BusinessResult> AssignReviewers(CouncilAssignReviewers request)
@@ -74,6 +76,32 @@ public class ReviewService : BaseService<Review>, IReviewService
                 .WithStatus(Const.FAIL_CODE)
                 .WithMessage(errorMessage);
         }
+    }
+
+    public async Task CreateReviewsForActiveProject()
+    {
+        //Tim project den thgian bat dau
+        var projects = await _projectRepository.GetProjectsStartingNow();
+
+        foreach (var project in projects)
+        {
+            for (int i = 1; i <= 4; i++)
+            {
+                var review = new Review
+                {
+                    ProjectId = project.Id,
+                    Number = i
+                };
+
+                await SetBaseEntityForCreation(review);
+
+                // Thêm vào repository
+                 _reviewRepository.Add(review);
+            }
+        }
+
+        await _unitOfWork.SaveChanges();
+
     }
 
     public async Task<BusinessResult> GetByProjectId(Guid projectId)

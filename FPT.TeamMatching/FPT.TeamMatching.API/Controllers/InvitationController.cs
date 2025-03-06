@@ -85,9 +85,9 @@ public class InvitationController : ControllerBase
     }
 
     [HttpGet("check-if-student-sent-invitation/{projectId:guid}")]
-    public async Task<IActionResult> CheckIfStudentSendInvitation([FromRoute] Guid projectId)
+    public async Task<IActionResult> CheckIfStudentSendInvitationByProjectId([FromRoute] Guid projectId)
     {
-        var msg = await _service.CheckIfStudentSendInvitation(projectId);
+        var msg = await _service.CheckIfStudentSendInvitationByProjectId(projectId);
         bool hasSent = (bool)msg.Data;
         if (hasSent)
             return Ok(new
