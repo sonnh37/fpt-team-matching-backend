@@ -62,10 +62,6 @@ public class UserResult : BaseResult
 
     public ICollection<ProjectResult> ProjectOfLeaders { get; set; } = new List<ProjectResult>();
 
-    public ICollection<RateResult> RateBys { get; set; } = new List<RateResult>();
-
-    public ICollection<RateResult> RateFors { get; set; } = new List<RateResult>();
-
     public ICollection<RefreshTokenResult> RefreshTokens { get; set; } = new List<RefreshTokenResult>();
 
     public ICollection<SkillProfileResult> SkillProfiles { get; set; } = new List<SkillProfileResult>();

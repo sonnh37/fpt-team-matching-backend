@@ -21,5 +21,7 @@ public class TeamMember : BaseEntity
     
     public virtual User? User { get; set; }
     
-    public virtual ICollection<Rate> Rates { get; set; } = new List<Rate>();
+    public virtual ICollection<Rate> RateBys { get; set; } = new List<Rate>();
+    
+    public virtual ICollection<Rate> RateFors { get; set; } = new List<Rate>();
 }

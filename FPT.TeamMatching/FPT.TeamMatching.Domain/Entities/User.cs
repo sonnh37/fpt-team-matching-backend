@@ -63,10 +63,6 @@ public class User : BaseEntity
 
     public virtual ICollection<Project> ProjectOfLeaders { get; set; } = new List<Project>();
 
-    public virtual ICollection<Rate> RateBys { get; set; } = new List<Rate>();
-
-    public virtual ICollection<Rate> RateFors { get; set; } = new List<Rate>();
-
     public virtual ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
 
     public virtual ICollection<SkillProfile> SkillProfiles { get; set; } = new List<SkillProfile>();

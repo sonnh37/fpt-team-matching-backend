@@ -50,6 +50,9 @@ namespace FPT.TeamMatching.Data.Migrations
                     b.Property<string>("SkillRequired")
                         .HasColumnType("text");
 
+                    b.Property<string>("Status")
+                        .HasColumnType("text");
+
                     b.Property<string>("Title")
                         .HasColumnType("text");
 
@@ -775,9 +778,6 @@ namespace FPT.TeamMatching.Data.Migrations
                     b.Property<Guid?>("RateForId")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid?>("TeamMemberId")
-                        .HasColumnType("uuid");
-
                     b.Property<string>("UpdatedBy")
                         .HasColumnType("text");
 
@@ -789,8 +789,6 @@ namespace FPT.TeamMatching.Data.Migrations
                     b.HasIndex("RateById");
 
                     b.HasIndex("RateForId");
-
-                    b.HasIndex("TeamMemberId");
 
                     b.ToTable("Rate", (string)null);
                 });
@@ -1437,23 +1435,17 @@ namespace FPT.TeamMatching.Data.Migrations
 
             modelBuilder.Entity("FPT.TeamMatching.Domain.Entities.Rate", b =>
                 {
-                    b.HasOne("FPT.TeamMatching.Domain.Entities.User", "RateBy")
+                    b.HasOne("FPT.TeamMatching.Domain.Entities.TeamMember", "RateBy")
                         .WithMany("RateBys")
                         .HasForeignKey("RateById");
 
-                    b.HasOne("FPT.TeamMatching.Domain.Entities.User", "RateFor")
+                    b.HasOne("FPT.TeamMatching.Domain.Entities.TeamMember", "RateFor")
                         .WithMany("RateFors")
                         .HasForeignKey("RateForId");
-
-                    b.HasOne("FPT.TeamMatching.Domain.Entities.TeamMember", "TeamMember")
-                        .WithMany("Rates")
-                        .HasForeignKey("TeamMemberId");
 
                     b.Navigation("RateBy");
 
                     b.Navigation("RateFor");
-
-                    b.Navigation("TeamMember");
                 });
 
             modelBuilder.Entity("FPT.TeamMatching.Domain.Entities.RefreshToken", b =>
@@ -1596,7 +1588,9 @@ namespace FPT.TeamMatching.Data.Migrations
 
             modelBuilder.Entity("FPT.TeamMatching.Domain.Entities.TeamMember", b =>
                 {
-                    b.Navigation("Rates");
+                    b.Navigation("RateBys");
+
+                    b.Navigation("RateFors");
                 });
 
             modelBuilder.Entity("FPT.TeamMatching.Domain.Entities.User", b =>
@@ -1632,10 +1626,6 @@ namespace FPT.TeamMatching.Data.Migrations
                     b.Navigation("ProjectOfLeaders");
 
                     b.Navigation("Projects");
-
-                    b.Navigation("RateBys");
-
-                    b.Navigation("RateFors");
 
                     b.Navigation("RefreshTokens");
 

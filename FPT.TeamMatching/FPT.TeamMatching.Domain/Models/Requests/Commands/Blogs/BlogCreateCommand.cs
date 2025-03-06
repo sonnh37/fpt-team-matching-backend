@@ -16,4 +16,6 @@ public class BlogCreateCommand : CreateCommand
     public string? SkillRequired { get; set; }
 
     public BlogType? Type { get; set; }
+    
+    public BlogStatus? Status { get; set; }
 }
