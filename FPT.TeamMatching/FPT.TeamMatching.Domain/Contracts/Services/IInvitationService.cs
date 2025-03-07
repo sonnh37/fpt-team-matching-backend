@@ -11,4 +11,5 @@ public interface IInvitationService : IBaseService
     Task<BusinessResult> TeamCreatePending(InvitationTeamCreatePendingCommand command);
     Task<BusinessResult> StudentCreatePending(InvitationStudentCreatePendingCommand command);
     Task<BusinessResult> CheckIfStudentSendInvitationByProjectId(Guid projectId);
+    Task<BusinessResult> DeletePermanentInvitation(Guid projectId);
 }

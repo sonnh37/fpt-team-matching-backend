@@ -1,7 +1,8 @@
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 using DotNetEnv;
 using FPT.TeamMatching.API.Collections;
 using FPT.TeamMatching.API.Hubs;
+using FPT.TeamMatching.API.Job;
 using FPT.TeamMatching.Data.Context;
 using FPT.TeamMatching.Domain.Configs;
 using FPT.TeamMatching.Domain.Configs.Mapping;
@@ -17,6 +18,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Npgsql;
+using Quartz;
 
 Env.Load();
 
@@ -149,6 +151,24 @@ builder.Services.AddScoped<CloudinaryConfig>();
 builder.Services.AddSingleton<RedisConfig>();
 builder.Services.AddSingleton<RedisUtil>();
 
+#endregion
+
+#region Quartz
+builder.Services.AddQuartz(q =>
+{
+    var jobKey = new JobKey("ReviewCreationJob");
+
+    q.AddJob<ReviewCreationJob>(opts => opts.WithIdentity(jobKey));
+
+    q.AddTrigger(opts => opts
+        .ForJob(jobKey)
+        .WithIdentity("ReviewCreationTrigger")
+        .WithSchedule(CronScheduleBuilder
+        .DailyAtHourAndMinute(9, 24)));
+
+});
+
+builder.Services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
 #endregion
 
 #region Custom Repositories & Services
