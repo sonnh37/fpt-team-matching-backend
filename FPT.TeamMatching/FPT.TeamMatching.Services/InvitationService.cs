@@ -186,6 +186,45 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
         }
     }
 
+    public async Task<BusinessResult> DeletePermanentInvitation(Guid projectId)
+    {
+        try
+        {
+            var user = await GetUserAsync();
+            if (user == null)
+            {
+                return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage("User haven't login!");
+            }
+            var invitation = await _invitationRepository.GetInvitationOfUserByProjectId(projectId, user.Id);
+            if (invitation == null)
+            {
+                return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage("User haven't sent invitation to given project!");
+            }
+            _invitationRepository.DeletePermanently(invitation);
+            bool saveChange = await _unitOfWork.SaveChanges();
+            if (saveChange)
+            {
+                return new ResponseBuilder()
+                .WithStatus(Const.SUCCESS_CODE)
+                .WithMessage(Const.SUCCESS_DELETE_MSG);
+            }
+            return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage(Const.FAIL_DELETE_MSG);
+        }
+        catch (Exception ex)
+        {
+            var errorMessage = $"An error occurred in {typeof(InvitationResult).Name}: {ex.Message}";
+            return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage(errorMessage);
+        }
+    }
+
     private async Task<bool> TeamCreateAsync(InvitationTeamCreatePendingCommand command)
     {
         var invitation = _mapper.Map<Invitation>(command);
@@ -242,4 +281,6 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
         }
         return haveTeamMember;
     }
+
+
 }
