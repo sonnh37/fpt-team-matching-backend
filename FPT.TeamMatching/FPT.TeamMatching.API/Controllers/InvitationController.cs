@@ -103,4 +103,12 @@ public class InvitationController : ControllerBase
             hasSent = hasSent
         });
     }
+
+    [HttpDelete("by-project-id/{projectId:guid}")]
+    public async Task<IActionResult> DeleteByProjectId ([FromRoute] Guid projectId)
+    {
+        var businessResult = await _service.DeletePermanentInvitation(projectId);
+
+        return Ok(businessResult);
+    }
 }
