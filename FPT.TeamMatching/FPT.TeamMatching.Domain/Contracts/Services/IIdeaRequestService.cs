@@ -6,14 +6,22 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using FPT.TeamMatching.Domain.Models.Requests.Queries.Base;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.IdeaRequests;
+using FPT.TeamMatching.Domain.Models.Results.Bases;
 
 namespace FPT.TeamMatching.Domain.Contracts.Services
 {
-    public interface IIdeaRequestService: IBaseService
+    public interface IIdeaRequestService : IBaseService
     {
         Task<BusinessResult> LecturerResponse(IdeaRequestLecturerOrCouncilResponseCommand command);
         Task<BusinessResult> CouncilResponse(IdeaRequestLecturerOrCouncilResponseCommand command);
-        Task<BusinessResult> GetAllByListStatusAndIdea(IdeaRequestGetAllByStatusQuery query);
+
+        Task<BusinessResult> GetAll<TResult>(IdeaRequestGetAllQuery query) where TResult : BaseResult;
+
+        Task<BusinessResult> GetAllByStatusAndIdeaId<TResult>(IdeaRequestGetAllByListStatusAndIdeaIdQuery query)
+            where TResult : BaseResult;
+
+        Task<BusinessResult> GetAllUnassignedReviewer<TResult>(GetQueryableQuery query) where TResult : BaseResult;
     }
 }

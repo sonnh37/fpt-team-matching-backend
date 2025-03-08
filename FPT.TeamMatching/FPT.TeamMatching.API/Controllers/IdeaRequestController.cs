@@ -1,5 +1,6 @@
 ﻿using FPT.TeamMatching.Domain.Contracts.Services;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.IdeaRequests;
+using FPT.TeamMatching.Domain.Models.Requests.Queries.Base;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.IdeaRequests;
 using FPT.TeamMatching.Domain.Models.Results;
 using FPT.TeamMatching.Domain.Utilities;
@@ -26,10 +27,17 @@ public class IdeaRequestController : ControllerBase
         return Ok(msg);
     }
     
-    [HttpGet("by-status-and-idea-id")]
-    public async Task<IActionResult> GetAllByListStatusAndIdea([FromQuery] IdeaRequestGetAllByStatusQuery query)
+    [HttpGet("by-list-status-and-idea-id")]
+    public async Task<IActionResult> GetAllByStatusAndIdeaId([FromQuery] IdeaRequestGetAllByListStatusAndIdeaIdQuery query)
     {
-        var msg = await _service.GetAllByListStatusAndIdea(query);
+        var msg = await _service.GetAllByStatusAndIdeaId<IdeaRequestResult>(query);
+        return Ok(msg);
+    }
+    
+    [HttpGet("without-reviewer")]
+    public async Task<IActionResult> GetAllUnassignedReviewer([FromQuery] GetQueryableQuery query)
+    {
+        var msg = await _service.GetAllUnassignedReviewer<IdeaRequestResult>(query);
         return Ok(msg);
     }
 
