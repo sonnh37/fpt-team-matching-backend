@@ -7,7 +7,7 @@ namespace FPT.TeamMatching.Domain.Models.Results;
 public class TeamMemberResult : BaseResult
 {
     public Guid? UserId { get; set; }
-    
+
     public Guid? ProjectId { get; set; }
 
     public TeamMemberRole? Role { get; set; }
@@ -16,10 +16,13 @@ public class TeamMemberResult : BaseResult
 
     public DateTimeOffset? LeaveDate { get; set; }
     
+    public TeamMemberStatus? Status { get; set; }
+    
     public UserResult? User { get; set; }
     
     public ProjectResult? Project { get; set; }
     
-    public ICollection<RateResult> Rates { get; set; } = new List<RateResult>();
-
+    public virtual ICollection<RateResult> RateBys { get; set; } = new List<RateResult>();
+    
+    public virtual ICollection<RateResult> RateFors { get; set; } = new List<RateResult>();
 }

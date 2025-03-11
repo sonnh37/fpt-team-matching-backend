@@ -174,8 +174,6 @@ public class IdeaService : BaseService<Idea>, IIdeaService
         await SetBaseEntityForCreation(ideaEntity);
         _ideaRepository.Add(ideaEntity);
 
-        var idea = await _ideaRepository.GetById(ideaEntity.Id);
-        if (idea == null) return false;
         var ideaRequest = new IdeaRequest
         {
             Id = Guid.NewGuid(),
@@ -185,6 +183,7 @@ public class IdeaService : BaseService<Idea>, IIdeaService
             UpdatedDate = DateTime.UtcNow,
             Status = IdeaRequestStatus.CouncilPending
         };
+        await SetBaseEntityForCreation(ideaRequest);
         _ideaRequestRepository.Add(ideaRequest);
 
         var saveChange = await _unitOfWork.SaveChanges();

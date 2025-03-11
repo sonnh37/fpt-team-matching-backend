@@ -8,8 +8,7 @@ public interface IUserService : IBaseService
 {
     Task<BusinessResult> Create(UserCreateCommand command);
 
-    Task<BusinessResult> Update(UserUpdateCommand command);
-    // Task<BusinessResult> UpdatePassword(UserPasswordCommand userPasswordCommand);
+    Task<BusinessResult> UpdatePassword(UserPasswordCommand userPasswordCommand);
     //
     // Task<BusinessResult> GetByUsername(string username);
     //

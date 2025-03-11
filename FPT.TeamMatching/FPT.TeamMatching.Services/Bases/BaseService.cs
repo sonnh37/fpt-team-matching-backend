@@ -102,10 +102,9 @@ public abstract class BaseService<TEntity> : BaseService, IBaseService
 
             if (results.Count == 0)
                 return new ResponseBuilder()
-                        .WithData(results)
-                        .WithStatus(Const.NOT_FOUND_CODE)
-                        .WithMessage(Const.NOT_FOUND_MSG)
-                    ;
+                    .WithData(results)
+                    .WithStatus(Const.NOT_FOUND_CODE)
+                    .WithMessage(Const.NOT_FOUND_MSG);
 
             // GetAll 
             if (!query.IsPagination)
@@ -163,6 +162,33 @@ public abstract class BaseService<TEntity> : BaseService, IBaseService
                 .WithMessage(errorMessage);
         }
     }
+    
+    protected async Task<TEntity?> CreateOrUpdateEntity(CreateOrUpdateCommand createOrUpdateCommand)
+    {
+        TEntity? entity;
+        if (createOrUpdateCommand is UpdateCommand updateCommand)
+        {
+            entity = await _baseRepository.GetById(updateCommand.Id);
+            if (entity == null) return null;
+
+            _mapper.Map(updateCommand, entity);
+
+            await SetBaseEntityForUpdate(entity);
+            _baseRepository.Update(entity);
+        }
+        else
+        {
+            entity = _mapper.Map<TEntity>(createOrUpdateCommand);
+            if (entity == null) return null;
+            entity.Id = Guid.NewGuid();
+            await SetBaseEntityForCreation(entity);
+            _baseRepository.Add(entity);
+        }
+
+        var saveChanges = await _unitOfWork.SaveChanges();
+        return saveChanges ? entity : null;
+    }
+
 
     public async Task<BusinessResult> Restore<TResult>(UpdateCommand updateCommand)
         where TResult : BaseResult
@@ -240,32 +266,7 @@ public abstract class BaseService<TEntity> : BaseService, IBaseService
         }
     }
 
-    protected async Task<TEntity?> CreateOrUpdateEntity(CreateOrUpdateCommand createOrUpdateCommand)
-    {
-        TEntity? entity;
-        if (createOrUpdateCommand is UpdateCommand updateCommand)
-        {
-            entity = await _baseRepository.GetById(updateCommand.Id);
-            if (entity == null) return null;
-
-            _mapper.Map(updateCommand, entity);
-
-            await SetBaseEntityForUpdate(entity);
-            _baseRepository.Update(entity);
-        }
-        else
-        {
-            entity = _mapper.Map<TEntity>(createOrUpdateCommand);
-            if (entity == null) return null;
-            entity.Id = Guid.NewGuid();
-            await SetBaseEntityForCreation(entity);
-            _baseRepository.Add(entity);
-        }
-
-        var saveChanges = await _unitOfWork.SaveChanges();
-        return saveChanges ? entity : null;
-    }
-
+   
     protected async Task<TEntity?> RestoreEntity(UpdateCommand updateCommand)
     {
         var entity = await _baseRepository.GetById(updateCommand.Id);
@@ -339,6 +340,21 @@ public abstract class BaseService<TEntity> : BaseService, IBaseService
                 return null;
 
             var userId = GetUserIdFromClaims();
+            if (userId == null)
+                return null;
+
+            return await _unitOfWork.UserRepository.GetById(userId.Value, true);
+        }
+        catch (Exception ex)
+        {
+            return null;
+        }
+    }
+    
+    protected async Task<User?> GetUserByIdAsync(Guid? userId)
+    {
+        try
+        {
             if (userId == null)
                 return null;
 

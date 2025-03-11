@@ -7,3 +7,10 @@ public enum BlogType
     Share,
     Recruit
 }
+
+public enum BlogStatus
+{
+    Draft,
+    Public,
+    Close
+}

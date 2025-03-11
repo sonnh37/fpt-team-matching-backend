@@ -61,7 +61,8 @@ public static class IncludeHelper
         queryable = queryable
             .Include(m => m.UserXRoles)
             .ThenInclude(x => x.Role)
-            .Include(m => m.Notifications);
+            .Include(m => m.Notifications)
+            .Include(m => m.TeamMembers);
 
         return queryable;
     }

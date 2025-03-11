@@ -14,10 +14,14 @@ public class TeamMember : BaseEntity
     public DateTimeOffset? JoinDate { get; set; }
 
     public DateTimeOffset? LeaveDate { get; set; }
+    
+    public TeamMemberStatus? Status { get; set; }
 
     public virtual Project? Project { get; set; }
     
     public virtual User? User { get; set; }
     
-    public virtual ICollection<Rate> Rates { get; set; } = new List<Rate>();
+    public virtual ICollection<Rate> RateBys { get; set; } = new List<Rate>();
+    
+    public virtual ICollection<Rate> RateFors { get; set; } = new List<Rate>();
 }

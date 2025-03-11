@@ -20,14 +20,18 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
 {
     private readonly IInvitationRepository _invitationRepository;
     private readonly IProjectRepository _projectRepository;
+    private readonly IIdeaRepository _ideaRepository;
+    private readonly ITeamMemberRepository _teamMemberRepository;
 
     public InvitationService(IMapper mapper, IUnitOfWork unitOfWork) : base(mapper, unitOfWork)
     {
         _invitationRepository = unitOfWork.InvitationRepository;
         _projectRepository = unitOfWork.ProjectRepository;
+        _ideaRepository = unitOfWork.IdeaRepository;
+        _teamMemberRepository = unitOfWork.TeamMemberRepository;
     }
 
-    public async Task<BusinessResult> CheckIfStudentSendInvitation(Guid projectId)
+    public async Task<BusinessResult> CheckIfStudentSendInvitationByProjectId(Guid projectId)
     {
         try
         {
@@ -57,29 +61,16 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
         try
         {
             List<InvitationResult>? results;
-            var userIdClaim = _httpContextAccessor.HttpContext.User.FindFirst("Id")?.Value;
-            if (string.IsNullOrEmpty(userIdClaim))
+            var userIdClaim = GetUserIdFromClaims();
+
+            if (userIdClaim == null)
                 return new ResponseBuilder()
-                        .WithStatus(Const.FAIL_CODE)
-                        .WithMessage("You need to authenticate with TeamMatching.")
-                    ;
-            var userId = Guid.Parse(userIdClaim);
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("You need to authenticate with TeamMatching.");
+
+            var userId = userIdClaim.Value;
             // get by type
-            var queryable = _invitationRepository.GetQueryable(m => m.Type == query.Type);
-            queryable = IncludeHelper.Apply(queryable);
-            // type: joinRequest 
-            // => verify userId with receiver
-            // type: requestToJoin 
-            // => verify userId with sender
-
-            queryable = query.Type switch
-            {
-                InvitationType.SentByStudent => queryable.Where(m => m.SenderId == userId),
-                InvitationType.SendByTeam => queryable.Where(m => m.ReceiverId == userId),
-                _ => queryable
-            };
-
-            var (data, total) = await _invitationRepository.GetData(query);
+            var (data, total) = await _invitationRepository.GetUserInvitationsByType(query, userId);
 
             results = _mapper.Map<List<InvitationResult>>(data);
 
@@ -111,14 +102,52 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
     {
         try
         {
-            bool isSucess = await StudentCreateAsync(command);
-            if (isSucess)
+            var invitation = _mapper.Map<Invitation>(command);
+            var user = await GetUserAsync();
+            if (user == null)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("User do not exist");
+            }
+            //check student co idea pending hay approve k
+            var haveIdea = await StudentHaveIdea(user.Id);
+            if (haveIdea)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("Student has idea");
+            }
+            //check student trong teammember in process OR pass
+            var inTeamMember = await StudentInTeamMember(user.Id);
+            if (inTeamMember)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("Student is in team now");
+            }
+            //check project exist
+            var project = await _projectRepository.GetById((Guid)command.ProjectId);
+            if (project == null)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("Project do not exist");
+            }
+
+            invitation.Status = InvitationStatus.Pending;
+            invitation.SenderId = user.Id;
+            invitation.ReceiverId = project.LeaderId;
+            invitation.Type = InvitationType.SentByStudent;
+            await SetBaseEntityForCreation(invitation);
+            _invitationRepository.Add(invitation);
+            bool saveChange = await _unitOfWork.SaveChanges();
+            if (saveChange)
             {
                 return new ResponseBuilder()
                     .WithStatus(Const.SUCCESS_CODE)
                     .WithMessage(Const.SUCCESS_SAVE_MSG);
             }
-
             return new ResponseBuilder()
                 .WithStatus(Const.FAIL_CODE)
                 .WithMessage(Const.FAIL_SAVE_MSG);
@@ -157,25 +186,43 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
         }
     }
 
-    private async Task<bool> StudentCreateAsync(InvitationStudentCreatePendingCommand command)
+    public async Task<BusinessResult> DeletePermanentInvitation(Guid projectId)
     {
-        var invitation = _mapper.Map<Invitation>(command);
-        var user = await GetUserAsync();
-        if (user == null) return false;
-        var project = await _projectRepository.GetById((Guid)command.ProjectId);
-        if (project != null)
+        try
         {
-            invitation.Status = InvitationStatus.Pending;
-            invitation.SenderId = user.Id;
-            invitation.ReceiverId = project.LeaderId;
-            invitation.Type = InvitationType.SentByStudent;
-            await SetBaseEntityForCreation(invitation);
-            _invitationRepository.Add(invitation);
+            var user = await GetUserAsync();
+            if (user == null)
+            {
+                return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage("User haven't login!");
+            }
+            var invitation = await _invitationRepository.GetInvitationOfUserByProjectId(projectId, user.Id);
+            if (invitation == null)
+            {
+                return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage("User haven't sent invitation to given project!");
+            }
+            _invitationRepository.DeletePermanently(invitation);
             bool saveChange = await _unitOfWork.SaveChanges();
-            return saveChange;
+            if (saveChange)
+            {
+                return new ResponseBuilder()
+                .WithStatus(Const.SUCCESS_CODE)
+                .WithMessage(Const.SUCCESS_DELETE_MSG);
+            }
+            return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage(Const.FAIL_DELETE_MSG);
         }
-
-        return false;
+        catch (Exception ex)
+        {
+            var errorMessage = $"An error occurred in {typeof(InvitationResult).Name}: {ex.Message}";
+            return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage(errorMessage);
+        }
     }
 
     private async Task<bool> TeamCreateAsync(InvitationTeamCreatePendingCommand command)
@@ -198,4 +245,42 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
 
         return false;
     }
+
+    private async Task<bool> StudentHaveIdea(Guid userId)
+    {
+        var ideas = _ideaRepository.GetIdeasByUserId(userId);
+        bool haveIdea = true;
+        if (ideas == null)
+        {
+            haveIdea = false;
+        }
+        foreach (var idea in await ideas)
+        {
+            if (idea.Status == IdeaStatus.Rejected)
+            {
+                haveIdea = false;
+            }
+        }
+        return haveIdea;
+    }
+
+    private async Task<bool> StudentInTeamMember(Guid userId)
+    {
+        var teamMembers = _teamMemberRepository.GetTeamMemberByUserId(userId);
+        bool haveTeamMember = true;
+        if (teamMembers == null)
+        {
+            haveTeamMember = false;
+        }
+        foreach (var teamMember in await teamMembers)
+        {
+            if (teamMember.Status == TeamMemberStatus.Failed)
+            {
+                haveTeamMember = false;
+            }
+        }
+        return haveTeamMember;
+    }
+
+
 }

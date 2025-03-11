@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace FPT.TeamMatching.Domain.Models.Requests.Commands.Reviews
 {
-    internal class ReviewRestoreCommand
+    public class ReviewRestoreCommand
     {
     }
 }

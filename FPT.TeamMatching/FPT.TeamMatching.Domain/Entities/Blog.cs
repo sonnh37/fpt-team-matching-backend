@@ -16,6 +16,8 @@ public class Blog : BaseEntity
     public string? SkillRequired { get; set; }
 
     public BlogType? Type { get; set; }
+    
+    public BlogStatus? Status { get; set; }
 
     public virtual ICollection<Comment> Comments { get; set; } = new List<Comment>();
 
