@@ -64,4 +64,12 @@ public class UserController : ControllerBase
 
         return Ok(businessResult);
     }
+    
+    [HttpPut("password")]
+    public async Task<IActionResult> UpdatePassword([FromBody] UserPasswordCommand userUpdateCommand)
+    {
+        var businessResult = await _userService.UpdatePassword(userUpdateCommand);
+
+        return Ok(businessResult);
+    }
 }

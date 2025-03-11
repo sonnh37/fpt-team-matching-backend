@@ -3,9 +3,11 @@ using FPT.TeamMatching.Domain.Contracts.Repositories;
 using FPT.TeamMatching.Domain.Contracts.Services;
 using FPT.TeamMatching.Domain.Contracts.UnitOfWorks;
 using FPT.TeamMatching.Domain.Entities;
+using FPT.TeamMatching.Domain.Models.Requests.Commands.Base;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Users;
 using FPT.TeamMatching.Domain.Models.Responses;
 using FPT.TeamMatching.Domain.Models.Results;
+using FPT.TeamMatching.Domain.Models.Results.Bases;
 using FPT.TeamMatching.Domain.Utilities;
 using FPT.TeamMatching.Services.Bases;
 
@@ -77,8 +79,35 @@ public class UserService : BaseService<User>, IUserService
         }
     }
 
-    public Task<BusinessResult> Update(UserUpdateCommand command)
+    public async Task<BusinessResult> UpdatePassword(UserPasswordCommand userPasswordCommand)
     {
-        throw new NotImplementedException();
+        try
+        {
+            var userCurrent = await GetUserAsync();
+            if (userCurrent == null) return HandlerFail("Please, login again.");
+            // set password
+            if (userPasswordCommand.Password != null)
+            {
+                var passwordHash = BCrypt.Net.BCrypt.HashPassword(userPasswordCommand.Password);
+                userCurrent.Password = passwordHash;
+            }
+
+            await SetBaseEntityForUpdate(userCurrent);
+            _userRepository.Update(userCurrent);
+            var isSave = await _unitOfWork.SaveChanges();
+
+            if (!isSave)
+            {
+                return HandlerFail(Const.FAIL_SAVE_MSG);
+            }
+
+            return new ResponseBuilder()
+                .WithStatus(Const.SUCCESS_CODE)
+                .WithMessage(Const.SUCCESS_READ_MSG);
+        }
+        catch (Exception ex)
+        {
+            return HandlerError(ex.Message);
+        }
     }
 }

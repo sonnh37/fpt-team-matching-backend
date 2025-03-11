@@ -350,6 +350,21 @@ public abstract class BaseService<TEntity> : BaseService, IBaseService
             return null;
         }
     }
+    
+    protected async Task<User?> GetUserByIdAsync(Guid? userId)
+    {
+        try
+        {
+            if (userId == null)
+                return null;
+
+            return await _unitOfWork.UserRepository.GetById(userId.Value, true);
+        }
+        catch (Exception ex)
+        {
+            return null;
+        }
+    }
 
     private bool IsUserAuthenticated()
     {
