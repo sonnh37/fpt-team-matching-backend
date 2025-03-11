@@ -44,7 +44,7 @@ public class IdeaController : ControllerBase
     [HttpPut]
     public async Task<IActionResult> Update([FromBody] IdeaUpdateCommand request)
     {
-        var businessResult = await _service.CreateOrUpdate<IdeaResult>(request);
+        var businessResult = await _service.UpdateIdea(request);
 
         return Ok(businessResult);
     }

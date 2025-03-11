@@ -17,5 +17,6 @@ namespace FPT.TeamMatching.Domain.Contracts.Services
         Task<BusinessResult> StudentCreatePending(IdeaStudentCreatePendingCommand idea);
         Task<BusinessResult> LecturerCreatePending(IdeaLecturerCreatePendingCommand idea);
         Task<BusinessResult> GetIdeasByUserId();
+        Task<BusinessResult> UpdateIdea(IdeaUpdateCommand ideaUpdateCommand);
     }
 }
