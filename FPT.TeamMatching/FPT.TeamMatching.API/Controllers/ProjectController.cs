@@ -41,6 +41,13 @@ public class ProjectController : ControllerBase
         return Ok(msg);
     }
 
+    [HttpPost("create-project-teammember")]
+    public async Task<IActionResult> CreateProjectAndTeammember([FromBody] ProjectCreateCommand request)
+    {
+        var msg = await _service.CreateProjectAndTeammember(request);
+        return Ok(msg);
+    }
+
     [HttpPut]
     public async Task<IActionResult> Update([FromBody] ProjectUpdateCommand request)
     {
