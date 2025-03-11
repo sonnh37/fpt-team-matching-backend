@@ -26,50 +26,35 @@ public class ProfileStudentService : BaseService<ProfileStudent>, IProfileStuden
     {
         try
         {
-            //1. Kiểm tra user có tồn tại không
-            var foundUser = await _unitOfWork.UserRepository.GetById(profileStudent.UserId!.Value);
-            if (foundUser == null || foundUser.IsDeleted) throw new Exception("User Not Found");
-
+            
             //2. Thêm CV vào storage || Bỏ qua tại đã xử lí ở FE
             // var cloudinaryResult = await _cloudinary.UploadCVImage(profileStudent.FileCv, profileStudent.UserId.Value);
-    
-            //3. Add Profile
-            //4. Thêm vào skill profile phục vụ suggestion system
-            _unitOfWork.ProfileStudentRepository.Add(new ProfileStudent
-            {
-                UserId = profileStudent.UserId,
-                SpecialtyId = profileStudent.SpecialtyId,
-                SemesterId = profileStudent.SemesterId,
-                CreatedBy = "",
-                CreatedDate = DateTime.Now,
-                UpdatedBy = "",
-                UpdatedDate = DateTime.Now,
-                IsDeleted = false,
-                FileCv = profileStudent.FileCv,
-                Bio = profileStudent.Bio,
-                Code = profileStudent.Code,
-                IsQualifiedForAcademicProject = profileStudent.IsQualifiedForAcademicProject,
-                ExperienceProject = profileStudent.ExperienceProject,
-                Achievement = profileStudent.Achievement,
-                Interest = profileStudent.Interest,
-                SkillProfiles = new List<SkillProfile>
-                {
-                    new SkillProfile
-                    {
-                        Json = profileStudent.Json,
-                        CreatedBy = "",
-                        CreatedDate = DateTime.Now,
-                        UpdatedBy = "",
-                        UpdatedDate = DateTime.Now, 
-                        IsDeleted = false,
-                        ProfileStudentId = null,
-                        FullSkill = profileStudent.FullSkill,
-                    }
-                }
-            });
+            var userId = GetUserIdFromClaims();
+            var semesterCurrent = await _unitOfWork.SemesterRepository.GetUpComingSemester();
+            
+            var profile = _mapper.Map<ProfileStudentCreateCommand, ProfileStudent>(profileStudent);
+            profile.UserId = userId;
+            profile.SemesterId = semesterCurrent?.Id;
+            profile.IsQualifiedForAcademicProject = true;
+            await SetBaseEntityForUpdate(profile);
+            _unitOfWork.ProfileStudentRepository.Add(profile);
 
-            //5 Save change skill profile và profile
-            await _unitOfWork.SaveChanges();
+            var isSaved = await _unitOfWork.SaveChanges();
+            if (!isSaved) return HandlerFail("Failed to add profile");
+
+            var skillProfile = new SkillProfile
+            {
+                ProfileStudentId = profile.Id,
+                Json = profileStudent.Json,
+                FullSkill = profileStudent.FullSkill,
+            };
+
+            await SetBaseEntityForUpdate(skillProfile);
+            _unitOfWork.SkillProfileRepository.Add(skillProfile);
+
+            var isSaved_ = await _unitOfWork.SaveChanges();
+            if (!isSaved_) return HandlerFail("Failed to add profile");
+
             return new BusinessResult(Const.SUCCESS_CODE, Const.SUCCESS_SAVE_MSG);
         }
         catch (Exception ex)
@@ -82,30 +67,42 @@ public class ProfileStudentService : BaseService<ProfileStudent>, IProfileStuden
     {
         try
         {
-            //1. Kiểm tra profile có tồn tại không
-            var foundProfile = await _unitOfWork.ProfileStudentRepository.GetById(profileStudent.Id);
-            if (foundProfile == null || foundProfile.IsDeleted) throw new Exception("Profile Not Found");
+            //2. Thêm CV vào storage || Bỏ qua tại đã xử lí ở FE
+            // var cloudinaryResult = await _cloudinary.UploadCVImage(profileStudent.FileCv, profileStudent.UserId.Value);
+            var userId = GetUserIdFromClaims();
+            var semesterCurrent = await _unitOfWork.SemesterRepository.GetUpComingSemester();
 
-            //2. Kiểm tra user đó còn tồn tại hay bị khoá hay không
-            var foundUser = await _unitOfWork.UserRepository.GetById(profileStudent.UserId!.Value);
-            if (foundUser == null || foundUser.IsDeleted) throw new Exception("User Not Found");
+            var profile = await _unitOfWork.ProfileStudentRepository.GetById(profileStudent.Id);
+            if (profile == null) return HandlerFail("Failed to update profile");
+            var oldFileCv = profile.FileCv;
+            _mapper.Map(profileStudent, profile); 
+            profile.UserId = userId;
+            profile.SemesterId = semesterCurrent?.Id;
+            await SetBaseEntityForUpdate(profile);
+            _unitOfWork.ProfileStudentRepository.Update(profile);
 
-            //3. Override profile CV trong storage
-            var cloudinaryResult = await _cloudinary.UploadCVImage(profileStudent.FileCv, profileStudent.UserId.Value);
+            var isSaved = await _unitOfWork.SaveChanges();
+            if (!isSaved) return HandlerFail("Failed to add profile");
 
-            //4. Update profile
-            var profileEntity = _mapper.Map<ProfileStudentUpdateCommand, ProfileStudent>(profileStudent);
-            profileEntity.FileCv = cloudinaryResult.Url.ToString();
-            _unitOfWork.ProfileStudentRepository.Update(profileEntity);
+            if ( oldFileCv == profile.FileCv)
+            {
+                return new BusinessResult(Const.SUCCESS_CODE, Const.SUCCESS_SAVE_MSG);
+            }
+            
+            // If fileCv has changed
+            var skillProfile = new SkillProfile
+            {
+                ProfileStudentId = profile.Id,
+                Json = profileStudent.Json,
+                FullSkill = profileStudent.FullSkill,
+            };
 
-            //5. Update SkillProfile
-            // var skillProfile = await _unitOfWork.SkillProfileRepository.GetSkillProfileByUserId(profileStudent.UserId);
-            // skillProfile.Json = ""; // note: sử dụng AI để scan lấy ra toàn bộ thông tin từ cv
-            // skillProfile.FullSkill = ""; // note: sử dụng AI để scan lấy ra thông tin về skill
-            // skillProfile.UpdatedDate = DateTime.UtcNow;
-            // await _unitOfWork.SkillProfileRepository.UpsertSkillProfile(skillProfile);
+            await SetBaseEntityForUpdate(skillProfile);
+            _unitOfWork.SkillProfileRepository.Add(skillProfile);
 
-            await _unitOfWork.SaveChanges();
+            var isSaved_ = await _unitOfWork.SaveChanges();
+            if (!isSaved_) return HandlerFail("Failed to add profile");
+
             return new BusinessResult(Const.SUCCESS_CODE, Const.SUCCESS_SAVE_MSG);
         }
         catch (Exception e)
@@ -196,7 +193,7 @@ public class ProfileStudentService : BaseService<ProfileStudent>, IProfileStuden
             var profile = await _unitOfWork.ProfileStudentRepository.GetProfileByUserId(userId);
             if (profile == null) return HandlerNotFound("User Does Not Have Profile");
 
-            var profileResult = _mapper.Map<SkillProfileResult>(profile);
+            var profileResult = _mapper.Map<ProfileStudent>(profile);
             return new BusinessResult(Const.SUCCESS_CODE, Const.SUCCESS_SAVE_MSG, profileResult);
         }
         catch (Exception e)
