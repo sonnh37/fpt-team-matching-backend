@@ -3,9 +3,9 @@ using FPT.TeamMatching.Domain.Models.Requests.Queries.Base;
 
 namespace FPT.TeamMatching.Domain.Models.Requests.Queries.IdeaRequests;
 
-public class IdeaRequestGetAllByStatusQuery : GetQueryableQuery
+public class IdeaRequestGetAllByListStatusAndIdeaIdQuery : GetQueryableQuery
 {
     public Guid? IdeaId { get; set; }
-
+    
     public List<IdeaRequestStatus> StatusList { get; set; } = new List<IdeaRequestStatus>();
 }

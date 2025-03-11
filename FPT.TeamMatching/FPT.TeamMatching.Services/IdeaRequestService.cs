@@ -11,7 +11,9 @@ using FPT.TeamMatching.Domain.Utilities;
 using FPT.TeamMatching.Services.Bases;
 using Microsoft.EntityFrameworkCore;
 using System.Text.RegularExpressions;
+using FPT.TeamMatching.Domain.Models.Requests.Queries.Base;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.IdeaRequests;
+using FPT.TeamMatching.Domain.Models.Results.Bases;
 
 namespace FPT.TeamMatching.Services;
 
@@ -27,16 +29,15 @@ public class IdeaRequestService : BaseService<IdeaRequest>, IIdeaRequestService
         _ideaRepository = unitOfWork.IdeaRepository;
         _semesterRepository = unitOfWork.SemesterRepository;
     }
-    
-    public async Task<BusinessResult> GetAllByListStatusAndIdea(IdeaRequestGetAllByStatusQuery query)
+
+    public async Task<BusinessResult>
+        GetAll<TResult>(IdeaRequestGetAllQuery query) where TResult : BaseResult
     {
         try
         {
-            var userId = GetUserIdFromClaims();
-            // get by type
-            var (data, total) = await _ideaRequestRepository.GetDataByListStatusAndIdea(query);
+            var (data, total) = await _ideaRequestRepository.GetData(query);
 
-            var results = _mapper.Map<List<IdeaRequestResult>>(data);
+            var results = _mapper.Map<List<TResult>>(data);
 
             // GetAll 
             if (!query.IsPagination)
@@ -55,7 +56,74 @@ public class IdeaRequestService : BaseService<IdeaRequest>, IIdeaRequestService
         }
         catch (Exception ex)
         {
-            var errorMessage = $"An error occurred in {typeof(IdeaRequestResult).Name}: {ex.Message}";
+            var errorMessage = $"An error occurred in {typeof(TResult).Name}: {ex.Message}";
+            return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage(errorMessage);
+        }
+    }
+
+    public async Task<BusinessResult>
+        GetAllByStatusAndIdeaId<TResult>(IdeaRequestGetAllByListStatusAndIdeaIdQuery query) where TResult : BaseResult
+    {
+        try
+        {
+            var (data, total) = await _ideaRequestRepository.GetDataByStatusAndIdeaId(query);
+
+            var results = _mapper.Map<List<TResult>>(data);
+
+            // GetAll 
+            if (!query.IsPagination)
+                return new ResponseBuilder()
+                    .WithData(results)
+                    .WithStatus(Const.SUCCESS_CODE)
+                    .WithMessage(Const.SUCCESS_READ_MSG);
+
+            // GetAll with pagination
+            var tableResponse = new PaginatedResult(query, results, total);
+
+            return new ResponseBuilder()
+                .WithData(tableResponse)
+                .WithStatus(Const.SUCCESS_CODE)
+                .WithMessage(Const.SUCCESS_READ_MSG);
+        }
+        catch (Exception ex)
+        {
+            var errorMessage = $"An error occurred in {typeof(TResult).Name}: {ex.Message}";
+            return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage(errorMessage);
+        }
+    }
+
+    public async Task<BusinessResult>
+        GetAllUnassignedReviewer<TResult>(GetQueryableQuery query) where TResult : BaseResult
+    {
+        try
+        {
+            var (data, total) = await _ideaRequestRepository.GetDataUnassignedReviewer(query);
+
+
+            var results = _mapper.Map<List<TResult>>(data);
+
+            // GetAll 
+            if (!query.IsPagination)
+                return new ResponseBuilder()
+                    .WithData(results)
+                    .WithStatus(Const.SUCCESS_CODE)
+                    .WithMessage(Const.SUCCESS_READ_MSG);
+
+            // GetAll with pagination
+            var tableResponse = new PaginatedResult(query, results, total);
+
+            return new ResponseBuilder()
+                .WithData(tableResponse)
+                .WithStatus(Const.SUCCESS_CODE)
+                .WithMessage(Const.SUCCESS_READ_MSG);
+        }
+        catch (Exception ex)
+        {
+            var errorMessage = $"An error occurred in {typeof(TResult).Name}: {ex.Message}";
             return new ResponseBuilder()
                 .WithStatus(Const.FAIL_CODE)
                 .WithMessage(errorMessage);
@@ -78,7 +146,7 @@ public class IdeaRequestService : BaseService<IdeaRequest>, IIdeaRequestService
                 ideaRequestOld.ReviewerId = user.Id;
                 await SetBaseEntityForUpdate(ideaRequestOld);
                 _ideaRequestRepository.Update(ideaRequestOld);
-                
+
                 var idea = await _ideaRepository.GetById(ideaRequestOld.IdeaId.Value);
 
                 if (ideaRequestOld.Status == IdeaRequestStatus.CouncilRejected)
@@ -112,16 +180,18 @@ public class IdeaRequestService : BaseService<IdeaRequest>, IIdeaRequestService
                 if (saveChange)
                 {
                     return new ResponseBuilder()
-                    .WithStatus(Const.SUCCESS_CODE)
-                    .WithMessage(Const.SUCCESS_SAVE_MSG);
+                        .WithStatus(Const.SUCCESS_CODE)
+                        .WithMessage(Const.SUCCESS_SAVE_MSG);
                 }
+
                 return new ResponseBuilder()
                     .WithStatus(Const.FAIL_CODE)
                     .WithMessage(Const.FAIL_SAVE_MSG);
             }
+
             return new ResponseBuilder()
-                    .WithStatus(Const.NOT_FOUND_CODE)
-                    .WithMessage("Not found idea");
+                .WithStatus(Const.NOT_FOUND_CODE)
+                .WithMessage("Not found idea");
         }
         catch (Exception ex)
         {
@@ -143,7 +213,7 @@ public class IdeaRequestService : BaseService<IdeaRequest>, IIdeaRequestService
                 ideaRequestOld.Status = ideaRequest.Status;
                 ideaRequestOld.Content = ideaRequest.Content;
                 ideaRequestOld.ProcessDate = DateTime.UtcNow;
-                await SetBaseEntityForUpdate(ideaRequestOld); 
+                await SetBaseEntityForUpdate(ideaRequestOld);
                 _ideaRequestRepository.Update(ideaRequestOld);
 
                 var idea = await _ideaRepository.GetById(ideaRequestOld.IdeaId.Value);
@@ -152,6 +222,7 @@ public class IdeaRequestService : BaseService<IdeaRequest>, IIdeaRequestService
                 {
                     idea.Status = IdeaStatus.Rejected;
                 }
+
                 await SetBaseEntityForUpdate(idea);
                 _ideaRepository.Update(idea);
 
@@ -159,16 +230,18 @@ public class IdeaRequestService : BaseService<IdeaRequest>, IIdeaRequestService
                 if (saveChange)
                 {
                     return new ResponseBuilder()
-                    .WithStatus(Const.SUCCESS_CODE)
-                    .WithMessage(Const.SUCCESS_SAVE_MSG);
+                        .WithStatus(Const.SUCCESS_CODE)
+                        .WithMessage(Const.SUCCESS_SAVE_MSG);
                 }
+
                 return new ResponseBuilder()
                     .WithStatus(Const.FAIL_CODE)
                     .WithMessage(Const.FAIL_SAVE_MSG);
             }
+
             return new ResponseBuilder()
-                    .WithStatus(Const.NOT_FOUND_CODE)
-                    .WithMessage("Not found idea");
+                .WithStatus(Const.NOT_FOUND_CODE)
+                .WithMessage("Not found idea");
         }
         catch (Exception ex)
         {

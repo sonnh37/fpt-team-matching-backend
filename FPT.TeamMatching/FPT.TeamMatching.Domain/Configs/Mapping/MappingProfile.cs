@@ -32,10 +32,11 @@ public class MappingProfile : Profile
     {
         #region User
 
-        CreateMap<User, UserResult>().ReverseMap();
+        CreateMap<User, UserResult>().ReverseMap()
+            .ForMember(dest => dest.Password, opt => opt.Ignore());
         CreateMap<User, UserCreateCommand>().ReverseMap();
-        CreateMap<User, UserUpdateCommand>().ReverseMap();
-
+        CreateMap<User, UserUpdateCommand>().ReverseMap()
+            .ForMember(dest => dest.Password, opt => opt.Ignore());
         #endregion
 
         #region Role
@@ -119,8 +120,8 @@ public class MappingProfile : Profile
         #region IdeaRequest
 
         CreateMap<IdeaRequest, IdeaRequestResult>().ReverseMap();
-        CreateMap<IdeaRequest, IdeaCreateCommand>().ReverseMap();
-        CreateMap<IdeaRequest, IdeaUpdateCommand>().ReverseMap();
+        CreateMap<IdeaRequest, IdeaRequestCreateCommand>().ReverseMap();
+        CreateMap<IdeaRequest, IdeaRequestUpdateCommand>().ReverseMap();
         CreateMap<IdeaRequest, IdeaRequestLecturerOrCouncilResponseCommand>().ReverseMap();
 
         #endregion

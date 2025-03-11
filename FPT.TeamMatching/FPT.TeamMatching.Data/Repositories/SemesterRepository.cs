@@ -22,8 +22,8 @@ namespace FPT.TeamMatching.Data.Repositories
 
         public async Task<Semester?> GetUpComingSemester()
         {
-            var s = await _dbContext.Semesters.Where(e => e.StartDate >  DateTime.Now)
-                                        .OrderBy(e => e.StartDate)
+            var s = await _dbContext.Semesters.Where(e => e.StartDate >  DateTime.UtcNow)
+                                        .OrderByDescending(e => e.StartDate)
                                         .FirstOrDefaultAsync();
             return s;
         }
