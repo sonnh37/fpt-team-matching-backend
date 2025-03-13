@@ -28,4 +28,11 @@ public class TeamMemberRepository : BaseRepository<TeamMember>, ITeamMemberRepos
                                                         .ToListAsync();
         return teamMembers;
     }
+
+    public async Task<TeamMember> GetMemberByUserId(Guid userId)
+    {
+        var teamMember = await _dbContext.TeamMembers.SingleOrDefaultAsync(e => e.UserId == userId
+                                                        && e.IsDeleted == false);
+        return teamMember;
+    }
 }
