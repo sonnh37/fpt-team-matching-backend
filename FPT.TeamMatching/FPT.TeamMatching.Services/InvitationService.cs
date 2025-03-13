@@ -13,6 +13,7 @@ using FPT.TeamMatching.Domain.Utilities.Filters;
 using FPT.TeamMatching.Services.Bases;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Pipelines.Sockets.Unofficial.Arenas;
 
 namespace FPT.TeamMatching.Services;
 
@@ -110,6 +111,14 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
                     .WithStatus(Const.FAIL_CODE)
                     .WithMessage("User do not exist");
             }
+
+            var haveInvite = await _invitationRepository.GetInvitationOfUserByProjectId((Guid)command.ProjectId, user.Id);
+            if (haveInvite != null) {
+                return new ResponseBuilder()
+                  .WithStatus(Const.FAIL_CODE)
+                  .WithMessage("Student has request join team");
+            }
+
             //check student co idea pending hay approve k
             var haveIdea = await StudentHaveIdea(user.Id);
             if (haveIdea)
@@ -165,6 +174,23 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
     {
         try
         {
+            //check student co idea pending hay approve k
+            var haveIdea = await StudentHaveIdea((Guid)command.ReceiverId);
+            if (haveIdea)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("Student has idea");
+            }
+            //check student trong teammember in process OR pass
+            var inTeamMember = await StudentInTeamMember((Guid)command.ReceiverId);
+            if (inTeamMember)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("Student is in team now");
+            }
+
             bool isSucess = await TeamCreateAsync(command);
             if (isSucess)
             {
@@ -248,17 +274,17 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
 
     private async Task<bool> StudentHaveIdea(Guid userId)
     {
-        var ideas = _ideaRepository.GetIdeasByUserId(userId);
-        bool haveIdea = true;
-        if (ideas == null)
+        var ideas = await _ideaRepository.GetIdeasByUserId(userId);
+        bool haveIdea = false;
+        if (!ideas.Any())
         {
-            haveIdea = false;
+            return haveIdea = false;
         }
-        foreach (var idea in await ideas)
+        foreach (var idea in  ideas)
         {
-            if (idea.Status == IdeaStatus.Rejected)
+            if (idea.Status != IdeaStatus.Rejected)
             {
-                haveIdea = false;
+                haveIdea = true;
             }
         }
         return haveIdea;
@@ -266,17 +292,17 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
 
     private async Task<bool> StudentInTeamMember(Guid userId)
     {
-        var teamMembers = _teamMemberRepository.GetTeamMemberByUserId(userId);
-        bool haveTeamMember = true;
-        if (teamMembers == null)
+        var teamMembers =await _teamMemberRepository.GetTeamMemberByUserId(userId);
+        bool haveTeamMember = false;
+        if (!teamMembers.Any())
         {
             haveTeamMember = false;
         }
-        foreach (var teamMember in await teamMembers)
+        foreach (var teamMember in  teamMembers)
         {
-            if (teamMember.Status == TeamMemberStatus.Failed)
+            if (teamMember.Status != TeamMemberStatus.Failed)
             {
-                haveTeamMember = false;
+                haveTeamMember = true;
             }
         }
         return haveTeamMember;
