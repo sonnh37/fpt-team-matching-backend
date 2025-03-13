@@ -54,7 +54,7 @@ public class TeamMemberService : BaseService<TeamMember>, ITeamMemberService
             teamMemberCurrentUser.IsDeleted = true;
         
             await SetBaseEntityForUpdate(teamMemberCurrentUser);
-            _teamMemberRepository.Update(teamMemberCurrentUser);
+            _teamMemberRepository.DeletePermanently(teamMemberCurrentUser);
 
             var saveChanges = await _unitOfWork.SaveChanges();
 
