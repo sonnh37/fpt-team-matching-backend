@@ -13,7 +13,6 @@ public class TeamMemberUpdateCommand : UpdateCommand
 
     public DateTimeOffset? JoinDate { get; set; }
 
-    public DateTimeOffset? LeaveDate { get; set; }
     
     public TeamMemberStatus? Status { get; set; }
 }

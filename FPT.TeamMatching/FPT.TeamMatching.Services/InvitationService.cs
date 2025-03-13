@@ -174,6 +174,14 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
     {
         try
         {
+            //check sl trong team
+            bool members = await CheckCountMembersInTeam((Guid)command.ProjectId);
+            if(!members)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("Project has maximum members");
+            }
             //check student co idea pending hay approve k
             var haveIdea = await StudentHaveIdea((Guid)command.ReceiverId);
             if (haveIdea)
@@ -306,6 +314,17 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
             }
         }
         return haveTeamMember;
+    }
+
+    private async Task<bool> CheckCountMembersInTeam(Guid projectId)
+    {
+        var teammember = await _projectRepository.GetById(projectId);
+        var count = teammember.TeamMembers.Where(x=> x.IsDeleted = false).Count();
+        if (count <= teammember.TeamSize)
+        {
+            return true;
+        }
+        return false;
     }
 
 
