@@ -20,6 +20,27 @@ public class TeamMemberService : BaseService<TeamMember>, ITeamMemberService
         _teamMemberRepository = _unitOfWork.TeamMemberRepository;
     }
 
+    public  async Task<BusinessResult> GetTeamMemberByUserId()
+    {
+        try
+        {
+            var userId = GetUserIdFromClaims();
+            if (userId == null) return HandlerFail("No user found");
+            var teamMemberCurrentUser = await _teamMemberRepository.GetMemberByUserId((Guid)userId.Value);
+            if (teamMemberCurrentUser == null) return HandlerFail("No user found in team members");
+          
+
+            return new ResponseBuilder()
+                .WithData(teamMemberCurrentUser)
+                .WithMessage(Const.SUCCESS_READ_MSG)
+                .WithStatus(Const.SUCCESS_CODE);
+        }
+        catch (Exception ex)
+        {
+            return HandlerError(ex.Message);
+        }
+    }
+
     public async Task<BusinessResult> LeaveByCurrentUser()
     {
         try

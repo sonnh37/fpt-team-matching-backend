@@ -35,6 +35,13 @@ public class TeamMemberController : ControllerBase
         return Ok(msg);
     }
 
+    [HttpGet("get-by-userid")]
+    public async Task<IActionResult> GetByUserId()
+    {
+        var msg = await _teammemberservice.GetTeamMemberByUserId();
+        return Ok(msg);
+    }
+
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] TeamMemberCreateCommand request)
     {
