@@ -34,6 +34,13 @@ public class IdeaRequestController : ControllerBase
         return Ok(msg);
     }
     
+    [HttpGet("me/by-list-status")]
+    public async Task<IActionResult> GetAllByStatusForCurrentUser([FromQuery] IdeaRequestGetAllByListStatusForCurrentUser query)
+    {
+        var msg = await _service.GetAllByStatusForCurrentUser<IdeaRequestResult>(query);
+        return Ok(msg);
+    }
+    
     [HttpGet("without-reviewer")]
     public async Task<IActionResult> GetAllUnassignedReviewer([FromQuery] GetQueryableQuery query)
     {

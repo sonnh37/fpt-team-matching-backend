@@ -96,6 +96,40 @@ public class IdeaRequestService : BaseService<IdeaRequest>, IIdeaRequestService
         }
     }
 
+    public async Task<BusinessResult> GetAllByStatusForCurrentUser<TResult>(IdeaRequestGetAllByListStatusForCurrentUser query) where TResult : BaseResult
+    {
+        try
+        {
+            var userIdClaims = GetUserIdFromClaims();
+            var userId = userIdClaims.Value;
+            var (data, total) = await _ideaRequestRepository.GetDataByStatusForCurrentUser(query, userId);
+
+            var results = _mapper.Map<List<TResult>>(data);
+
+            // GetAll 
+            if (!query.IsPagination)
+                return new ResponseBuilder()
+                    .WithData(results)
+                    .WithStatus(Const.SUCCESS_CODE)
+                    .WithMessage(Const.SUCCESS_READ_MSG);
+
+            // GetAll with pagination
+            var tableResponse = new PaginatedResult(query, results, total);
+
+            return new ResponseBuilder()
+                .WithData(tableResponse)
+                .WithStatus(Const.SUCCESS_CODE)
+                .WithMessage(Const.SUCCESS_READ_MSG);
+        }
+        catch (Exception ex)
+        {
+            var errorMessage = $"An error occurred in {typeof(TResult).Name}: {ex.Message}";
+            return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage(errorMessage);
+        }
+    }
+
     public async Task<BusinessResult>
         GetAllUnassignedReviewer<TResult>(GetQueryableQuery query) where TResult : BaseResult
     {

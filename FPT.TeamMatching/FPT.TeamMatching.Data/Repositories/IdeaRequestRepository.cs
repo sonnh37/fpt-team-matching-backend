@@ -55,8 +55,39 @@ public class IdeaRequestRepository : BaseRepository<IdeaRequest>, IIdeaRequestRe
         var queryable = GetQueryable();
         queryable = queryable.Include(m => m.Idea)
             .Include(m => m.Reviewer);
+
         queryable = queryable.Where(m =>
             m.Status != null && (query.StatusList.Contains(m.Status.Value) && m.IdeaId == query.IdeaId));
+
+
+        if (query.IsPagination)
+        {
+            // Tổng số count sau khi  filter khi chưa lọc trang
+            var totalOrigin = queryable.Count();
+            // Sắp sếp
+            queryable = Sort(queryable, query);
+            // Lọc trang
+            var results = await GetQueryablePagination(queryable, query).ToListAsync();
+
+            return (results, totalOrigin);
+        }
+        else
+        {
+            queryable = Sort(queryable, query);
+            var results = await queryable.ToListAsync();
+            return (results, results.Count);
+        }
+    }
+
+    public async Task<(List<IdeaRequest>, int)> GetDataByStatusForCurrentUser(IdeaRequestGetAllByListStatusForCurrentUser query, Guid userId)
+    {
+        var queryable = GetQueryable();
+        queryable = queryable.Include(m => m.Idea)
+            .Include(m => m.Reviewer);
+
+        queryable = queryable.Where(m =>
+            m.Status != null && (query.StatusList.Contains(m.Status.Value) && m.ReviewerId == userId));
+
 
         if (query.IsPagination)
         {
