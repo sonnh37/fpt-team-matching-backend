@@ -6,5 +6,7 @@ namespace FPT.TeamMatching.Domain.Contracts.Services;
 public interface ITeamMemberService : IBaseService
 {
     Task<BusinessResult> LeaveByCurrentUser();
+    Task<BusinessResult> GetTeamMemberByUserId();
+
 
 }

@@ -10,6 +10,8 @@ public class Rate : BaseEntity
 
     public int NumbOfStar { get; set; }
 
+    public string? Content { get; set; }
+
     public virtual TeamMember? RateFor { get; set; }
 
     public virtual TeamMember? RateBy { get; set; }
