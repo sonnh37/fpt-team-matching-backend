@@ -2,6 +2,7 @@
 using FPT.TeamMatching.Domain.Entities.Base;
 using FPT.TeamMatching.Domain.Enums;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Base;
+using FPT.TeamMatching.Domain.Models.Requests.Queries.IdeaRequests;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Ideas;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Invitations;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Notifications;
@@ -18,6 +19,8 @@ public static class FilterHelper
         {
             UserGetAllQuery userQuery =>
                 User((queryable as IQueryable<User>)!, userQuery) as IQueryable<TEntity>,
+            IdeaRequestGetAllQuery ideaRequestQuery =>
+                IdeaRequest((queryable as IQueryable<IdeaRequest>)!, ideaRequestQuery) as IQueryable<TEntity>,
             IdeaGetAllQuery ideaQuery =>
                 Idea((queryable as IQueryable<Idea>)!, ideaQuery) as IQueryable<TEntity>,
             InvitationGetAllQuery invitationQuery =>
@@ -113,6 +116,19 @@ public static class FilterHelper
                  (m.LastName.Trim().ToLower() + " " + m.FirstName.Trim().ToLower()).Contains(query.EmailOrFullname
                      .Trim().ToLower()))
             );
+        }
+
+        queryable = BaseFilterHelper.Base(queryable, query);
+
+        return queryable;
+    }
+    
+    private static IQueryable<IdeaRequest>? IdeaRequest(IQueryable<IdeaRequest> queryable, IdeaRequestGetAllQuery query)
+    {
+        if (query.Status.HasValue)
+        {
+            queryable = queryable.Where(m =>
+                m.Status == query.Status);
         }
 
         queryable = BaseFilterHelper.Base(queryable, query);

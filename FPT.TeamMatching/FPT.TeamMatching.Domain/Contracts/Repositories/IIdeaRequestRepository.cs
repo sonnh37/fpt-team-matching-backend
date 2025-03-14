@@ -17,5 +17,9 @@ namespace FPT.TeamMatching.Domain.Contracts.Repositories
 
         Task<(List<IdeaRequest>, int)> GetDataByStatusAndIdeaId(
             IdeaRequestGetAllByListStatusAndIdeaIdQuery query);
+        
+        Task<(List<IdeaRequest>, int)> GetDataByStatusForCurrentUser(
+            IdeaRequestGetAllByListStatusForCurrentUser query, Guid userId);
+
     }
 }

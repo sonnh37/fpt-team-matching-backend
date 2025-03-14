@@ -130,7 +130,7 @@ public class IdeaService : BaseService<Idea>, IIdeaService
         if (ideaEntity == null) return false;
         var userId = GetUserIdFromClaims();
         if (userId == null) return false;
-        ideaEntity.Id = Guid.NewGuid();
+        // ideaEntity.Id = Guid.NewGuid();
         ideaEntity.Status = IdeaStatus.Pending;
         ideaEntity.OwnerId = userId;
         ideaEntity.SemesterId = semester.Id;
@@ -143,15 +143,12 @@ public class IdeaService : BaseService<Idea>, IIdeaService
         var saveChange = await _unitOfWork.SaveChanges();
         if(!saveChange) return false;
 
-        var idea = await _ideaRepository.GetById(ideaEntity.Id);
-        if (idea == null) return false;
         var ideaRequest = new IdeaRequest
         {
             Id = Guid.NewGuid(),
             IdeaId = ideaEntity.Id,
-            IsDeleted = false,
-            CreatedDate = DateTime.UtcNow,
-            UpdatedDate = DateTime.UtcNow,
+            ReviewerId = ideaEntity.MentorId,
+            ProcessDate = DateTime.UtcNow,
             Status = IdeaRequestStatus.MentorPending
         };
         await SetBaseEntityForCreation(ideaRequest);

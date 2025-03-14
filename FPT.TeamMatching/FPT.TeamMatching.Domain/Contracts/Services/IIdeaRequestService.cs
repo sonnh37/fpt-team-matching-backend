@@ -21,6 +21,9 @@ namespace FPT.TeamMatching.Domain.Contracts.Services
 
         Task<BusinessResult> GetAllByStatusAndIdeaId<TResult>(IdeaRequestGetAllByListStatusAndIdeaIdQuery query)
             where TResult : BaseResult;
+        
+        Task<BusinessResult> GetAllByStatusForCurrentUser<TResult>(IdeaRequestGetAllByListStatusForCurrentUser query)
+            where TResult : BaseResult;
 
         Task<BusinessResult> GetAllUnassignedReviewer<TResult>(GetQueryableQuery query) where TResult : BaseResult;
     }

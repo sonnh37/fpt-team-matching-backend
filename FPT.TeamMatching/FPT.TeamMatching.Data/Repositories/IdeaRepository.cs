@@ -24,6 +24,7 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
                                         .ToListAsync();
         return ideas;
     }
+    
 
     public async Task<int> MaxNumberOfSemester(Guid semesterId)
     {
