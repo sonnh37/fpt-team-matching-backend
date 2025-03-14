@@ -17,4 +17,6 @@ public class Semester : BaseEntity
     public virtual ICollection<Idea> Ideas { get; set; } = new List<Idea>();
     
     public virtual ICollection<ProfileStudent> ProfileStudents { get; set; } = new List<ProfileStudent>();
+    
+    public virtual ICollection<StageIdea> StageIdeas { get; set; } = new List<StageIdea>();
 }

@@ -9,19 +9,13 @@ public class Project : BaseEntity
 
     public Guid? IdeaId { get; set; }
 
+    public string? TeamCode { get; set; }
+
     public string? TeamName { get; set; }
-
-    public string? Name { get; set; }
-
-    public string? Description { get; set; }
 
     public ProjectStatus? Status { get; set; }
 
     public int? TeamSize { get; set; }
-
-    public DateTimeOffset? StartDate { get; set; }
-
-    public DateTimeOffset? EndDate { get; set; }
 
     public virtual User? Leader { get; set; }
 
@@ -34,4 +28,8 @@ public class Project : BaseEntity
     public virtual ICollection<TeamMember> TeamMembers { get; set; } = new List<TeamMember>();
     
     public virtual ICollection<Blog> Blogs { get; set; } = new List<Blog>();
+
+    public virtual ICollection<MentorIdeaRequest> MentorIdeaRequests { get; set; } = new List<MentorIdeaRequest>();
+
+    public virtual ICollection<CapstoneSchedule> CapstoneSchedules { get; set; } = new List<CapstoneSchedule>();
 }

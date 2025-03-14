@@ -13,9 +13,9 @@ public class Idea : BaseEntity
 
     public Guid? SubMentorId { get; set; }
 
-    public IdeaType? Type { get; set; }
-    
     public Guid? SpecialtyId { get; set; }
+
+    public IdeaType? Type { get; set; }
 
     public string? IdeaCode { get; set; }
     
@@ -54,4 +54,6 @@ public class Idea : BaseEntity
     public virtual ICollection<IdeaRequest> IdeaRequests { get; set; } = new List<IdeaRequest>();
     
     public virtual ICollection<IdeaHistory> IdeaHistories { get; set; } = new List<IdeaHistory>();
+
+    public virtual ICollection<MentorIdeaRequest> MentorIdeaRequests { get; set; } = new List<MentorIdeaRequest>();
 }

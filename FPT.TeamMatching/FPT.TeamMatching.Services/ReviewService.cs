@@ -54,8 +54,8 @@ public class ReviewService : BaseService<Review>, IReviewService
                 .WithStatus(Const.NOT_FOUND_CODE)
                 .WithMessage("Not found review");
             }
-            review.Reviewer1 = reviewer1.Email;
-            review.Reviewer2 = reviewer2.Email;
+            //review.Reviewer1 = reviewer1.Email;
+            //review.Reviewer2 = reviewer2.Email;
             await SetBaseEntityForUpdate(review);
             _reviewRepository.Update(review);
             bool saveChange = await _unitOfWork.SaveChanges();
