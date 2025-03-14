@@ -29,7 +29,6 @@ public class IdeaService : BaseService<Idea>, IIdeaService
         _ideaRequestRepository = unitOfWork.IdeaRequestRepository;
         _semesterRepository = unitOfWork.SemesterRepository;
         _projectRepository = unitOfWork.ProjectRepository;
-
     }
 
 
@@ -141,7 +140,7 @@ public class IdeaService : BaseService<Idea>, IIdeaService
         _ideaRepository.Add(ideaEntity);
 
         var saveChange = await _unitOfWork.SaveChanges();
-        if(!saveChange) return false;
+        if (!saveChange) return false;
 
         var ideaRequest = new IdeaRequest
         {
@@ -189,24 +188,28 @@ public class IdeaService : BaseService<Idea>, IIdeaService
 
     public async Task<BusinessResult> UpdateIdea(IdeaUpdateCommand ideaUpdateCommand)
     {
-        var userId = GetUserIdFromClaims();
-        var idea = await _projectRepository.GetProjectByUserIdLogin(userId.Value);
-        ideaUpdateCommand.OwnerId = idea.Idea.OwnerId;
-        ideaUpdateCommand.SemesterId = idea.Idea.SemesterId;
-        ideaUpdateCommand.MentorId = idea.Idea.MentorId;
-        ideaUpdateCommand.SubMentorId = idea.Idea.SubMentorId;
-        ideaUpdateCommand.IdeaCode = idea.Idea.IdeaCode;
-        ideaUpdateCommand.SpecialtyId = idea.Idea.SpecialtyId;
-        ideaUpdateCommand.IsExistedTeam = idea.Idea.IsExistedTeam;
-        ideaUpdateCommand.IsEnterpriseTopic = idea.Idea.IsEnterpriseTopic;
-        ideaUpdateCommand.EnterpriseName = idea.Idea.EnterpriseName;
-        ideaUpdateCommand.MaxTeamSize = idea.Idea.MaxTeamSize;
+        try
+        {
+            var userId = GetUserIdFromClaims();
+            var project = await _projectRepository.GetProjectByUserIdLogin(userId.Value);
+            if (project == null || project.Idea == null) return HandlerFail("Not found project");
 
-        var command = _mapper.Map<Idea>(ideaUpdateCommand);
-        command.Id = idea.Idea.Id;
-        _ideaRepository.Update(command);
-        var check = await _unitOfWork.SaveChanges();
-      
+            ideaUpdateCommand.OwnerId = project.Idea.OwnerId;
+            ideaUpdateCommand.SemesterId = project.Idea.SemesterId;
+            ideaUpdateCommand.MentorId = project.Idea.MentorId;
+            ideaUpdateCommand.SubMentorId = project.Idea.SubMentorId;
+            ideaUpdateCommand.IdeaCode = project.Idea.IdeaCode;
+            ideaUpdateCommand.SpecialtyId = project.Idea.SpecialtyId;
+            ideaUpdateCommand.IsExistedTeam = project.Idea.IsExistedTeam;
+            ideaUpdateCommand.IsEnterpriseTopic = project.Idea.IsEnterpriseTopic;
+            ideaUpdateCommand.EnterpriseName = project.Idea.EnterpriseName;
+            ideaUpdateCommand.MaxTeamSize = project.Idea.MaxTeamSize;
+
+            var command = _mapper.Map<Idea>(ideaUpdateCommand);
+            command.Id = project.Idea.Id;
+            _ideaRepository.Update(command);
+            var check = await _unitOfWork.SaveChanges();
+
             if (!check)
                 return new ResponseBuilder()
                     .WithStatus(Const.FAIL_CODE)
@@ -217,8 +220,10 @@ public class IdeaService : BaseService<Idea>, IIdeaService
                 .WithMessage(Const.SUCCESS_SAVE_MSG);
 
             return msg;
-        
-
-
+        }
+        catch (Exception ex)
+        {
+            return HandlerError(ex.Message);
+        }
     }
 }
