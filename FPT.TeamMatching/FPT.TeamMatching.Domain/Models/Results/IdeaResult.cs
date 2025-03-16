@@ -1,3 +1,4 @@
+using FPT.TeamMatching.Domain.Entities;
 using FPT.TeamMatching.Domain.Enums;
 using FPT.TeamMatching.Domain.Models.Results.Bases;
 
@@ -7,7 +8,7 @@ namespace FPT.TeamMatching.Domain.Models.Results
     {
         public Guid? OwnerId { get; set; }
 
-        public Guid? SemesterId { get; set; }
+        public Guid? StageIdeaId { get; set; }
 
         public Guid? MentorId { get; set; }
 
@@ -49,7 +50,7 @@ namespace FPT.TeamMatching.Domain.Models.Results
 
         public ProjectResult? Project { get; set; }
 
-        public SemesterResult? Semester { get; set; }
+        // public StageIdeaResult? StageIdeaResult { get; set; }
 
         public ICollection<IdeaRequestResult> IdeaRequests { get; set; } = new List<IdeaRequestResult>();
         

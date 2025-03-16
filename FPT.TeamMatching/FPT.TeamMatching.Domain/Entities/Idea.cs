@@ -7,7 +7,7 @@ public class Idea : BaseEntity
 {
     public Guid? OwnerId { get; set; }
 
-    public Guid? SemesterId { get; set; }
+    public Guid? StageIdeaId { get; set; }
 
     public Guid? MentorId { get; set; }
 
@@ -49,7 +49,7 @@ public class Idea : BaseEntity
 
     public virtual Project? Project { get; set; }
 
-    public virtual Semester? Semester { get; set; }
+    public virtual StageIdea? StageIdea { get; set; }
 
     public virtual ICollection<IdeaRequest> IdeaRequests { get; set; } = new List<IdeaRequest>();
     
