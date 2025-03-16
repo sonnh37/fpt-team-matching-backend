@@ -62,11 +62,18 @@ public class ReviewController : ControllerBase
         return Ok(msg);
     }
 
-    [HttpPut("council-assign-reviewers")]
-    public async Task<IActionResult> CouncilAssignReviewers([FromBody] CouncilAssignReviewers request)
+    [HttpPut("student-submit-review")]
+    public async Task<IActionResult> StudentSubmitReview([FromBody] SubmitReviewCommand request)
     {
-        var businessResult = await _service.AssignReviewers(request);
+        var businessResult = await _service.StudentSubmitReview(request);
 
         return Ok(businessResult);
     }
+    //[HttpPut("council-assign-reviewers")]
+    //public async Task<IActionResult> CouncilAssignReviewers([FromBody] CouncilAssignReviewers request)
+    //{
+    //    var businessResult = await _service.AssignReviewers(request);
+
+    //    return Ok(businessResult);
+    //}
 }

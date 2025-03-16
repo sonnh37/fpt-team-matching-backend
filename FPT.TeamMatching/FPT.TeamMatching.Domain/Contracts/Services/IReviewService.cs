@@ -10,4 +10,5 @@ public interface IReviewService : IBaseService
     Task<BusinessResult> GetByProjectId(Guid projectId);
     Task<BusinessResult> AssignReviewers(CouncilAssignReviewers request);
     Task CreateReviewsForActiveProject();
+    Task<BusinessResult> StudentSubmitReview(SubmitReviewCommand request);
 }

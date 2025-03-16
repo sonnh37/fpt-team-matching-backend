@@ -124,4 +124,38 @@ public class ReviewService : BaseService<Review>, IReviewService
                 .WithMessage(errorMessage);
         }
     }
+
+    public async Task<BusinessResult> StudentSubmitReview(SubmitReviewCommand request)
+    {
+        try
+        {
+            var entities = await _reviewRepository.GetById(request.Id);
+            if (entities == null)
+            {
+                return new ResponseBuilder()
+                .WithStatus(Const.NOT_FOUND_CODE)
+                .WithMessage(Const.NOT_FOUND_MSG);
+            }
+            entities.FileUpload = request.FileUpload;
+            await SetBaseEntityForUpdate(entities);
+             _reviewRepository.Update(entities);
+            bool saveChange = await _unitOfWork.SaveChanges();
+            if (saveChange)
+            {
+                return new ResponseBuilder()
+                .WithStatus(Const.SUCCESS_CODE)
+                .WithMessage(Const.SUCCESS_SAVE_MSG);
+            }
+            return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage(Const.FAIL_SAVE_MSG);
+        }
+        catch (Exception ex)
+        {
+            var errorMessage = $"An error {typeof(ReviewResult).Name}: {ex.Message}";
+            return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage(errorMessage);
+        }
+    }
 }
