@@ -49,6 +49,14 @@ public class IdeaController : ControllerBase
         return Ok(businessResult);
     }
 
+    [HttpPut("status")]
+    public async Task<IActionResult> UpdateStatus([FromBody] IdeaUpdateStatusCommand request)
+    {
+        var businessResult = await _service.UpdateStatusIdea(request);
+
+        return Ok(businessResult);
+    }
+
     [HttpDelete]
     public async Task<IActionResult> Delete([FromQuery] IdeaDeleteCommand request)
     {
@@ -85,5 +93,13 @@ public class IdeaController : ControllerBase
         var businessResult = await _service.GetIdeasByUserId();
         return Ok(businessResult);
     }
+    
+    [HttpGet("me/get-by-status")]
+    public async Task<IActionResult> GetCurrentIdeaByStatus([FromQuery] IdeaGetCurrentByStatus request)
+    {
+        var businessResult = await _service.GetCurrentIdeaByStatus(request);
+        return Ok(businessResult);
+    }
+
 }
 
