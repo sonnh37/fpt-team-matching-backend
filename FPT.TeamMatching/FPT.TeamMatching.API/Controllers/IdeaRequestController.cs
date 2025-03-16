@@ -56,6 +56,13 @@ public class IdeaRequestController : ControllerBase
         return Ok(businessResult);
     }
     
+    [HttpPost("create-council-requests")]
+    public async Task<IActionResult> CreateCouncilRequests([FromBody] IdeaRequestCreateForCouncilsCommand command)
+    {
+        var result = await _service.CreateCouncilRequestsForIdea(command);
+        return Ok(result);
+    }
+    
     [HttpGet("without-reviewer")]
     public async Task<IActionResult> GetAllUnassignedReviewer([FromQuery] GetQueryableQuery query)
     {

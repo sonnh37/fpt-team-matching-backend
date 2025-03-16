@@ -30,11 +30,21 @@ public class UserRepository : BaseRepository<User>, IUserRepository
             .FirstOrDefaultAsync();
     }
     
-    public async Task<List<User>> GetThreeCouncilsForIdeaRequest()
+    public async Task<List<User>> GetThreeCouncilsForIdeaRequest(Guid ideaId)
     {
         var queryable = GetQueryable();
-        
         queryable = queryable.Include(m => m.UserXRoles).ThenInclude(m => m.Role);
+
+        // Lấy thông tin idea để lấy mentor
+        var idea = await GetQueryable<Idea>()
+            .Where(i => i.Id == ideaId)
+            .Select(i => new { i.MentorId, i.SubMentorId })
+            .FirstOrDefaultAsync();
+
+        if (idea == null)
+        {
+            throw new Exception("Idea not found");
+        }
 
         var councils = await queryable
             .Where(u => u.UserXRoles.Any(m => m.Role != null && m.Role.RoleName == "Council"))
@@ -45,12 +55,15 @@ public class UserRepository : BaseRepository<User>, IUserRepository
                     .Count(ir => ir.ReviewerId == u.Id && ir.Status == IdeaRequestStatus.Approved && ir.Role == "Council")
             })
             .OrderBy(x => x.ApprovedCount)
-            .Take(3)
             .Select(x => x.Council)
             .ToListAsync();
 
+        // Lọc bỏ những council trùng với mentor hoặc sub-mentor
+        councils = councils.Where(c => c.Id != idea.MentorId && c.Id != idea.SubMentorId).Take(3).ToList();
+
         return councils;
     }
+
 
 
     public async Task<User?> GetByEmail(string keyword)

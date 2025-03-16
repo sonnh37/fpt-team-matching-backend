@@ -206,6 +206,46 @@ public class IdeaRequestService : BaseService<IdeaRequest>, IIdeaRequestService
         }
     }
 
+    public async Task<BusinessResult> CreateCouncilRequestsForIdea(IdeaRequestCreateForCouncilsCommand command)
+    {
+        try
+        {
+            if(command.IdeaId == Guid.Empty || command.IdeaId == null) return HandlerFail("No Idea Id provided");
+            var councils = await _userRepository.GetThreeCouncilsForIdeaRequest(command.IdeaId.Value);
+            if (!councils.Any()) return HandlerFail("No available councils");
+
+            var newIdeaRequests = new List<IdeaRequest>();
+
+            foreach (var council in councils)
+            {
+                var ideaRequest = new IdeaRequest
+                {
+                    IdeaId = command.IdeaId,
+                    ReviewerId = council.Id,
+                    Status = IdeaRequestStatus.Pending,
+                    Role = "Council",
+                };
+                await SetBaseEntityForCreation(ideaRequest);
+                newIdeaRequests.Add(ideaRequest);
+            }
+
+            if (!newIdeaRequests.Any()) return HandlerNotFound("No available councils");
+
+            _ideaRequestRepository.AddRange(newIdeaRequests);
+            var check = await _unitOfWork.SaveChanges();
+
+            return check
+                ? new ResponseBuilder().WithStatus(Const.SUCCESS_CODE)
+                    .WithMessage("Created council requests successfully.")
+                : new ResponseBuilder().WithStatus(Const.FAIL_CODE)
+                    .WithMessage("Failed to create council requests.");
+        }
+        catch (Exception ex)
+        {
+            return HandlerError(ex.Message);
+        }
+    }
+
     public async Task<BusinessResult> UpdateStatus(IdeaRequestUpdateStatusCommand command)
     {
         try
@@ -225,23 +265,23 @@ public class IdeaRequestService : BaseService<IdeaRequest>, IIdeaRequestService
                     .WithMessage(Const.FAIL_SAVE_MSG);
 
             // Nếu Mentor approve -> Tạo 3 request cho Council duyệt
-            if (command.Status == IdeaRequestStatus.Approved && ideaRequest.Role == "Mentor")
-            {
-                var councils = await _userRepository.GetThreeCouncilsForIdeaRequest();
-
-                var newIdeaRequests = councils.Select(council => new IdeaRequest
-                {
-                    IdeaId = ideaRequest.IdeaId,
-                    ReviewerId = council.Id,
-                    Status = IdeaRequestStatus.Pending,
-                    Role = "Council",
-                }).ToList();
-
-                _ideaRequestRepository.AddRange(newIdeaRequests);
-                await _unitOfWork.SaveChanges();
-            }
+            // if (command.Status == IdeaRequestStatus.Approved && ideaRequest.Role == "Mentor")
+            // {
+            //     var councils = await _userRepository.GetThreeCouncilsForIdeaRequest();
+            //
+            //     var newIdeaRequests = councils.Select(council => new IdeaRequest
+            //     {
+            //         IdeaId = ideaRequest.IdeaId,
+            //         ReviewerId = council.Id,
+            //         Status = IdeaRequestStatus.Pending,
+            //         Role = "Council",
+            //     }).ToList();
+            //
+            //     _ideaRequestRepository.AddRange(newIdeaRequests);
+            //     await _unitOfWork.SaveChanges();
+            // }
             // Nếu Mentor từ chối -> Idea bị từ chối ngay lập tức
-            else if (command.Status == IdeaRequestStatus.Rejected && ideaRequest.Role == "Mentor")
+            if (command.Status == IdeaRequestStatus.Rejected && ideaRequest.Role == "Mentor")
             {
                 return await _ideaService.UpdateStatusIdea(new IdeaUpdateStatusCommand
                 {
