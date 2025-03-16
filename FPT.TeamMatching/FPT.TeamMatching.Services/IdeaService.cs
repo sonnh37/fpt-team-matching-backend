@@ -29,14 +29,8 @@ public class IdeaService : BaseService<Idea>, IIdeaService
         _ideaRequestRepository = unitOfWork.IdeaRequestRepository;
         _semesterRepository = unitOfWork.SemesterRepository;
         _projectRepository = unitOfWork.ProjectRepository;
-
     }
 
-
-    public async Task<BusinessResult> GetAll<TResult>(IdeaGetAllQuery query) where TResult : BaseResult
-    {
-        return await base.GetAll<TResult>(query);
-    }
 
     public async Task<BusinessResult> GetIdeasByUserId()
     {
@@ -97,6 +91,36 @@ public class IdeaService : BaseService<Idea>, IIdeaService
         }
     }
 
+    public async Task<BusinessResult> GetCurrentIdeaByStatus(IdeaGetCurrentByStatus query)
+    {
+        try
+        {
+            var userId = GetUserIdFromClaims();
+            if (userId == null) return HandlerError("User does not exist");
+
+            if (query.Status == null) return HandlerFail("Status cannot be null");
+
+            var ideas = await _ideaRepository.GetCurrentIdeaByUserIdAndStatus(userId.Value, query.Status.Value);
+            var result = _mapper.Map<List<IdeaResult>>(ideas);
+            if (result == null)
+                return new ResponseBuilder()
+                    .WithStatus(Const.NOT_FOUND_CODE)
+                    .WithMessage(Const.NOT_FOUND_MSG);
+
+            return new ResponseBuilder()
+                .WithData(result)
+                .WithStatus(Const.SUCCESS_CODE)
+                .WithMessage(Const.SUCCESS_READ_MSG);
+        }
+        catch (Exception ex)
+        {
+            var errorMessage = $"An error {typeof(IdeaResult).Name}: {ex.Message}";
+            return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage(errorMessage);
+        }
+    }
+
     public async Task<BusinessResult> StudentCreatePending(IdeaStudentCreatePendingCommand idea)
     {
         try
@@ -133,7 +157,8 @@ public class IdeaService : BaseService<Idea>, IIdeaService
         // ideaEntity.Id = Guid.NewGuid();
         ideaEntity.Status = IdeaStatus.Pending;
         ideaEntity.OwnerId = userId;
-        ideaEntity.SemesterId = semester.Id;
+        // # Lỗi do thay đổi db
+        // ideaEntity.SemesterId = semester.Id;
         ideaEntity.Type = IdeaType.Student;
         ideaEntity.IsExistedTeam = true;
         ideaEntity.IsEnterpriseTopic = false;
@@ -141,7 +166,7 @@ public class IdeaService : BaseService<Idea>, IIdeaService
         _ideaRepository.Add(ideaEntity);
 
         var saveChange = await _unitOfWork.SaveChanges();
-        if(!saveChange) return false;
+        if (!saveChange) return false;
 
         var ideaRequest = new IdeaRequest
         {
@@ -149,7 +174,10 @@ public class IdeaService : BaseService<Idea>, IIdeaService
             IdeaId = ideaEntity.Id,
             ReviewerId = ideaEntity.MentorId,
             ProcessDate = DateTime.UtcNow,
-            Status = IdeaRequestStatus.MentorPending
+            Status = IdeaRequestStatus.Pending,
+            Role = "Mentor",
+            // # Lỗi do thay đổi db
+            // Status = IdeaRequestStatus.MentorPending
         };
         await SetBaseEntityForCreation(ideaRequest);
         _ideaRequestRepository.Add(ideaRequest);
@@ -176,9 +204,10 @@ public class IdeaService : BaseService<Idea>, IIdeaService
             Id = Guid.NewGuid(),
             IdeaId = ideaEntity.Id,
             IsDeleted = false,
-            CreatedDate = DateTime.UtcNow,
-            UpdatedDate = DateTime.UtcNow,
-            Status = IdeaRequestStatus.CouncilPending
+            Status = IdeaRequestStatus.Pending,
+            Role = "Mentor",
+            // # Lỗi do thay đổi db
+            // Status = IdeaRequestStatus.CouncilPending
         };
         await SetBaseEntityForCreation(ideaRequest);
         _ideaRequestRepository.Add(ideaRequest);
@@ -189,24 +218,29 @@ public class IdeaService : BaseService<Idea>, IIdeaService
 
     public async Task<BusinessResult> UpdateIdea(IdeaUpdateCommand ideaUpdateCommand)
     {
-        var userId = GetUserIdFromClaims();
-        var idea = await _projectRepository.GetProjectByUserIdLogin(userId.Value);
-        ideaUpdateCommand.OwnerId = idea.Idea.OwnerId;
-        ideaUpdateCommand.SemesterId = idea.Idea.SemesterId;
-        ideaUpdateCommand.MentorId = idea.Idea.MentorId;
-        ideaUpdateCommand.SubMentorId = idea.Idea.SubMentorId;
-        ideaUpdateCommand.IdeaCode = idea.Idea.IdeaCode;
-        ideaUpdateCommand.SpecialtyId = idea.Idea.SpecialtyId;
-        ideaUpdateCommand.IsExistedTeam = idea.Idea.IsExistedTeam;
-        ideaUpdateCommand.IsEnterpriseTopic = idea.Idea.IsEnterpriseTopic;
-        ideaUpdateCommand.EnterpriseName = idea.Idea.EnterpriseName;
-        ideaUpdateCommand.MaxTeamSize = idea.Idea.MaxTeamSize;
+        try
+        {
+            var userId = GetUserIdFromClaims();
+            var project = await _projectRepository.GetProjectByUserIdLogin(userId.Value);
+            if (project == null || project.Idea == null) return HandlerFail("Not found project");
 
-        var command = _mapper.Map<Idea>(ideaUpdateCommand);
-        command.Id = idea.Idea.Id;
-        _ideaRepository.Update(command);
-        var check = await _unitOfWork.SaveChanges();
-      
+            ideaUpdateCommand.OwnerId = project.Idea.OwnerId;
+            // # Lỗi do thay đổi db
+            // ideaUpdateCommand.SemesterId = project.Idea.SemesterId;
+            ideaUpdateCommand.MentorId = project.Idea.MentorId;
+            ideaUpdateCommand.SubMentorId = project.Idea.SubMentorId;
+            ideaUpdateCommand.IdeaCode = project.Idea.IdeaCode;
+            ideaUpdateCommand.SpecialtyId = project.Idea.SpecialtyId;
+            ideaUpdateCommand.IsExistedTeam = project.Idea.IsExistedTeam;
+            ideaUpdateCommand.IsEnterpriseTopic = project.Idea.IsEnterpriseTopic;
+            ideaUpdateCommand.EnterpriseName = project.Idea.EnterpriseName;
+            ideaUpdateCommand.MaxTeamSize = project.Idea.MaxTeamSize;
+
+            var command = _mapper.Map<Idea>(ideaUpdateCommand);
+            command.Id = project.Idea.Id;
+            _ideaRepository.Update(command);
+            var check = await _unitOfWork.SaveChanges();
+
             if (!check)
                 return new ResponseBuilder()
                     .WithStatus(Const.FAIL_CODE)
@@ -217,8 +251,37 @@ public class IdeaService : BaseService<Idea>, IIdeaService
                 .WithMessage(Const.SUCCESS_SAVE_MSG);
 
             return msg;
-        
+        }
+        catch (Exception ex)
+        {
+            return HandlerError(ex.Message);
+        }
+    }
 
+    public async Task<BusinessResult> UpdateStatusIdea(IdeaUpdateStatusCommand command)
+    {
+        try
+        {
+            var idea = await _ideaRepository.GetById(command.Id);
+            if (idea == null) return HandlerFail("Not found idea");
+            idea.Status = command.Status;
+            _ideaRepository.Update(idea);
+            var check = await _unitOfWork.SaveChanges();
 
+            if (!check)
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage(Const.FAIL_SAVE_MSG);
+
+            var msg = new ResponseBuilder()
+                .WithStatus(Const.SUCCESS_CODE)
+                .WithMessage(Const.SUCCESS_SAVE_MSG);
+
+            return msg;
+        }
+        catch (Exception ex)
+        {
+            return HandlerError(ex.Message);
+        }
     }
 }

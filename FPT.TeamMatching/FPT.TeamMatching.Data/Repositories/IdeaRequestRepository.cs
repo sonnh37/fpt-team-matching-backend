@@ -49,15 +49,82 @@ public class IdeaRequestRepository : BaseRepository<IdeaRequest>, IIdeaRequestRe
     }
 
 
-    public async Task<(List<IdeaRequest>, int)> GetDataByStatusAndIdeaId(
-        IdeaRequestGetAllByListStatusAndIdeaIdQuery query)
+    public async Task<(List<IdeaRequest>, int)> GetIdeaRequestsCurrentByStatus(
+        IdeaRequestGetAllCurrentByStatus query, Guid userId)
+    {
+        var status = (IdeaStatus)query.Status;
+        var idea = await GetQueryable<Idea>()
+            .OrderByDescending(m => m.CreatedDate)
+            .Where(e => e.OwnerId == userId
+                        && e.Status == status).FirstOrDefaultAsync();
+
+        if (idea == null) return (new List<IdeaRequest>(), -1);
+
+        var queryable = GetQueryable<IdeaRequest>()
+            .Include(m => m.Idea)
+            .Where(ir => ir.IdeaId == idea.Id && ir.Status == query.Status);
+
+        if (query.IsPagination)
+        {
+            // Tổng số count sau khi  filter khi chưa lọc trang
+            var totalOrigin = queryable.Count();
+            // Sắp sếp
+            queryable = Sort(queryable, query);
+            // Lọc trang
+            var results = await GetQueryablePagination(queryable, query).ToListAsync();
+
+            return (results, totalOrigin);
+        }
+        else
+        {
+            queryable = Sort(queryable, query);
+            var results = await queryable.ToListAsync();
+            return (results, results.Count);
+        }
+    }
+
+    public async Task<(List<IdeaRequest>, int)> GetCurrentIdeaRequestsByStatusAndRoles(
+        IdeaRequestGetAllByListStatusForCurrentUser query, Guid userId)
     {
         var queryable = GetQueryable();
         queryable = queryable.Include(m => m.Idea)
             .Include(m => m.Reviewer);
 
         queryable = queryable.Where(m =>
-            m.Status != null && (query.StatusList.Contains(m.Status.Value) && m.IdeaId == query.IdeaId));
+            m.Status != null && m.Role != null &&
+            (query.Roles.Contains(m.Role) && query.Status == m.Status && m.ReviewerId == userId));
+
+
+        if (query.IsPagination)
+        {
+            // Tổng số count sau khi  filter khi chưa lọc trang
+            var totalOrigin = queryable.Count();
+            // Sắp sếp
+            queryable = Sort(queryable, query);
+            // Lọc trang
+            var results = await GetQueryablePagination(queryable, query).ToListAsync();
+
+            return (results, totalOrigin);
+        }
+        else
+        {
+            queryable = Sort(queryable, query);
+            var results = await queryable.ToListAsync();
+            return (results, results.Count);
+        }
+    }
+    
+    public async Task<(List<IdeaRequest>, int)> GetIdeaRequestsByStatusAndRoles(
+        IdeaRequestGetAllByListStatusForCurrentUser query)
+    {
+        
+        var queryable = GetQueryable();
+        queryable = queryable.Include(m => m.Idea)
+            .Include(m => m.Reviewer);
+
+        queryable = queryable.Where(m =>
+            m.Status != null && m.Role != null &&
+            (query.Roles.Contains(m.Role) && query.Status == m.Status && query.IdeaId == m.IdeaId));
 
 
         if (query.IsPagination)
@@ -79,34 +146,27 @@ public class IdeaRequestRepository : BaseRepository<IdeaRequest>, IIdeaRequestRe
         }
     }
 
-    public async Task<(List<IdeaRequest>, int)> GetDataByStatusForCurrentUser(IdeaRequestGetAllByListStatusForCurrentUser query, Guid userId)
+    public async Task<int> CountApprovedCouncilsForIdea(Guid ideaId)
     {
-        var queryable = GetQueryable();
-        queryable = queryable.Include(m => m.Idea)
-            .Include(m => m.Reviewer);
-
-        queryable = queryable.Where(m =>
-            m.Status != null && (query.StatusList.Contains(m.Status.Value) && m.ReviewerId == userId));
-
-
-        if (query.IsPagination)
-        {
-            // Tổng số count sau khi  filter khi chưa lọc trang
-            var totalOrigin = queryable.Count();
-            // Sắp sếp
-            queryable = Sort(queryable, query);
-            // Lọc trang
-            var results = await GetQueryablePagination(queryable, query).ToListAsync();
-
-            return (results, totalOrigin);
-        }
-        else
-        {
-            queryable = Sort(queryable, query);
-            var results = await queryable.ToListAsync();
-            return (results, results.Count);
-        }
+        return await GetQueryable()
+            .Where(ir => ir.IdeaId == ideaId && ir.Role == "Council" && ir.Status == IdeaRequestStatus.Approved)
+            .CountAsync();
     }
+    
+    public async Task<int> CountCouncilsForIdea(Guid ideaId)
+    {
+        return await GetQueryable()
+            .Where(ir => ir.IdeaId == ideaId && ir.Role == "Council")
+            .CountAsync();
+    }
+    
+    public async Task<int> CountRejectedCouncilsForIdea(Guid ideaId)
+    {
+        return await GetQueryable()
+            .Where(ir => ir.IdeaId == ideaId && ir.Role == "Council" && ir.Status == IdeaRequestStatus.Rejected)
+            .CountAsync();
+    }
+
 
     public async Task<(List<IdeaRequest>, int)> GetDataUnassignedReviewer(
         GetQueryableQuery query)

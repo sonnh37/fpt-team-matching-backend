@@ -50,9 +50,11 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
 
     public async Task<List<Project>?> GetProjectsStartingNow()
     {
-        return await _context.Projects
-            .Where(p => p.Idea.Semester != null 
-                        && p.Idea.Semester.StartDate == DateTime.UtcNow.Date)
-            .ToListAsync();
+        // # Lỗi do thay đổi db
+        // return await _context.Projects
+        //     .Where(p => p.Idea.Semester != null 
+        //                 && p.Idea.Semester.StartDate == DateTime.UtcNow.Date)
+        //     .ToListAsync();
+        return [];
     }
 }

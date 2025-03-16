@@ -13,10 +13,11 @@ namespace FPT.TeamMatching.Domain.Contracts.Services
 {
     public interface IIdeaService: IBaseService
     {
-        Task<BusinessResult> GetAll<TResult>(IdeaGetAllQuery query) where TResult : BaseResult;
+        Task<BusinessResult> GetCurrentIdeaByStatus(IdeaGetCurrentByStatus query);
         Task<BusinessResult> StudentCreatePending(IdeaStudentCreatePendingCommand idea);
         Task<BusinessResult> LecturerCreatePending(IdeaLecturerCreatePendingCommand idea);
         Task<BusinessResult> GetIdeasByUserId();
         Task<BusinessResult> UpdateIdea(IdeaUpdateCommand ideaUpdateCommand);
+        Task<BusinessResult> UpdateStatusIdea(IdeaUpdateStatusCommand command);
     }
 }

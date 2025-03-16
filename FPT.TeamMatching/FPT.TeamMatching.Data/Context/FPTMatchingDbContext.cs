@@ -349,8 +349,8 @@ public partial class FPTMatchingDbContext : BaseDbContext
             entity.HasOne(d => d.SubMentor).WithMany(p => p.IdeaOfSubMentors)
                 .HasForeignKey(d => d.SubMentorId);
 
-            entity.HasOne(d => d.Semester).WithMany(p => p.Ideas)
-                .HasForeignKey(d => d.SemesterId);
+            entity.HasOne(d => d.StageIdea).WithMany(p => p.Ideas)
+                .HasForeignKey(d => d.StageIdeaId);
             
             entity.HasOne(d => d.Specialty).WithMany(p => p.Ideas)
                 .HasForeignKey(d => d.SpecialtyId);
