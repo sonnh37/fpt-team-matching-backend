@@ -4,6 +4,7 @@ using FPT.TeamMatching.Data.Repositories.Base;
 using FPT.TeamMatching.Domain.Contracts.Repositories;
 using FPT.TeamMatching.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
+using ZstdSharp.Unsafe;
 
 namespace FPT.TeamMatching.Data.Repositories;
 
@@ -30,5 +31,25 @@ public class ReviewRepository : BaseRepository<Review>, IReviewRepository
                                                         && e.IsDeleted == false)
                                                 .SingleOrDefaultAsync();
         return review;
+    }
+
+    public async Task<(List<Review>?, int)> GetReviewByReviewNumberAndSemesterIdPaging(int number, Guid semesterId, int pageIndex, int pageSize)
+    {
+        var query = _dbContext.Reviews.Where(e =>
+                                    e.IsDeleted == false &&
+                                    e.Number == number &&
+                                    e.Project != null &&
+                                    e.Project.Idea != null &&
+                                    e.Project.Idea.StageIdea != null &&
+                                    e.Project.Idea.StageIdea.SemesterId == semesterId);
+
+        var items = await query
+            .Skip((pageIndex - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        var totalRecords = items.Count();
+
+        return (items, totalRecords);
     }
 }

@@ -20,12 +20,14 @@ public class ReviewService : BaseService<Review>, IReviewService
     private readonly IReviewRepository _reviewRepository;
     private readonly IUserRepository _userRepository;
     private readonly IProjectRepository _projectRepository;
+    private readonly ISemesterRepository _semesterRepository;
 
     public ReviewService(IMapper mapper, IUnitOfWork unitOfWork) : base(mapper, unitOfWork)
     {
         _reviewRepository = unitOfWork.ReviewRepository;
         _userRepository = unitOfWork.UserRepository;
         _projectRepository = unitOfWork.ProjectRepository;
+        _semesterRepository = unitOfWork.SemesterRepository;
     }
 
     public async Task<BusinessResult> AssignReviewers(CouncilAssignReviewers request)
@@ -296,5 +298,45 @@ public class ReviewService : BaseService<Review>, IReviewService
         }
     }
 
-
+    public async Task<BusinessResult> GetReviewByReviewNumberAndSemesterIdPaging(int number, Guid semesterId, int pageIndex, int pageSize)
+    {
+        try
+        {
+            var semester = await _semesterRepository.GetById(semesterId);
+            if (semester == null)
+            {
+                return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage("Semester is not exist!");
+            }
+            if (number > 4 || number < 0)
+            {
+                return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage("Review number must less than 5 and greater than 0!");
+            }
+            var result = await _reviewRepository.GetReviewByReviewNumberAndSemesterIdPaging(number, semesterId, pageIndex, pageSize);
+            if (result.Item2 == 0)
+            {
+                return new ResponseBuilder()
+                .WithStatus(Const.NOT_FOUND_CODE)
+                .WithMessage("No review exist!");
+            }
+            return new ResponseBuilder()
+                .WithStatus(Const.SUCCESS_CODE)
+                .WithMessage(Const.SUCCESS_READ_MSG)
+                .WithData(new
+                {
+                    reviews = result.Item1,
+                    total = result.Item2,
+                });
+        }
+        catch (Exception ex)
+        {
+            var errorMessage = $"An error {typeof(ReviewResult).Name}: {ex.Message}";
+            return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage(errorMessage);
+        }
+    }
 }

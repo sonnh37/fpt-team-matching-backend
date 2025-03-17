@@ -50,10 +50,16 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
 
     public async Task<List<Project>?> GetProjectsStartingNow()
     {
-        return await _context.Projects
-            .Where(p => p.Idea.StageIdea.Semester != null 
-                        && p.Idea.StageIdea.Semester.StartDate == DateTime.UtcNow.Date)
+        var project = await _context.Projects
+            .Where(p => p.IsDeleted == false &&
+                        p.Idea != null &&
+                        p.Idea.StageIdea != null &&
+                        p.Idea.StageIdea.Semester != null &&
+                        p.Idea.StageIdea.Semester != null &&
+                        //p.Idea.StageIdea.Semester.StartDate != null &&
+                        p.Idea.StageIdea.Semester.StartDate == DateTime.UtcNow.Date)
             .ToListAsync();
+        return project;
     }
 
     public async Task<Project?> GetProjectByCode(string code)
