@@ -29,12 +29,13 @@ public class User : BaseEntity
 
     public Department? Department { get; set; }
 
+    public virtual ProfileStudent? ProfileStudent { get; set; }
+
     public virtual ICollection<Blog> Blogs { get; set; } = new List<Blog>();
 
     public virtual ICollection<IdeaRequest> IdeaRequestOfReviewers { get; set; } = new List<IdeaRequest>();
 
-    public virtual ICollection<IdeaHistoryRequest> IdeaHistoryRequestOfReviewers { get; set; } =
-        new List<IdeaHistoryRequest>();
+    public virtual ICollection<IdeaHistoryRequest> IdeaHistoryRequestOfReviewers { get; set; } = new List<IdeaHistoryRequest>();
 
     public virtual ICollection<Idea> IdeaOfOwners { get; set; } = new List<Idea>();
 
@@ -45,6 +46,7 @@ public class User : BaseEntity
     public virtual ICollection<IdeaHistory> IdeaHistoryOfCouncils { get; set; } = new List<IdeaHistory>();
 
     public virtual ICollection<UserXRole> UserXRoles { get; set; } = new List<UserXRole>();
+
     public virtual ICollection<Comment> Comments { get; set; } = new List<Comment>();
 
     public virtual ICollection<Invitation> InvitationOfSenders { get; set; } = new List<Invitation>();
@@ -57,8 +59,6 @@ public class User : BaseEntity
 
     public virtual ICollection<Notification> Notifications { get; set; } = new List<Notification>();
 
-    public virtual ProfileStudent? ProfileStudent { get; set; }
-
     public virtual ICollection<Project> Projects { get; set; } = new List<Project>();
 
     public virtual ICollection<Project> ProjectOfLeaders { get; set; } = new List<Project>();
@@ -68,4 +68,8 @@ public class User : BaseEntity
     public virtual ICollection<SkillProfile> SkillProfiles { get; set; } = new List<SkillProfile>();
 
     public virtual ICollection<TeamMember> TeamMembers { get; set; } = new List<TeamMember>();
+
+    public virtual ICollection<Review> Reviewer1s { get; set; } = new List<Review>();
+
+    public virtual ICollection<Review> Reviewer2s { get; set; } = new List<Review>();
 }

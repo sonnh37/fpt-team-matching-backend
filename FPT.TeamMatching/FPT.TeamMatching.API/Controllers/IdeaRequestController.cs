@@ -27,11 +27,33 @@ public class IdeaRequestController : ControllerBase
         return Ok(msg);
     }
     
-    [HttpGet("by-list-status-and-idea-id")]
-    public async Task<IActionResult> GetAllByStatusAndIdeaId([FromQuery] IdeaRequestGetAllByListStatusAndIdeaIdQuery query)
+    [HttpGet("me/by-status")]
+    public async Task<IActionResult> GetIdeaRequestsCurrentByStatus([FromQuery] IdeaRequestGetAllCurrentByStatus request)
     {
-        var msg = await _service.GetAllByStatusAndIdeaId<IdeaRequestResult>(query);
+        var businessResult = await _service.GetIdeaRequestsCurrentByStatus<IdeaRequestResult>(request);
+        return Ok(businessResult);
+    }
+    
+    [HttpGet("me/by-status-and-roles")]
+    public async Task<IActionResult> GetIdeaRequestsCurrentByStatusAndRoles([FromQuery] IdeaRequestGetAllByListStatusForCurrentUser query)
+    {
+        var msg = await _service.GetIdeaRequestsCurrentByStatusAndRoles<IdeaRequestResult>(query);
         return Ok(msg);
+    }
+    
+    [HttpGet("by-status-and-roles")]
+    public async Task<IActionResult> GetIdeaRequestsByStatusAndRoles([FromQuery] IdeaRequestGetAllByListStatusForCurrentUser query)
+    {
+        var msg = await _service.GetIdeaRequestsByStatusAndRoles<IdeaRequestResult>(query);
+        return Ok(msg);
+    }
+    
+    [HttpPut("status")]
+    public async Task<IActionResult> UpdateStatus([FromBody] IdeaRequestUpdateStatusCommand request)
+    {
+        var businessResult = await _service.UpdateStatus(request);
+
+        return Ok(businessResult);
     }
     
     [HttpGet("without-reviewer")]

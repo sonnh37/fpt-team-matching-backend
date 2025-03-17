@@ -19,6 +19,8 @@ namespace FPT.TeamMatching.Domain.Models.Results
         public IdeaRequestStatus? Status { get; set; }
 
         public DateTimeOffset? ProcessDate { get; set; }
+        
+        public string? Role { get; set; }
 
         public IdeaResult? Idea { get; set; }
 

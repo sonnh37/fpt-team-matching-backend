@@ -16,8 +16,10 @@ public class ProfileStudentRepository : BaseRepository<ProfileStudent>, IProfile
         _dbContext = dbContext;
     }
 
-    public async Task<ProfileStudent> GetProfileByUserId(Guid userId)
+    public async Task<ProfileStudent?> GetProfileByUserId(Guid userId)
     {
-        return await _dbContext.ProfileStudents.FirstOrDefaultAsync(x => x.UserId == userId);
+        var queryable = GetQueryable(m => m.UserId == userId).Include(m => m.Specialty);
+        
+        return await queryable.SingleOrDefaultAsync();
     }
 }

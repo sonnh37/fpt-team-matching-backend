@@ -15,7 +15,20 @@ namespace FPT.TeamMatching.Domain.Contracts.Repositories
         Task<(List<IdeaRequest>, int)> GetData(IdeaRequestGetAllQuery query);
         Task<(List<IdeaRequest>, int)> GetDataUnassignedReviewer(GetQueryableQuery query);
 
-        Task<(List<IdeaRequest>, int)> GetDataByStatusAndIdeaId(
-            IdeaRequestGetAllByListStatusAndIdeaIdQuery query);
+        Task<(List<IdeaRequest>, int)> GetIdeaRequestsCurrentByStatus(
+            IdeaRequestGetAllCurrentByStatus query, Guid userId);
+
+        Task<(List<IdeaRequest>, int)> GetCurrentIdeaRequestsByStatusAndRoles(
+            IdeaRequestGetAllByListStatusForCurrentUser query, Guid userId);
+
+        Task<(List<IdeaRequest>, int)> GetIdeaRequestsByStatusAndRoles(
+            IdeaRequestGetAllByListStatusForCurrentUser query);
+        
+        Task<int> CountApprovedCouncilsForIdea(Guid ideaId);
+
+        Task<int> CountRejectedCouncilsForIdea(Guid ideaId);
+
+        Task<int> CountCouncilsForIdea(Guid ideaId);
+
     }
 }

@@ -248,6 +248,12 @@ public partial class FPTMatchingDbContext : BaseDbContext
 
             entity.HasOne(d => d.Project).WithMany(p => p.Reviews)
                 .HasForeignKey(d => d.ProjectId);
+
+            entity.HasOne(d => d.Reviewer1).WithMany(p => p.Reviewer1s)
+                .HasForeignKey(d => d.Reviewer1Id);
+
+            entity.HasOne(d => d.Reviewer2).WithMany(p => p.Reviewer2s)
+                .HasForeignKey(d => d.Reviewer2Id);
         });
 
         modelBuilder.Entity<SkillProfile>(entity =>
@@ -343,8 +349,8 @@ public partial class FPTMatchingDbContext : BaseDbContext
             entity.HasOne(d => d.SubMentor).WithMany(p => p.IdeaOfSubMentors)
                 .HasForeignKey(d => d.SubMentorId);
 
-            entity.HasOne(d => d.Semester).WithMany(p => p.Ideas)
-                .HasForeignKey(d => d.SemesterId);
+            entity.HasOne(d => d.StageIdea).WithMany(p => p.Ideas)
+                .HasForeignKey(d => d.StageIdeaId);
             
             entity.HasOne(d => d.Specialty).WithMany(p => p.Ideas)
                 .HasForeignKey(d => d.SpecialtyId);
@@ -416,7 +422,53 @@ public partial class FPTMatchingDbContext : BaseDbContext
             entity.HasKey(e => e.Id);
 
             entity.ToTable("Profession");
+
+            entity.Property(e => e.Id).ValueGeneratedOnAdd()
+                .HasDefaultValueSql("gen_random_uuid()");
         });
+
+        modelBuilder.Entity<CapstoneSchedule>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            entity.ToTable("CapstoneSchedule");
+
+            entity.Property(e => e.Id).ValueGeneratedOnAdd()
+                .HasDefaultValueSql("gen_random_uuid()");
+
+            entity.HasOne(d => d.Project).WithMany(p => p.CapstoneSchedules)
+                .HasForeignKey(d => d.ProjectId);
+        });
+
+        modelBuilder.Entity<StageIdea>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            entity.ToTable("StageIdea");
+
+            entity.Property(e => e.Id).ValueGeneratedOnAdd()
+                .HasDefaultValueSql("gen_random_uuid()");
+
+            entity.HasOne(d => d.Semester).WithMany(p => p.StageIdeas)
+                .HasForeignKey(d => d.SemesterId);
+        });
+
+        modelBuilder.Entity<MentorIdeaRequest>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            entity.ToTable("MentorIdeaRequest");
+
+            entity.Property(e => e.Id).ValueGeneratedOnAdd()
+                .HasDefaultValueSql("gen_random_uuid()");
+
+            entity.HasOne(d => d.Project).WithMany(p => p.MentorIdeaRequests)
+                .HasForeignKey(d => d.ProjectId);
+
+            entity.HasOne(d => d.Idea).WithMany(p => p.MentorIdeaRequests)
+                .HasForeignKey(d => d.IdeaId);
+        });
+
 
         OnModelCreatingPartial(modelBuilder);
     }

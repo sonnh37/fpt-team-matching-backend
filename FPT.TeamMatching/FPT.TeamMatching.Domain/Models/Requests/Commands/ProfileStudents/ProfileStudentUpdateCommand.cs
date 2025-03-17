@@ -15,13 +15,15 @@ public class ProfileStudentUpdateCommand : UpdateCommand
 
     public string? Code { get; set; }
 
-    public bool IsQualifiedForAcademicProject { get; set; }
-
     public string? Achievement { get; set; }
 
     public string? ExperienceProject { get; set; }
 
     public string? Interest { get; set; }
 
-    public IFormFile? FileCv { get; set; }
+    public string? FileCv { get; set; }
+    
+    // add more
+    public string? Json {get; set;}
+    public string? FullSkill {get; set;}
 }
