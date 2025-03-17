@@ -11,6 +11,6 @@ public interface IUserRepository : IBaseRepository<User>
     Task<User?> GetByEmail(string keyword);
     Task<User?> GetByUsername(string username);
     Task<List<PartnerInfoResult>> GetAllUsersWithNameOnly();
-    Task<List<User>> GetThreeCouncilsForIdeaRequest();
+    Task<List<User>> GetThreeCouncilsForIdeaRequest(Guid ideaId);
     Task<User?> GetReviewerByMatchingEmail(string keyword);
 }
