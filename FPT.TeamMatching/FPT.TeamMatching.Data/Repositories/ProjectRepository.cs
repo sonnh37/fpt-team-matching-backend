@@ -50,11 +50,21 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
 
     public async Task<List<Project>?> GetProjectsStartingNow()
     {
-        // # Lỗi do thay đổi db
-        // return await _context.Projects
-        //     .Where(p => p.Idea.Semester != null 
-        //                 && p.Idea.Semester.StartDate == DateTime.UtcNow.Date)
-        //     .ToListAsync();
-        return [];
+        var project = await _context.Projects
+            .Where(p => p.IsDeleted == false &&
+                        p.Idea != null &&
+                        p.Idea.StageIdea != null &&
+                        p.Idea.StageIdea.Semester != null &&
+                        p.Idea.StageIdea.Semester != null &&
+                        //p.Idea.StageIdea.Semester.StartDate != null &&
+                        p.Idea.StageIdea.Semester.StartDate == DateTime.UtcNow.Date)
+            .ToListAsync();
+        return project;
+    }
+
+    public async Task<Project?> GetProjectByCode(string code)
+    {
+        var project = await _context.Projects.Where(e => e.TeamCode == code).FirstOrDefaultAsync();
+        return project;
     }
 }

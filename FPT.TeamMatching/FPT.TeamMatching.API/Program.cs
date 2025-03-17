@@ -164,7 +164,7 @@ builder.Services.AddQuartz(q =>
         .ForJob(jobKey)
         .WithIdentity("ReviewCreationTrigger")
         .WithSchedule(CronScheduleBuilder
-        .DailyAtHourAndMinute(9, 24)));
+        .DailyAtHourAndMinute(22, 59)));
 
 });
 
