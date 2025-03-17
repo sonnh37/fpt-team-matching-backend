@@ -50,7 +50,7 @@ namespace FPT.TeamMatching.Domain.Models.Results
 
         public ProjectResult? Project { get; set; }
 
-        // public StageIdeaResult? StageIdeaResult { get; set; }
+        public StageIdeaResult? StageIdea { get; set; }
 
         public ICollection<IdeaRequestResult> IdeaRequests { get; set; } = new List<IdeaRequestResult>();
         

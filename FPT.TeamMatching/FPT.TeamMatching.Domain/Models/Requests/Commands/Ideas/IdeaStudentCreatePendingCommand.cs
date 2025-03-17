@@ -14,7 +14,7 @@ namespace FPT.TeamMatching.Domain.Models.Requests.Commands.Ideas
 
         public Guid? SpecialtyId { get; set; }
 
-        //public string? IdeaCode { get; set; }
+        public Guid? StageIdeaId { get; set; }
 
         public string? Description { get; set; }
 

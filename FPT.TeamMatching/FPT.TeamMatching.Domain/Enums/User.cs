@@ -21,5 +21,7 @@ public enum Role
     Student,
     Lecturer,
     Manager,
-    Admin
+    Admin,
+    Reviewer,
+    Council
 }

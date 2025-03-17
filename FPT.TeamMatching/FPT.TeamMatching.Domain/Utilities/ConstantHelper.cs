@@ -86,6 +86,10 @@ public static class Const
 
     public const string API_SEMESTERS = $"{BaseApi}/semesters";
 
+    public const string API_STAGE_IDEAS = $"{BaseApi}/stage-ideas";
+
+    public const string API_CAPSTONESCHEDULES = $"{BaseApi}/capstone-schedules";
+
     public const string API_IDEA_HISTORIES = $"{BaseApi}/idea-histories";
 
     public const string API_IDEA_HISTORY_REQUESTS = $"{BaseApi}/idea-history-requests";

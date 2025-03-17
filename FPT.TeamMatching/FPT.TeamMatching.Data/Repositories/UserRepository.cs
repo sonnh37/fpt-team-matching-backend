@@ -99,4 +99,15 @@ public class UserRepository : BaseRepository<User>, IUserRepository
 
         return users;
     }
+
+    public async Task<User?> GetReviewerByMatchingEmail(string keyword)
+    {
+        var queryable = GetQueryable();
+        var reviewer = await queryable.Where(e => e.Email != null
+                                            && e.Email.Substring(0, e.Email.IndexOf("@")).ToLower() == keyword.ToLower()
+                                            && e.UserXRoles.Any(e => e.Role != null 
+                                            && e.Role.RoleName == "Reviewer"))
+                                        .FirstOrDefaultAsync();
+        return reviewer;
+    }
 }

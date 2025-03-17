@@ -14,7 +14,6 @@ public class IdeaController : ControllerBase
 {
     private readonly IIdeaService _service;
 
-
     public IdeaController(IIdeaService __service)
     {
         _service = __service;

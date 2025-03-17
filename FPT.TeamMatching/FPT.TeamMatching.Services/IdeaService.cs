@@ -125,7 +125,7 @@ public class IdeaService : BaseService<Idea>, IIdeaService
     {
         try
         {
-            bool createSucess = await StudentCreateAsync(idea);
+                bool createSucess = await StudentCreateAsync(idea);
             if (!createSucess)
                 return new ResponseBuilder()
                     .WithStatus(Const.FAIL_CODE)
@@ -149,16 +149,11 @@ public class IdeaService : BaseService<Idea>, IIdeaService
     private async Task<bool> StudentCreateAsync(IdeaStudentCreatePendingCommand ideaCreateCommand)
     {
         var ideaEntity = _mapper.Map<Idea>(ideaCreateCommand);
-        // var semester = await _semesterRepository.GetUpComingSemester();
-        // if (semester == null) return false;
         if (ideaEntity == null) return false;
         var userId = GetUserIdFromClaims();
         if (userId == null) return false;
-        // ideaEntity.Id = Guid.NewGuid();
         ideaEntity.Status = IdeaStatus.Pending;
         ideaEntity.OwnerId = userId;
-        // # Lỗi do thay đổi db
-        // ideaEntity.SemesterId = semester.Id;
         ideaEntity.Type = IdeaType.Student;
         ideaEntity.IsExistedTeam = true;
         ideaEntity.IsEnterpriseTopic = false;
@@ -176,8 +171,6 @@ public class IdeaService : BaseService<Idea>, IIdeaService
             ProcessDate = DateTime.UtcNow,
             Status = IdeaRequestStatus.Pending,
             Role = "Mentor",
-            // # Lỗi do thay đổi db
-            // Status = IdeaRequestStatus.MentorPending
         };
         await SetBaseEntityForCreation(ideaRequest);
         _ideaRequestRepository.Add(ideaRequest);
@@ -206,8 +199,6 @@ public class IdeaService : BaseService<Idea>, IIdeaService
             IsDeleted = false,
             Status = IdeaRequestStatus.Pending,
             Role = "Mentor",
-            // # Lỗi do thay đổi db
-            // Status = IdeaRequestStatus.CouncilPending
         };
         await SetBaseEntityForCreation(ideaRequest);
         _ideaRequestRepository.Add(ideaRequest);
@@ -225,8 +216,6 @@ public class IdeaService : BaseService<Idea>, IIdeaService
             if (project == null || project.Idea == null) return HandlerFail("Not found project");
 
             ideaUpdateCommand.OwnerId = project.Idea.OwnerId;
-            // # Lỗi do thay đổi db
-            // ideaUpdateCommand.SemesterId = project.Idea.SemesterId;
             ideaUpdateCommand.MentorId = project.Idea.MentorId;
             ideaUpdateCommand.SubMentorId = project.Idea.SubMentorId;
             ideaUpdateCommand.IdeaCode = project.Idea.IdeaCode;

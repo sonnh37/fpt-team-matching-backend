@@ -18,8 +18,7 @@ namespace FPT.TeamMatching.Domain.Entities
         public DateTimeOffset ResultDate { get; set; }
     
         public virtual Semester? Semester { get; set; }
-        
-        public virtual ICollection<Idea> Ideas { get; set; } = new List<Idea>();
 
+        public virtual ICollection<Idea> Ideas { get; set; } = new List<Idea>();
     }
 }
