@@ -38,7 +38,7 @@ public class BlogController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] BlogCreateCommand request)
     {
-        var msg = await _service.CreateOrUpdate<BlogResult>(request);
+        var msg = await _service.CreateBlog(request);
         return Ok(msg);
     }
 

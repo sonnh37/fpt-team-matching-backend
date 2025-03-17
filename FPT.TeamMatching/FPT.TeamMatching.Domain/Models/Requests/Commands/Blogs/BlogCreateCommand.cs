@@ -5,10 +5,6 @@ namespace FPT.TeamMatching.Domain.Models.Requests.Commands.Blogs;
 
 public class BlogCreateCommand : CreateCommand
 {
-    public Guid? UserId { get; set; }
-    
-    public Guid? ProjectId { get; set; }
-
     public string? Title { get; set; }
 
     public string? Content { get; set; }
