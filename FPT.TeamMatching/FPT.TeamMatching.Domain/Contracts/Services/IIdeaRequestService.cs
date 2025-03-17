@@ -36,5 +36,7 @@ namespace FPT.TeamMatching.Domain.Contracts.Services
 
         Task<BusinessResult> CreateCouncilRequestsForIdea(IdeaRequestCreateForCouncilsCommand command);
 
+        Task<BusinessResult> ProcessCouncilDecision(Guid ideaId);
+
     }
 }
