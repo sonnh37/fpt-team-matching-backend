@@ -149,8 +149,8 @@ public class IdeaService : BaseService<Idea>, IIdeaService
     private async Task<bool> StudentCreateAsync(IdeaStudentCreatePendingCommand ideaCreateCommand)
     {
         var ideaEntity = _mapper.Map<Idea>(ideaCreateCommand);
-        var semester = await _semesterRepository.GetUpComingSemester();
-        if (semester == null) return false;
+        // var semester = await _semesterRepository.GetUpComingSemester();
+        // if (semester == null) return false;
         if (ideaEntity == null) return false;
         var userId = GetUserIdFromClaims();
         if (userId == null) return false;
