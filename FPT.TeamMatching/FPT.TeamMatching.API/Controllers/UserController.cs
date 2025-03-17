@@ -48,6 +48,15 @@ public class UserController : ControllerBase
 
         return Ok(businessResult);
     }
+    
+    [HttpPut("update-cache")]
+    public async Task<IActionResult> UpdateUserCache([FromBody] UserUpdateCacheCommand request)
+    {
+        var businessResult = await _userService.UpdateUserCacheAsync(request);
+
+        return Ok(businessResult);
+    }
+
 
     [HttpPut("restore")]
     public async Task<IActionResult> Restore([FromBody] UserRestoreCommand command)

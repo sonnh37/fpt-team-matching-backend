@@ -10,6 +10,8 @@ using FPT.TeamMatching.Domain.Models.Results;
 using FPT.TeamMatching.Domain.Models.Results.Bases;
 using FPT.TeamMatching.Domain.Utilities;
 using FPT.TeamMatching.Services.Bases;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace FPT.TeamMatching.Services;
 
@@ -26,6 +28,60 @@ public class UserService : BaseService<User>, IUserService
         _userRepository = _unitOfWork.UserRepository;
         _roleRepository = _unitOfWork.RoleRepository;
         _userXRoleRepository = _unitOfWork.UserXRoleRepository;
+    }
+
+    public async Task<BusinessResult> UpdateUserCacheAsync(UserUpdateCacheCommand newCacheJson)
+    {
+        try
+        {
+            var user = await GetUserAsync();
+            if (user == null) return HandlerFail("No user found.");
+
+            JObject existingCache;
+            try
+            {
+                if (string.IsNullOrWhiteSpace(user.Cache))
+                {
+                    existingCache = new JObject();
+                }
+                else
+                {
+                    existingCache = JObject.Parse(user.Cache);
+                }
+            }
+            catch (JsonReaderException ex)
+            {
+                Console.WriteLine($"Error parsing cache: {ex.Message}, Raw Data: {user.Cache}");
+                existingCache = new JObject(); // Nếu lỗi thì dùng cache mới
+            }
+            
+            if (newCacheJson.Cache != null)
+            {
+                JObject newCache = JObject.Parse(newCacheJson.Cache);
+
+                existingCache.Merge(newCache, new JsonMergeSettings
+                {
+                    MergeArrayHandling = MergeArrayHandling.Union
+                });
+            }
+
+            user.Cache = existingCache.ToString();
+            await SetBaseEntityForUpdate(user);
+            _userRepository.Update(user);
+            var isSaveChanges = await _unitOfWork.SaveChanges();
+            if (!isSaveChanges)
+                return HandlerFail(Const.FAIL_SAVE_MSG);
+
+            var msg = new ResponseBuilder()
+                .WithStatus(Const.SUCCESS_CODE)
+                .WithMessage(Const.SUCCESS_SAVE_MSG);
+
+            return msg;
+        }
+        catch (Exception ex)
+        {
+            return HandlerFail(ex.Message);
+        }
     }
 
     public async Task<BusinessResult> Create(UserCreateCommand command)

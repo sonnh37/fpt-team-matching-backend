@@ -9,6 +9,8 @@ public interface IUserService : IBaseService
     Task<BusinessResult> Create(UserCreateCommand command);
 
     Task<BusinessResult> UpdatePassword(UserPasswordCommand userPasswordCommand);
+
+    Task<BusinessResult> UpdateUserCacheAsync(UserUpdateCacheCommand newCacheJson);
     //
     // Task<BusinessResult> GetByUsername(string username);
     //
