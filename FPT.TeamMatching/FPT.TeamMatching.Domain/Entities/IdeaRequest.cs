@@ -12,6 +12,8 @@ public class IdeaRequest : BaseEntity
     public string? Content { get; set; }
     
     public IdeaRequestStatus? Status { get; set; }
+    
+    public string? Role { get; set; }
 
     public DateTimeOffset? ProcessDate { get; set; }
 

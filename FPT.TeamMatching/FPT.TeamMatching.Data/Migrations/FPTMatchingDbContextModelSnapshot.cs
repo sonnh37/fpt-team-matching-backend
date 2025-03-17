@@ -500,6 +500,9 @@ namespace FPT.TeamMatching.Data.Migrations
                     b.Property<Guid?>("ReviewerId")
                         .HasColumnType("uuid");
 
+                    b.Property<string>("Role")
+                        .HasColumnType("text");
+
                     b.Property<string>("Status")
                         .HasColumnType("text");
 

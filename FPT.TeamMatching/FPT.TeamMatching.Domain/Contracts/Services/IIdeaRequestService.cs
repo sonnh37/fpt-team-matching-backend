@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using FPT.TeamMatching.Domain.Models.Requests.Commands.Ideas;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Base;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.IdeaRequests;
 using FPT.TeamMatching.Domain.Models.Results.Bases;
@@ -19,12 +20,19 @@ namespace FPT.TeamMatching.Domain.Contracts.Services
 
         Task<BusinessResult> GetAll<TResult>(IdeaRequestGetAllQuery query) where TResult : BaseResult;
 
-        Task<BusinessResult> GetAllByStatusAndIdeaId<TResult>(IdeaRequestGetAllByListStatusAndIdeaIdQuery query)
+        Task<BusinessResult> GetIdeaRequestsCurrentByStatus<TResult>(IdeaRequestGetAllCurrentByStatus query)
             where TResult : BaseResult;
-        
-        Task<BusinessResult> GetAllByStatusForCurrentUser<TResult>(IdeaRequestGetAllByListStatusForCurrentUser query)
+
+        Task<BusinessResult> GetIdeaRequestsCurrentByStatusAndRoles<TResult>(
+            IdeaRequestGetAllByListStatusForCurrentUser query)
+            where TResult : BaseResult;
+
+        Task<BusinessResult> GetIdeaRequestsByStatusAndRoles<TResult>(IdeaRequestGetAllByListStatusForCurrentUser query)
             where TResult : BaseResult;
 
         Task<BusinessResult> GetAllUnassignedReviewer<TResult>(GetQueryableQuery query) where TResult : BaseResult;
+        
+        Task<BusinessResult> UpdateStatus(IdeaRequestUpdateStatusCommand command);
+
     }
 }

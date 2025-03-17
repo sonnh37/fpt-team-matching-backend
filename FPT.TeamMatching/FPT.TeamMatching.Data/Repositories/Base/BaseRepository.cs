@@ -161,7 +161,7 @@ public class BaseRepository<TEntity> : IBaseRepository<TEntity> where TEntity : 
         return queryable;
     }
 
-    private IQueryable<T> GetQueryable<T>()
+    public IQueryable<T> GetQueryable<T>()
         where T : BaseEntity
     {
         IQueryable<T> queryable = _dbContext.Set<T>();

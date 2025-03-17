@@ -1,3 +1,4 @@
+using FPT.TeamMatching.Domain.Entities;
 using FPT.TeamMatching.Domain.Enums;
 using FPT.TeamMatching.Domain.Models.Results.Bases;
 
@@ -7,7 +8,7 @@ namespace FPT.TeamMatching.Domain.Models.Results
     {
         public Guid? OwnerId { get; set; }
 
-        public Guid? StageId { get; set; }
+        public Guid? StageIdeaId { get; set; }
 
         public Guid? MentorId { get; set; }
 
