@@ -210,7 +210,7 @@ public class IdeaRequestService : BaseService<IdeaRequest>, IIdeaRequestService
     {
         try
         {
-            if(command.IdeaId == Guid.Empty || command.IdeaId == null) return HandlerFail("No Idea Id provided");
+            if (command.IdeaId == Guid.Empty || command.IdeaId == null) return HandlerFail("No Idea Id provided");
             var councils = await _userRepository.GetThreeCouncilsForIdeaRequest(command.IdeaId.Value);
             if (!councils.Any()) return HandlerFail("No available councils");
 
@@ -264,22 +264,6 @@ public class IdeaRequestService : BaseService<IdeaRequest>, IIdeaRequestService
                     .WithStatus(Const.FAIL_CODE)
                     .WithMessage(Const.FAIL_SAVE_MSG);
 
-            // Nếu Mentor approve -> Tạo 3 request cho Council duyệt
-            // if (command.Status == IdeaRequestStatus.Approved && ideaRequest.Role == "Mentor")
-            // {
-            //     var councils = await _userRepository.GetThreeCouncilsForIdeaRequest();
-            //
-            //     var newIdeaRequests = councils.Select(council => new IdeaRequest
-            //     {
-            //         IdeaId = ideaRequest.IdeaId,
-            //         ReviewerId = council.Id,
-            //         Status = IdeaRequestStatus.Pending,
-            //         Role = "Council",
-            //     }).ToList();
-            //
-            //     _ideaRequestRepository.AddRange(newIdeaRequests);
-            //     await _unitOfWork.SaveChanges();
-            // }
             // Nếu Mentor từ chối -> Idea bị từ chối ngay lập tức
             if (command.Status == IdeaRequestStatus.Rejected && ideaRequest.Role == "Mentor")
             {
@@ -288,75 +272,6 @@ public class IdeaRequestService : BaseService<IdeaRequest>, IIdeaRequestService
                     Id = ideaRequest.IdeaId.Value,
                     Status = IdeaStatus.Rejected
                 });
-            }
-            else if (ideaRequest.Role == "Council")
-            {
-                var totalCouncils = await _ideaRequestRepository.CountCouncilsForIdea(ideaRequest.IdeaId.Value);
-                var totalApproved = await _ideaRequestRepository.CountApprovedCouncilsForIdea(ideaRequest.IdeaId.Value);
-                var totalRejected = await _ideaRequestRepository.CountRejectedCouncilsForIdea(ideaRequest.IdeaId.Value);
-
-                if (totalCouncils == 1)
-                {
-                    // Nếu chỉ có 1 Council, quyết định dựa vào duy nhất người đó
-                    if (totalApproved == 1)
-                    {
-                        return await _ideaService.UpdateStatusIdea(new IdeaUpdateStatusCommand
-                        {
-                            Id = ideaRequest.IdeaId.Value,
-                            Status = IdeaStatus.Approved
-                        });
-                    }
-                    else if (totalRejected == 1)
-                    {
-                        return await _ideaService.UpdateStatusIdea(new IdeaUpdateStatusCommand
-                        {
-                            Id = ideaRequest.IdeaId.Value,
-                            Status = IdeaStatus.Rejected
-                        });
-                    }
-                }
-                else if (totalCouncils == 2)
-                {
-                    // Nếu có 2 Council, chỉ quyết định khi cả hai đồng thuận
-                    if (totalApproved == 2)
-                    {
-                        return await _ideaService.UpdateStatusIdea(new IdeaUpdateStatusCommand
-                        {
-                            Id = ideaRequest.IdeaId.Value,
-                            Status = IdeaStatus.Approved
-                        });
-                    }
-                    else if (totalRejected == 2)
-                    {
-                        return await _ideaService.UpdateStatusIdea(new IdeaUpdateStatusCommand
-                        {
-                            Id = ideaRequest.IdeaId.Value,
-                            Status = IdeaStatus.Rejected
-                        });
-                    }
-                    // Nếu mỗi người 1 ý kiến (1 Approved - 1 Rejected) thì giữ nguyên Pending
-                }
-                else if (totalCouncils == 3)
-                {
-                    // Nếu có 3 Council, xét theo tỷ lệ
-                    if (totalApproved > totalRejected)
-                    {
-                        return await _ideaService.UpdateStatusIdea(new IdeaUpdateStatusCommand
-                        {
-                            Id = ideaRequest.IdeaId.Value,
-                            Status = IdeaStatus.Approved
-                        });
-                    }
-                    else if (totalRejected > totalApproved)
-                    {
-                        return await _ideaService.UpdateStatusIdea(new IdeaUpdateStatusCommand
-                        {
-                            Id = ideaRequest.IdeaId.Value,
-                            Status = IdeaStatus.Rejected
-                        });
-                    }
-                    // Nếu 2 thuận - 1 nghịch hoặc 2 nghịch - 1 thuận thì chấp nhận theo số đông
-                }
             }
 
             return new ResponseBuilder()
@@ -367,6 +282,46 @@ public class IdeaRequestService : BaseService<IdeaRequest>, IIdeaRequestService
         {
             return HandlerError(ex.Message);
         }
+    }
+
+    public async Task<BusinessResult> ProcessCouncilDecision(Guid ideaId)
+    {
+        var totalCouncils = await _ideaRequestRepository.CountCouncilsForIdea(ideaId);
+        var totalApproved = await _ideaRequestRepository.CountApprovedCouncilsForIdea(ideaId);
+        var totalRejected = await _ideaRequestRepository.CountRejectedCouncilsForIdea(ideaId);
+
+        if (totalCouncils == 1)
+        {
+            if (totalApproved == 1)
+                return await _ideaService.UpdateStatusIdea(new IdeaUpdateStatusCommand
+                    { Id = ideaId, Status = IdeaStatus.Approved });
+
+            if (totalRejected == 1)
+                return await _ideaService.UpdateStatusIdea(new IdeaUpdateStatusCommand
+                    { Id = ideaId, Status = IdeaStatus.Rejected });
+        }
+        else if (totalCouncils == 2)
+        {
+            if (totalApproved == 2)
+                return await _ideaService.UpdateStatusIdea(new IdeaUpdateStatusCommand
+                    { Id = ideaId, Status = IdeaStatus.Approved });
+
+            if (totalRejected == 2)
+                return await _ideaService.UpdateStatusIdea(new IdeaUpdateStatusCommand
+                    { Id = ideaId, Status = IdeaStatus.Rejected });
+        }
+        else if (totalCouncils == 3)
+        {
+            if (totalApproved > totalRejected)
+                return await _ideaService.UpdateStatusIdea(new IdeaUpdateStatusCommand
+                    { Id = ideaId, Status = IdeaStatus.Approved });
+
+            if (totalRejected > totalApproved)
+                return await _ideaService.UpdateStatusIdea(new IdeaUpdateStatusCommand
+                    { Id = ideaId, Status = IdeaStatus.Rejected });
+        }
+
+        return new ResponseBuilder().WithStatus(Const.SUCCESS_CODE).WithMessage(Const.SUCCESS_SAVE_MSG);
     }
 
 
