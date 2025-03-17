@@ -9,17 +9,11 @@ public class ProjectCreateCommand : CreateCommand
 
     public Guid? IdeaId { get; set; }
 
+    public string? TeamCode { get; set; }
+
     public string? TeamName { get; set; }
-
-    public string? Name { get; set; }
-
-    public string? Description { get; set; }
 
     public ProjectStatus? Status { get; set; }
 
     public int? TeamSize { get; set; }
-
-    public DateTimeOffset? StartDate { get; set; }
-
-    public DateTimeOffset? EndDate { get; set; }
 }

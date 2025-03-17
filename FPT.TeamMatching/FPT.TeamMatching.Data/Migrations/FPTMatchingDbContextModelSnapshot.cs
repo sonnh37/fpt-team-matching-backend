@@ -332,6 +332,9 @@ namespace FPT.TeamMatching.Data.Migrations
                     b.Property<Guid?>("OwnerId")
                         .HasColumnType("uuid");
 
+                    b.Property<Guid?>("SemesterId")
+                        .HasColumnType("uuid");
+
                     b.Property<Guid?>("SpecialtyId")
                         .HasColumnType("uuid");
 
@@ -361,6 +364,8 @@ namespace FPT.TeamMatching.Data.Migrations
                     b.HasIndex("MentorId");
 
                     b.HasIndex("OwnerId");
+
+                    b.HasIndex("SemesterId");
 
                     b.HasIndex("SpecialtyId");
 
@@ -1495,6 +1500,10 @@ namespace FPT.TeamMatching.Data.Migrations
                         .WithMany("IdeaOfOwners")
                         .HasForeignKey("OwnerId");
 
+                    b.HasOne("FPT.TeamMatching.Domain.Entities.Semester", null)
+                        .WithMany("Ideas")
+                        .HasForeignKey("SemesterId");
+
                     b.HasOne("FPT.TeamMatching.Domain.Entities.Specialty", "Specialty")
                         .WithMany("Ideas")
                         .HasForeignKey("SpecialtyId");
@@ -1840,6 +1849,8 @@ namespace FPT.TeamMatching.Data.Migrations
 
             modelBuilder.Entity("FPT.TeamMatching.Domain.Entities.Semester", b =>
                 {
+                    b.Navigation("Ideas");
+
                     b.Navigation("ProfileStudents");
 
                     b.Navigation("StageIdeas");

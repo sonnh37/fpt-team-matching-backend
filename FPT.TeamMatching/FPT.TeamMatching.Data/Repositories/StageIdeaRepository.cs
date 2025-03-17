@@ -1,4 +1,5 @@
-﻿using FPT.TeamMatching.Data.Repositories.Base;
+﻿using FPT.TeamMatching.Data.Context;
+using FPT.TeamMatching.Data.Repositories.Base;
 using FPT.TeamMatching.Domain.Contracts.Repositories;
 using FPT.TeamMatching.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -12,7 +13,7 @@ namespace FPT.TeamMatching.Data.Repositories
 {
     public class StageIdeaRepository : BaseRepository<StageIdea>, IStageIdeaRepositoty
     {
-        public StageIdeaRepository(DbContext dbContext) : base(dbContext)
+        public StageIdeaRepository(FPTMatchingDbContext dbContext) : base(dbContext)
         {
         }
     }

@@ -269,7 +269,8 @@ public class ReviewService : BaseService<Review>, IReviewService
                             {
                                 continue;
                             }
-                            review.ReviewDate = date;
+                            date.AddHours(7);
+                            review.ReviewDate = date.ToUniversalTime();
                             review.Slot = slot;
                             review.Room = room;
                             review.Reviewer1Id = r1.Id;
