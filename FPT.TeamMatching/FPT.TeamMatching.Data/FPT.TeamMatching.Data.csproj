@@ -25,4 +25,8 @@
         <ProjectReference Include="..\FPT.TeamMatching.Domain\FPT.TeamMatching.Domain.csproj"/>
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="Migrations\" />
+    </ItemGroup>
+
 </Project>

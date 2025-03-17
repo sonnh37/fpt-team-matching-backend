@@ -34,5 +34,7 @@ namespace FPT.TeamMatching.Domain.Contracts.Services
         
         Task<BusinessResult> UpdateStatus(IdeaRequestUpdateStatusCommand command);
 
+        Task<BusinessResult> CreateCouncilRequestsForIdea(IdeaRequestCreateForCouncilsCommand command);
+
     }
 }
