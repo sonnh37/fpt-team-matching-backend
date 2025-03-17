@@ -51,13 +51,26 @@ public partial class FPTMatchingDbContext : BaseDbContext
 
     public virtual DbSet<IdeaRequest> IdeaRequests { get; set; } //
 
+    public virtual DbSet<Conversation> Conversations { get; set; } //
+
+    public virtual DbSet<ConversationMember> ConversationMembers { get; set; } //
+
+    public virtual DbSet<Message> Messages { get; set; } //
+
     public virtual DbSet<UserXRole> UserXRoles { get; set; } //
 
     public virtual DbSet<Role> Roles { get; set; } //
     
     public virtual DbSet<IdeaHistory> IdeaHistories { get; set; } //
-    
+
     public virtual DbSet<IdeaHistoryRequest> IdeaHistoryRequests { get; set; } //
+
+    public virtual DbSet<CapstoneSchedule> CapstoneSchedules { get; set; } //
+
+    public virtual DbSet<StageIdea> StageIdeas { get; set; } //
+
+    public virtual DbSet<MentorIdeaRequest> MentorIdeaRequests { get; set; } //
+
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -349,8 +362,8 @@ public partial class FPTMatchingDbContext : BaseDbContext
             entity.HasOne(d => d.SubMentor).WithMany(p => p.IdeaOfSubMentors)
                 .HasForeignKey(d => d.SubMentorId);
 
-            entity.HasOne(d => d.Semester).WithMany(p => p.Ideas)
-                .HasForeignKey(d => d.SemesterId);
+            entity.HasOne(d => d.StageIdea).WithMany(p => p.Ideas)
+                .HasForeignKey(d => d.StageIdeaId);
             
             entity.HasOne(d => d.Specialty).WithMany(p => p.Ideas)
                 .HasForeignKey(d => d.SpecialtyId);
@@ -468,7 +481,6 @@ public partial class FPTMatchingDbContext : BaseDbContext
             entity.HasOne(d => d.Idea).WithMany(p => p.MentorIdeaRequests)
                 .HasForeignKey(d => d.IdeaId);
         });
-
 
         OnModelCreatingPartial(modelBuilder);
     }

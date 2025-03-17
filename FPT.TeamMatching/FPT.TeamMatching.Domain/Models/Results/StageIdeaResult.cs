@@ -1,13 +1,14 @@
-﻿using FPT.TeamMatching.Domain.Entities.Base;
+﻿using FPT.TeamMatching.Domain.Entities;
+using FPT.TeamMatching.Domain.Models.Results.Bases;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace FPT.TeamMatching.Domain.Entities
+namespace FPT.TeamMatching.Domain.Models.Results
 {
-    public class StageIdea: BaseEntity
+    public class StageIdeaResult: BaseResult
     {
         public Guid? SemesterId { get; set; }
 
@@ -16,7 +17,7 @@ namespace FPT.TeamMatching.Domain.Entities
         public DateTimeOffset EndDate { get; set; }
 
         public DateTimeOffset ResultDate { get; set; }
-    
+
         public virtual Semester? Semester { get; set; }
 
         public virtual ICollection<Idea> Ideas { get; set; } = new List<Idea>();

@@ -51,8 +51,14 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
     public async Task<List<Project>?> GetProjectsStartingNow()
     {
         return await _context.Projects
-            .Where(p => p.Idea.Semester != null 
-                        && p.Idea.Semester.StartDate == DateTime.UtcNow.Date)
+            .Where(p => p.Idea.StageIdea.Semester != null 
+                        && p.Idea.StageIdea.Semester.StartDate == DateTime.UtcNow.Date)
             .ToListAsync();
+    }
+
+    public async Task<Project?> GetProjectByCode(string code)
+    {
+        var project = await _context.Projects.Where(e => e.TeamCode == code).FirstOrDefaultAsync();
+        return project;
     }
 }

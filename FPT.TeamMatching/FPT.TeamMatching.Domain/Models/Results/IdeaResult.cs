@@ -7,7 +7,7 @@ namespace FPT.TeamMatching.Domain.Models.Results
     {
         public Guid? OwnerId { get; set; }
 
-        public Guid? SemesterId { get; set; }
+        public Guid? StageId { get; set; }
 
         public Guid? MentorId { get; set; }
 
@@ -49,7 +49,7 @@ namespace FPT.TeamMatching.Domain.Models.Results
 
         public ProjectResult? Project { get; set; }
 
-        public SemesterResult? Semester { get; set; }
+        public StageIdeaResult? StageIdea { get; set; }
 
         public ICollection<IdeaRequestResult> IdeaRequests { get; set; } = new List<IdeaRequestResult>();
         

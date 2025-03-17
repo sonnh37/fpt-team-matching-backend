@@ -211,6 +211,37 @@ namespace FPT.TeamMatching.Data.Migrations
                     b.ToTable("Comment", (string)null);
                 });
 
+            modelBuilder.Entity("FPT.TeamMatching.Domain.Entities.Conversation", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ConversationName")
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Conversations");
+                });
+
+            modelBuilder.Entity("FPT.TeamMatching.Domain.Entities.ConversationMember", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ConversationId")
+                        .HasColumnType("text");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ConversationId");
+
+                    b.ToTable("ConversationMembers");
+                });
+
             modelBuilder.Entity("FPT.TeamMatching.Domain.Entities.Feedback", b =>
                 {
                     b.Property<Guid>("Id")
@@ -301,10 +332,10 @@ namespace FPT.TeamMatching.Data.Migrations
                     b.Property<Guid?>("OwnerId")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid?>("SemesterId")
+                    b.Property<Guid?>("SpecialtyId")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid?>("SpecialtyId")
+                    b.Property<Guid?>("StageIdeaId")
                         .HasColumnType("uuid");
 
                     b.Property<string>("Status")
@@ -331,9 +362,9 @@ namespace FPT.TeamMatching.Data.Migrations
 
                     b.HasIndex("OwnerId");
 
-                    b.HasIndex("SemesterId");
-
                     b.HasIndex("SpecialtyId");
+
+                    b.HasIndex("StageIdeaId");
 
                     b.HasIndex("SubMentorId");
 
@@ -622,6 +653,30 @@ namespace FPT.TeamMatching.Data.Migrations
                     b.HasIndex("ProjectId");
 
                     b.ToTable("MentorIdeaRequest", (string)null);
+                });
+
+            modelBuilder.Entity("FPT.TeamMatching.Domain.Entities.Message", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Content")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ConversationId")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("CreatedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("SendById")
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ConversationId");
+
+                    b.ToTable("Messages");
                 });
 
             modelBuilder.Entity("FPT.TeamMatching.Domain.Entities.Notification", b =>
@@ -1409,6 +1464,15 @@ namespace FPT.TeamMatching.Data.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("FPT.TeamMatching.Domain.Entities.ConversationMember", b =>
+                {
+                    b.HasOne("FPT.TeamMatching.Domain.Entities.Conversation", "Conversation")
+                        .WithMany()
+                        .HasForeignKey("ConversationId");
+
+                    b.Navigation("Conversation");
+                });
+
             modelBuilder.Entity("FPT.TeamMatching.Domain.Entities.Feedback", b =>
                 {
                     b.HasOne("FPT.TeamMatching.Domain.Entities.Review", "Review")
@@ -1428,13 +1492,13 @@ namespace FPT.TeamMatching.Data.Migrations
                         .WithMany("IdeaOfOwners")
                         .HasForeignKey("OwnerId");
 
-                    b.HasOne("FPT.TeamMatching.Domain.Entities.Semester", "Semester")
-                        .WithMany("Ideas")
-                        .HasForeignKey("SemesterId");
-
                     b.HasOne("FPT.TeamMatching.Domain.Entities.Specialty", "Specialty")
                         .WithMany("Ideas")
                         .HasForeignKey("SpecialtyId");
+
+                    b.HasOne("FPT.TeamMatching.Domain.Entities.StageIdea", "StageIdea")
+                        .WithMany("Ideas")
+                        .HasForeignKey("StageIdeaId");
 
                     b.HasOne("FPT.TeamMatching.Domain.Entities.User", "SubMentor")
                         .WithMany("IdeaOfSubMentors")
@@ -1444,9 +1508,9 @@ namespace FPT.TeamMatching.Data.Migrations
 
                     b.Navigation("Owner");
 
-                    b.Navigation("Semester");
-
                     b.Navigation("Specialty");
+
+                    b.Navigation("StageIdea");
 
                     b.Navigation("SubMentor");
                 });
@@ -1545,6 +1609,15 @@ namespace FPT.TeamMatching.Data.Migrations
                     b.Navigation("Idea");
 
                     b.Navigation("Project");
+                });
+
+            modelBuilder.Entity("FPT.TeamMatching.Domain.Entities.Message", b =>
+                {
+                    b.HasOne("FPT.TeamMatching.Domain.Entities.Conversation", "Conversation")
+                        .WithMany()
+                        .HasForeignKey("ConversationId");
+
+                    b.Navigation("Conversation");
                 });
 
             modelBuilder.Entity("FPT.TeamMatching.Domain.Entities.Notification", b =>
@@ -1764,8 +1837,6 @@ namespace FPT.TeamMatching.Data.Migrations
 
             modelBuilder.Entity("FPT.TeamMatching.Domain.Entities.Semester", b =>
                 {
-                    b.Navigation("Ideas");
-
                     b.Navigation("ProfileStudents");
 
                     b.Navigation("StageIdeas");
@@ -1776,6 +1847,11 @@ namespace FPT.TeamMatching.Data.Migrations
                     b.Navigation("Ideas");
 
                     b.Navigation("ProfileStudents");
+                });
+
+            modelBuilder.Entity("FPT.TeamMatching.Domain.Entities.StageIdea", b =>
+                {
+                    b.Navigation("Ideas");
                 });
 
             modelBuilder.Entity("FPT.TeamMatching.Domain.Entities.TeamMember", b =>

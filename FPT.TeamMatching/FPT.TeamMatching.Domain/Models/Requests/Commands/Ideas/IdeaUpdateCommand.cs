@@ -12,7 +12,7 @@ namespace FPT.TeamMatching.Domain.Models.Requests.Commands.Ideas
     {
         public Guid? OwnerId { get; set; }
 
-        public Guid? SemesterId { get; set; }
+        public Guid? StageIdeaId { get; set; }
 
         public Guid? MentorId { get; set; }
 

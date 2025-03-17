@@ -125,15 +125,12 @@ public class IdeaService : BaseService<Idea>, IIdeaService
     private async Task<bool> StudentCreateAsync(IdeaStudentCreatePendingCommand ideaCreateCommand)
     {
         var ideaEntity = _mapper.Map<Idea>(ideaCreateCommand);
-        var semester = await _semesterRepository.GetUpComingSemester();
-        if (semester == null) return false;
         if (ideaEntity == null) return false;
         var userId = GetUserIdFromClaims();
         if (userId == null) return false;
         // ideaEntity.Id = Guid.NewGuid();
         ideaEntity.Status = IdeaStatus.Pending;
         ideaEntity.OwnerId = userId;
-        ideaEntity.SemesterId = semester.Id;
         ideaEntity.Type = IdeaType.Student;
         ideaEntity.IsExistedTeam = true;
         ideaEntity.IsEnterpriseTopic = false;
@@ -192,7 +189,7 @@ public class IdeaService : BaseService<Idea>, IIdeaService
         var userId = GetUserIdFromClaims();
         var idea = await _projectRepository.GetProjectByUserIdLogin(userId.Value);
         ideaUpdateCommand.OwnerId = idea.Idea.OwnerId;
-        ideaUpdateCommand.SemesterId = idea.Idea.SemesterId;
+        ideaUpdateCommand.StageIdeaId = idea.Idea.StageIdeaId;
         ideaUpdateCommand.MentorId = idea.Idea.MentorId;
         ideaUpdateCommand.SubMentorId = idea.Idea.SubMentorId;
         ideaUpdateCommand.IdeaCode = idea.Idea.IdeaCode;

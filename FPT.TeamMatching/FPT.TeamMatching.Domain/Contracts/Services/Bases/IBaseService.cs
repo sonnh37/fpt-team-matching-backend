@@ -5,10 +5,6 @@ using FPT.TeamMatching.Domain.Models.Results.Bases;
 
 namespace FPT.TeamMatching.Domain.Contracts.Services.Bases;
 
-// public interface IBaseService
-// {
-//     
-// }
 public interface IBaseService
 {
     Task<BusinessResult> GetAll<TResult>() where TResult : BaseResult;
