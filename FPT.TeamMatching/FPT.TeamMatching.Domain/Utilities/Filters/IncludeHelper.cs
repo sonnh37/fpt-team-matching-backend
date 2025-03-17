@@ -16,6 +16,8 @@ public static class IncludeHelper
             IQueryable<Project> projects => Project(projects) as IQueryable<TEntity>,
             IQueryable<Profession> professions => Profession(professions) as IQueryable<TEntity>,
             IQueryable<User> users => User(users) as IQueryable<TEntity>,
+            IQueryable<Blog> blogs => Blogs(blogs) as IQueryable<TEntity>,
+            IQueryable<Comment> comments => Comments(comments) as IQueryable<TEntity>,
             IQueryable<Invitation> invitations => Invitation(invitations) as IQueryable<TEntity>,
             IQueryable<Notification> notifications => Notification(notifications) as IQueryable<TEntity>,
             _ => queryable
@@ -28,6 +30,24 @@ public static class IncludeHelper
             .Include(m => m.Reviewer);
         return queryable;
     }
+
+    private static IQueryable<Blog> Blogs(IQueryable<Blog> queryable)
+    {
+        queryable = queryable.Include(m => m.User);
+        queryable = queryable.Include(m => m.Project);
+        queryable = queryable.Include(m => m.Comments).ThenInclude(x=> x.User);
+        queryable = queryable.Include(m => m.Likes);
+        return queryable;
+    }
+
+    private static IQueryable<Comment> Comments(IQueryable<Comment> queryable)
+    {
+        queryable = queryable.Include(m => m.User);
+       
+        return queryable;
+    }
+
+
 
     private static IQueryable<Invitation> Invitation(IQueryable<Invitation> queryable)
     {
