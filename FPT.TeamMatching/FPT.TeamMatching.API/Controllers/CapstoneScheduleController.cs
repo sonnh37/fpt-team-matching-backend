@@ -1,0 +1,67 @@
+﻿using FPT.TeamMatching.Domain.Contracts.Services;
+using FPT.TeamMatching.Domain.Models.Requests.Commands.CapstoneSchedules;
+using FPT.TeamMatching.Domain.Models.Requests.Queries.CapstoneSchedules;
+using FPT.TeamMatching.Domain.Models.Results;
+using FPT.TeamMatching.Domain.Utilities;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+
+namespace FPT.TeamMatching.API.Controllers
+{
+    [Route(Const.API_CAPSTONE_SCHEDULES)]
+    [ApiController]
+    public class CapstoneScheduleController : ControllerBase
+    {
+        private readonly ICapstoneScheduleService _service;
+
+        public CapstoneScheduleController(ICapstoneScheduleService __service)
+        {
+            _service = __service;
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetAll([FromQuery] CapstoneScheduleGetAllQuery query)
+        {
+            var msg = await _service.GetAll<CapstoneScheduleResult>(query);
+            return Ok(msg);
+        }
+
+        [HttpGet("{id:guid}")]
+        public async Task<IActionResult> GetById([FromRoute] Guid id)
+        {
+            var msg = await _service.GetById<CapstoneScheduleResult>(id);
+            return Ok(msg);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] CapstoneScheduleCreateCommand request)
+        {
+            var msg = await _service.CreateOrUpdate<CapstoneScheduleResult>(request);
+            return Ok(msg);
+        }
+
+        [HttpPut]
+        public async Task<IActionResult> Update([FromBody] CapstoneScheduleUpdateCommand request)
+        {
+            var businessResult = await _service.CreateOrUpdate<CapstoneScheduleResult>(request);
+
+            return Ok(businessResult);
+        }
+
+        [HttpPut("restore")]
+        public async Task<IActionResult> Restore([FromBody] CapstoneScheduleRestoreCommand command)
+        {
+            var businessResult = await _service.Restore<CapstoneScheduleResult>(command);
+
+            return Ok(businessResult);
+        }
+
+        [HttpDelete]
+        public async Task<IActionResult> Delete([FromQuery] CapstoneScheduleDeleteCommand request)
+        {
+            var businessResult = await _service.DeleteById(request.Id, request.IsPermanent);
+
+            return Ok(businessResult);
+        }
+    }
+}

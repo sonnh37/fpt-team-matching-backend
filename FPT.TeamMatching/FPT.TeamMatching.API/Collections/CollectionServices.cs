@@ -35,6 +35,9 @@ public static class CollectionServices
         services.AddTransient<IIdeaHistoryService, IdeaHistoryService>();
         services.AddTransient<IIdeaHistoryRequestService, IdeaHistoryRequestService>();
         services.AddTransient<IStageIdeaService, StageIdeaService>();
+        services.AddTransient<ICapstoneScheduleService, CapstoneScheduleService>();
+        services.AddTransient<IMentorIdeaRequestService, MentorIdeaRequestService>();
+
         services.AddSingleton<IUserIdProvider, CustomUserIdProvider>();
 
         services.AddTransient<IApiHubService, ApiHubService>();

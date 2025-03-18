@@ -88,7 +88,9 @@ public static class Const
 
     public const string API_STAGE_IDEAS = $"{BaseApi}/stage-ideas";
 
-    public const string API_CAPSTONESCHEDULES = $"{BaseApi}/capstone-schedules";
+    public const string API_CAPSTONE_SCHEDULES = $"{BaseApi}/capstone-schedules";
+
+    public const string API_MENTOR_IDEA_REQUESTS = $"{BaseApi}/mentor-idea-requests";
 
     public const string API_IDEA_HISTORIES = $"{BaseApi}/idea-histories";
 
