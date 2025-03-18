@@ -21,6 +21,7 @@ public class ReviewService : BaseService<Review>, IReviewService
     private readonly IUserRepository _userRepository;
     private readonly IProjectRepository _projectRepository;
     private readonly ISemesterRepository _semesterRepository;
+    private readonly IIdeaRepository _ideaRepository;
 
     public ReviewService(IMapper mapper, IUnitOfWork unitOfWork) : base(mapper, unitOfWork)
     {
@@ -28,6 +29,7 @@ public class ReviewService : BaseService<Review>, IReviewService
         _userRepository = unitOfWork.UserRepository;
         _projectRepository = unitOfWork.ProjectRepository;
         _semesterRepository = unitOfWork.SemesterRepository;
+        _ideaRepository = unitOfWork.IdeaRepository;
     }
 
     public async Task<BusinessResult> AssignReviewers(CouncilAssignReviewers request)
@@ -238,6 +240,21 @@ public class ReviewService : BaseService<Review>, IReviewService
                                 continue;
                             }
 
+                            //check reviewer 1, 2 k trung vs mentor
+                            if (project.IdeaId != null)
+                            {
+                                var idea = await _ideaRepository.GetById((Guid)project.IdeaId);
+                                if (idea != null)
+                                {
+                                    if (idea.MentorId == r1.Id || idea.MentorId == r2.Id)
+                                    {
+                                        continue;
+                                    }
+                                }
+                                else continue;
+                            }
+                            else continue;
+
                             //check date
                             var dateValue = reader.GetValue(10)?.ToString();
                             DateTimeOffset date;
@@ -271,8 +288,7 @@ public class ReviewService : BaseService<Review>, IReviewService
                             {
                                 continue;
                             }
-                            date.AddHours(7);
-                            review.ReviewDate = date.ToUniversalTime();
+                            review.ReviewDate = date.UtcDateTime.Date.AddDays(1);
                             review.Slot = slot;
                             review.Room = room;
                             review.Reviewer1Id = r1.Id;

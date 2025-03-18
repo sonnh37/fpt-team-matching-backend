@@ -4,15 +4,12 @@ using FPT.TeamMatching.Domain.Contracts.Services;
 using FPT.TeamMatching.Domain.Contracts.UnitOfWorks;
 using FPT.TeamMatching.Domain.Entities;
 using FPT.TeamMatching.Domain.Enums;
-using FPT.TeamMatching.Domain.Models.Requests.Commands.Base;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Ideas;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Ideas;
 using FPT.TeamMatching.Domain.Models.Responses;
 using FPT.TeamMatching.Domain.Models.Results;
-using FPT.TeamMatching.Domain.Models.Results.Bases;
 using FPT.TeamMatching.Domain.Utilities;
 using FPT.TeamMatching.Services.Bases;
-using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace FPT.TeamMatching.Services;
 

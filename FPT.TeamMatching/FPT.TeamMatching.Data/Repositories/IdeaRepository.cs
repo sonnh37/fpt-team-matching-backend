@@ -24,7 +24,7 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
                                         .ToListAsync();
         return ideas;
     }
-    
+
     public async Task<List<Idea>> GetCurrentIdeaByUserIdAndStatus(Guid userId, IdeaStatus status)
     {
         var ideas = await _dbContext.Ideas.Where(e => e.OwnerId == userId
@@ -35,7 +35,7 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
 
         return ideas;
     }
-    
+
     public async Task<int> MaxNumberOfSemester(Guid semesterId)
     {
         // # Lỗi do thay đổi db
@@ -48,4 +48,6 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
         // return maxNumber;
         return 0;
     }
+
+    
 }

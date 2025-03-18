@@ -12,4 +12,5 @@ public interface IIdeaRepository : IBaseRepository<Idea>
     Task<int> MaxNumberOfSemester(Guid semesterId);
 
     Task<List<Idea>> GetCurrentIdeaByUserIdAndStatus(Guid userId, IdeaStatus status);
+
 }
