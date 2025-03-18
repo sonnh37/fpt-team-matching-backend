@@ -5,9 +5,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace FPT.TeamMatching.Domain.Models.Requests.Commands.CapstoneSchedules
+namespace FPT.TeamMatching.Domain.Models.Requests.Commands.MentorIdeaRequests
 {
-    public class CapstoneScheduleDeleteCommand: DeleteCommand
+    public class MentorIdeaRequestRestoreCommand: UpdateCommand
     {
     }
 }

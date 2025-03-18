@@ -39,6 +39,7 @@ public static class CollectionRepositories
         services.AddScoped<IIdeaHistoryRepository, IdeaHistoryRepository>();
         services.AddScoped<IIdeaHistoryRequestRepository, IdeaHistoryRequestRepository>();
         services.AddScoped<IStageIdeaRepositoty, StageIdeaRepository>();
-
+        services.AddScoped<ICapstoneScheduleRepository, CapstoneScheduleRepository>();
+        services.AddScoped<IMentorIdeaRequestRepository, MentorIdeaRequestRepository>();
     }
 }
