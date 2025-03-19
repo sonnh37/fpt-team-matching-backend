@@ -11,5 +11,6 @@ namespace FPT.TeamMatching.Domain.Models.Requests.Commands.Reviews
     {
         public IFormFile? file {  get; set; }
         public int reviewNumber { get; set; }
+        public Guid semesterId { get; set; }
     }
 }
