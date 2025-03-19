@@ -70,15 +70,15 @@ public class ReviewController : ControllerBase
         return Ok(businessResult);
     }
 
-    //[HttpPost("import-file-excel-review")]
-    //public async Task<IActionResult> ImportExcel([FromForm] FileImport file)
-    //{
-    //    var businessResult = await _service.ImportExcel(file.file, file.reviewNumber);
-    //    return Ok(businessResult);
-    //}
+    [HttpPost("import-file-excel-review")]
+    public async Task<IActionResult> ImportExcel([FromForm] FileImport file)
+    {
+        var businessResult = await _service.ImportExcel(file.file, file.reviewNumber, file.semesterId);
+        return Ok(businessResult);
+    }
 
     [HttpPost("get-by-review-number-and-semester-id-paging")]
-    public async Task<IActionResult> ImportExcel([FromBody] ReviewFilterRequest request)
+    public async Task<IActionResult> GetReviewByReviewNumberAndSemester([FromBody] ReviewFilterRequest request)
     {
         var businessResult = await _service.GetReviewByReviewNumberAndSemesterIdPaging
                                     (request.Number, request.SemesterId, request.PageIndex, request.PageSize);

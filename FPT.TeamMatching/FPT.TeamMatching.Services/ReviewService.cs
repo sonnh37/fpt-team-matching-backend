@@ -21,6 +21,7 @@ public class ReviewService : BaseService<Review>, IReviewService
     private readonly IUserRepository _userRepository;
     private readonly IProjectRepository _projectRepository;
     private readonly ISemesterRepository _semesterRepository;
+    private readonly IIdeaRepository _ideaRepository;
 
     public ReviewService(IMapper mapper, IUnitOfWork unitOfWork) : base(mapper, unitOfWork)
     {
@@ -28,6 +29,7 @@ public class ReviewService : BaseService<Review>, IReviewService
         _userRepository = unitOfWork.UserRepository;
         _projectRepository = unitOfWork.ProjectRepository;
         _semesterRepository = unitOfWork.SemesterRepository;
+        _ideaRepository = unitOfWork.IdeaRepository;
     }
 
     public async Task<BusinessResult> AssignReviewers(CouncilAssignReviewers request)
@@ -163,7 +165,7 @@ public class ReviewService : BaseService<Review>, IReviewService
         }
     }
 
-    public async Task<BusinessResult> ImportExcel(IFormFile file, int reviewNumber)
+    public async Task<BusinessResult> ImportExcel(IFormFile file, int reviewNumber, Guid semesterId)
     {
         try
         {
@@ -188,6 +190,10 @@ public class ReviewService : BaseService<Review>, IReviewService
                 file.CopyTo(stream);
             }
 
+            var reviewList = await _userRepository.GetAllReviewerIdAndUsername();
+            var reviewUsernameList = reviewList.Select(x => x.Username).ToList();
+            var customIdeaModel = await _ideaRepository.GetCustomIdea(semesterId, reviewNumber);
+            var reviews = new List<Review>();
             using (var stream = File.Open(filePath, FileMode.Open, FileAccess.Read))
             {
                 using (var reader = ExcelReaderFactory.CreateReader(stream))
@@ -206,8 +212,8 @@ public class ReviewService : BaseService<Review>, IReviewService
                             {
                                 continue;
                             }
-                            //check project exist
-                            var project = await _projectRepository.GetProjectByCode(teamCode);
+                            //check pr¢oject exist
+                            var project = customIdeaModel.FirstOrDefault(x => x.TeamCode == teamCode);
                             if (project == null)
                             {
                                 continue;
@@ -219,21 +225,38 @@ public class ReviewService : BaseService<Review>, IReviewService
                                 continue;
                             }
                             //check idea code giong vs idea code cua project
-                            if (project.Idea != null && project.Idea.IdeaCode != ideaCode)
+                            if (project.IdeaCode != ideaCode)
                             {
                                 continue;
                             }
                             //check reviewer 1, 2 exist
                             var r1Value = reader.GetValue(8)?.ToString();
                             var r2Value = reader.GetValue(9)?.ToString();
+                            var gvhd1 = reader.GetValue(6).ToString().ToLower();
+                            var gvhd2 = reader.GetValue(7)?.ToString().ToLower();
+                            if (gvhd1 == null)
+                            {
+                                continue;
+                            }
+
+                            var listGVHD = gvhd2 != null
+                                ? new List<string>() { gvhd1, gvhd2 }
+                                : new List<string>() { gvhd1};
                             if (string.IsNullOrWhiteSpace(r1Value) || string.IsNullOrWhiteSpace(r2Value))
                             {
                                 continue;
                             }
 
-                            var r1 = await _userRepository.GetReviewerByMatchingEmail(r1Value);
-                            var r2 = await _userRepository.GetReviewerByMatchingEmail(r2Value);
-                            if (r1 == null || r2 == null)
+                            // kiểm tra reviewer có trong danh giản viên hướng dẫn không
+                            if (listGVHD.Contains(r1Value) || listGVHD.Contains(r2Value))
+                            {
+                                continue;
+                            }
+                            // var r1 = await _userRepository.GetReviewerByMatchingEmail(r1Value);
+                            // var r2 = await _userRepository.GetReviewerByMatchingEmail(r2Value);
+                            var r1 = reviewUsernameList.Contains(r1Value.ToLower());
+                            var r2 = reviewUsernameList.Contains(r2Value.ToLower());
+                            if (!r1 || !r2 )
                             {
                                 continue;
                             }
@@ -266,25 +289,26 @@ public class ReviewService : BaseService<Review>, IReviewService
                             }
 
                             //get review
-                            var review = await _reviewRepository.GetReviewByProjectIdAndNumber(project.Id, reviewNumber);
+                            var review = project.Review;
                             if (review == null)
                             {
                                 continue;
                             }
+                            var reviewEntity = _mapper.Map<Review>(review);
                             date.AddHours(7);
-                            review.ReviewDate = date.ToUniversalTime();
-                            review.Slot = slot;
-                            review.Room = room;
-                            review.Reviewer1Id = r1.Id;
-                            review.Reviewer2Id = r2.Id;
+                            reviewEntity.ReviewDate = date.ToUniversalTime();
+                            reviewEntity.Slot = slot;
+                            reviewEntity.Room = room;
+                            reviewEntity.Reviewer1Id = reviewList.FirstOrDefault(r => r.Username == r1Value.ToLower())?.Id;
+                            reviewEntity.Reviewer2Id = reviewList.FirstOrDefault(r => r.Username == r2Value.ToLower())?.Id;
 
-                            _reviewRepository.Update(review);
-                            await _unitOfWork.SaveChanges();
+                            reviews.Add(reviewEntity);
                         }
                     } while (reader.NextResult());
                 }
             }
-
+            _reviewRepository.UpdateRange(reviews);
+            await _unitOfWork.SaveChanges();
             return new ResponseBuilder()
                 .WithStatus(Const.SUCCESS_CODE)
                 .WithMessage("Import file success");

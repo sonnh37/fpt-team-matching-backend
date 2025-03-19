@@ -12,7 +12,7 @@ public class ReviewUpdateCommand : UpdateCommand
 
     public string? FileUpload { get; set; }
 
-    public string? Reviewer1 { get; set; }
+    public Guid? Reviewer1 { get; set; }
 
-    public string? Reviewer2 { get; set; }
+    public Guid? Reviewer2 { get; set; }
 }
