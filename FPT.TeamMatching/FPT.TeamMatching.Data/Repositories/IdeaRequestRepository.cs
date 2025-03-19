@@ -14,6 +14,7 @@ namespace FPT.TeamMatching.Data.Repositories;
 public class IdeaRequestRepository : BaseRepository<IdeaRequest>, IIdeaRequestRepository
 {
     private readonly IIdeaRepository _ideaRepository;
+
     public IdeaRequestRepository(FPTMatchingDbContext dbContext, IIdeaRepository ideaRepository) : base(dbContext)
     {
         _ideaRepository = ideaRepository;
@@ -55,13 +56,16 @@ public class IdeaRequestRepository : BaseRepository<IdeaRequest>, IIdeaRequestRe
         IdeaRequestGetListByStatusAndRoleQuery query, Guid userId)
     {
         var queryable = GetQueryable();
-        queryable = queryable.Include(m => m.Idea)
+        queryable = queryable.Include(m => m.Idea).ThenInclude(m => m.StageIdea)
             .Include(m => m.Reviewer);
 
         queryable = queryable.Where(m =>
             m.Status != null && m.Role != null &&
-            (query.Roles.Contains(m.Role) && query.Status == m.Status && m.ReviewerId == userId));
-
+            query.Roles.Contains(m.Role) && query.Status == m.Status && m.ReviewerId == userId &&
+            m.Idea != null &&
+            m.Idea.StageIdea != null &&
+            query.StageNumber.HasValue &&
+            m.Idea.StageIdea.StageNumber == query.StageNumber);
 
         if (query.IsPagination)
         {
@@ -81,21 +85,21 @@ public class IdeaRequestRepository : BaseRepository<IdeaRequest>, IIdeaRequestRe
             return (results, results.Count);
         }
     }
-    
+
     public async Task<int> CountApprovedCouncilsForIdea(Guid ideaId)
     {
         return await GetQueryable()
             .Where(ir => ir.IdeaId == ideaId && ir.Role == "Council" && ir.Status == IdeaRequestStatus.Approved)
             .CountAsync();
     }
-    
+
     public async Task<int> CountCouncilsForIdea(Guid ideaId)
     {
         return await GetQueryable()
             .Where(ir => ir.IdeaId == ideaId && ir.Role == "Council")
             .CountAsync();
     }
-    
+
     public async Task<int> CountRejectedCouncilsForIdea(Guid ideaId)
     {
         return await GetQueryable()

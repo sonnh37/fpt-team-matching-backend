@@ -21,6 +21,7 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
     {
         var ideas = await _dbContext.Ideas.Where(e => e.OwnerId == userId)
                                         .Include(e => e.IdeaRequests).ThenInclude(e => e.Reviewer)
+                                        .Include(e => e.StageIdea)
                                         .ToListAsync();
         return ideas;
     }
@@ -37,6 +38,7 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
         var ideas = await _dbContext.Ideas.Where(e => e.OwnerId == userId
              && e.Status == status)
             .OrderByDescending(m => m.CreatedDate)
+            .Include(m => m.StageIdea)
             .Include(e => e.IdeaRequests).ThenInclude(e => e.Reviewer)
             .ToListAsync();
 
