@@ -35,7 +35,7 @@ public static class IncludeHelper
     {
         queryable = queryable.Include(m => m.User);
         queryable = queryable.Include(m => m.Project);
-        queryable = queryable.Include(m => m.Comments).ThenInclude(x=> x.User);
+        queryable = queryable.Include(m => m.Comments);
         queryable = queryable.Include(m => m.Likes);
         return queryable;
     }
