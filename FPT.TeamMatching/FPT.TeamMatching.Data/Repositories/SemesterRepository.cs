@@ -14,18 +14,28 @@ namespace FPT.TeamMatching.Data.Repositories
 {
     public class SemesterRepository : BaseRepository<Semester>, ISemesterRepository
     {
-        private readonly FPTMatchingDbContext _dbContext;
         public SemesterRepository(FPTMatchingDbContext dbContext) : base(dbContext)
         {
-            _dbContext = dbContext;
         }
 
         public async Task<Semester?> GetUpComingSemester()
         {
-            var s = await _dbContext.Semesters.Where(e => e.StartDate >  DateTime.UtcNow)
+            var now = DateTime.UtcNow;
+            var semester = await GetQueryable().Where(e => e.StartDate >  now)
                                         .OrderByDescending(e => e.StartDate)
                                         .FirstOrDefaultAsync();
-            return s;
+            return semester;
+        }
+        
+        public async Task<Semester?> GetCurrentSemester()
+        {
+            var now = DateTime.UtcNow;
+
+            var semester = await GetQueryable()
+                .Where(e => e.StartDate <= now && e.EndDate >= now)
+                .OrderByDescending(e => e.StartDate)
+                .FirstOrDefaultAsync();
+            return semester;
         }
     }
 }

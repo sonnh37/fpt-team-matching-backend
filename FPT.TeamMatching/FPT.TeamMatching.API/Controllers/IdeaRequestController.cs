@@ -27,24 +27,10 @@ public class IdeaRequestController : ControllerBase
         return Ok(msg);
     }
     
-    [HttpGet("me/by-status")]
-    public async Task<IActionResult> GetIdeaRequestsCurrentByStatus([FromQuery] IdeaRequestGetAllCurrentByStatus request)
-    {
-        var businessResult = await _service.GetIdeaRequestsCurrentByStatus<IdeaRequestResult>(request);
-        return Ok(businessResult);
-    }
-    
     [HttpGet("me/by-status-and-roles")]
-    public async Task<IActionResult> GetIdeaRequestsCurrentByStatusAndRoles([FromQuery] IdeaRequestGetAllByListStatusForCurrentUser query)
+    public async Task<IActionResult> GetIdeaRequestsCurrentByStatusAndRoles([FromQuery] IdeaRequestGetListByStatusAndRoleQuery query)
     {
-        var msg = await _service.GetIdeaRequestsCurrentByStatusAndRoles<IdeaRequestResult>(query);
-        return Ok(msg);
-    }
-    
-    [HttpGet("by-status-and-roles")]
-    public async Task<IActionResult> GetIdeaRequestsByStatusAndRoles([FromQuery] IdeaRequestGetAllByListStatusForCurrentUser query)
-    {
-        var msg = await _service.GetIdeaRequestsByStatusAndRoles<IdeaRequestResult>(query);
+        var msg = await _service.GetIdeaRequestsForCurrentReviewerByRolesAndStatus<IdeaRequestResult>(query);
         return Ok(msg);
     }
     

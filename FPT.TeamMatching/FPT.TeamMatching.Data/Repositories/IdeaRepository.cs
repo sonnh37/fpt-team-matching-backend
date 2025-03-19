@@ -23,8 +23,16 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
     {
         var ideas = await _dbContext.Ideas.Where(e => e.OwnerId == userId)
                                         .Include(e => e.IdeaRequests).ThenInclude(e => e.Reviewer)
+                                        .Include(e => e.StageIdea)
                                         .ToListAsync();
         return ideas;
+    }
+    
+    public async Task<Idea?> GetLatestIdeaByUserAndStatus(Guid userId, IdeaStatus status)
+    {
+        return await GetQueryable<Idea>()
+            .OrderByDescending(m => m.CreatedDate)
+            .FirstOrDefaultAsync(e => e.OwnerId == userId && e.Status == status);
     }
     
     public async Task<List<Idea>> GetCurrentIdeaByUserIdAndStatus(Guid userId, IdeaStatus status)
@@ -32,6 +40,7 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
         var ideas = await _dbContext.Ideas.Where(e => e.OwnerId == userId
              && e.Status == status)
             .OrderByDescending(m => m.CreatedDate)
+            .Include(m => m.StageIdea)
             .Include(e => e.IdeaRequests).ThenInclude(e => e.Reviewer)
             .ToListAsync();
 

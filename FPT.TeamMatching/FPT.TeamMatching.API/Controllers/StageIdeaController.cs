@@ -32,6 +32,20 @@ namespace FPT.TeamMatching.API.Controllers
             var msg = await _service.GetById<StageIdeaResult>(id);
             return Ok(msg);
         }
+        
+        [HttpGet("stage-number/{number:int}")]
+        public async Task<IActionResult> GetByStageNumber([FromRoute] int number)
+        {
+            var msg = await _service.GetByStageNumber<StageIdeaResult>(number);
+            return Ok(msg);
+        }
+        
+        [HttpGet("latest")]
+        public async Task<IActionResult> GetLatestStageIdea()
+        {
+            var msg = await _service.GetLatestStageIdea<StageIdeaResult>();
+            return Ok(msg);
+        }
 
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] StageIdeaCreateCommand request)

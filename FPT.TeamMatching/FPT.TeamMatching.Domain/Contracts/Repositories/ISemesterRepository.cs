@@ -11,5 +11,6 @@ namespace FPT.TeamMatching.Domain.Contracts.Repositories
     public interface ISemesterRepository: IBaseRepository<Semester>
     {
         Task<Semester?> GetUpComingSemester();
+        Task<Semester?> GetCurrentSemester();
     }
 }
