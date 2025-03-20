@@ -1,4 +1,6 @@
 ﻿using FPT.TeamMatching.Domain.Contracts.Services.Bases;
+using FPT.TeamMatching.Domain.Entities;
+using FPT.TeamMatching.Domain.Models.Responses;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,5 +11,6 @@ namespace FPT.TeamMatching.Domain.Contracts.Services
 {
     public interface ISemesterService: IBaseService
     {
+        Task<BusinessResult> GetPresentSemester();
     }
 }

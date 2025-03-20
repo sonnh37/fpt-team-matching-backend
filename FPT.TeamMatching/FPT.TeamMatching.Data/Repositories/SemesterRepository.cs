@@ -20,6 +20,13 @@ namespace FPT.TeamMatching.Data.Repositories
             _dbContext = dbContext;
         }
 
+        public async Task<Semester?> GetPresentSemester()
+        {
+            var s = await _dbContext.Semesters.Where(e => e.StartDate.Value.LocalDateTime.Date <= DateTime.Now.Date && DateTime.Now.Date <= e.EndDate.Value.LocalDateTime.Date)
+                                        .FirstOrDefaultAsync();
+            return s;
+        }
+
         public async Task<Semester?> GetUpComingSemester()
         {
             var s = await _dbContext.Semesters.Where(e => e.StartDate >  DateTime.UtcNow)
