@@ -318,9 +318,9 @@ public class ReviewService : BaseService<Review>, IReviewService
                             reviewEntity.ReviewDate = date.ToUniversalTime();
                             
                             // #fix: ai fix đi
-                            review.ReviewDate = date.UtcDateTime.Date.AddDays(1);
-                            review.Room = room;
-                            review.Slot = slot;
+                            // review.ReviewDate = date.UtcDateTime.Date.AddDays(1);
+                            // review.Room = room;
+                            // review.Slot = slot;
                             reviewEntity.Reviewer1Id = reviewList.FirstOrDefault(r => r.Username == r1Value.ToLower())?.Id;
                             reviewEntity.Reviewer2Id = reviewList.FirstOrDefault(r => r.Username == r2Value.ToLower())?.Id;
 

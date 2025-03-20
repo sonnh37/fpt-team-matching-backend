@@ -31,6 +31,15 @@ public class UserRepository : BaseRepository<User>, IUserRepository
             .FirstOrDefaultAsync();
     }
     
+    public async Task<User?> GetById(Guid id)
+    {
+        var queryable = GetQueryable(x => x.Id == id);
+        queryable = queryable.Include(e => e.UserXRoles).ThenInclude(e => e.Role);
+        var entity = await queryable.FirstOrDefaultAsync();
+
+        return entity;
+    }
+    
     public async Task<List<User>> GetThreeCouncilsForIdeaRequest(Guid ideaId)
     {
         var queryable = GetQueryable();
