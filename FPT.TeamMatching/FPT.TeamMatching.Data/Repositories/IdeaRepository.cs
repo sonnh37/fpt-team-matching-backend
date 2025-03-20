@@ -46,18 +46,59 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
 
         return ideas;
     }
-    
-    public async Task<int> MaxNumberOfSemester(Guid semesterId)
+
+    public async Task<int> NumberApprovedIdeasOfSemester(Guid? semesterId)
     {
-        // # Lỗi do thay đổi db
-        // var maxNumber = await _dbContext.Ideas
-        //                .Where(i => i.SemesterId == semesterId)
-        //             .Select(i => Regex.Match(i.IdeaCode, @"\d+$").Value) // Lấy phần số cuối
-        //             .Select(x => int.Parse(x)) // Chuyển thành số nguyên
-        //             .DefaultIfEmpty(0) // Nếu không có Idea nào, giá trị mặc định là 0
-        //             .MaxAsync();
-        // return maxNumber;
-        return 0;
+        var maxNumber = await _dbContext.Ideas.Where(e => e.Status == IdeaStatus.Approved && 
+                                                        e.IsDeleted == false &&
+                                                        e.StageIdea != null &&
+                                                        e.StageIdea.SemesterId == semesterId).CountAsync();
+        return maxNumber;
+    }
+
+    public async Task<List<Idea>> GetIdeaWithResultDateIsToday()
+    {
+        var ideas = await _dbContext.Ideas
+            .Where(e =>
+                                                    e.IsDeleted == false &&
+                                                    e.Status == IdeaStatus.Pending &&
+                                                    e.StageIdea != null &&
+                                                    e.StageIdea.ResultDate.UtcDateTime.Date == DateTime.UtcNow.Date)
+                                            .Include(e => e.StageIdea).ThenInclude(e => e.Semester)
+                                            .Include(e => e.Owner).ThenInclude(e => e.UserXRoles).ThenInclude(e => e.Role)
+                                            .ToListAsync();
+
+        return ideas;
+    }
+
+    public async Task<Idea?> GetIdeaPendingInStageIdeaOfUser(Guid userId, Guid stageIdeaId)
+    {
+        var i = await _dbContext.Ideas.Where(e => e.IsDeleted == false &&
+                                            e.StageIdeaId == stageIdeaId && 
+                                            e.OwnerId == userId &&
+                                            e.Status == IdeaStatus.Pending)
+                                .FirstOrDefaultAsync();
+        return i;
+    }
+
+    public async Task<Idea?> GetIdeaApproveInSemesterOfUser(Guid userId, Guid semesterId)
+    {
+        var i = await _dbContext.Ideas.Where(e => e.IsDeleted == false &&
+                                            e.StageIdea != null &&
+                                            e.StageIdea.Semester != null &&
+                                            e.StageIdea.Semester.Id == semesterId &&
+                                            e.OwnerId == userId &&
+                                            e.Status == IdeaStatus.Approved)
+                                .FirstOrDefaultAsync();
+        return i;
+    }
+
+    public async Task<int> NumberOfIdeaMentorOrOwner(Guid userId)
+    {
+        var number = await _dbContext.Ideas.Where(e => e.IsDeleted == false &&
+                                                (e.MentorId ==  userId || e.OwnerId == userId))
+                                        .CountAsync();
+        return number;
     }
 
 

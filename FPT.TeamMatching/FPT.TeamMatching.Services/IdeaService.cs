@@ -4,15 +4,13 @@ using FPT.TeamMatching.Domain.Contracts.Services;
 using FPT.TeamMatching.Domain.Contracts.UnitOfWorks;
 using FPT.TeamMatching.Domain.Entities;
 using FPT.TeamMatching.Domain.Enums;
-using FPT.TeamMatching.Domain.Models.Requests.Commands.Base;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Ideas;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Ideas;
 using FPT.TeamMatching.Domain.Models.Responses;
 using FPT.TeamMatching.Domain.Models.Results;
-using FPT.TeamMatching.Domain.Models.Results.Bases;
 using FPT.TeamMatching.Domain.Utilities;
 using FPT.TeamMatching.Services.Bases;
-using Microsoft.AspNetCore.Http.HttpResults;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace FPT.TeamMatching.Services;
 
@@ -22,6 +20,7 @@ public class IdeaService : BaseService<Idea>, IIdeaService
     private readonly IIdeaRequestRepository _ideaRequestRepository;
     private readonly ISemesterRepository _semesterRepository;
     private readonly IProjectRepository _projectRepository;
+    private readonly IUserRepository _userRepository;
 
     public IdeaService(IMapper mapper, IUnitOfWork unitOfWork) : base(mapper, unitOfWork)
     {
@@ -29,6 +28,7 @@ public class IdeaService : BaseService<Idea>, IIdeaService
         _ideaRequestRepository = unitOfWork.IdeaRequestRepository;
         _semesterRepository = unitOfWork.SemesterRepository;
         _projectRepository = unitOfWork.ProjectRepository;
+        _userRepository = unitOfWork.UserRepository;
     }
 
 
@@ -70,6 +70,51 @@ public class IdeaService : BaseService<Idea>, IIdeaService
     {
         try
         {
+            //check đề tài đki thứ 5 phải có submentor
+            var u = await GetUserAsync();
+            if (u == null)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("No lecturer login");
+            }
+            var numberOfIdeaMentorOrOwner = await _ideaRepository.NumberOfIdeaMentorOrOwner(u.Id);
+            if (numberOfIdeaMentorOrOwner > 4)
+            {
+                //k co submentor
+                if (idea.SubMentorId == null)
+                {
+                    return new ResponseBuilder()
+                        .WithStatus(Const.FAIL_CODE)
+                        .WithMessage("Lecturer is mentor or owner in 4 ideas, the 5th idea needs submentor");
+                }
+                //k tim thay submentor
+                var submentor = _userRepository.GetById((Guid)idea.SubMentorId);
+                if (submentor == null)
+                {
+                    return new ResponseBuilder()
+                        .WithStatus(Const.FAIL_CODE)
+                        .WithMessage("Don't exist submentor with given idea");
+                }
+            }
+            //check đề tài doanh nghiệp thì phải nhập tên doanh nghiệp
+            if (idea.IsEnterpriseTopic)
+            {
+                if (idea.EnterpriseName == null)
+                {
+                    return new ResponseBuilder()
+                        .WithStatus(Const.FAIL_CODE)
+                        .WithMessage("Enterprise idea need enterprise name");
+                }
+            } else
+            {
+                if (idea.EnterpriseName != null)
+                {
+                    return new ResponseBuilder()
+                        .WithStatus(Const.FAIL_CODE)
+                        .WithMessage("Do not need enterprise name");
+                }
+            }
             var createSucess = await LecturerCreateAsync(idea);
             if (!createSucess)
                 return new ResponseBuilder()
@@ -125,7 +170,44 @@ public class IdeaService : BaseService<Idea>, IIdeaService
     {
         try
         {
-                bool createSucess = await StudentCreateAsync(idea);
+            var u = await GetUserAsync();
+            if (u == null)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("No student login");
+            }
+            if (idea.StageIdeaId == null)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("StageIdeaId is required field");
+            }
+            var semester = await _semesterRepository.GetSemesterByStageIdeaId((Guid)idea.StageIdeaId);
+            if (semester == null)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("Not found semester");
+            }
+            //check student co idea approve trong ki nay k
+            var ideaApprovedInSemester = await _ideaRepository.GetIdeaApproveInSemesterOfUser(u.Id, semester.Id);
+            if (ideaApprovedInSemester != null)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("Student has approved idea in this semester");
+            }
+            //check student co idea dang pending trong dot duyet nay k
+            var ideaPendingInStageIdea = await _ideaRepository.GetIdeaPendingInStageIdeaOfUser(u.Id, (Guid)idea.StageIdeaId);
+            if (ideaPendingInStageIdea != null)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("Student has pending idea in this stage idea");
+            }
+
+            bool createSucess = await StudentCreateAsync(idea);
             if (!createSucess)
                 return new ResponseBuilder()
                     .WithStatus(Const.FAIL_CODE)
@@ -181,10 +263,10 @@ public class IdeaService : BaseService<Idea>, IIdeaService
 
     private async Task<bool> LecturerCreateAsync(IdeaLecturerCreatePendingCommand ideaCreateCommand)
     {
+
         var ideaEntity = _mapper.Map<Idea>(ideaCreateCommand);
         if (ideaEntity == null) return false;
         var userId = GetUserIdFromClaims();
-        ideaEntity.Id = Guid.NewGuid();
         ideaEntity.Status = IdeaStatus.Pending;
         ideaEntity.OwnerId = userId;
         ideaEntity.MentorId = userId;
@@ -263,6 +345,7 @@ public class IdeaService : BaseService<Idea>, IIdeaService
                     .WithMessage(Const.FAIL_SAVE_MSG);
 
             var msg = new ResponseBuilder()
+                .WithData(idea)
                 .WithStatus(Const.SUCCESS_CODE)
                 .WithMessage(Const.SUCCESS_SAVE_MSG);
 
@@ -272,5 +355,68 @@ public class IdeaService : BaseService<Idea>, IIdeaService
         {
             return HandlerError(ex.Message);
         }
+    }
+
+    public async Task AutoUpdateIdeaStatus()
+    {
+        var ideas = await _ideaRepository.GetIdeaWithResultDateIsToday();
+        if (ideas != null)
+        {
+            foreach (var idea in ideas)
+            {
+                var totalCouncils = await _ideaRequestRepository.CountCouncilsForIdea(idea.Id);
+                var totalApproved = await _ideaRequestRepository.CountApprovedCouncilsForIdea(idea.Id);
+                var totalRejected = await _ideaRequestRepository.CountRejectedCouncilsForIdea(idea.Id);
+
+                if (totalCouncils == 3)
+                {
+                    if (totalApproved > totalRejected)
+                        await UpdateIdea(idea, IdeaStatus.Approved);
+                    else
+                    if (totalRejected > totalApproved)
+                        await UpdateIdea(idea, IdeaStatus.Rejected);
+                }
+            }
+        }
+    }
+    private async Task UpdateIdea(Idea idea, IdeaStatus status)
+    {
+        if (status == IdeaStatus.Approved)
+        {
+            if (idea.StageIdea != null)
+            {
+                //Gen idea code 
+                var semester = await _semesterRepository.GetById((Guid)idea.StageIdea.SemesterId);
+                if (semester == null) return;
+                var semesterCode = semester.SemesterCode;
+                var semesterPrefix = semester.SemesterPrefixName;
+                //get so luong idea dc duyet ok cua ki
+                var numberOfIdeas = await _ideaRepository.NumberApprovedIdeasOfSemester(semester.Id);
+
+                // Tạo số thứ tự tiếp theo
+                int nextNumber = numberOfIdeas + 1;
+
+                // Tạo mã Idea mới theo định dạng: semesterPrefix + semesterCode + "SE" + số thứ tự (2 chữ số)
+                string newIdeaCode = $"{semesterPrefix}{semesterCode}SE{nextNumber:D2}";
+
+                idea.IdeaCode = newIdeaCode;
+
+                //Tạo mã nhóm
+                string newTeamCode = $"{semesterCode}SE{nextNumber:D3}";
+                //Tao project
+                var project = new Project
+                {
+                    LeaderId = idea.Owner.UserXRoles.Any(e => e.Role.RoleName == "Student") ? idea.OwnerId : null,
+                    IdeaId = idea.Id,
+                    TeamCode = newTeamCode,
+                    Status = ProjectStatus.InProgress,
+                    TeamSize = idea.MaxTeamSize
+                };
+                _projectRepository.Add(project);
+            }
+        }
+        idea.Status = status;
+        _ideaRepository.Update(idea);
+        await _unitOfWork.SaveChanges();
     }
 }

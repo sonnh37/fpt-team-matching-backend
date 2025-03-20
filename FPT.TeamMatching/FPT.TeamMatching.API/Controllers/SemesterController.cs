@@ -71,5 +71,12 @@ namespace FPT.TeamMatching.API.Controllers
 
             return Ok(businessResult);
         }
+
+        [HttpGet("get-present-semester")]
+        public async Task<IActionResult> GetPresentSemester()
+        {
+            var msg = await _service.GetPresentSemester();
+            return Ok(msg);
+        }
     }
 }

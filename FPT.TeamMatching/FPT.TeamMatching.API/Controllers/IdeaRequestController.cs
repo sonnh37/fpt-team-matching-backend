@@ -102,11 +102,11 @@ public class IdeaRequestController : ControllerBase
         return Ok(businessResult);
     }
 
-    [HttpPut("council-response")]
-    public async Task<IActionResult> CouncilResponse([FromBody] IdeaRequestLecturerOrCouncilResponseCommand request)
-    {
-        var businessResult = await _service.CouncilResponse(request);
+    //[HttpPut("council-response")]
+    //public async Task<IActionResult> CouncilResponse([FromBody] IdeaRequestLecturerOrCouncilResponseCommand request)
+    //{
+    //    var businessResult = await _service.CouncilResponse(request);
 
-        return Ok(businessResult);
-    }
+    //    return Ok(businessResult);
+    //}
 }
