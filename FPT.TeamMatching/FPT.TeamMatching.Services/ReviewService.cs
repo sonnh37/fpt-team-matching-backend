@@ -255,11 +255,13 @@ public class ReviewService : BaseService<Review>, IReviewService
                             {
                                 continue;
                             }
-                            // var r1 = await _userRepository.GetReviewerByMatchingEmail(r1Value);
-                            // var r2 = await _userRepository.GetReviewerByMatchingEmail(r2Value);
-                            var r1 = reviewUsernameList.Contains(r1Value.ToLower());
-                            var r2 = reviewUsernameList.Contains(r2Value.ToLower());
-                            if (!r1 || !r2 )
+                            
+                            // #fix: r1, r2 ở 2 hàm dưới trả về bool mà đi xét r1.Id 
+                             var r1 = await _userRepository.GetReviewerByMatchingEmail(r1Value);
+                             var r2 = await _userRepository.GetReviewerByMatchingEmail(r2Value);
+                             var r1Bool = reviewUsernameList.Contains(r1Value.ToLower());
+                             var r2Bool = reviewUsernameList.Contains(r2Value.ToLower());
+                            if (!r1Bool || !r2Bool )
                             {
                                 continue;
                             }
