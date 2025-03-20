@@ -20,6 +20,7 @@ public class IdeaService : BaseService<Idea>, IIdeaService
     private readonly IIdeaRequestRepository _ideaRequestRepository;
     private readonly ISemesterRepository _semesterRepository;
     private readonly IProjectRepository _projectRepository;
+    private readonly IUserRepository _userRepository;
 
     public IdeaService(IMapper mapper, IUnitOfWork unitOfWork) : base(mapper, unitOfWork)
     {
@@ -27,6 +28,7 @@ public class IdeaService : BaseService<Idea>, IIdeaService
         _ideaRequestRepository = unitOfWork.IdeaRequestRepository;
         _semesterRepository = unitOfWork.SemesterRepository;
         _projectRepository = unitOfWork.ProjectRepository;
+        _userRepository = unitOfWork.UserRepository;
     }
 
 
@@ -68,6 +70,51 @@ public class IdeaService : BaseService<Idea>, IIdeaService
     {
         try
         {
+            //check đề tài đki thứ 5 phải có submentor
+            var u = await GetUserAsync();
+            if (u == null)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("No lecturer login");
+            }
+            var numberOfIdeaMentorOrOwner = await _ideaRepository.NumberOfIdeaMentorOrOwner(u.Id);
+            if (numberOfIdeaMentorOrOwner > 4)
+            {
+                //k co submentor
+                if (idea.SubMentorId == null)
+                {
+                    return new ResponseBuilder()
+                        .WithStatus(Const.FAIL_CODE)
+                        .WithMessage("Lecturer is mentor or owner in 4 ideas, the 5th idea needs submentor");
+                }
+                //k tim thay submentor
+                var submentor = _userRepository.GetById((Guid)idea.SubMentorId);
+                if (submentor == null)
+                {
+                    return new ResponseBuilder()
+                        .WithStatus(Const.FAIL_CODE)
+                        .WithMessage("Don't exist submentor with given idea");
+                }
+            }
+            //check đề tài doanh nghiệp thì phải nhập tên doanh nghiệp
+            if (idea.IsEnterpriseTopic)
+            {
+                if (idea.EnterpriseName == null)
+                {
+                    return new ResponseBuilder()
+                        .WithStatus(Const.FAIL_CODE)
+                        .WithMessage("Enterprise idea need enterprise name");
+                }
+            } else
+            {
+                if (idea.EnterpriseName != null)
+                {
+                    return new ResponseBuilder()
+                        .WithStatus(Const.FAIL_CODE)
+                        .WithMessage("Do not need enterprise name");
+                }
+            }
             var createSucess = await LecturerCreateAsync(idea);
             if (!createSucess)
                 return new ResponseBuilder()
@@ -137,7 +184,7 @@ public class IdeaService : BaseService<Idea>, IIdeaService
                     .WithMessage("StageIdeaId is required field");
             }
             var semester = await _semesterRepository.GetSemesterByStageIdeaId((Guid)idea.StageIdeaId);
-            if(semester == null)
+            if (semester == null)
             {
                 return new ResponseBuilder()
                     .WithStatus(Const.FAIL_CODE)
@@ -145,7 +192,7 @@ public class IdeaService : BaseService<Idea>, IIdeaService
             }
             //check student co idea approve trong ki nay k
             var ideaApprovedInSemester = await _ideaRepository.GetIdeaApproveInSemesterOfUser(u.Id, semester.Id);
-            if(ideaApprovedInSemester != null)
+            if (ideaApprovedInSemester != null)
             {
                 return new ResponseBuilder()
                     .WithStatus(Const.FAIL_CODE)
@@ -216,10 +263,10 @@ public class IdeaService : BaseService<Idea>, IIdeaService
 
     private async Task<bool> LecturerCreateAsync(IdeaLecturerCreatePendingCommand ideaCreateCommand)
     {
+
         var ideaEntity = _mapper.Map<Idea>(ideaCreateCommand);
         if (ideaEntity == null) return false;
         var userId = GetUserIdFromClaims();
-        ideaEntity.Id = Guid.NewGuid();
         ideaEntity.Status = IdeaStatus.Pending;
         ideaEntity.OwnerId = userId;
         ideaEntity.MentorId = userId;

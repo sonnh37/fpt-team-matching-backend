@@ -33,23 +33,17 @@ public class ReviewRepository : BaseRepository<Review>, IReviewRepository
         return review;
     }
 
-    public async Task<(List<Review>?, int)> GetReviewByReviewNumberAndSemesterIdPaging(int number, Guid semesterId, int pageIndex, int pageSize)
+    public async Task<List<Review>?> GetReviewByReviewNumberAndSemesterIdPaging(int number, Guid semesterId)
     {
-        var query = _dbContext.Reviews.Where(e =>
+        var query = await _dbContext.Reviews.Where(e =>
                                     e.IsDeleted == false &&
                                     e.Number == number &&
                                     e.Project != null &&
                                     e.Project.Idea != null &&
                                     e.Project.Idea.StageIdea != null &&
-                                    e.Project.Idea.StageIdea.SemesterId == semesterId);
+                                    e.Project.Idea.StageIdea.SemesterId == semesterId)
+                                    .ToListAsync();
 
-        var items = await query
-            .Skip((pageIndex - 1) * pageSize)
-            .Take(pageSize)
-            .ToListAsync();
-
-        var totalRecords = items.Count();
-
-        return (items, totalRecords);
+        return query;
     }
 }

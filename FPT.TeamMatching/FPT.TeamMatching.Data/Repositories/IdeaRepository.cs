@@ -81,4 +81,12 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
                                 .FirstOrDefaultAsync();
         return i;
     }
+
+    public async Task<int> NumberOfIdeaMentorOrOwner(Guid userId)
+    {
+        var number = await _dbContext.Ideas.Where(e => e.IsDeleted == false &&
+                                                (e.MentorId ==  userId || e.OwnerId == userId))
+                                        .CountAsync();
+        return number;
+    }
 }

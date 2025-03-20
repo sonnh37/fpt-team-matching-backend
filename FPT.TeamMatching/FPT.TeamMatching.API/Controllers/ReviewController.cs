@@ -77,13 +77,14 @@ public class ReviewController : ControllerBase
         return Ok(businessResult);
     }
 
-    [HttpPost("get-by-review-number-and-semester-id-paging")]
+    [HttpPost("get-by-review-number-and-semester-id")]
     public async Task<IActionResult> ImportExcel([FromBody] ReviewFilterRequest request)
     {
         var businessResult = await _service.GetReviewByReviewNumberAndSemesterIdPaging
-                                    (request.Number, request.SemesterId, request.PageIndex, request.PageSize);
+                                    (request.Number, request.SemesterId);
         return Ok(businessResult);
     }
+
     //[HttpPut("council-assign-reviewers")]
     //public async Task<IActionResult> CouncilAssignReviewers([FromBody] CouncilAssignReviewers request)
     //{

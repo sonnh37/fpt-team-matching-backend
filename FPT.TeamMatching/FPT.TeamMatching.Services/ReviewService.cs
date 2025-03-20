@@ -317,7 +317,7 @@ public class ReviewService : BaseService<Review>, IReviewService
         }
     }
 
-    public async Task<BusinessResult> GetReviewByReviewNumberAndSemesterIdPaging(int number, Guid semesterId, int pageIndex, int pageSize)
+    public async Task<BusinessResult> GetReviewByReviewNumberAndSemesterIdPaging(int number, Guid semesterId)
     {
         try
         {
@@ -334,21 +334,17 @@ public class ReviewService : BaseService<Review>, IReviewService
                 .WithStatus(Const.FAIL_CODE)
                 .WithMessage("Review number must less than 5 and greater than 0!");
             }
-            var result = await _reviewRepository.GetReviewByReviewNumberAndSemesterIdPaging(number, semesterId, pageIndex, pageSize);
-            if (result.Item2 == 0)
+            var result = await _reviewRepository.GetReviewByReviewNumberAndSemesterIdPaging(number, semesterId);
+            if (result.Count == 0)
             {
                 return new ResponseBuilder()
                 .WithStatus(Const.NOT_FOUND_CODE)
                 .WithMessage("No review exist!");
             }
             return new ResponseBuilder()
+                .WithData(result)
                 .WithStatus(Const.SUCCESS_CODE)
-                .WithMessage(Const.SUCCESS_READ_MSG)
-                .WithData(new
-                {
-                    reviews = result.Item1,
-                    total = result.Item2,
-                });
+                .WithMessage(Const.SUCCESS_READ_MSG);
         }
         catch (Exception ex)
         {

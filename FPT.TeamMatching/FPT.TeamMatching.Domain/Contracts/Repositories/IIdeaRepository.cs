@@ -18,4 +18,6 @@ public interface IIdeaRepository : IBaseRepository<Idea>
     Task<Idea?> GetIdeaPendingInStageIdeaOfUser(Guid userId, Guid stageIdeaId);
 
     Task<Idea?> GetIdeaApproveInSemesterOfUser(Guid userId, Guid semesterId);
+
+    Task<int> NumberOfIdeaMentorOrOwner(Guid userId);
 }
