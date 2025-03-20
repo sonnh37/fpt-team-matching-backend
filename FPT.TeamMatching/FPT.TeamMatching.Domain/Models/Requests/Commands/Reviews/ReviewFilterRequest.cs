@@ -10,7 +10,5 @@ namespace FPT.TeamMatching.Domain.Models.Requests.Commands.Reviews
     {
         public int Number { get; set; }
         public Guid SemesterId { get; set; }
-        public int PageIndex { get; set; } 
-        public int PageSize { get; set; } 
     }
 }

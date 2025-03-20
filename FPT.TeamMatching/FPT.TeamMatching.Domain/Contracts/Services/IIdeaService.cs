@@ -19,5 +19,7 @@ namespace FPT.TeamMatching.Domain.Contracts.Services
         Task<BusinessResult> GetIdeasByUserId();
         Task<BusinessResult> UpdateIdea(IdeaUpdateCommand ideaUpdateCommand);
         Task<BusinessResult> UpdateStatusIdea(IdeaUpdateStatusCommand command);
+
+        Task AutoUpdateIdeaStatus();
     }
 }

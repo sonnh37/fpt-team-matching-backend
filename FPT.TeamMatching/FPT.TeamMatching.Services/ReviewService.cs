@@ -88,7 +88,10 @@ public class ReviewService : BaseService<Review>, IReviewService
     {
         //Tim project den thgian bat dau
         var projects = await _projectRepository.GetProjectsStartingNow();
-
+        if (projects == null)
+        {
+            return;
+        }
         foreach (var project in projects)
         {
             for (int i = 1; i <= 4; i++)
@@ -261,6 +264,21 @@ public class ReviewService : BaseService<Review>, IReviewService
                                 continue;
                             }
 
+                            //check reviewer 1, 2 k trung vs mentor
+                            //if (project.IdeaId != null)
+                            //{
+                            //    var idea = await _ideaRepository.GetById((Guid)project.IdeaId);
+                            //    if (idea != null)
+                            //    {
+                            //        if (idea.MentorId == r1.Id || idea.MentorId == r2.Id)
+                            //        {
+                            //            continue;
+                            //        }
+                            //    }
+                            //    else continue;
+                            //}
+                            //else continue;
+
                             //check date
                             var dateValue = reader.GetValue(10)?.ToString();
                             DateTimeOffset date;
@@ -295,10 +313,10 @@ public class ReviewService : BaseService<Review>, IReviewService
                                 continue;
                             }
                             var reviewEntity = _mapper.Map<Review>(review);
-                            date.AddHours(7);
-                            reviewEntity.ReviewDate = date.ToUniversalTime();
-                            reviewEntity.Slot = slot;
+                            //reviewEntity.ReviewDate = date.ToUniversalTime();
+                            reviewEntity.ReviewDate = date.UtcDateTime.Date.AddDays(1);
                             reviewEntity.Room = room;
+                            reviewEntity.Slot = slot;
                             reviewEntity.Reviewer1Id = reviewList.FirstOrDefault(r => r.Username == r1Value.ToLower())?.Id;
                             reviewEntity.Reviewer2Id = reviewList.FirstOrDefault(r => r.Username == r2Value.ToLower())?.Id;
 
@@ -322,7 +340,7 @@ public class ReviewService : BaseService<Review>, IReviewService
         }
     }
 
-    public async Task<BusinessResult> GetReviewByReviewNumberAndSemesterIdPaging(int number, Guid semesterId, int pageIndex, int pageSize)
+    public async Task<BusinessResult> GetReviewByReviewNumberAndSemesterIdPaging(int number, Guid semesterId)
     {
         try
         {
@@ -339,21 +357,17 @@ public class ReviewService : BaseService<Review>, IReviewService
                 .WithStatus(Const.FAIL_CODE)
                 .WithMessage("Review number must less than 5 and greater than 0!");
             }
-            var result = await _reviewRepository.GetReviewByReviewNumberAndSemesterIdPaging(number, semesterId, pageIndex, pageSize);
-            if (result.Item2 == 0)
+            var result = await _reviewRepository.GetReviewByReviewNumberAndSemesterIdPaging(number, semesterId);
+            if (result.Count == 0)
             {
                 return new ResponseBuilder()
                 .WithStatus(Const.NOT_FOUND_CODE)
                 .WithMessage("No review exist!");
             }
             return new ResponseBuilder()
+                .WithData(result)
                 .WithStatus(Const.SUCCESS_CODE)
-                .WithMessage(Const.SUCCESS_READ_MSG)
-                .WithData(new
-                {
-                    reviews = result.Item1,
-                    total = result.Item2,
-                });
+                .WithMessage(Const.SUCCESS_READ_MSG);
         }
         catch (Exception ex)
         {

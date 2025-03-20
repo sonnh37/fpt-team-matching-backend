@@ -12,5 +12,7 @@ namespace FPT.TeamMatching.Domain.Contracts.Repositories
     {
         Task<Semester?> GetUpComingSemester();
         Task<Semester?> GetCurrentSemester();
+        Task<Semester?> GetPresentSemester();
+        Task<Semester?> GetSemesterByStageIdeaId(Guid stageIdeaId);
     }
 }

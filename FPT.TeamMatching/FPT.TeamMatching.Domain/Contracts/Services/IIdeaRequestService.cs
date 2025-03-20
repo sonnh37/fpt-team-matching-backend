@@ -16,7 +16,7 @@ namespace FPT.TeamMatching.Domain.Contracts.Services
     public interface IIdeaRequestService : IBaseService
     {
         Task<BusinessResult> LecturerResponse(IdeaRequestLecturerOrCouncilResponseCommand command);
-        Task<BusinessResult> CouncilResponse(IdeaRequestLecturerOrCouncilResponseCommand command);
+        //Task<BusinessResult> CouncilResponse(IdeaRequestLecturerOrCouncilResponseCommand command);
 
         Task<BusinessResult> GetAll<TResult>(IdeaRequestGetAllQuery query) where TResult : BaseResult;
 

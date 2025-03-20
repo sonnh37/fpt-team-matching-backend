@@ -10,10 +10,18 @@ public interface IIdeaRepository : IBaseRepository<Idea>
 {
     Task<IList<Idea>> GetIdeasByUserId(Guid userId);
     
-    Task<int> MaxNumberOfSemester(Guid semesterId);
+    Task<int> NumberApprovedIdeasOfSemester(Guid? semesterId);
 
     Task<List<Idea>> GetCurrentIdeaByUserIdAndStatus(Guid userId, IdeaStatus status);
 
     Task<Idea?> GetLatestIdeaByUserAndStatus(Guid userId, IdeaStatus status);
     Task<List<CustomIdeaResultModel>> GetCustomIdea(Guid semesterId, int reviewNumber);
+
+    Task<List<Idea>> GetIdeaWithResultDateIsToday();
+
+    Task<Idea?> GetIdeaPendingInStageIdeaOfUser(Guid userId, Guid stageIdeaId);
+
+    Task<Idea?> GetIdeaApproveInSemesterOfUser(Guid userId, Guid semesterId);
+
+    Task<int> NumberOfIdeaMentorOrOwner(Guid userId);
 }
