@@ -42,6 +42,7 @@ public class ReviewRepository : BaseRepository<Review>, IReviewRepository
                                     e.Project.Idea != null &&
                                     e.Project.Idea.StageIdea != null &&
                                     e.Project.Idea.StageIdea.SemesterId == semesterId)
+                                    .Include(e => e.Project).ThenInclude(e => e.Idea)
                                     .ToListAsync();
 
         return query;
