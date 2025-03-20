@@ -27,6 +27,16 @@ namespace FPT.TeamMatching.Data.Repositories
             return s;
         }
 
+        public async Task<Semester?> GetSemesterByStageIdeaId(Guid stageIdeaId)
+        {
+            var s = await _dbContext.StageIdeas
+                .Where(si => si.Id == stageIdeaId)
+                .Select(si => si.Semester)
+                .FirstOrDefaultAsync();
+
+            return s;
+        }
+
         public async Task<Semester?> GetUpComingSemester()
         {
             var s = await _dbContext.Semesters.Where(e => e.StartDate >  DateTime.UtcNow)

@@ -123,6 +123,43 @@ public class IdeaService : BaseService<Idea>, IIdeaService
     {
         try
         {
+            var u = await GetUserAsync();
+            if (u == null)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("No student login");
+            }
+            if (idea.StageIdeaId == null)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("StageIdeaId is required field");
+            }
+            var semester = await _semesterRepository.GetSemesterByStageIdeaId((Guid)idea.StageIdeaId);
+            if(semester == null)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("Not found semester");
+            }
+            //check student co idea approve trong ki nay k
+            var ideaApprovedInSemester = await _ideaRepository.GetIdeaApproveInSemesterOfUser(u.Id, semester.Id);
+            if(ideaApprovedInSemester != null)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("Student has approved idea in this semester");
+            }
+            //check student co idea dang pending trong dot duyet nay k
+            var ideaPendingInStageIdea = await _ideaRepository.GetIdeaPendingInStageIdeaOfUser(u.Id, (Guid)idea.StageIdeaId);
+            if (ideaPendingInStageIdea != null)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("Student has pending idea in this stage idea");
+            }
+
             bool createSucess = await StudentCreateAsync(idea);
             if (!createSucess)
                 return new ResponseBuilder()

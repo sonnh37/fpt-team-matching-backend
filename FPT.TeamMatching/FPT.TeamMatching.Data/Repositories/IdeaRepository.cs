@@ -59,4 +59,26 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
 
         return ideas;
     }
+
+    public async Task<Idea?> GetIdeaPendingInStageIdeaOfUser(Guid userId, Guid stageIdeaId)
+    {
+        var i = await _dbContext.Ideas.Where(e => e.IsDeleted == false &&
+                                            e.StageIdeaId == stageIdeaId && 
+                                            e.OwnerId == userId &&
+                                            e.Status == IdeaStatus.Pending)
+                                .FirstOrDefaultAsync();
+        return i;
+    }
+
+    public async Task<Idea?> GetIdeaApproveInSemesterOfUser(Guid userId, Guid semesterId)
+    {
+        var i = await _dbContext.Ideas.Where(e => e.IsDeleted == false &&
+                                            e.StageIdea != null &&
+                                            e.StageIdea.Semester != null &&
+                                            e.StageIdea.Semester.Id == semesterId &&
+                                            e.OwnerId == userId &&
+                                            e.Status == IdeaStatus.Approved)
+                                .FirstOrDefaultAsync();
+        return i;
+    }
 }

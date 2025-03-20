@@ -14,4 +14,8 @@ public interface IIdeaRepository : IBaseRepository<Idea>
     Task<List<Idea>> GetCurrentIdeaByUserIdAndStatus(Guid userId, IdeaStatus status);
 
     Task<List<Idea>> GetIdeaWithResultDateIsToday();
+
+    Task<Idea?> GetIdeaPendingInStageIdeaOfUser(Guid userId, Guid stageIdeaId);
+
+    Task<Idea?> GetIdeaApproveInSemesterOfUser(Guid userId, Guid semesterId);
 }
