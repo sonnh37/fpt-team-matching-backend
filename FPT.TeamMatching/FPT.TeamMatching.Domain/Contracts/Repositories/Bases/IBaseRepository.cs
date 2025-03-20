@@ -17,6 +17,8 @@ public interface IBaseRepository<TEntity> : IBaseRepository
     IQueryable<TEntity> GetQueryable(Expression<Func<TEntity, bool>> predicate);
 
     Task<List<TEntity>> GetAll();
+    
+    DbContext GetDbContext();
 
     Task<(List<TEntity>, int)> GetData(GetQueryableQuery query);
 
