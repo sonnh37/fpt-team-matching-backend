@@ -63,9 +63,9 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
                                                     e.IsDeleted == false &&
                                                     e.Status == IdeaStatus.Pending &&
                                                     e.StageIdea != null &&
-                                                    e.StageIdea.ResultDate.UtcDateTime.Date == DateTime.UtcNow.Date)
-                                            .Include(e => e.StageIdea).ThenInclude(e => e.Semester)
-                                            .Include(e => e.Owner).ThenInclude(e => e.UserXRoles).ThenInclude(e => e.Role)
+                                                     e.StageIdea.ResultDate.UtcDateTime.Date == DateTime.UtcNow.Date)
+                                             // .Include(e => e.StageIdea).ThenInclude(e => e.Semester)
+                                             // .Include(e => e.Owner).ThenInclude(e => e.UserXRoles).ThenInclude(e => e.Role)
                                             .ToListAsync();
 
         return ideas;

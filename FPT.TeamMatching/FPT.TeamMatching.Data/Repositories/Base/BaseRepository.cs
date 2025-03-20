@@ -19,6 +19,11 @@ public class BaseRepository<TEntity> : IBaseRepository<TEntity> where TEntity : 
         _dbContext = dbContext;
     }
     
+    public DbContext GetDbContext()
+    {
+        return _dbContext;
+    }
+    
     #region Commands
 
     public void Add(TEntity entity)
