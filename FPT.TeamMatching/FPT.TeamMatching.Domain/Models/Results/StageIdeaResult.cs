@@ -17,6 +17,8 @@ namespace FPT.TeamMatching.Domain.Models.Results
         public DateTimeOffset EndDate { get; set; }
 
         public DateTimeOffset ResultDate { get; set; }
+        
+        public int StageNumber  { get; set; }
 
         public virtual Semester? Semester { get; set; }
 

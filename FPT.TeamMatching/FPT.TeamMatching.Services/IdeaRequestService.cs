@@ -69,14 +69,14 @@ public class IdeaRequestService : BaseService<IdeaRequest>, IIdeaRequestService
         }
     }
 
-    public async Task<BusinessResult> GetIdeaRequestsCurrentByStatus<TResult>(IdeaRequestGetAllCurrentByStatus query)
-        where TResult : BaseResult
+    public async Task<BusinessResult> GetIdeaRequestsForCurrentReviewerByRolesAndStatus<TResult>(
+        IdeaRequestGetListByStatusAndRoleQuery query) where TResult : BaseResult
     {
         try
         {
             var userIdClaims = GetUserIdFromClaims();
             var userId = userIdClaims.Value;
-            var (data, total) = await _ideaRequestRepository.GetIdeaRequestsCurrentByStatus(query, userId);
+            var (data, total) = await _ideaRequestRepository.GetIdeaRequestsForCurrentReviewerByRolesAndStatus(query, userId);
 
             var results = _mapper.Map<List<TResult>>(data);
 
@@ -103,75 +103,6 @@ public class IdeaRequestService : BaseService<IdeaRequest>, IIdeaRequestService
                 .WithMessage(errorMessage);
         }
     }
-
-    public async Task<BusinessResult> GetIdeaRequestsCurrentByStatusAndRoles<TResult>(
-        IdeaRequestGetAllByListStatusForCurrentUser query) where TResult : BaseResult
-    {
-        try
-        {
-            var userIdClaims = GetUserIdFromClaims();
-            var userId = userIdClaims.Value;
-            var (data, total) = await _ideaRequestRepository.GetCurrentIdeaRequestsByStatusAndRoles(query, userId);
-
-            var results = _mapper.Map<List<TResult>>(data);
-
-            // GetAll 
-            if (!query.IsPagination)
-                return new ResponseBuilder()
-                    .WithData(results)
-                    .WithStatus(Const.SUCCESS_CODE)
-                    .WithMessage(Const.SUCCESS_READ_MSG);
-
-            // GetAll with pagination
-            var tableResponse = new PaginatedResult(query, results, total);
-
-            return new ResponseBuilder()
-                .WithData(tableResponse)
-                .WithStatus(Const.SUCCESS_CODE)
-                .WithMessage(Const.SUCCESS_READ_MSG);
-        }
-        catch (Exception ex)
-        {
-            var errorMessage = $"An error occurred in {typeof(TResult).Name}: {ex.Message}";
-            return new ResponseBuilder()
-                .WithStatus(Const.FAIL_CODE)
-                .WithMessage(errorMessage);
-        }
-    }
-
-    public async Task<BusinessResult> GetIdeaRequestsByStatusAndRoles<TResult>(
-        IdeaRequestGetAllByListStatusForCurrentUser query) where TResult : BaseResult
-    {
-        try
-        {
-            var (data, total) = await _ideaRequestRepository.GetIdeaRequestsByStatusAndRoles(query);
-
-            var results = _mapper.Map<List<TResult>>(data);
-
-            // GetAll 
-            if (!query.IsPagination)
-                return new ResponseBuilder()
-                    .WithData(results)
-                    .WithStatus(Const.SUCCESS_CODE)
-                    .WithMessage(Const.SUCCESS_READ_MSG);
-
-            // GetAll with pagination
-            var tableResponse = new PaginatedResult(query, results, total);
-
-            return new ResponseBuilder()
-                .WithData(tableResponse)
-                .WithStatus(Const.SUCCESS_CODE)
-                .WithMessage(Const.SUCCESS_READ_MSG);
-        }
-        catch (Exception ex)
-        {
-            var errorMessage = $"An error occurred in {typeof(TResult).Name}: {ex.Message}";
-            return new ResponseBuilder()
-                .WithStatus(Const.FAIL_CODE)
-                .WithMessage(errorMessage);
-        }
-    }
-
 
     public async Task<BusinessResult>
         GetAllUnassignedReviewer<TResult>(GetQueryableQuery query) where TResult : BaseResult

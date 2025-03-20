@@ -73,7 +73,7 @@ public class ReviewController : ControllerBase
     [HttpPost("import-file-excel-review")]
     public async Task<IActionResult> ImportExcel([FromForm] FileImport file)
     {
-        var businessResult = await _service.ImportExcel(file.file, file.reviewNumber);
+        var businessResult = await _service.ImportExcel(file.file, file.reviewNumber, file.semesterId);
         return Ok(businessResult);
     }
 

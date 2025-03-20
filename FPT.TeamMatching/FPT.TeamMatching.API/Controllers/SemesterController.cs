@@ -33,6 +33,13 @@ namespace FPT.TeamMatching.API.Controllers
             var msg = await _service.GetById<SemesterResult>(id);
             return Ok(msg);
         }
+        
+        [HttpGet("latest")]
+        public async Task<IActionResult> GetCurrentSemester()
+        {
+            var msg = await _service.GetCurrentSemester<SemesterResult>();
+            return Ok(msg);
+        }
 
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] SemesterCreateCommand request)

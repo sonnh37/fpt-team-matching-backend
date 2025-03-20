@@ -13,6 +13,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using FPT.TeamMatching.Domain.Contracts.Repositories;
+using FPT.TeamMatching.Domain.Models.Responses;
+using FPT.TeamMatching.Domain.Models.Results.Bases;
+using FPT.TeamMatching.Domain.Utilities;
 
 namespace FPT.TeamMatching.Services
 {
@@ -21,6 +25,32 @@ namespace FPT.TeamMatching.Services
         private readonly ISemesterRepository _semesterRepository;
         public SemesterService(IMapper mapper, IUnitOfWork unitOfWork) : base(mapper, unitOfWork)
         {
+            _semesterRepository = unitOfWork.SemesterRepository;
+        }
+        
+        public async Task<BusinessResult> GetCurrentSemester<TResult>() where TResult : BaseResult
+        {
+            try
+            {
+                var entity = await _semesterRepository.GetCurrentSemester();
+                var result = _mapper.Map<TResult>(entity);
+                if (result == null)
+                    return new ResponseBuilder()
+                        .WithStatus(Const.NOT_FOUND_CODE)
+                        .WithMessage(Const.NOT_FOUND_MSG);
+
+                return new ResponseBuilder()
+                    .WithData(result)
+                    .WithStatus(Const.SUCCESS_CODE)
+                    .WithMessage(Const.SUCCESS_READ_MSG);
+            }
+            catch (Exception ex)
+            {
+                var errorMessage = $"An error {typeof(TResult).Name}: {ex.Message}";
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage(errorMessage);
+            }
             _semesterRepository = unitOfWork.SemesterRepository;
         }
 

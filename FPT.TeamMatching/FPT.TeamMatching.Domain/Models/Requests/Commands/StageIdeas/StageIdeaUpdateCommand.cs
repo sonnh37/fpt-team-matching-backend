@@ -16,5 +16,7 @@ namespace FPT.TeamMatching.Domain.Models.Requests.Commands.StageIdeas
         public DateTimeOffset EndDate { get; set; }
 
         public DateTimeOffset ResultDate { get; set; }
+        
+        public int StageNumber  { get; set; }
     }
 }

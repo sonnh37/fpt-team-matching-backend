@@ -6,6 +6,8 @@ using FPT.TeamMatching.Domain.Entities;
 using FPT.TeamMatching.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 using System.Text.RegularExpressions;
+using FPT.TeamMatching.Domain.Models;
+using FPT.TeamMatching.Domain.Models.Requests.Commands.Reviews;
 
 namespace FPT.TeamMatching.Data.Repositories;
 
@@ -21,15 +23,24 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
     {
         var ideas = await _dbContext.Ideas.Where(e => e.OwnerId == userId)
                                         .Include(e => e.IdeaRequests).ThenInclude(e => e.Reviewer)
+                                        .Include(e => e.StageIdea)
                                         .ToListAsync();
         return ideas;
     }
-
+    
+    public async Task<Idea?> GetLatestIdeaByUserAndStatus(Guid userId, IdeaStatus status)
+    {
+        return await GetQueryable<Idea>()
+            .OrderByDescending(m => m.CreatedDate)
+            .FirstOrDefaultAsync(e => e.OwnerId == userId && e.Status == status);
+    }
+    
     public async Task<List<Idea>> GetCurrentIdeaByUserIdAndStatus(Guid userId, IdeaStatus status)
     {
         var ideas = await _dbContext.Ideas.Where(e => e.OwnerId == userId
              && e.Status == status)
             .OrderByDescending(m => m.CreatedDate)
+            .Include(m => m.StageIdea)
             .Include(e => e.IdeaRequests).ThenInclude(e => e.Reviewer)
             .ToListAsync();
 
@@ -88,5 +99,34 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
                                                 (e.MentorId ==  userId || e.OwnerId == userId))
                                         .CountAsync();
         return number;
+    }
+
+
+    public async Task<List<CustomIdeaResultModel>> GetCustomIdea(Guid semesterId, int reviewNumber)
+    {
+        // Use async query execution and optimize the LINQ query
+        return await GetQueryable()
+            .Where(x => x.StageIdea.SemesterId == semesterId)
+            .Where(x => x.Project.Reviews.Any(review => review.Number == reviewNumber))
+            .Select(y => new CustomIdeaResultModel
+            {
+                IdeaId = y.Id,
+                TeamCode = y.Project.TeamCode,
+                IdeaCode = y.IdeaCode,
+                Review = y.Project.Reviews
+                    .Where(review => review.Number == reviewNumber)
+                    .Select(review => new ReviewUpdateCommand
+                    {
+                        Id = review.Id,     
+                        Number = review.Number,  
+                        Description = review.Description,
+                        Reviewer1 = review.Reviewer1Id,
+                        Reviewer2 = review.Reviewer2Id,
+                        FileUpload = review.FileUpload,
+                        ProjectId = review.ProjectId,
+                    })
+                    .FirstOrDefault()
+            })
+            .ToListAsync();
     }
 }

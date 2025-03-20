@@ -10,5 +10,8 @@ namespace FPT.TeamMatching.Domain.Contracts.Repositories
 {
     public interface IStageIdeaRepositoty: IBaseRepository<StageIdea>
     {
+        Task<StageIdea?> GetByStageNumberAndSemester(int number, Guid semesterId);
+
+        Task<StageIdea?> GetLatestStageIdea();
     }
 }

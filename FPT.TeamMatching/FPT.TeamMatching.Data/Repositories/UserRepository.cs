@@ -8,6 +8,7 @@ using FPT.TeamMatching.Domain.Models;
 using FPT.TeamMatching.Domain.Models.Results;
 using FPT.TeamMatching.Domain.Utilities.Filters;
 using Microsoft.EntityFrameworkCore;
+using MongoDB.Driver.Linq;
 using Role = FPT.TeamMatching.Domain.Entities.Role;
 
 namespace FPT.TeamMatching.Data.Repositories;
@@ -111,5 +112,16 @@ public class UserRepository : BaseRepository<User>, IUserRepository
         return reviewer;
     }
 
-    
+    public async Task<List<UserIdEmailResult>> GetAllReviewerIdAndUsername()
+    {
+        var result = await GetQueryable()
+            .Where(e => e.UserXRoles.Any(e => e.Role.RoleName == "Reviewer"))
+            .Select(x => 
+                new UserIdEmailResult
+                {
+                    Username = x.Username.ToLower(),
+                    Id = x.Id,
+                }).Distinct().ToListAsync();
+        return result;
+    }
 }
