@@ -215,7 +215,7 @@ public class ReviewService : BaseService<Review>, IReviewService
                             {
                                 continue;
                             }
-                            //check pr¢oject exist
+                            //check project exist
                             var project = customIdeaModel.FirstOrDefault(x => x.TeamCode == teamCode);
                             if (project == null)
                             {
@@ -255,31 +255,14 @@ public class ReviewService : BaseService<Review>, IReviewService
                             {
                                 continue;
                             }
-                            
-                            // #fix: r1, r2 ở 2 hàm dưới trả về bool mà đi xét r1.Id 
-                             var r1 = await _userRepository.GetReviewerByMatchingEmail(r1Value);
-                             var r2 = await _userRepository.GetReviewerByMatchingEmail(r2Value);
-                             var r1Bool = reviewUsernameList.Contains(r1Value.ToLower());
-                             var r2Bool = reviewUsernameList.Contains(r2Value.ToLower());
-                            if (!r1Bool || !r2Bool )
+                            // var r1 = await _userRepository.GetReviewerByMatchingEmail(r1Value);
+                            // var r2 = await _userRepository.GetReviewerByMatchingEmail(r2Value);
+                            var r1 = reviewUsernameList.Contains(r1Value.ToLower());
+                            var r2 = reviewUsernameList.Contains(r2Value.ToLower());
+                            if (!r1 || !r2 )
                             {
                                 continue;
                             }
-
-                            //check reviewer 1, 2 k trung vs mentor
-                            //if (project.IdeaId != null)
-                            //{
-                            //    var idea = await _ideaRepository.GetById((Guid)project.IdeaId);
-                            //    if (idea != null)
-                            //    {
-                            //        if (idea.MentorId == r1.Id || idea.MentorId == r2.Id)
-                            //        {
-                            //            continue;
-                            //        }
-                            //    }
-                            //    else continue;
-                            //}
-                            //else continue;
 
                             //check date
                             var dateValue = reader.GetValue(10)?.ToString();
@@ -315,10 +298,10 @@ public class ReviewService : BaseService<Review>, IReviewService
                                 continue;
                             }
                             var reviewEntity = _mapper.Map<Review>(review);
-                            //reviewEntity.ReviewDate = date.ToUniversalTime();
-                            reviewEntity.ReviewDate = date.UtcDateTime.Date.AddDays(1);
-                            reviewEntity.Room = room;
+                            date.AddHours(7);
+                            reviewEntity.ReviewDate = date.ToUniversalTime();
                             reviewEntity.Slot = slot;
+                            reviewEntity.Room = room;
                             reviewEntity.Reviewer1Id = reviewList.FirstOrDefault(r => r.Username == r1Value.ToLower())?.Id;
                             reviewEntity.Reviewer2Id = reviewList.FirstOrDefault(r => r.Username == r2Value.ToLower())?.Id;
 
