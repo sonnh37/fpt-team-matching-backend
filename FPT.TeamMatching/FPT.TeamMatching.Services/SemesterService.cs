@@ -51,7 +51,6 @@ namespace FPT.TeamMatching.Services
                     .WithStatus(Const.FAIL_CODE)
                     .WithMessage(errorMessage);
             }
-            
         }
 
         public async Task<BusinessResult> GetPresentSemester()
@@ -78,5 +77,6 @@ namespace FPT.TeamMatching.Services
                     .WithMessage(errorMessage);
             }
         }
+
     }
 }

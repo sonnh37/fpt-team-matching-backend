@@ -267,19 +267,19 @@ public class ReviewService : BaseService<Review>, IReviewService
                             }
 
                             //check reviewer 1, 2 k trung vs mentor
-                            if (project.IdeaId != null)
-                            {
-                                var idea = await _ideaRepository.GetById((Guid)project.IdeaId);
-                                if (idea != null)
-                                {
-                                    if (idea.MentorId == r1.Id || idea.MentorId == r2.Id)
-                                    {
-                                        continue;
-                                    }
-                                }
-                                else continue;
-                            }
-                            else continue;
+                            //if (project.IdeaId != null)
+                            //{
+                            //    var idea = await _ideaRepository.GetById((Guid)project.IdeaId);
+                            //    if (idea != null)
+                            //    {
+                            //        if (idea.MentorId == r1.Id || idea.MentorId == r2.Id)
+                            //        {
+                            //            continue;
+                            //        }
+                            //    }
+                            //    else continue;
+                            //}
+                            //else continue;
 
                             //check date
                             var dateValue = reader.GetValue(10)?.ToString();
@@ -315,12 +315,10 @@ public class ReviewService : BaseService<Review>, IReviewService
                                 continue;
                             }
                             var reviewEntity = _mapper.Map<Review>(review);
-                            reviewEntity.ReviewDate = date.ToUniversalTime();
-                            
-                            // #fix: ai fix đi
-                            review.ReviewDate = date.UtcDateTime.Date.AddDays(1);
-                            review.Room = room;
-                            review.Slot = slot;
+                            //reviewEntity.ReviewDate = date.ToUniversalTime();
+                            reviewEntity.ReviewDate = date.UtcDateTime.Date.AddDays(1);
+                            reviewEntity.Room = room;
+                            reviewEntity.Slot = slot;
                             reviewEntity.Reviewer1Id = reviewList.FirstOrDefault(r => r.Username == r1Value.ToLower())?.Id;
                             reviewEntity.Reviewer2Id = reviewList.FirstOrDefault(r => r.Username == r2Value.ToLower())?.Id;
 
