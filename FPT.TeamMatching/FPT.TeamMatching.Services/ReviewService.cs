@@ -88,7 +88,10 @@ public class ReviewService : BaseService<Review>, IReviewService
     {
         //Tim project den thgian bat dau
         var projects = await _projectRepository.GetProjectsStartingNow();
-
+        if (projects == null)
+        {
+            return;
+        }
         foreach (var project in projects)
         {
             for (int i = 1; i <= 4; i++)

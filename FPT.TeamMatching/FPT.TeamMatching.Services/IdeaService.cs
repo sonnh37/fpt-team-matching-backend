@@ -10,6 +10,7 @@ using FPT.TeamMatching.Domain.Models.Responses;
 using FPT.TeamMatching.Domain.Models.Results;
 using FPT.TeamMatching.Domain.Utilities;
 using FPT.TeamMatching.Services.Bases;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace FPT.TeamMatching.Services;
 
@@ -122,7 +123,7 @@ public class IdeaService : BaseService<Idea>, IIdeaService
     {
         try
         {
-                bool createSucess = await StudentCreateAsync(idea);
+            bool createSucess = await StudentCreateAsync(idea);
             if (!createSucess)
                 return new ResponseBuilder()
                     .WithStatus(Const.FAIL_CODE)
@@ -260,6 +261,7 @@ public class IdeaService : BaseService<Idea>, IIdeaService
                     .WithMessage(Const.FAIL_SAVE_MSG);
 
             var msg = new ResponseBuilder()
+                .WithData(idea)
                 .WithStatus(Const.SUCCESS_CODE)
                 .WithMessage(Const.SUCCESS_SAVE_MSG);
 
@@ -269,5 +271,68 @@ public class IdeaService : BaseService<Idea>, IIdeaService
         {
             return HandlerError(ex.Message);
         }
+    }
+
+    public async Task AutoUpdateIdeaStatus()
+    {
+        var ideas = await _ideaRepository.GetIdeaWithResultDateIsToday();
+        if (ideas != null)
+        {
+            foreach (var idea in ideas)
+            {
+                var totalCouncils = await _ideaRequestRepository.CountCouncilsForIdea(idea.Id);
+                var totalApproved = await _ideaRequestRepository.CountApprovedCouncilsForIdea(idea.Id);
+                var totalRejected = await _ideaRequestRepository.CountRejectedCouncilsForIdea(idea.Id);
+
+                if (totalCouncils == 3)
+                {
+                    if (totalApproved > totalRejected)
+                        await UpdateIdea(idea, IdeaStatus.Approved);
+                    else
+                    if (totalRejected > totalApproved)
+                        await UpdateIdea(idea, IdeaStatus.Rejected);
+                }
+            }
+        }
+    }
+    private async Task UpdateIdea(Idea idea, IdeaStatus status)
+    {
+        if (status == IdeaStatus.Approved)
+        {
+            if (idea.StageIdea != null)
+            {
+                //Gen idea code 
+                var semester = await _semesterRepository.GetById((Guid)idea.StageIdea.SemesterId);
+                if (semester == null) return;
+                var semesterCode = semester.SemesterCode;
+                var semesterPrefix = semester.SemesterPrefixName;
+                //get so luong idea dc duyet ok cua ki
+                var numberOfIdeas = await _ideaRepository.NumberApprovedIdeasOfSemester(semester.Id);
+
+                // Tạo số thứ tự tiếp theo
+                int nextNumber = numberOfIdeas + 1;
+
+                // Tạo mã Idea mới theo định dạng: semesterPrefix + semesterCode + "SE" + số thứ tự (2 chữ số)
+                string newIdeaCode = $"{semesterPrefix}{semesterCode}SE{nextNumber:D2}";
+
+                idea.IdeaCode = newIdeaCode;
+
+                //Tạo mã nhóm
+                string newTeamCode = $"{semesterCode}SE{nextNumber:D3}";
+                //Tao project
+                var project = new Project
+                {
+                    LeaderId = idea.Owner.UserXRoles.Any(e => e.Role.RoleName == "Student") ? idea.OwnerId : null,
+                    IdeaId = idea.Id,
+                    TeamCode = newTeamCode,
+                    Status = ProjectStatus.InProgress,
+                    TeamSize = idea.MaxTeamSize
+                };
+                _projectRepository.Add(project);
+            }
+        }
+        idea.Status = status;
+        _ideaRepository.Update(idea);
+        await _unitOfWork.SaveChanges();
     }
 }

@@ -325,77 +325,69 @@ public class IdeaRequestService : BaseService<IdeaRequest>, IIdeaRequestService
     }
 
 
-    public async Task<BusinessResult> CouncilResponse(IdeaRequestLecturerOrCouncilResponseCommand command)
-    {
-        try
-        {
-            var user = await GetUserAsync();
-            var ideaRequest = _mapper.Map<IdeaRequest>(command);
-            var ideaRequestOld = await _ideaRequestRepository.GetById(ideaRequest.Id);
-            if (ideaRequestOld != null)
-            {
-                ideaRequestOld.Status = ideaRequest.Status;
-                ideaRequestOld.Content = ideaRequest.Content;
-                ideaRequestOld.ProcessDate = DateTime.UtcNow;
-                ideaRequestOld.ReviewerId = user.Id;
-                await SetBaseEntityForUpdate(ideaRequestOld);
-                _ideaRequestRepository.Update(ideaRequestOld);
+    //public async Task<BusinessResult> CouncilResponse(IdeaRequestLecturerOrCouncilResponseCommand command)
+    //{
+    //    try
+    //    {
+    //        var user = await GetUserAsync();
+    //        var ideaRequest = _mapper.Map<IdeaRequest>(command);
+    //        var ideaRequestOld = await _ideaRequestRepository.GetById(ideaRequest.Id);
+    //        if (ideaRequestOld != null)
+    //        {
+    //            ideaRequestOld.Status = ideaRequest.Status;
+    //            ideaRequestOld.Content = ideaRequest.Content;
+    //            ideaRequestOld.ProcessDate = DateTime.UtcNow;
+    //            ideaRequestOld.ReviewerId = user.Id;
+    //            await SetBaseEntityForUpdate(ideaRequestOld);
+    //            _ideaRequestRepository.Update(ideaRequestOld);
 
-                var idea = await _ideaRepository.GetById(ideaRequestOld.IdeaId.Value);
+    //            var idea = await _ideaRepository.GetById(ideaRequestOld.IdeaId.Value);
 
-                // # Lỗi do thay đổi db
-                // if (ideaRequestOld.Status == IdeaRequestStatus.CouncilRejected)
-                // {
-                //     idea.Status = IdeaStatus.Rejected;
-                // }
-                // else if (ideaRequestOld.Status == IdeaRequestStatus.CouncilApproved)
-                // {
-                //     idea.Status = IdeaStatus.Approved;
-                //
-                //     ////Gen idea code 
-                //     //var semester = await _semesterRepository.GetById((Guid)idea.SemesterId);
-                //     //var semesterCode = semester.SemesterCode;
-                //
-                //     ////lấy số thứ tự đề tài lớn nhất của kì học 
-                //     //var maxNumber = await _ideaRepository.MaxNumberOfSemester((Guid)idea.SemesterId);
-                //
-                //     //// Tạo số thứ tự tiếp theo
-                //     //int nextNumber = maxNumber + 1;
-                //
-                //     //// Tạo mã Idea mới theo định dạng: semesterCode + "SE" + số thứ tự (2 chữ số)
-                //     //string newIdeaCode = $"{semesterCode}SE{nextNumber:D2}";
-                //
-                //     //idea.IdeaCode = newIdeaCode;
-                // }
+                
+    //                 ////Gen idea code 
+    //                 //var semester = await _semesterRepository.GetById((Guid)idea.SemesterId);
+    //                 //var semesterCode = semester.SemesterCode;
+                
+    //                 ////lấy số thứ tự đề tài lớn nhất của kì học 
+    //                 //var maxNumber = await _ideaRepository.MaxNumberOfSemester((Guid)idea.SemesterId);
+                
+    //                 //// Tạo số thứ tự tiếp theo
+    //                 //int nextNumber = maxNumber + 1;
+                
+    //                 //// Tạo mã Idea mới theo định dạng: semesterCode + "SE" + số thứ tự (2 chữ số)
+    //                 //string newIdeaCode = $"{semesterCode}SE{nextNumber:D2}";
+                
+    //                 //idea.IdeaCode = newIdeaCode;
+    //             }
 
-                await SetBaseEntityForUpdate(idea);
-                _ideaRepository.Update(idea);
+    //            await SetBaseEntityForUpdate(idea);
+    //            _ideaRepository.Update(idea);
 
-                bool saveChange = await _unitOfWork.SaveChanges();
-                if (saveChange)
-                {
-                    return new ResponseBuilder()
-                        .WithStatus(Const.SUCCESS_CODE)
-                        .WithMessage(Const.SUCCESS_SAVE_MSG);
-                }
+    //            bool saveChange = await _unitOfWork.SaveChanges();
+    //            if (saveChange)
+    //            {
+    //                return new ResponseBuilder()
+    //                    .WithStatus(Const.SUCCESS_CODE)
+    //                    .WithMessage(Const.SUCCESS_SAVE_MSG);
+    //            }
 
-                return new ResponseBuilder()
-                    .WithStatus(Const.FAIL_CODE)
-                    .WithMessage(Const.FAIL_SAVE_MSG);
-            }
+    //            return new ResponseBuilder()
+    //                .WithStatus(Const.FAIL_CODE)
+    //                .WithMessage(Const.FAIL_SAVE_MSG);
+    //        }
 
-            return new ResponseBuilder()
-                .WithStatus(Const.NOT_FOUND_CODE)
-                .WithMessage("Not found idea");
-        }
-        catch (Exception ex)
-        {
-            var errorMessage = $"An error {typeof(IdeaRequestResult).Name}: {ex.Message}";
-            return new ResponseBuilder()
-                .WithStatus(Const.FAIL_CODE)
-                .WithMessage(errorMessage);
-        }
-    }
+    //        return new ResponseBuilder()
+    //            .WithStatus(Const.NOT_FOUND_CODE)
+    //            .WithMessage("Not found idea");
+    //    }
+    //    catch (Exception ex)
+    //    {
+    //        var errorMessage = $"An error {typeof(IdeaRequestResult).Name}: {ex.Message}";
+    //        return new ResponseBuilder()
+    //            .WithStatus(Const.FAIL_CODE)
+    //            .WithMessage(errorMessage);
+    //    }
+    //}
 
     public async Task<BusinessResult> LecturerResponse(IdeaRequestLecturerOrCouncilResponseCommand command)
     {

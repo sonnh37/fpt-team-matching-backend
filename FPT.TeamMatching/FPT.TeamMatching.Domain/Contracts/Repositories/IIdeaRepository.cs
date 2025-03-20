@@ -9,8 +9,9 @@ public interface IIdeaRepository : IBaseRepository<Idea>
 {
     Task<IList<Idea>> GetIdeasByUserId(Guid userId);
     
-    Task<int> MaxNumberOfSemester(Guid semesterId);
+    Task<int> NumberApprovedIdeasOfSemester(Guid? semesterId);
 
     Task<List<Idea>> GetCurrentIdeaByUserIdAndStatus(Guid userId, IdeaStatus status);
 
+    Task<List<Idea>> GetIdeaWithResultDateIsToday();
 }

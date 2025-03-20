@@ -156,15 +156,27 @@ builder.Services.AddSingleton<RedisUtil>();
 #region Quartz
 builder.Services.AddQuartz(q =>
 {
-    var jobKey = new JobKey("ReviewCreationJob");
+    //Review creation job
+    var jobKey1 = new JobKey("ReviewCreationJob");
 
-    q.AddJob<ReviewCreationJob>(opts => opts.WithIdentity(jobKey));
+    q.AddJob<ReviewCreationJob>(opts => opts.WithIdentity(jobKey1));
 
     q.AddTrigger(opts => opts
-        .ForJob(jobKey)
+        .ForJob(jobKey1)
         .WithIdentity("ReviewCreationTrigger")
         .WithSchedule(CronScheduleBuilder
         .DailyAtHourAndMinute(22, 59)));
+
+    //public result idea job
+    //var jobKey2 = new JobKey("PublicResultIdeaJob");
+
+    //q.AddJob<PublicResultIdeaJob>(opts => opts.WithIdentity(jobKey2));
+
+    //q.AddTrigger(opts => opts
+    //    .ForJob(jobKey2)
+    //    .WithIdentity("PublicResultIdeaTrigger")
+    //    .WithSchedule(CronScheduleBuilder
+    //    .DailyAtHourAndMinute(22,58)));
 
 });
 
