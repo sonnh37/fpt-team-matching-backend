@@ -80,6 +80,7 @@ public class IdeaService : BaseService<Idea>, IIdeaService
                     .WithStatus(Const.FAIL_CODE)
                     .WithMessage("Không có đợt duyệt ứng với ngày hiện tại");
             }
+
             //ki hien tai
             var semester = await _semesterRepository.GetSemesterByStageIdeaId(stageIdea.Id);
             if (semester == null)
@@ -88,17 +89,21 @@ public class IdeaService : BaseService<Idea>, IIdeaService
                     .WithStatus(Const.FAIL_CODE)
                     .WithMessage("Không có kì ứng với đợt duyệt hiện tại");
             }
+
             //check student co idea approve trong ki nay k
             var userId = GetUserIdFromClaims();
-            var ideaApprovedInSemester = await _ideaRepository.GetIdeaApproveInSemesterOfUser((Guid)userId, semester.Id);
+            var ideaApprovedInSemester =
+                await _ideaRepository.GetIdeaApproveInSemesterOfUser((Guid)userId, semester.Id);
             if (ideaApprovedInSemester != null)
             {
                 return new ResponseBuilder()
                     .WithStatus(Const.FAIL_CODE)
                     .WithMessage("Sinh viên đã có đề tài được duyệt trong kì này");
             }
+
             //check student co idea dang pending trong dot duyet nay k
-            var ideaPendingInStageIdea = await _ideaRepository.GetIdeaPendingInStageIdeaOfUser((Guid)userId, (Guid)stageIdea.Id);
+            var ideaPendingInStageIdea =
+                await _ideaRepository.GetIdeaPendingInStageIdeaOfUser((Guid)userId, (Guid)stageIdea.Id);
             if (ideaPendingInStageIdea != null)
             {
                 return new ResponseBuilder()
@@ -113,6 +118,7 @@ public class IdeaService : BaseService<Idea>, IIdeaService
                     .WithStatus(Const.FAIL_CODE)
                     .WithMessage(Const.FAIL_SAVE_MSG);
             }
+
             ideaEntity.StageIdeaId = stageIdea.Id;
             ideaEntity.Status = IdeaStatus.Pending;
             ideaEntity.OwnerId = userId;
@@ -128,11 +134,10 @@ public class IdeaService : BaseService<Idea>, IIdeaService
                 return new ResponseBuilder()
                     .WithStatus(Const.FAIL_CODE)
                     .WithMessage(Const.FAIL_SAVE_MSG);
-            };
+            }
 
             var ideaRequest = new IdeaRequest
             {
-                Id = Guid.NewGuid(),
                 IdeaId = ideaEntity.Id,
                 ReviewerId = ideaEntity.MentorId,
                 ProcessDate = DateTime.UtcNow,
@@ -148,8 +153,8 @@ public class IdeaService : BaseService<Idea>, IIdeaService
                 return new ResponseBuilder()
                     .WithStatus(Const.FAIL_CODE)
                     .WithMessage(Const.FAIL_SAVE_MSG);
-            };
-
+            }
+            
             return new ResponseBuilder()
                 .WithStatus(Const.SUCCESS_CODE)
                 .WithMessage(Const.SUCCESS_SAVE_MSG);
@@ -175,6 +180,7 @@ public class IdeaService : BaseService<Idea>, IIdeaService
                     .WithStatus(Const.FAIL_CODE)
                     .WithMessage("Không có đợt duyệt ứng với ngày hiện tại");
             }
+
             //ki hien tai
             var semester = await _semesterRepository.GetSemesterByStageIdeaId(stageIdea.Id);
             if (semester == null)
@@ -183,6 +189,7 @@ public class IdeaService : BaseService<Idea>, IIdeaService
                     .WithStatus(Const.FAIL_CODE)
                     .WithMessage("Không có kì ứng với đợt duyệt hiện tại");
             }
+
             //check đề tài đki thứ 5 phải có submentor
             var userId = GetUserIdFromClaims();
             var numberOfIdeaMentorOrOwner = await _ideaRepository.NumberOfIdeaMentorOrOwner((Guid)userId);
@@ -195,6 +202,7 @@ public class IdeaService : BaseService<Idea>, IIdeaService
                         .WithStatus(Const.FAIL_CODE)
                         .WithMessage("Lecturer is mentor or owner in 4 ideas, the 5th idea needs submentor");
                 }
+
                 //k tim thay submentor
                 var submentor = await _userRepository.GetById((Guid)idea.SubMentorId);
                 if (submentor == null)
@@ -204,6 +212,7 @@ public class IdeaService : BaseService<Idea>, IIdeaService
                         .WithMessage("Don't exist submentor with given idea");
                 }
             }
+
             //check đề tài doanh nghiệp thì phải nhập tên doanh nghiệp
             if (idea.IsEnterpriseTopic)
             {
@@ -221,7 +230,8 @@ public class IdeaService : BaseService<Idea>, IIdeaService
                 return new ResponseBuilder()
                     .WithStatus(Const.FAIL_CODE)
                     .WithMessage(Const.FAIL_SAVE_MSG);
-            };
+            }
+            
             ideaEntity.Status = IdeaStatus.Pending;
             ideaEntity.StageIdeaId = stageIdea.Id;
             ideaEntity.OwnerId = userId;
@@ -235,15 +245,24 @@ public class IdeaService : BaseService<Idea>, IIdeaService
                 ideaEntity.Type = IdeaType.Lecturer;
                 ideaEntity.EnterpriseName = null;
             }
+
             await SetBaseEntityForCreation(ideaEntity);
             _ideaRepository.Add(ideaEntity);
 
+            var saveChange_ = await _unitOfWork.SaveChanges();
+            if (!saveChange_)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage(Const.FAIL_SAVE_MSG);
+            }
+
             var ideaRequest = new IdeaRequest
             {
-                Id = Guid.NewGuid(),
                 IdeaId = ideaEntity.Id,
-                IsDeleted = false,
-                Status = IdeaRequestStatus.Pending,
+                ReviewerId = ideaEntity.MentorId,
+                Status = IdeaRequestStatus.Approved,
+                ProcessDate = DateTime.UtcNow,
                 Role = "Mentor",
             };
             await SetBaseEntityForCreation(ideaRequest);
@@ -255,7 +274,7 @@ public class IdeaService : BaseService<Idea>, IIdeaService
                 return new ResponseBuilder()
                     .WithStatus(Const.FAIL_CODE)
                     .WithMessage(Const.FAIL_SAVE_MSG);
-            };
+            }
 
             return new ResponseBuilder()
                 .WithStatus(Const.SUCCESS_CODE)
@@ -391,8 +410,6 @@ public class IdeaService : BaseService<Idea>, IIdeaService
                     }
                 }
             }
-
-
         }
         catch (Exception ex)
         {
@@ -426,7 +443,6 @@ public class IdeaService : BaseService<Idea>, IIdeaService
                 var isStudent = idea.Owner.UserXRoles.Any(e => e.Role.RoleName == "Student");
                 if (isStudent)
                 {
-
                     //Tạo mã nhóm
                     string newTeamCode = $"{semesterCode}SE{nextNumber:D3}";
                     //Tao project
@@ -443,11 +459,10 @@ public class IdeaService : BaseService<Idea>, IIdeaService
                     var res = await _unitOfWork.SaveChanges();
                 }
             }
+
             idea.Status = status;
             _ideaRepository.Update(idea);
             await _unitOfWork.SaveChanges();
         }
-
-
     }
 }
