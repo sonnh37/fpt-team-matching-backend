@@ -31,7 +31,7 @@ namespace FPT.TeamMatching.Data.Repositories
         public async Task<Semester?> GetSemesterByStageIdeaId(Guid stageIdeaId)
         {
             var s = await GetQueryable()
-                .Where(si => si.Id == stageIdeaId)
+                .Where(si => si.StageIdeas.Any(e => e.Id == stageIdeaId))
                 .FirstOrDefaultAsync();
 
             return s;
