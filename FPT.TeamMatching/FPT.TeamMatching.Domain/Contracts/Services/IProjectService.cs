@@ -11,4 +11,5 @@ public interface IProjectService : IBaseService
     //Task<Project?> GetProjectByUserId(Guid userId);
     Task<BusinessResult> GetProjectByUserIdLogin();
     Task<BusinessResult> CreateProjectAndTeammember(ProjectCreateCommand command);
+    Task<BusinessResult> GetProjectOfUserLogin();
 }

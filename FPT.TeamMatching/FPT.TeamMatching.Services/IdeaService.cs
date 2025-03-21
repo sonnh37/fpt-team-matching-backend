@@ -106,7 +106,8 @@ public class IdeaService : BaseService<Idea>, IIdeaService
                         .WithStatus(Const.FAIL_CODE)
                         .WithMessage("Enterprise idea need enterprise name");
                 }
-            } else
+            }
+            else
             {
                 if (idea.EnterpriseName != null)
                 {
@@ -400,19 +401,24 @@ public class IdeaService : BaseService<Idea>, IIdeaService
                 string newIdeaCode = $"{semesterPrefix}{semesterCode}SE{nextNumber:D2}";
 
                 idea.IdeaCode = newIdeaCode;
-
-                //Tạo mã nhóm
-                string newTeamCode = $"{semesterCode}SE{nextNumber:D3}";
-                //Tao project
-                var project = new Project
+                //Check neu owner la student thi tao project
+                var isStudent = idea.Owner.UserXRoles.Any(e => e.Role.RoleName == "Student");
+                if (isStudent)
                 {
-                    LeaderId = idea.Owner.UserXRoles.Any(e => e.Role.RoleName == "Student") ? idea.OwnerId : null,
-                    IdeaId = idea.Id,
-                    TeamCode = newTeamCode,
-                    Status = ProjectStatus.InProgress,
-                    TeamSize = idea.MaxTeamSize
-                };
-                _projectRepository.Add(project);
+
+                    //Tạo mã nhóm
+                    string newTeamCode = $"{semesterCode}SE{nextNumber:D3}";
+                    //Tao project
+                    var project = new Project
+                    {
+                        LeaderId = idea.Owner.UserXRoles.Any(e => e.Role.RoleName == "Student") ? idea.OwnerId : null,
+                        IdeaId = idea.Id,
+                        TeamCode = newTeamCode,
+                        Status = ProjectStatus.InProgress,
+                        TeamSize = idea.MaxTeamSize
+                    };
+                    _projectRepository.Add(project);
+                }
             }
         }
         idea.Status = status;
