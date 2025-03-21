@@ -15,6 +15,15 @@ public class ReviewResult : BaseResult
     public string? Reviewer1 { get; set; }
 
     public string? Reviewer2 { get; set; }
+    
+    public DateTimeOffset? ExpirationDate { get; set; }
+
+    public DateTimeOffset? ReviewDate { get; set; }
+
+    public string? Room { get; set; }
+
+    public int? Slot { get; set; }
+
 
     public ProjectResult? Project { get; set; }
 

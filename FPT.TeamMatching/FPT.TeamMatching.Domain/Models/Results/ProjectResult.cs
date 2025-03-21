@@ -17,4 +17,5 @@ public class ProjectResult : BaseResult
     public ProjectStatus? Status { get; set; }
 
     public int? TeamSize { get; set; }
+    public Idea? Idea { get; set; }
 }
