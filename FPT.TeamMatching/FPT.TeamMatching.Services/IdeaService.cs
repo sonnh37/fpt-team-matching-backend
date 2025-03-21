@@ -350,7 +350,7 @@ public class IdeaService : BaseService<Idea>, IIdeaService
                 .WithStatus(Const.SUCCESS_CODE)
                 .WithMessage(Const.SUCCESS_SAVE_MSG);
 
-            
+
             return msg;
         }
         catch (Exception ex)
@@ -381,8 +381,8 @@ public class IdeaService : BaseService<Idea>, IIdeaService
                     }
                 }
             }
-            
-          
+
+
         }
         catch (Exception ex)
         {
@@ -416,26 +416,27 @@ public class IdeaService : BaseService<Idea>, IIdeaService
                 if (isStudent)
                 {
 
-                //Tạo mã nhóm
-                string newTeamCode = $"{semesterCode}SE{nextNumber:D3}";
-                //Tao project
-                var owner = await _unitOfWork.UserRepository.GetById((Guid)idea.OwnerId);
-                var project = new Project
-                {
-                    LeaderId = owner.UserXRoles.Any(e => e.Role.RoleName == "Student") ? idea.OwnerId : null,
-                    IdeaId = idea.Id,
-                    TeamCode = newTeamCode,
-                    Status = ProjectStatus.InProgress,
-                    TeamSize = idea.MaxTeamSize
-                };
-                _projectRepository.Add(project);
-                var res = await _unitOfWork.SaveChanges();
+                    //Tạo mã nhóm
+                    string newTeamCode = $"{semesterCode}SE{nextNumber:D3}";
+                    //Tao project
+                    var owner = await _unitOfWork.UserRepository.GetById((Guid)idea.OwnerId);
+                    var project = new Project
+                    {
+                        LeaderId = owner.UserXRoles.Any(e => e.Role.RoleName == "Student") ? idea.OwnerId : null,
+                        IdeaId = idea.Id,
+                        TeamCode = newTeamCode,
+                        Status = ProjectStatus.InProgress,
+                        TeamSize = idea.MaxTeamSize
+                    };
+                    _projectRepository.Add(project);
+                    var res = await _unitOfWork.SaveChanges();
+                }
             }
+            idea.Status = status;
+            _ideaRepository.Update(idea);
+            await _unitOfWork.SaveChanges();
         }
-        idea.Status = status;
-        _ideaRepository.Update(idea);
-        await _unitOfWork.SaveChanges();
+
+
     }
-    
-    
 }
