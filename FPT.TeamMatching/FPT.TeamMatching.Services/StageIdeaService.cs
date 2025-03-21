@@ -21,7 +21,7 @@ namespace FPT.TeamMatching.Services
 
         public StageIdeaService(IMapper mapper, IUnitOfWork unitOfWork) : base(mapper, unitOfWork)
         {
-            _stageIdeaRepositoty = unitOfWork.GetRepository<IStageIdeaRepositoty>();
+            _stageIdeaRepositoty = unitOfWork.StageIdeaRepository;
         }
 
         public async Task<BusinessResult> GetByStageNumber<TResult>(int number) where TResult : BaseResult

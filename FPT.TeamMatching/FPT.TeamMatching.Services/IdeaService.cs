@@ -350,6 +350,7 @@ public class IdeaService : BaseService<Idea>, IIdeaService
                 .WithStatus(Const.SUCCESS_CODE)
                 .WithMessage(Const.SUCCESS_SAVE_MSG);
 
+            
             return msg;
         }
         catch (Exception ex)
@@ -360,34 +361,43 @@ public class IdeaService : BaseService<Idea>, IIdeaService
 
     public async Task AutoUpdateIdeaStatus()
     {
-        var ideas = await _ideaRepository.GetIdeaWithResultDateIsToday();
-        if (ideas != null)
+        try
         {
-            foreach (var idea in ideas)
+            var ideas = await _ideaRepository.GetIdeaWithResultDateIsToday();
+            if (ideas.Count != 0)
             {
-                var totalCouncils = await _ideaRequestRepository.CountCouncilsForIdea(idea.Id);
-                var totalApproved = await _ideaRequestRepository.CountApprovedCouncilsForIdea(idea.Id);
-                var totalRejected = await _ideaRequestRepository.CountRejectedCouncilsForIdea(idea.Id);
-
-                if (totalCouncils == 3)
+                foreach (var idea in ideas)
                 {
-                    if (totalApproved > totalRejected)
-                        await UpdateIdea(idea, IdeaStatus.Approved);
-                    else
-                    if (totalRejected > totalApproved)
-                        await UpdateIdea(idea, IdeaStatus.Rejected);
+                    var totalCouncils = await _ideaRequestRepository.CountCouncilsForIdea(idea.Id);
+                    var totalApproved = await _ideaRequestRepository.CountApprovedCouncilsForIdea(idea.Id);
+                    var totalRejected = await _ideaRequestRepository.CountRejectedCouncilsForIdea(idea.Id);
+
+                    if (totalCouncils == 3)
+                    {
+                        if (totalApproved > totalRejected)
+                            await UpdateIdea(idea, IdeaStatus.Approved);
+                        if (totalRejected > totalApproved)
+                            await UpdateIdea(idea, IdeaStatus.Rejected);
+                    }
                 }
             }
+            
+          
+        }
+        catch (Exception ex)
+        {
+            return;
         }
     }
     private async Task UpdateIdea(Idea idea, IdeaStatus status)
     {
         if (status == IdeaStatus.Approved)
         {
-            if (idea.StageIdea != null)
+            if (idea.StageIdeaId != null)
             {
                 //Gen idea code 
-                var semester = await _semesterRepository.GetById((Guid)idea.StageIdea.SemesterId);
+                var stageIdea = await _unitOfWork.StageIdeaRepository.GetById((Guid)idea.StageIdeaId);
+                var semester = await _semesterRepository.GetById((Guid)stageIdea.SemesterId);
                 if (semester == null) return;
                 var semesterCode = semester.SemesterCode;
                 var semesterPrefix = semester.SemesterPrefixName;
@@ -406,23 +416,26 @@ public class IdeaService : BaseService<Idea>, IIdeaService
                 if (isStudent)
                 {
 
-                    //Tạo mã nhóm
-                    string newTeamCode = $"{semesterCode}SE{nextNumber:D3}";
-                    //Tao project
-                    var project = new Project
-                    {
-                        LeaderId = idea.Owner.UserXRoles.Any(e => e.Role.RoleName == "Student") ? idea.OwnerId : null,
-                        IdeaId = idea.Id,
-                        TeamCode = newTeamCode,
-                        Status = ProjectStatus.InProgress,
-                        TeamSize = idea.MaxTeamSize
-                    };
-                    _projectRepository.Add(project);
-                }
+                //Tạo mã nhóm
+                string newTeamCode = $"{semesterCode}SE{nextNumber:D3}";
+                //Tao project
+                var owner = await _unitOfWork.UserRepository.GetById((Guid)idea.OwnerId);
+                var project = new Project
+                {
+                    LeaderId = owner.UserXRoles.Any(e => e.Role.RoleName == "Student") ? idea.OwnerId : null,
+                    IdeaId = idea.Id,
+                    TeamCode = newTeamCode,
+                    Status = ProjectStatus.InProgress,
+                    TeamSize = idea.MaxTeamSize
+                };
+                _projectRepository.Add(project);
+                var res = await _unitOfWork.SaveChanges();
             }
         }
         idea.Status = status;
         _ideaRepository.Update(idea);
         await _unitOfWork.SaveChanges();
     }
+    
+    
 }

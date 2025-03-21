@@ -28,4 +28,5 @@ public interface IUnitOfWork : IBaseUnitOfWork
     ISemesterRepository SemesterRepository { get; }
     IIdeaHistoryRepository IdeaHistoryRepository { get; }
     IIdeaHistoryRequestRepository IdeaHistoryRequestRepository { get; }
+    IStageIdeaRepositoty StageIdeaRepository { get; }
 }
