@@ -11,7 +11,7 @@ namespace FPT.TeamMatching.API.Controllers;
 [Route(Const.API_BLOGS)]
 [ApiController]
 // test authorize
-[Authorize(Roles = "Student,Lecturer")]
+[Authorize]
 public class BlogController : ControllerBase
 {
     private readonly IBlogService _service;
@@ -38,7 +38,7 @@ public class BlogController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] BlogCreateCommand request)
     {
-        var msg = await _service.CreateOrUpdate<BlogResult>(request);
+        var msg = await _service.CreateBlog(request);
         return Ok(msg);
     }
 
