@@ -2,6 +2,8 @@
 using FPT.TeamMatching.Domain.Entities.Base;
 using FPT.TeamMatching.Domain.Enums;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Base;
+using FPT.TeamMatching.Domain.Models.Requests.Queries.Blogs;
+using FPT.TeamMatching.Domain.Models.Requests.Queries.Comments;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.IdeaRequests;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Ideas;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Invitations;
@@ -19,13 +21,20 @@ public static class FilterHelper
         {
             UserGetAllQuery userQuery =>
                 User((queryable as IQueryable<User>)!, userQuery) as IQueryable<TEntity>,
+            CommentGetAllQuery commentQuery =>
+            Comment((queryable as IQueryable<Comment>)!, commentQuery) as IQueryable<TEntity>,
             IdeaRequestGetAllQuery ideaRequestQuery =>
                 IdeaRequest((queryable as IQueryable<IdeaRequest>)!, ideaRequestQuery) as IQueryable<TEntity>,
             IdeaGetAllQuery ideaQuery =>
                 Idea((queryable as IQueryable<Idea>)!, ideaQuery) as IQueryable<TEntity>,
             InvitationGetAllQuery invitationQuery =>
                 Invitation((queryable as IQueryable<Invitation>)!, invitationQuery) as IQueryable<TEntity>,
-            _ => BaseFilterHelper.Base(queryable, query)
+            BlogGetAllQuery blogQuery =>
+                Blog((queryable as IQueryable<Blog>)!, blogQuery) as IQueryable<TEntity>,
+            _ => BaseFilterHelper.Base(queryable, query),
+            
+
+
         };
     }
 
@@ -54,6 +63,31 @@ public static class FilterHelper
 
         return queryable;
     }
+
+    private static IQueryable<Blog>? Blog(IQueryable<Blog> queryable, BlogGetAllQuery query)
+    {
+        if (query.Type != null)
+        {
+            queryable = queryable.Where(m =>
+                m.Type != null && m.Type == query.Type);
+        }
+
+        if (query.ProjectId != null)
+        {
+            queryable = queryable.Where(m =>
+                m.ProjectId == query.ProjectId);
+        }
+        if (query.UserId != null)
+        {
+            queryable = queryable.Where(m =>
+                m.UserId == query.UserId);
+        }
+
+        queryable = BaseFilterHelper.Base(queryable, query);
+
+        return queryable;
+    }
+
 
     private static IQueryable<Idea>? Idea(IQueryable<Idea> queryable, IdeaGetAllQuery query)
     {
@@ -129,6 +163,25 @@ public static class FilterHelper
         {
             queryable = queryable.Where(m =>
                 m.Status == query.Status);
+        }
+
+        queryable = BaseFilterHelper.Base(queryable, query);
+
+        return queryable;
+    }
+
+
+    private static IQueryable<Comment>? Comment(IQueryable<Comment> queryable, CommentGetAllQuery  query)
+    {
+        if (query.BlogId != null)
+        {
+            queryable = queryable.Where(m => m.BlogId == query.BlogId);
+        }
+
+        if (query.UserId != null)
+        {
+            queryable = queryable.Where(m =>
+                m.UserId == query.UserId);
         }
 
         queryable = BaseFilterHelper.Base(queryable, query);
