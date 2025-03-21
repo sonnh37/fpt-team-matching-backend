@@ -64,4 +64,12 @@ public class LikeController : ControllerBase
 
         return Ok(businessResult);
     }
+
+    [HttpDelete("delete-by-blog-id/{blogId:guid}")]
+    public async Task<IActionResult> DeleteByBlogId([FromRoute] Guid blogId)
+    {
+        var businessResult = await _likeservice.DeleteLikeByBlogId(blogId);
+
+        return Ok(businessResult);
+    }
 }

@@ -5,4 +5,5 @@ namespace FPT.TeamMatching.Domain.Contracts.Repositories;
 
 public interface ILikeRepository : IBaseRepository<Like>
 {
+    Task<bool> DeleteLikeByBlogId(Guid blogId, Guid userId);
 }

@@ -8,5 +8,7 @@ public interface ITeamMemberRepository : IBaseRepository<TeamMember>
     Task<TeamMember?> GetTeamMemberActiveByUserId(Guid userId);
 
     Task<List<TeamMember>> GetTeamMemberByUserId(Guid userId);
+
     Task<TeamMember> GetMemberByUserId(Guid userId);
+
 }

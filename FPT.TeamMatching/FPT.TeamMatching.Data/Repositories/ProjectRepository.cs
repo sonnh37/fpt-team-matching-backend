@@ -67,4 +67,20 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
         var project = await _context.Projects.Where(e => e.TeamCode == code).FirstOrDefaultAsync();
         return project;
     }
+
+    public async Task<Project?> GetProjectOfUserLogin(Guid userId)
+    {
+        var teamMember = await _context.TeamMembers.Where(e => e.IsDeleted == false &&
+                                                e.UserId == userId &&
+                                                e.Status == TeamMemberStatus.InProgress)
+                                            .FirstOrDefaultAsync();
+        if (teamMember != null)
+        {
+            var project = await _context.Projects.Where(e => e.IsDeleted ==false &&
+                                                e.Id == teamMember.ProjectId)
+                                            .FirstOrDefaultAsync();
+            return project;
+        }
+        return null;
+    }
 }

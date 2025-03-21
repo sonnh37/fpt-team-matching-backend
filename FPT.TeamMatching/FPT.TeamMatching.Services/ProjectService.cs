@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using CloudinaryDotNet.Core;
 using FPT.TeamMatching.Domain.Contracts.Repositories;
 using FPT.TeamMatching.Domain.Contracts.Services;
 using FPT.TeamMatching.Domain.Contracts.UnitOfWorks;
@@ -15,14 +16,15 @@ namespace FPT.TeamMatching.Services;
 
 public class ProjectService : BaseService<Project>, IProjectService
 {
-    private readonly IProjectRepository _repository;
+    private readonly IProjectRepository _projectRepository;
     private readonly ITeamMemberService _serviceTeam;
-    private readonly ITeamMemberRepository _repositoryTeam;
+    private readonly ITeamMemberRepository _teamMemberRepository;
 
     public ProjectService(IMapper mapper, IUnitOfWork unitOfWork, ITeamMemberService teamMemberService) : base(mapper, unitOfWork)
     {
-        _repository = unitOfWork.ProjectRepository;
+        _projectRepository = unitOfWork.ProjectRepository;
         _serviceTeam = teamMemberService;
+        _teamMemberRepository = unitOfWork.TeamMemberRepository;
     }
 
     //public async Task<Project?> GetProjectByUserId(Guid userId)
@@ -42,7 +44,7 @@ public class ProjectService : BaseService<Project>, IProjectService
             var userId = GetUserIdFromClaims();
             if (userId != null)
             {
-                var project = await _repository.GetProjectByUserIdLogin(userId.Value);
+                var project = await _projectRepository.GetProjectByUserIdLogin(userId.Value);
                 var result = _mapper.Map<ProjectResult>(project);
                 if (result == null)
                     return new ResponseBuilder()
@@ -68,6 +70,7 @@ public class ProjectService : BaseService<Project>, IProjectService
                 .WithMessage(errorMessage);
         }
     }
+
     public async Task<BusinessResult> CreateProjectAndTeammember(ProjectCreateCommand project)
     {
         try
@@ -111,5 +114,42 @@ public class ProjectService : BaseService<Project>, IProjectService
         }
     }
 
+    public async Task<BusinessResult> GetProjectOfUserLogin()
+    {
+        try
+        {
+            var userId = GetUserIdFromClaims();
+            if (userId != null)
+            {
+                var project = await _projectRepository.GetProjectOfUserLogin((Guid)userId);
+                if (project != null && project.Status == Domain.Enums.ProjectStatus.Pending)
+                {
+                    if (project.LeaderId != userId)
+                    {
+                        return new ResponseBuilder()
+                        .WithStatus(Const.FAIL_CODE)
+                        .WithMessage("User is not leader of project");
+                    }
+                    return new ResponseBuilder()
+                        .WithData(project)
+                        .WithStatus(Const.SUCCESS_CODE)
+                        .WithMessage(Const.SUCCESS_READ_MSG);
+                }
+                return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage("User doesn't join any project");
+            }
 
+            return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage(Const.FAIL_READ_MSG);
+        }
+        catch (Exception ex)
+        {
+            var errorMessage = $"An error {typeof(ProjectResult).Name}: {ex.Message}";
+            return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage(errorMessage);
+        }
+    }
 }

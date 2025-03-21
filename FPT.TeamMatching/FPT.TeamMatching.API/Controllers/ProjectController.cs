@@ -79,4 +79,11 @@ public class ProjectController : ControllerBase
         return Ok(businessResult);
     }
 
+    [HttpGet("get-of-user-login")]
+    public async Task<IActionResult> GetProjectOfUserLogin()
+    {
+        var businessResult = await _service.GetProjectOfUserLogin();
+        return Ok(businessResult);
+    }
+
 }

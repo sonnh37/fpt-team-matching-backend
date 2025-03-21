@@ -8,4 +8,5 @@ public interface IProjectRepository : IBaseRepository<Project>
     Task<Project?> GetProjectByUserIdLogin(Guid userId);
     Task<List<Project>?> GetProjectsStartingNow();
     Task<Project?> GetProjectByCode(string code);
+    Task<Project?> GetProjectOfUserLogin(Guid userId);
 }
