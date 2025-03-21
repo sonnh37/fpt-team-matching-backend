@@ -408,4 +408,3 @@ FodyWeavers.xsd
 /Studio.API/obj/Debug/net6.0/Studio.API.csproj.AssemblyReference.cache
 /Studio.API/obj/project.assets.json
 /Studio.API/obj/Studio.API.csproj.nuget.dgspec.json
-/FPT.TeamMatching/FPT.TeamMatching.Domain/Contracts/Services/ICommentService.cs
