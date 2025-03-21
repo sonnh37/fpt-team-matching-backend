@@ -196,7 +196,7 @@ public class IdeaService : BaseService<Idea>, IIdeaService
                         .WithMessage("Lecturer is mentor or owner in 4 ideas, the 5th idea needs submentor");
                 }
                 //k tim thay submentor
-                var submentor = _userRepository.GetById((Guid)idea.SubMentorId);
+                var submentor = await _userRepository.GetById((Guid)idea.SubMentorId);
                 if (submentor == null)
                 {
                     return new ResponseBuilder()
