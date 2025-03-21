@@ -20,6 +20,7 @@ public static class IncludeHelper
             IQueryable<Comment> comments => Comments(comments) as IQueryable<TEntity>,
             IQueryable<Invitation> invitations => Invitation(invitations) as IQueryable<TEntity>,
             IQueryable<Notification> notifications => Notification(notifications) as IQueryable<TEntity>,
+            IQueryable<Review> reviews => Review(reviews) as IQueryable<TEntity>,
             _ => queryable
         })!;
     }
@@ -105,6 +106,20 @@ public static class IncludeHelper
         queryable = queryable.Include(e => e.TeamMembers).ThenInclude(e => e.User).Include(e => e.Idea)
             .ThenInclude(e => e.Specialty).ThenInclude(e => e.Profession);
 
+        return queryable;
+    }
+    
+    private static IQueryable<Review> Review(IQueryable<Review> queryable)
+    {
+        // queryable = queryable
+        //     .Include(m => m.Tasks);
+
+        queryable = queryable
+            .Include(x => x.Project)
+            .ThenInclude(y => y.Idea)
+            .Include(d => d.Reviewer1)
+            .Include(d => d.Reviewer2)
+            .Include(d => d.Feedbacks);
         return queryable;
     }
 }
