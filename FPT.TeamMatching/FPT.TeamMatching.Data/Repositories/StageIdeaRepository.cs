@@ -28,12 +28,23 @@ namespace FPT.TeamMatching.Data.Repositories
 
             return stageIdea;
         }
-        
+
+        public async Task<StageIdea?> GetCurrentStageIdea()
+        {
+            return await GetQueryable()
+                .Where(e => e.IsDeleted == false &&
+                        e.StartDate.LocalDateTime.Date <= DateTime.Now.Date &&
+                        DateTime.Now.Date <= e.EndDate.LocalDateTime.Date )
+                .FirstOrDefaultAsync();
+        }
+
         public async Task<StageIdea?> GetLatestStageIdea()
         {
             return await GetQueryable()
                 .OrderByDescending(s => s.StartDate)
                 .FirstOrDefaultAsync();
         }
+
+
     }
 }
