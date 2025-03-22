@@ -38,13 +38,5 @@ namespace FPT.TeamMatching.Data.Repositories
                 .FirstOrDefaultAsync();
         }
 
-        public async Task<StageIdea?> GetLatestStageIdea()
-        {
-            return await GetQueryable()
-                .OrderByDescending(s => s.StartDate)
-                .FirstOrDefaultAsync();
-        }
-
-
     }
 }
