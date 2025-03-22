@@ -17,4 +17,12 @@ public class ProjectResult : BaseResult
     public ProjectStatus? Status { get; set; }
 
     public int? TeamSize { get; set; }
+
+    public  IdeaResult? Idea { get; set; }
+
+    public  ICollection<TeamMemberResult> TeamMembers { get; set; } = new List<TeamMemberResult>();
+
+    public virtual ICollection<InvitationResult> Invitations { get; set; } = new List<InvitationResult>();
+
+    public virtual ICollection<ReviewResult> Reviews { get; set; } = new List<ReviewResult>();
 }
