@@ -1,4 +1,5 @@
-﻿using FPT.TeamMatching.Domain.Models.Results.Bases;
+﻿using FPT.TeamMatching.Domain.Entities;
+using FPT.TeamMatching.Domain.Models.Results.Bases;
 
 namespace FPT.TeamMatching.Domain.Models.Results;
 
@@ -12,9 +13,9 @@ public class ReviewResult : BaseResult
 
     public string? FileUpload { get; set; }
 
-    public string? Reviewer1 { get; set; }
+    public User? Reviewer1 { get; set; }
 
-    public string? Reviewer2 { get; set; }
+    public User? Reviewer2 { get; set; }
     
     public DateTimeOffset? ExpirationDate { get; set; }
 
@@ -23,8 +24,7 @@ public class ReviewResult : BaseResult
     public string? Room { get; set; }
 
     public int? Slot { get; set; }
-
-
+    
     public ProjectResult? Project { get; set; }
 
     public ICollection<FeedbackResult> Feedbacks { get; set; } = new List<FeedbackResult>();
