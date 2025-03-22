@@ -53,6 +53,7 @@ public static class FilterHelper
 
         return queryable;
     }
+
     
     private static IQueryable<Notification>? Notification(IQueryable<Notification> queryable, NotificationGetAllQuery query)
     {
