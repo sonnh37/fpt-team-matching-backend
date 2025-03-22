@@ -21,6 +21,7 @@ public class IdeaService : BaseService<Idea>, IIdeaService
     private readonly ISemesterRepository _semesterRepository;
     private readonly IProjectRepository _projectRepository;
     private readonly IUserRepository _userRepository;
+    private readonly IStageIdeaRepositoty _stageIdeaRepositoty;
 
     public IdeaService(IMapper mapper, IUnitOfWork unitOfWork) : base(mapper, unitOfWork)
     {
@@ -29,6 +30,7 @@ public class IdeaService : BaseService<Idea>, IIdeaService
         _semesterRepository = unitOfWork.SemesterRepository;
         _projectRepository = unitOfWork.ProjectRepository;
         _userRepository = unitOfWork.UserRepository;
+        _stageIdeaRepositoty = unitOfWork.StageIdeaRepository;
     }
 
 
@@ -66,19 +68,131 @@ public class IdeaService : BaseService<Idea>, IIdeaService
         }
     }
 
+    public async Task<BusinessResult> StudentCreatePending(IdeaStudentCreatePendingCommand idea)
+    {
+        try
+        {
+            //lay ra stageIdea hien tai
+            var stageIdea = await _stageIdeaRepositoty.GetCurrentStageIdea();
+            if (stageIdea == null)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("Không có đợt duyệt ứng với ngày hiện tại");
+            }
+
+            //ki hien tai
+            var semester = await _semesterRepository.GetSemesterByStageIdeaId(stageIdea.Id);
+            if (semester == null)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("Không có kì ứng với đợt duyệt hiện tại");
+            }
+
+            //check student co idea approve trong ki nay k
+            var userId = GetUserIdFromClaims();
+            var ideaApprovedInSemester =
+                await _ideaRepository.GetIdeaApproveInSemesterOfUser((Guid)userId, semester.Id);
+            if (ideaApprovedInSemester != null)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("Sinh viên đã có đề tài được duyệt trong kì này");
+            }
+
+            //check student co idea dang pending trong dot duyet nay k
+            var ideaPendingInStageIdea =
+                await _ideaRepository.GetIdeaPendingInStageIdeaOfUser((Guid)userId, (Guid)stageIdea.Id);
+            if (ideaPendingInStageIdea != null)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("Sinh viên có đề tài đang trong quá trình duyệt ở kì này");
+            }
+
+            var ideaEntity = _mapper.Map<Idea>(idea);
+            if (ideaEntity == null)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage(Const.FAIL_SAVE_MSG);
+            }
+
+            ideaEntity.StageIdeaId = stageIdea.Id;
+            ideaEntity.Status = IdeaStatus.Pending;
+            ideaEntity.OwnerId = userId;
+            ideaEntity.Type = IdeaType.Student;
+            ideaEntity.IsExistedTeam = true;
+            ideaEntity.IsEnterpriseTopic = false;
+            await SetBaseEntityForCreation(ideaEntity);
+            _ideaRepository.Add(ideaEntity);
+
+            var saveChange = await _unitOfWork.SaveChanges();
+            if (!saveChange)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage(Const.FAIL_SAVE_MSG);
+            }
+
+            var ideaRequest = new IdeaRequest
+            {
+                IdeaId = ideaEntity.Id,
+                ReviewerId = ideaEntity.MentorId,
+                ProcessDate = DateTime.UtcNow,
+                Status = IdeaRequestStatus.Pending,
+                Role = "Mentor",
+            };
+            await SetBaseEntityForCreation(ideaRequest);
+            _ideaRequestRepository.Add(ideaRequest);
+
+            var _saveChange = await _unitOfWork.SaveChanges();
+            if (!_saveChange)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage(Const.FAIL_SAVE_MSG);
+            }
+            
+            return new ResponseBuilder()
+                .WithStatus(Const.SUCCESS_CODE)
+                .WithMessage(Const.SUCCESS_SAVE_MSG);
+        }
+        catch (Exception ex)
+        {
+            var errorMessage = $"An error occurred while updating : {ex.Message}";
+            return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage(errorMessage);
+        }
+    }
+
     public async Task<BusinessResult> LecturerCreatePending(IdeaLecturerCreatePendingCommand idea)
     {
         try
         {
-            //check đề tài đki thứ 5 phải có submentor
-            var u = await GetUserAsync();
-            if (u == null)
+            //lay ra stageIdea hien tai
+            var stageIdea = await _stageIdeaRepositoty.GetCurrentStageIdea();
+            if (stageIdea == null)
             {
                 return new ResponseBuilder()
                     .WithStatus(Const.FAIL_CODE)
-                    .WithMessage("No lecturer login");
+                    .WithMessage("Không có đợt duyệt ứng với ngày hiện tại");
             }
-            var numberOfIdeaMentorOrOwner = await _ideaRepository.NumberOfIdeaMentorOrOwner(u.Id);
+
+            //ki hien tai
+            var semester = await _semesterRepository.GetSemesterByStageIdeaId(stageIdea.Id);
+            if (semester == null)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("Không có kì ứng với đợt duyệt hiện tại");
+            }
+
+            //check đề tài đki thứ 5 phải có submentor
+            var userId = GetUserIdFromClaims();
+            var numberOfIdeaMentorOrOwner = await _ideaRepository.NumberOfIdeaMentorOrOwner((Guid)userId);
             if (numberOfIdeaMentorOrOwner > 4)
             {
                 //k co submentor
@@ -88,8 +202,9 @@ public class IdeaService : BaseService<Idea>, IIdeaService
                         .WithStatus(Const.FAIL_CODE)
                         .WithMessage("Lecturer is mentor or owner in 4 ideas, the 5th idea needs submentor");
                 }
+
                 //k tim thay submentor
-                var submentor = _userRepository.GetById((Guid)idea.SubMentorId);
+                var submentor = await _userRepository.GetById((Guid)idea.SubMentorId);
                 if (submentor == null)
                 {
                     return new ResponseBuilder()
@@ -97,6 +212,7 @@ public class IdeaService : BaseService<Idea>, IIdeaService
                         .WithMessage("Don't exist submentor with given idea");
                 }
             }
+
             //check đề tài doanh nghiệp thì phải nhập tên doanh nghiệp
             if (idea.IsEnterpriseTopic)
             {
@@ -107,26 +223,62 @@ public class IdeaService : BaseService<Idea>, IIdeaService
                         .WithMessage("Enterprise idea need enterprise name");
                 }
             }
-            else
+
+            var ideaEntity = _mapper.Map<Idea>(idea);
+            if (ideaEntity == null)
             {
-                if (idea.EnterpriseName != null)
-                {
-                    return new ResponseBuilder()
-                        .WithStatus(Const.FAIL_CODE)
-                        .WithMessage("Do not need enterprise name");
-                }
-            }
-            var createSucess = await LecturerCreateAsync(idea);
-            if (!createSucess)
                 return new ResponseBuilder()
                     .WithStatus(Const.FAIL_CODE)
                     .WithMessage(Const.FAIL_SAVE_MSG);
+            }
+            
+            ideaEntity.Status = IdeaStatus.Pending;
+            ideaEntity.StageIdeaId = stageIdea.Id;
+            ideaEntity.OwnerId = userId;
+            ideaEntity.MentorId = userId;
+            if (idea.IsEnterpriseTopic)
+            {
+                ideaEntity.Type = IdeaType.Enterprise;
+            }
+            else
+            {
+                ideaEntity.Type = IdeaType.Lecturer;
+                ideaEntity.EnterpriseName = null;
+            }
 
-            var msg = new ResponseBuilder()
+            await SetBaseEntityForCreation(ideaEntity);
+            _ideaRepository.Add(ideaEntity);
+
+            var saveChange_ = await _unitOfWork.SaveChanges();
+            if (!saveChange_)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage(Const.FAIL_SAVE_MSG);
+            }
+
+            var ideaRequest = new IdeaRequest
+            {
+                IdeaId = ideaEntity.Id,
+                ReviewerId = ideaEntity.MentorId,
+                Status = IdeaRequestStatus.Approved,
+                ProcessDate = DateTime.UtcNow,
+                Role = "Mentor",
+            };
+            await SetBaseEntityForCreation(ideaRequest);
+            _ideaRequestRepository.Add(ideaRequest);
+
+            var saveChange = await _unitOfWork.SaveChanges();
+            if (!saveChange)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage(Const.FAIL_SAVE_MSG);
+            }
+
+            return new ResponseBuilder()
                 .WithStatus(Const.SUCCESS_CODE)
                 .WithMessage(Const.SUCCESS_SAVE_MSG);
-
-            return msg;
         }
         catch (Exception ex)
         {
@@ -165,129 +317,6 @@ public class IdeaService : BaseService<Idea>, IIdeaService
                 .WithStatus(Const.FAIL_CODE)
                 .WithMessage(errorMessage);
         }
-    }
-
-    public async Task<BusinessResult> StudentCreatePending(IdeaStudentCreatePendingCommand idea)
-    {
-        try
-        {
-            var u = await GetUserAsync();
-            if (u == null)
-            {
-                return new ResponseBuilder()
-                    .WithStatus(Const.FAIL_CODE)
-                    .WithMessage("No student login");
-            }
-            if (idea.StageIdeaId == null)
-            {
-                return new ResponseBuilder()
-                    .WithStatus(Const.FAIL_CODE)
-                    .WithMessage("StageIdeaId is required field");
-            }
-            var semester = await _semesterRepository.GetSemesterByStageIdeaId((Guid)idea.StageIdeaId);
-            if (semester == null)
-            {
-                return new ResponseBuilder()
-                    .WithStatus(Const.FAIL_CODE)
-                    .WithMessage("Not found semester");
-            }
-            //check student co idea approve trong ki nay k
-            var ideaApprovedInSemester = await _ideaRepository.GetIdeaApproveInSemesterOfUser(u.Id, semester.Id);
-            if (ideaApprovedInSemester != null)
-            {
-                return new ResponseBuilder()
-                    .WithStatus(Const.FAIL_CODE)
-                    .WithMessage("Student has approved idea in this semester");
-            }
-            //check student co idea dang pending trong dot duyet nay k
-            var ideaPendingInStageIdea = await _ideaRepository.GetIdeaPendingInStageIdeaOfUser(u.Id, (Guid)idea.StageIdeaId);
-            if (ideaPendingInStageIdea != null)
-            {
-                return new ResponseBuilder()
-                    .WithStatus(Const.FAIL_CODE)
-                    .WithMessage("Student has pending idea in this stage idea");
-            }
-
-            bool createSucess = await StudentCreateAsync(idea);
-            if (!createSucess)
-                return new ResponseBuilder()
-                    .WithStatus(Const.FAIL_CODE)
-                    .WithMessage(Const.FAIL_SAVE_MSG);
-
-            var msg = new ResponseBuilder()
-                .WithStatus(Const.SUCCESS_CODE)
-                .WithMessage(Const.SUCCESS_SAVE_MSG);
-
-            return msg;
-        }
-        catch (Exception ex)
-        {
-            var errorMessage = $"An error occurred while updating : {ex.Message}";
-            return new ResponseBuilder()
-                .WithStatus(Const.FAIL_CODE)
-                .WithMessage(errorMessage);
-        }
-    }
-
-    private async Task<bool> StudentCreateAsync(IdeaStudentCreatePendingCommand ideaCreateCommand)
-    {
-        var ideaEntity = _mapper.Map<Idea>(ideaCreateCommand);
-        if (ideaEntity == null) return false;
-        var userId = GetUserIdFromClaims();
-        if (userId == null) return false;
-        ideaEntity.Status = IdeaStatus.Pending;
-        ideaEntity.OwnerId = userId;
-        ideaEntity.Type = IdeaType.Student;
-        ideaEntity.IsExistedTeam = true;
-        ideaEntity.IsEnterpriseTopic = false;
-        await SetBaseEntityForCreation(ideaEntity);
-        _ideaRepository.Add(ideaEntity);
-
-        var saveChange = await _unitOfWork.SaveChanges();
-        if (!saveChange) return false;
-
-        var ideaRequest = new IdeaRequest
-        {
-            Id = Guid.NewGuid(),
-            IdeaId = ideaEntity.Id,
-            ReviewerId = ideaEntity.MentorId,
-            ProcessDate = DateTime.UtcNow,
-            Status = IdeaRequestStatus.Pending,
-            Role = "Mentor",
-        };
-        await SetBaseEntityForCreation(ideaRequest);
-        _ideaRequestRepository.Add(ideaRequest);
-
-        var saveChange_ = await _unitOfWork.SaveChanges();
-        return saveChange_;
-    }
-
-    private async Task<bool> LecturerCreateAsync(IdeaLecturerCreatePendingCommand ideaCreateCommand)
-    {
-
-        var ideaEntity = _mapper.Map<Idea>(ideaCreateCommand);
-        if (ideaEntity == null) return false;
-        var userId = GetUserIdFromClaims();
-        ideaEntity.Status = IdeaStatus.Pending;
-        ideaEntity.OwnerId = userId;
-        ideaEntity.MentorId = userId;
-        ideaEntity.Type = IdeaType.Lecturer;
-        await SetBaseEntityForCreation(ideaEntity);
-        _ideaRepository.Add(ideaEntity);
-
-        var ideaRequest = new IdeaRequest
-        {
-            Id = Guid.NewGuid(),
-            IdeaId = ideaEntity.Id,
-            IsDeleted = false,
-            Status = IdeaRequestStatus.Pending,
-            Role = "Mentor",
-        };
-        await SetBaseEntityForCreation(ideaRequest);
-        _ideaRequestRepository.Add(ideaRequest);
-
-        var saveChange = await _unitOfWork.SaveChanges();
-        return saveChange;
     }
 
     public async Task<BusinessResult> UpdateIdea(IdeaUpdateCommand ideaUpdateCommand)
@@ -381,14 +410,13 @@ public class IdeaService : BaseService<Idea>, IIdeaService
                     }
                 }
             }
-
-
         }
         catch (Exception ex)
         {
             return;
         }
     }
+
     private async Task UpdateIdea(Idea idea, IdeaStatus status)
     {
         if (status == IdeaStatus.Approved)
@@ -415,7 +443,6 @@ public class IdeaService : BaseService<Idea>, IIdeaService
                 var isStudent = idea.Owner.UserXRoles.Any(e => e.Role.RoleName == "Student");
                 if (isStudent)
                 {
-
                     //Tạo mã nhóm
                     string newTeamCode = $"{semesterCode}SE{nextNumber:D3}";
                     //Tao project
@@ -432,11 +459,10 @@ public class IdeaService : BaseService<Idea>, IIdeaService
                     var res = await _unitOfWork.SaveChanges();
                 }
             }
+
             idea.Status = status;
             _ideaRepository.Update(idea);
             await _unitOfWork.SaveChanges();
         }
-
-
     }
 }

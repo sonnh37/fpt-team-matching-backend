@@ -10,8 +10,6 @@ namespace FPT.TeamMatching.Domain.Models.Requests.Commands.Ideas
 {
     public class IdeaLecturerCreatePendingCommand: CreateCommand
     {
-        public Guid? StageIdeaId { get; set; }
-
         public Guid? SubMentorId { get; set; }
 
         public Guid? SpecialtyId { get; set; }
