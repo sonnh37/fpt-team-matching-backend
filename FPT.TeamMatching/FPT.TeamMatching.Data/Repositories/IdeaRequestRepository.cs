@@ -62,11 +62,9 @@ public class IdeaRequestRepository : BaseRepository<IdeaRequest>, IIdeaRequestRe
         queryable = queryable.Where(m =>
             m.Status != null && m.Role != null &&
             query.Roles.Contains(m.Role) && query.Status == m.Status && m.ReviewerId == userId &&
-            m.Idea != null &&
-            m.Idea.StageIdea != null &&
-            query.StageNumber.HasValue &&
-            m.Idea.StageIdea.StageNumber == query.StageNumber);
-
+            (m.Idea == null || m.Idea.StageIdea == null || !query.StageNumber.HasValue ||
+             m.Idea.StageIdea.StageNumber == query.StageNumber.Value));
+        
         if (query.IsPagination)
         {
             // Tổng số count sau khi  filter khi chưa lọc trang
