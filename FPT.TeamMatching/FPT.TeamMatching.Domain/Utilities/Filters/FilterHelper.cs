@@ -7,6 +7,7 @@ using FPT.TeamMatching.Domain.Models.Requests.Queries.Comments;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.IdeaRequests;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Ideas;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Invitations;
+using FPT.TeamMatching.Domain.Models.Requests.Queries.Likes;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Notifications;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Users;
 
@@ -31,6 +32,8 @@ public static class FilterHelper
                 Invitation((queryable as IQueryable<Invitation>)!, invitationQuery) as IQueryable<TEntity>,
             BlogGetAllQuery blogQuery =>
                 Blog((queryable as IQueryable<Blog>)!, blogQuery) as IQueryable<TEntity>,
+            LikeGetAllQuery likeQuery =>
+                Like((queryable as IQueryable<Like>)!, likeQuery) as IQueryable<TEntity>,
             _ => BaseFilterHelper.Base(queryable, query),
             
 
@@ -50,6 +53,7 @@ public static class FilterHelper
 
         return queryable;
     }
+
     
     private static IQueryable<Notification>? Notification(IQueryable<Notification> queryable, NotificationGetAllQuery query)
     {
@@ -88,6 +92,24 @@ public static class FilterHelper
         return queryable;
     }
 
+    private static IQueryable<Like>? Like(IQueryable<Like> queryable, LikeGetAllQuery query)
+    {
+     
+        if (query.BlogId != null)
+        {
+            queryable = queryable.Where(m =>
+                m.BlogId == query.BlogId);
+        }
+        if (query.UserId != null)
+        {
+            queryable = queryable.Where(m =>
+                m.UserId == query.UserId);
+        }
+
+        queryable = BaseFilterHelper.Base(queryable, query);
+
+        return queryable;
+    }
 
     private static IQueryable<Idea>? Idea(IQueryable<Idea> queryable, IdeaGetAllQuery query)
     {
@@ -150,6 +172,12 @@ public static class FilterHelper
                  (m.LastName.Trim().ToLower() + " " + m.FirstName.Trim().ToLower()).Contains(query.EmailOrFullname
                      .Trim().ToLower()))
             );
+        }
+        if (!string.IsNullOrEmpty(query.Email))
+        {
+            string searchEmail = query.Email.Trim().ToLower();
+            queryable = queryable.Where(m => m.Email.ToLower() == searchEmail);
+
         }
 
         queryable = BaseFilterHelper.Base(queryable, query);
