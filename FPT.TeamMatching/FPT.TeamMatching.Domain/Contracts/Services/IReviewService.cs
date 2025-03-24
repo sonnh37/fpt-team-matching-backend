@@ -12,6 +12,6 @@ public interface IReviewService : IBaseService
     Task<BusinessResult> AssignReviewers(CouncilAssignReviewers request);
     Task CreateReviewsForActiveProject();
     Task<BusinessResult> StudentSubmitReview(SubmitReviewCommand request);
-    Task<BusinessResult> ImportExcel(IFormFile file, int reviewNumber, Guid semesterId);
+    //Task<BusinessResult> ImportExcel(IFormFile file, int reviewNumber, Guid semesterId);
     Task<BusinessResult> GetReviewByReviewNumberAndSemesterIdPaging(int number, Guid semesterId);
 }

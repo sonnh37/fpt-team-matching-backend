@@ -26,6 +26,7 @@ using FPT.TeamMatching.Domain.Models.Requests.Commands.IdeaRequests;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.StageIdeas;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.CapstoneSchedules;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.MentorIdeaRequests;
+using FPT.TeamMatching.Domain.Models.Requests.Commands.ExpirationReviews;
 
 namespace FPT.TeamMatching.Domain.Configs.Mapping;
 
@@ -134,6 +135,14 @@ public class MappingProfile : Profile
         CreateMap<Review, ReviewResult>().ReverseMap();
         CreateMap<Review, ReviewCreateCommand>().ReverseMap();
         CreateMap<Review, ReviewUpdateCommand>().ReverseMap();
+
+        #endregion
+
+        #region ExpirationReview
+
+        CreateMap<ExpirationReview, ExpirationReviewResult>().ReverseMap();
+        CreateMap<ExpirationReview, ExpirationReviewCreateCommand>().ReverseMap();
+        CreateMap<ExpirationReview, ExpirationReviewUpdateCommand>().ReverseMap();
 
         #endregion
 
