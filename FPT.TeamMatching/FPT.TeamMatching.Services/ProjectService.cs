@@ -45,7 +45,7 @@ public class ProjectService : BaseService<Project>, IProjectService
             if (userId != null)
             {
                 var project = await _projectRepository.GetProjectByUserIdLogin(userId.Value);
-                if (project != null && project.Status == Domain.Enums.ProjectStatus.Pending)
+                if (project != null && project.Status == Domain.Enums.ProjectStatus.Pending || project.Status == Domain.Enums.ProjectStatus.InProgress)
                 {
                     var result = _mapper.Map<ProjectResult>(project);
                     if (result == null)
@@ -69,7 +69,7 @@ public class ProjectService : BaseService<Project>, IProjectService
 
             return new ResponseBuilder()
                 .WithStatus(Const.FAIL_CODE)
-                .WithMessage(Const.FAIL_READ_MSG);
+                .WithMessage("Người dùng chưa đăng nhập");
         }
         catch (Exception ex)
         {
@@ -137,7 +137,7 @@ public class ProjectService : BaseService<Project>, IProjectService
                     {
                         return new ResponseBuilder()
                         .WithStatus(Const.FAIL_CODE)
-                        .WithMessage("User is not leader of project");
+                        .WithMessage("Hiện tại người dùng không có quyền tuyển thành viên");
                     }
                     return new ResponseBuilder()
                         .WithData(project)
@@ -146,12 +146,12 @@ public class ProjectService : BaseService<Project>, IProjectService
                 }
                 return new ResponseBuilder()
                 .WithStatus(Const.FAIL_CODE)
-                .WithMessage("User doesn't join any project");
+                .WithMessage("Hiện tại bạn không có project nào đủ điều kiện có thể tuyển thành viên");
             }
 
             return new ResponseBuilder()
                 .WithStatus(Const.FAIL_CODE)
-                .WithMessage(Const.FAIL_READ_MSG);
+                .WithMessage("User chưa đăng nhập");
         }
         catch (Exception ex)
         {
