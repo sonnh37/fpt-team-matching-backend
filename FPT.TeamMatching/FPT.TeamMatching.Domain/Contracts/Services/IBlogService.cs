@@ -8,4 +8,5 @@ namespace FPT.TeamMatching.Domain.Contracts.Services;
 public interface IBlogService : IBaseService
 {
     Task<BusinessResult> CreateBlog(BlogCreateCommand createOrUpdateCommand);
+    Task<BusinessResult> GetBlogFindMemberInCurrentSemester();
 }
