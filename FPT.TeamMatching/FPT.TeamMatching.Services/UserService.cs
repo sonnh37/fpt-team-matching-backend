@@ -20,6 +20,7 @@ public class UserService : BaseService<User>, IUserService
     private readonly IRoleRepository _roleRepository;
     private readonly IUserRepository _userRepository;
     private readonly IUserXRoleRepository _userXRoleRepository;
+    private readonly ISemesterRepository _semesterRepository;
 
     public UserService(IMapper mapper,
         IUnitOfWork unitOfWork)
@@ -28,6 +29,7 @@ public class UserService : BaseService<User>, IUserService
         _userRepository = _unitOfWork.UserRepository;
         _roleRepository = _unitOfWork.RoleRepository;
         _userXRoleRepository = _unitOfWork.UserXRoleRepository;
+        _semesterRepository = _unitOfWork.SemesterRepository;
     }
 
     public async Task<BusinessResult> UpdateUserCacheAsync(UserUpdateCacheCommand newCacheJson)
@@ -164,6 +166,31 @@ public class UserService : BaseService<User>, IUserService
         catch (Exception ex)
         {
             return HandlerError(ex.Message);
+        }
+    }
+
+    public async Task<BusinessResult> GetStudentDoNotHaveTeam()
+    {
+        try
+        {
+            var result = await _userRepository.GetStudentDoNotHaveTeam();
+            if (result.Count == 0)
+            {
+                return new ResponseBuilder()
+                .WithStatus(Const.NOT_FOUND_CODE)
+                .WithMessage("Không có sinh viên chưa có nhóm");
+            }
+            return new ResponseBuilder()
+                .WithData(_mapper.Map<List<UserResult>>(result))
+                .WithStatus(Const.SUCCESS_CODE)
+                .WithMessage(Const.SUCCESS_READ_MSG);
+        }
+        catch (Exception ex)
+        {
+            var errorMessage = $"An error {typeof(UserResult).Name}: {ex.Message}";
+            return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage(errorMessage);
         }
     }
 }

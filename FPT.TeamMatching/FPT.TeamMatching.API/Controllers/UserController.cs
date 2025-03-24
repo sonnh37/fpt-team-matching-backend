@@ -81,4 +81,11 @@ public class UserController : ControllerBase
 
         return Ok(businessResult);
     }
+
+    [HttpGet("get-student-do-not-have-team")]
+    public async Task<IActionResult> GetStudentDoNotHaveTeam()
+    {
+        var msg = await _userService.GetStudentDoNotHaveTeam();
+        return Ok(msg);
+    }
 }
