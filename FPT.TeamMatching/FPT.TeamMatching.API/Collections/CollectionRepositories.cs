@@ -13,6 +13,7 @@ public static class CollectionRepositories
         services.AddScoped<IMongoUnitOfWork, MongoUnitOfWork>();
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IReviewRepository, ReviewRepository>();
+        services.AddScoped<IExpirationReviewRepository, ExpirationReviewRepository>();
         services.AddScoped<IProjectRepository, ProjectRepository>();
         services.AddScoped<IIdeaRepository, IdeaRepository>();
         services.AddScoped<IIdeaRequestRepository, IdeaRequestRepository>();
