@@ -33,6 +33,7 @@ public class BlogService : BaseService<Blog>, IBlogService
                 .WithMessage("You need to authenticate with TeamMatching.");
         Blog blog =  _mapper.Map<Blog>(createOrUpdateCommand);
         blog.UserId = userIdClaim;
+        await SetBaseEntityForCreation(blog);
         _blogrepository.Add(blog);
         bool saveChange = await _unitOfWork.SaveChanges();
         if (saveChange)
