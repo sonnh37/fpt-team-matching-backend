@@ -101,32 +101,31 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
         return number;
     }
 
-    //sua db
-    //public async Task<List<CustomIdeaResultModel>> GetCustomIdea(Guid semesterId, int reviewNumber)
-    //{
-    //    // Use async query execution and optimize the LINQ query
-    //    return await GetQueryable()
-    //        .Where(x => x.StageIdea.SemesterId == semesterId)
-    //        .Where(x => x.Project.Reviews.Any(review => review.Number == reviewNumber))
-    //        .Select(y => new CustomIdeaResultModel
-    //        {
-    //            IdeaId = y.Id,
-    //            TeamCode = y.Project.TeamCode,
-    //            IdeaCode = y.IdeaCode,
-    //            Review = y.Project.Reviews
-    //                .Where(review => review.Number == reviewNumber)
-    //                .Select(review => new ReviewUpdateCommand
-    //                {
-    //                    Id = review.Id,     
-    //                    Number = review.Number,  
-    //                    Description = review.Description,
-    //                    Reviewer1 = review.Reviewer1Id,
-    //                    Reviewer2 = review.Reviewer2Id,
-    //                    FileUpload = review.FileUpload,
-    //                    ProjectId = review.ProjectId,
-    //                })
-    //                .FirstOrDefault()
-    //        })
-    //        .ToListAsync();
-    //}
+    public async Task<List<CustomIdeaResultModel>> GetCustomIdea(Guid semesterId, int reviewNumber)
+    {
+        // Use async query execution and optimize the LINQ query
+        return await GetQueryable()
+            .Where(x => x.StageIdea.SemesterId == semesterId)
+            .Where(x => x.Project.Reviews.Any(review => review.ExpirationReview.Number == reviewNumber))
+            .Select(y => new CustomIdeaResultModel
+            {
+                IdeaId = y.Id,
+                TeamCode = y.Project.TeamCode,
+                IdeaCode = y.IdeaCode,
+                Review = y.Project.Reviews
+                    .Where(review => review.ExpirationReview.Number == reviewNumber)
+                    .Select(review => new ReviewUpdateCommand
+                    {
+                        Id = review.Id,
+                        Number = review.ExpirationReview.Number,
+                        Description = review.Description,
+                        Reviewer1 = review.Reviewer1Id,
+                        Reviewer2 = review.Reviewer2Id,
+                        FileUpload = review.FileUpload,
+                        ProjectId = review.ProjectId,
+                    })
+                    .FirstOrDefault()
+            })
+            .ToListAsync();
+    }
 }
