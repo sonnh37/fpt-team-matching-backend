@@ -29,6 +29,4 @@ public class Review : BaseEntity
     public virtual User? Reviewer1 { get; set; }
 
     public virtual User? Reviewer2 { get; set; }
-
-    public virtual ICollection<Feedback> Feedbacks { get; set; } = new List<Feedback>();
 }

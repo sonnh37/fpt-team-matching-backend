@@ -14,7 +14,6 @@ public interface IUnitOfWork : IBaseUnitOfWork
     IBlogCvRepository BlogCvRepository { get; }
     ITeamMemberRepository TeamMemberRepository { get; }
     IProjectRepository ProjectRepository { get; }
-    IFeedbackRepository FeedbackRepository { get; }
     IReviewRepository ReviewRepository { get; }
     IInvitationRepository InvitationRepository { get; }
     IRefreshTokenRepository RefreshTokenRepository { get; }

@@ -19,7 +19,6 @@ public static class CollectionServices
         services.AddTransient<IAuthService, AuthService>();
         services.AddTransient<IReviewService, ReviewService>();
         services.AddTransient<IProjectService, ProjectService>();
-        services.AddTransient<IFeedbackService, FeedbackService>();
         services.AddTransient<IInvitationService, InvitationService>();
         services.AddTransient<IRefreshTokenService, RefreshTokenService>();
         services.AddTransient<INotificationService, NotificationService>();

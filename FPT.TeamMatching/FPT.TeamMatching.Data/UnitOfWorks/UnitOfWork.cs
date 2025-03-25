@@ -28,7 +28,6 @@ public class UnitOfWork : BaseUnitOfWork<FPTMatchingDbContext>, IUnitOfWork
     public ISkillProfileRepository SkillProfileRepository => GetRepository<ISkillProfileRepository>();
     public IRoleRepository RoleRepository => GetRepository<IRoleRepository>();
     public IUserXRoleRepository UserXRoleRepository => GetRepository<IUserXRoleRepository>();
-    public IFeedbackRepository FeedbackRepository => GetRepository<IFeedbackRepository>();
     public IProfessionRepository ProfessionRepository => GetRepository<IProfessionRepository>();
     public ISpecialtyRepository SpecialtyRepository => GetRepository<ISpecialtyRepository>();
     public ISemesterRepository SemesterRepository => GetRepository<ISemesterRepository>();
