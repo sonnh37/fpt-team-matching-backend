@@ -105,9 +105,25 @@ public class InvitationController : ControllerBase
     }
 
     [HttpDelete("by-project-id/{projectId:guid}")]
-    public async Task<IActionResult> DeleteByProjectId ([FromRoute] Guid projectId)
+    public async Task<IActionResult> DeleteByProjectId([FromRoute] Guid projectId)
     {
         var businessResult = await _service.DeletePermanentInvitation(projectId);
+
+        return Ok(businessResult);
+    }
+
+    [HttpPut("approve-invitation-of-team-by-me/by-project-id/{projectId:guid}")]
+    public async Task<IActionResult> ApproveInvitationOfTeamByMe([FromRoute] Guid projectId)
+    {
+        var businessResult = await _service.ApproveInvitationOfTeamByMe(projectId);
+
+        return Ok(businessResult);
+    }
+    
+    [HttpPut("cancel-invitation-of-team-by-me/by-project-id/{projectId:guid}")]
+    public async Task<IActionResult> CancelInvitationOfTeamByMe([FromRoute] Guid projectId)
+    {
+        var businessResult = await _service.CancelInvitationOfTeamByMe(projectId);
 
         return Ok(businessResult);
     }
