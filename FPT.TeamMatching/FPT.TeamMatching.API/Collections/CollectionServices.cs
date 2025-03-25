@@ -18,7 +18,6 @@ public static class CollectionServices
         services.AddTransient<ITeamMemberService, TeamMemberService>();
         services.AddTransient<IAuthService, AuthService>();
         services.AddTransient<IReviewService, ReviewService>();
-        services.AddTransient<IExpirationReviewService, ExpirationReviewService>();
         services.AddTransient<IProjectService, ProjectService>();
         services.AddTransient<IFeedbackService, FeedbackService>();
         services.AddTransient<IInvitationService, InvitationService>();
