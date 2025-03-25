@@ -15,7 +15,6 @@ using FPT.TeamMatching.Domain.Models.Requests.Commands.TeamMembers;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Users;
 using FPT.TeamMatching.Domain.Models.Results;
 using Profile = AutoMapper.Profile;
-using FPT.TeamMatching.Domain.Models.Requests.Commands.Feedbacks;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Ideas;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Professions;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Specialties;
@@ -26,7 +25,6 @@ using FPT.TeamMatching.Domain.Models.Requests.Commands.IdeaRequests;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.StageIdeas;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.CapstoneSchedules;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.MentorIdeaRequests;
-using FPT.TeamMatching.Domain.Models.Requests.Commands.ExpirationReviews;
 
 namespace FPT.TeamMatching.Domain.Configs.Mapping;
 
@@ -138,14 +136,6 @@ public class MappingProfile : Profile
 
         #endregion
 
-        #region ExpirationReview
-
-        CreateMap<ExpirationReview, ExpirationReviewResult>().ReverseMap();
-        CreateMap<ExpirationReview, ExpirationReviewCreateCommand>().ReverseMap();
-        CreateMap<ExpirationReview, ExpirationReviewUpdateCommand>().ReverseMap();
-
-        #endregion
-
         #region UserXProject
 
         //CreateMap<UserXProject, >().ReverseMap();
@@ -169,14 +159,6 @@ public class MappingProfile : Profile
         CreateMap<Invitation, InvitationTeamCreatePendingCommand>().ReverseMap();
         CreateMap<Invitation, InvitationStudentCreatePendingCommand>().ReverseMap();
         CreateMap<Invitation, InvitationUpdateCommand>().ReverseMap();
-
-        #endregion
-
-        #region Feedback
-
-        CreateMap<Feedback, FeedbackResult>().ReverseMap();
-        CreateMap<Feedback, FeedbackCreateCommand>().ReverseMap();
-        CreateMap<Feedback, FeedbackUpdateCommand>().ReverseMap();
 
         #endregion
 

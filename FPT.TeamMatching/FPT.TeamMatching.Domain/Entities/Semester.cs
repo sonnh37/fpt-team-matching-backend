@@ -17,7 +17,4 @@ public class Semester : BaseEntity
     public virtual ICollection<ProfileStudent> ProfileStudents { get; set; } = new List<ProfileStudent>();
     
     public virtual ICollection<StageIdea> StageIdeas { get; set; } = new List<StageIdea>();
-
-    public virtual ICollection<ExpirationReview> ExpirationReviews { get; set; } = new List<ExpirationReview>();
-
 }

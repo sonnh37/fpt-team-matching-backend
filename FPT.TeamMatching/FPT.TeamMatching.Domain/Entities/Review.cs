@@ -8,6 +8,8 @@ public class Review : BaseEntity
 
     public Guid? ExpirationReviewId { get; set; }
 
+    public int Number {  get; set; }
+
     public string? Description { get; set; }
 
     public string? FileUpload { get; set; }
@@ -27,8 +29,4 @@ public class Review : BaseEntity
     public virtual User? Reviewer1 { get; set; }
 
     public virtual User? Reviewer2 { get; set; }
-
-    public virtual ExpirationReview? ExpirationReview { get; set; }
-
-    public virtual ICollection<Feedback> Feedbacks { get; set; } = new List<Feedback>();
 }

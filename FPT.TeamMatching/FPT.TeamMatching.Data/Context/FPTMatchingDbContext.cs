@@ -21,8 +21,6 @@ public partial class FPTMatchingDbContext : BaseDbContext
 
     public virtual DbSet<Like> Likes { get; set; } //
 
-    public virtual DbSet<Feedback> Feedbacks { get; set; } //
-
     public virtual DbSet<Notification> Notifications { get; set; } //
     
     public virtual DbSet<Profession> Professions { get; set; } //
@@ -70,8 +68,6 @@ public partial class FPTMatchingDbContext : BaseDbContext
     public virtual DbSet<StageIdea> StageIdeas { get; set; } //
 
     public virtual DbSet<MentorIdeaRequest> MentorIdeaRequests { get; set; } //
-
-    public virtual DbSet<ExpirationReview> ExpirationReviews { get; set; } //
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -142,19 +138,6 @@ public partial class FPTMatchingDbContext : BaseDbContext
 
             entity.HasOne(d => d.User).WithMany(p => p.BlogCvs)
                 .HasForeignKey(d => d.UserId);
-        });
-
-        modelBuilder.Entity<Feedback>(entity =>
-        {
-            entity.HasKey(e => e.Id);
-
-            entity.ToTable("Feedback");
-
-            entity.Property(e => e.Id).ValueGeneratedOnAdd()
-                .HasDefaultValueSql("gen_random_uuid()");
-
-            entity.HasOne(d => d.Review).WithMany(p => p.Feedbacks)
-                .HasForeignKey(d => d.ReviewId);
         });
 
         modelBuilder.Entity<Like>(entity =>
@@ -269,20 +252,6 @@ public partial class FPTMatchingDbContext : BaseDbContext
 
             entity.HasOne(d => d.Reviewer2).WithMany(p => p.Reviewer2s)
                 .HasForeignKey(d => d.Reviewer2Id);
-        });
-
-        modelBuilder.Entity<ExpirationReview>(entity =>
-        {
-            entity.HasKey(e => e.Id);
-
-            entity.ToTable("ExpirationReview");
-
-            entity.Property(e => e.Id).ValueGeneratedOnAdd()
-                .HasDefaultValueSql("gen_random_uuid()");
-
-            entity.HasOne(d => d.Semester).WithMany(p => p.ExpirationReviews)
-                .HasForeignKey(d => d.SemesterId);
-
         });
 
         modelBuilder.Entity<SkillProfile>(entity =>
