@@ -6,8 +6,6 @@ public class Review : BaseEntity
 {
     public Guid? ProjectId { get; set; }
 
-    public Guid? ExpirationReviewId { get; set; }
-
     public int Number {  get; set; }
 
     public string? Description { get; set; }
