@@ -45,6 +45,12 @@ public class ProjectService : BaseService<Project>, IProjectService
             if (userId != null)
             {
                 var project = await _projectRepository.GetProjectByUserIdLogin(userId.Value);
+                  if(project == null)
+                {
+                    return new ResponseBuilder()
+                      .WithStatus(Const.FAIL_CODE)
+                      .WithMessage("Người dùng không có project đang tồn tại");
+                }
                 if (project != null && project.Status == Domain.Enums.ProjectStatus.Pending || project.Status == Domain.Enums.ProjectStatus.InProgress)
                 {
                     var result = _mapper.Map<ProjectResult>(project);
@@ -59,12 +65,7 @@ public class ProjectService : BaseService<Project>, IProjectService
                         .WithStatus(Const.SUCCESS_CODE)
                         .WithMessage(Const.SUCCESS_READ_MSG);
                 }
-                else
-                {
-                    return new ResponseBuilder()
-                      .WithStatus(Const.FAIL_CODE)
-                      .WithMessage("Người dùng không có project đang tồn tại");
-                }
+              
             }
 
             return new ResponseBuilder()
