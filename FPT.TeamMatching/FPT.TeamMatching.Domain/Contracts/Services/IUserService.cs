@@ -27,4 +27,6 @@ public interface IUserService : IBaseService
     // Task<BusinessResult> GetByUsernameOrEmail(string key);
     //
     // Task<BusinessResult> GetByRefreshToken(UserGetByRefreshTokenQuery request);
+
+    Task<BusinessResult> GetStudentDoNotHaveTeam();
 }

@@ -6,13 +6,13 @@ public class Review : BaseEntity
 {
     public Guid? ProjectId { get; set; }
 
-    public int Number { get; set; }
+    public Guid? ExpirationReviewId { get; set; }
+
+    public int Number {  get; set; }
 
     public string? Description { get; set; }
 
     public string? FileUpload { get; set; }
-
-    public DateTimeOffset? ExpirationDate { get; set; }
 
     public DateTimeOffset? ReviewDate { get; set; }
 
@@ -29,6 +29,4 @@ public class Review : BaseEntity
     public virtual User? Reviewer1 { get; set; }
 
     public virtual User? Reviewer2 { get; set; }
-
-    public virtual ICollection<Feedback> Feedbacks { get; set; } = new List<Feedback>();
 }

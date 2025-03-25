@@ -11,7 +11,7 @@ namespace FPT.TeamMatching.API.Controllers;
 [Route(Const.API_BLOGS)]
 [ApiController]
 // test authorize
-[Authorize]
+//[Authorize]
 public class BlogController : ControllerBase
 {
     private readonly IBlogService _service;
@@ -64,5 +64,12 @@ public class BlogController : ControllerBase
         var businessResult = await _service.DeleteById(request.Id, request.IsPermanent);
 
         return Ok(businessResult);
+    }
+
+    [HttpGet("find-member-in-current-semester")]
+    public async Task<IActionResult> GetBlogFindMemberInCurrentSemester()
+    {
+        var msg = await _service.GetBlogFindMemberInCurrentSemester();
+        return Ok(msg);
     }
 }

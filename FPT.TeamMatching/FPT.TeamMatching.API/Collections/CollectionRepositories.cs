@@ -16,7 +16,6 @@ public static class CollectionRepositories
         services.AddScoped<IProjectRepository, ProjectRepository>();
         services.AddScoped<IIdeaRepository, IdeaRepository>();
         services.AddScoped<IIdeaRequestRepository, IdeaRequestRepository>();
-        services.AddScoped<IFeedbackRepository, FeedbackRepository>();
         services.AddScoped<IInvitationRepository, InvitationRepository>();
         services.AddScoped<IBlogRepository, BlogRepository>();
         services.AddScoped<ILikeRepository, LikeRepository>();

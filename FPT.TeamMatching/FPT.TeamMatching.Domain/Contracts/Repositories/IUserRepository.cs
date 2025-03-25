@@ -16,4 +16,6 @@ public interface IUserRepository : IBaseRepository<User>
     Task<List<UserIdEmailResult>> GetAllReviewerIdAndUsername();
 
     Task<User?> GetById(Guid id);
+
+    Task<List<User>?> GetStudentDoNotHaveTeam();
 }

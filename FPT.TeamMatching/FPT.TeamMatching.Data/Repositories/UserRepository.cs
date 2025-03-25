@@ -30,7 +30,7 @@ public class UserRepository : BaseRepository<User>, IUserRepository
             .Where(e => e.Email!.ToLower().Trim() == key || e.Username!.ToLower().Trim() == key)
             .FirstOrDefaultAsync();
     }
-    
+
     public async Task<User?> GetById(Guid id)
     {
         var queryable = GetQueryable(x => x.Id == id);
@@ -39,7 +39,7 @@ public class UserRepository : BaseRepository<User>, IUserRepository
 
         return entity;
     }
-    
+
     public async Task<List<User>> GetThreeCouncilsForIdeaRequest(Guid ideaId)
     {
         var queryable = GetQueryable();
@@ -74,8 +74,6 @@ public class UserRepository : BaseRepository<User>, IUserRepository
         return councils;
     }
 
-
-
     public async Task<User?> GetByEmail(string keyword)
     {
         var queryable = GetQueryable();
@@ -104,7 +102,7 @@ public class UserRepository : BaseRepository<User>, IUserRepository
                 Id = x.Id.ToString(),
                 LastName = x.LastName,
                 FirstName = x.FirstName,
-            }) 
+            })
             .ToListAsync();
 
         return users;
@@ -115,7 +113,7 @@ public class UserRepository : BaseRepository<User>, IUserRepository
         var queryable = GetQueryable();
         var reviewer = await queryable.Where(e => e.Email != null
                                             && e.Email.Substring(0, e.Email.IndexOf("@")).ToLower() == keyword.ToLower()
-                                            && e.UserXRoles.Any(e => e.Role != null 
+                                            && e.UserXRoles.Any(e => e.Role != null
                                             && e.Role.RoleName == "Reviewer"))
                                         .FirstOrDefaultAsync();
         return reviewer;
@@ -125,12 +123,24 @@ public class UserRepository : BaseRepository<User>, IUserRepository
     {
         var result = await GetQueryable()
             .Where(e => e.UserXRoles.Any(e => e.Role.RoleName == "Reviewer"))
-            .Select(x => 
+            .Select(x =>
                 new UserIdEmailResult
                 {
                     Username = x.Username.ToLower(),
                     Id = x.Id,
                 }).Distinct().ToListAsync();
         return result;
+    }
+
+    public async Task<List<User>?> GetStudentDoNotHaveTeam()
+    {
+        var students = await GetQueryable().Where(e => e.IsDeleted == false &&
+                                            e.UserXRoles.Any(e => e.Role.RoleName == "Student") &&
+                                            (// Chưa có nhóm (không có TeamMembers nào)
+                                            !e.TeamMembers.Any() ||
+                                            // Có nhóm nhưng tất cả status đều "Fail"
+                                            e.TeamMembers.All(tm => tm.Status == TeamMemberStatus.Failed)))
+                                            .ToListAsync();
+        return students;
     }
 }

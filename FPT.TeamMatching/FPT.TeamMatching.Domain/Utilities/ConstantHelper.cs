@@ -48,6 +48,8 @@ public static class Const
 
     public const string API_REVIEWS = $"{BaseApi}/reviews";
 
+    public const string API_EXPIRATION_REVIEWS = $"{BaseApi}/expiration-reviews";
+
     public const string API_FEEDBACKS = $"{BaseApi}/feedbacks";
 
     public const string API_INVITATIONS = $"{BaseApi}/invitations";

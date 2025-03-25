@@ -99,7 +99,8 @@ public class ReviewService : BaseService<Review>, IReviewService
                 var review = new Review
                 {
                     ProjectId = project.Id,
-                    Number = i
+                    //sua db
+                    //Number = i
                 };
 
                 await SetBaseEntityForCreation(review);
@@ -244,7 +245,7 @@ public class ReviewService : BaseService<Review>, IReviewService
 
                             var listGVHD = gvhd2 != null
                                 ? new List<string>() { gvhd1, gvhd2 }
-                                : new List<string>() { gvhd1};
+                                : new List<string>() { gvhd1 };
                             if (string.IsNullOrWhiteSpace(r1Value) || string.IsNullOrWhiteSpace(r2Value))
                             {
                                 continue;
@@ -259,7 +260,7 @@ public class ReviewService : BaseService<Review>, IReviewService
                             // var r2 = await _userRepository.GetReviewerByMatchingEmail(r2Value);
                             var r1 = reviewUsernameList.Contains(r1Value.ToLower());
                             var r2 = reviewUsernameList.Contains(r2Value.ToLower());
-                            if (!r1 || !r2 )
+                            if (!r1 || !r2)
                             {
                                 continue;
                             }

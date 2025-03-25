@@ -440,16 +440,17 @@ public class IdeaService : BaseService<Idea>, IIdeaService
 
                 idea.IdeaCode = newIdeaCode;
                 //Check neu owner la student thi tao project
-                var isStudent = idea.Owner.UserXRoles.Any(e => e.Role.RoleName == "Student");
+               // Error: do khi list idea , de update thi ko dc include 
+               var owner = await _unitOfWork.UserRepository.GetById(idea.OwnerId.Value);
+               var isStudent = owner.UserXRoles.Any(e => e.Role.RoleName == "Student");
                 if (isStudent)
                 {
                     //Tạo mã nhóm
                     string newTeamCode = $"{semesterCode}SE{nextNumber:D3}";
                     //Tao project
-                    var owner = await _unitOfWork.UserRepository.GetById((Guid)idea.OwnerId);
                     var project = new Project
                     {
-                        LeaderId = owner.UserXRoles.Any(e => e.Role.RoleName == "Student") ? idea.OwnerId : null,
+                        LeaderId = isStudent ? idea.OwnerId : null,
                         IdeaId = idea.Id,
                         TeamCode = newTeamCode,
                         Status = ProjectStatus.InProgress,

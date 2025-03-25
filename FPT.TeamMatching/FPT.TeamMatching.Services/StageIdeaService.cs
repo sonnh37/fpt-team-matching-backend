@@ -56,7 +56,7 @@ namespace FPT.TeamMatching.Services
         {
             try
             {
-                var entity = await _stageIdeaRepositoty.GetLatestStageIdea();
+                var entity = await _stageIdeaRepositoty.GetCurrentStageIdea();
                 var result = _mapper.Map<TResult>(entity);
                 if (result == null)
                     return new ResponseBuilder()
