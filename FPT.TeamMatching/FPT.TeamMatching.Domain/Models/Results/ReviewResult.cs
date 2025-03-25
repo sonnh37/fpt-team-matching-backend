@@ -26,6 +26,4 @@ public class ReviewResult : BaseResult
     public int? Slot { get; set; }
     
     public ProjectResult? Project { get; set; }
-
-    public ICollection<FeedbackResult> Feedbacks { get; set; } = new List<FeedbackResult>();
 }

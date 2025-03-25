@@ -125,8 +125,7 @@ public static class IncludeHelper
             .Include(x => x.Project)
             .ThenInclude(y => y.Idea)
             .Include(d => d.Reviewer1)
-            .Include(d => d.Reviewer2)
-            .Include(d => d.Feedbacks);
+            .Include(d => d.Reviewer2);
         return queryable;
     }
 }
