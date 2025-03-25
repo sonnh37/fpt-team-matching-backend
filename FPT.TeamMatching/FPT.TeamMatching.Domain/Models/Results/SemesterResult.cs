@@ -17,7 +17,5 @@ public class SemesterResult : BaseResult
     public ICollection<ProfileStudentResult> ProfileStudents { get; set; } = new List<ProfileStudentResult>();
 
     public ICollection<StageIdeaResult> StageIdeas { get; set; } = new List<StageIdeaResult>();
-
-    public ICollection<ExpirationReviewResult> ExpirationReviews { get; set; } =
-        new List<ExpirationReviewResult>();
+    
 }
