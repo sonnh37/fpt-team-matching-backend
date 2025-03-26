@@ -176,7 +176,7 @@ builder.Services.AddQuartz(q =>
     //    .ForJob(jobKey2)
     //    .WithIdentity("PublicResultIdeaTrigger")
     //    .WithSchedule(CronScheduleBuilder
-    //    .DailyAtHourAndMinute(14, 11)));
+    //    .DailyAtHourAndMinute(21, 32)));
 
 });
 

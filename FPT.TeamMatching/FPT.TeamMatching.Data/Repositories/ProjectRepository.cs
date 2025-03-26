@@ -50,6 +50,7 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
 
     public async Task<List<Project>?> GetProjectsStartingNow()
     {
+        var today = DateTime.UtcNow.Date;
         var project = await _context.Projects
             .Where(p => p.IsDeleted == false &&
                         p.Idea != null &&
@@ -57,7 +58,7 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
                         p.Idea.StageIdea.Semester != null &&
                         p.Idea.StageIdea.Semester != null &&
                         p.Idea.StageIdea.Semester.StartDate != null &&
-                        p.Idea.StageIdea.Semester.StartDate.Value.LocalDateTime.Date == DateTime.Now.Date)
+                        p.Idea.StageIdea.Semester.StartDate.Value.UtcDateTime.Date == today)
             .ToListAsync();
         return project;
     }

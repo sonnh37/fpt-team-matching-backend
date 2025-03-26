@@ -393,7 +393,7 @@ public class IdeaService : BaseService<Idea>, IIdeaService
         try
         {
             var ideas = await _ideaRepository.GetIdeaWithResultDateIsToday();
-                if (ideas.Count != 0)
+            if (ideas.Count != 0)
             {
                 foreach (var idea in ideas)
                 {
@@ -463,10 +463,10 @@ public class IdeaService : BaseService<Idea>, IIdeaService
                         var res = await _unitOfWork.SaveChanges();
                     }
                 }
+                idea.Status = status;
+                _ideaRepository.Update(idea);
+                await _unitOfWork.SaveChanges();
             }
-            idea.Status = status;
-            _ideaRepository.Update(idea);
-            await _unitOfWork.SaveChanges();
         }
         catch (Exception ex)
         {
