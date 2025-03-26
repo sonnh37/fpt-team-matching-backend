@@ -35,4 +35,13 @@ public class TeamMemberRepository : BaseRepository<TeamMember>, ITeamMemberRepos
                                                         && e.IsDeleted == false);
         return teamMember;
     }
+
+    public async Task<List<TeamMember>?> GetMembersOfTeamByProjectId(Guid projectId)
+    {
+        var tm = await _dbContext.TeamMembers.Where(e => e.IsDeleted == false &&
+                                                    e.ProjectId == projectId &&
+                                                    e.LeaveDate == null)
+                                                .ToListAsync();
+        return tm;
+    }
 }

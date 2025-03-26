@@ -56,8 +56,8 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
                         p.Idea.StageIdea != null &&
                         p.Idea.StageIdea.Semester != null &&
                         p.Idea.StageIdea.Semester != null &&
-                        //p.Idea.StageIdea.Semester.StartDate != null &&
-                        p.Idea.StageIdea.Semester.StartDate == DateTime.UtcNow.Date)
+                        p.Idea.StageIdea.Semester.StartDate != null &&
+                        p.Idea.StageIdea.Semester.StartDate.Value.LocalDateTime.Date == DateTime.Now.Date)
             .ToListAsync();
         return project;
     }

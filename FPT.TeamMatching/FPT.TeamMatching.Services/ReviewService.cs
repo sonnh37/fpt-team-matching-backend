@@ -99,8 +99,7 @@ public class ReviewService : BaseService<Review>, IReviewService
                 var review = new Review
                 {
                     ProjectId = project.Id,
-                    //sua db
-                    //Number = i
+                    Number = i
                 };
 
                 await SetBaseEntityForCreation(review);
