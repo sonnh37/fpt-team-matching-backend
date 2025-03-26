@@ -157,15 +157,15 @@ builder.Services.AddSingleton<RedisUtil>();
 builder.Services.AddQuartz(q =>
 {
     //Review creation job
-    var jobKey1 = new JobKey("ReviewCreationJob");
+    //var jobKey1 = new JobKey("ReviewCreationJob");
 
-    q.AddJob<ReviewCreationJob>(opts => opts.WithIdentity(jobKey1));
+    //q.AddJob<ReviewCreationJob>(opts => opts.WithIdentity(jobKey1));
 
-    q.AddTrigger(opts => opts
-        .ForJob(jobKey1)
-        .WithIdentity("ReviewCreationTrigger")
-        .WithSchedule(CronScheduleBuilder
-        .DailyAtHourAndMinute(22, 59)));
+    //q.AddTrigger(opts => opts
+    //    .ForJob(jobKey1)
+    //    .WithIdentity("ReviewCreationTrigger")
+    //    .WithSchedule(CronScheduleBuilder
+    //    .DailyAtHourAndMinute(22, 59)));
 
     //public result idea job
     //var jobKey2 = new JobKey("PublicResultIdeaJob");
@@ -176,7 +176,7 @@ builder.Services.AddQuartz(q =>
     //    .ForJob(jobKey2)
     //    .WithIdentity("PublicResultIdeaTrigger")
     //    .WithSchedule(CronScheduleBuilder
-    //    .DailyAtHourAndMinute(22,58)));
+    //    .DailyAtHourAndMinute(21, 32)));
 
 });
 

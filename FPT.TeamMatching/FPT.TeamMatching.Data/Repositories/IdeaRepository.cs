@@ -59,13 +59,14 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
 
     public async Task<List<Idea>> GetIdeaWithResultDateIsToday()
     {
-        var toDay = DateTime.UtcNow.Date;
+        var toDay = DateTime.Now.Date;
         var ideas = await _dbContext.Ideas
+            .Include(e => e.StageIdea)
             .Where(e =>
                 e.IsDeleted == false &&
                 e.Status == IdeaStatus.Pending &&
                 e.StageIdea != null &&
-                e.StageIdea.ResultDate.UtcDateTime.Date == toDay)
+                e.StageIdea.ResultDate.LocalDateTime.Date == toDay)
             .ToListAsync();
 
         return ideas;
