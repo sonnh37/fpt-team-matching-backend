@@ -1,4 +1,5 @@
 ﻿using FPT.TeamMatching.Domain.Contracts.Services;
+using FPT.TeamMatching.Domain.Models;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Reviews;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Reviews;
 using FPT.TeamMatching.Domain.Models.Results;
@@ -83,6 +84,13 @@ public class ReviewController : ControllerBase
         var businessResult = await _service.GetReviewByReviewNumberAndSemesterIdPaging
                                     (request.Number, request.SemesterId);
         return Ok(businessResult);
+    }
+
+    [HttpPut("upload-file-url-review")]
+    public async Task<IActionResult> UploadFile(UploadFileUrl request)
+    {
+        var result = await _service.UpdateFilerReview(request);
+        return Ok(result);
     }
 
     //[HttpPut("council-assign-reviewers")]
