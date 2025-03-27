@@ -137,7 +137,10 @@ builder.Services.AddHangfire(config =>
 });
 builder.Services.AddHangfireServer();
 builder.Services.AddScoped<IJobHangfireService, JobHangFireService>();
-
+builder.Services.AddHangfireServer(options =>
+{
+    options.Queues = new[] { builder.Configuration.GetSection("HANGFIRE_SERVER_LOCAL").Value };
+});
 #endregion
 
 #region Cloudinary

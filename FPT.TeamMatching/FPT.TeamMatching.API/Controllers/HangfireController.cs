@@ -15,15 +15,17 @@ public class HangfireController : ControllerBase
     private readonly IRecurringJobManager _recurringJobManager;
     private readonly IReviewService _reviewService;
     private readonly IIdeaService _ideaService;
+    private readonly IConfiguration _configuration;
 
     public HangfireController(IBackgroundJobClient backgroundJobClient, IJobHangfireService hangfireService,
-        IRecurringJobManager recurringJobManager, IReviewService reviewService, IIdeaService ideaService)
+        IRecurringJobManager recurringJobManager, IReviewService reviewService, IIdeaService ideaService, IConfiguration configuration)
     {
         _jobHangfireService = hangfireService;
         _backgroundJobClient = backgroundJobClient;
         _recurringJobManager = recurringJobManager;
         _reviewService = reviewService;
         _ideaService = ideaService;
+        _configuration = configuration;
     }
 
     [HttpGet("/FireAndForgetJob")]
@@ -50,7 +52,8 @@ public class HangfireController : ControllerBase
     [HttpGet("/RecurringJob/public-idea-result")]
     public ActionResult PublicIdeaResult()
     {
-        _recurringJobManager.AddOrUpdate("public-idea-result", () => _ideaService.AutoUpdateIdeaStatus(), Cron.Minutely);
+        var name = _configuration.GetSection("HANGFIRE_SERVER_LOCAL");
+        _recurringJobManager.AddOrUpdate("public-idea-result", () => _ideaService.AutoUpdateIdeaStatus(), Cron.Minutely, new RecurringJobOptions { QueueName = name.Value });
         return Ok();
     }
 
