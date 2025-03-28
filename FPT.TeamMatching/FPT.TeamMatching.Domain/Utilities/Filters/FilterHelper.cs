@@ -9,6 +9,7 @@ using FPT.TeamMatching.Domain.Models.Requests.Queries.Ideas;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Invitations;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Likes;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Notifications;
+using FPT.TeamMatching.Domain.Models.Requests.Queries.Projects;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.StageIdeas;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Users;
 
@@ -25,6 +26,8 @@ public static class FilterHelper
                 User((queryable as IQueryable<User>)!, userQuery) as IQueryable<TEntity>,
             StageIdeaGetAllQuery stageIdeaQuery =>
                 StageIdea((queryable as IQueryable<StageIdea>)!, stageIdeaQuery) as IQueryable<TEntity>,
+            ProjectGetAllQuery ProjectQuery =>
+                Project((queryable as IQueryable<Project>)!, ProjectQuery) as IQueryable<TEntity>,
             CommentGetAllQuery commentQuery =>
                 Comment((queryable as IQueryable<Comment>)!, commentQuery) as IQueryable<TEntity>,
             IdeaRequestGetAllQuery ideaRequestQuery =>
@@ -39,6 +42,42 @@ public static class FilterHelper
                 Like((queryable as IQueryable<Like>)!, likeQuery) as IQueryable<TEntity>,
             _ => BaseFilterHelper.Base(queryable, query),
         };
+    }
+
+    private static IQueryable<Project>? Project(IQueryable<Project> queryable, ProjectGetAllQuery query)
+    {
+        if (query.IsHasTeam)
+        {
+            queryable = queryable.Where(m => m.TeamMembers.Count > 0);
+        }
+
+        if (query.SpecialtyId != null)
+        {
+            queryable = queryable.Where(m => m.Idea != null && m.Idea.SpecialtyId == query.SpecialtyId);
+        }
+
+        if (query.ProfessionId != null)
+        {
+            queryable = queryable.Where(m =>
+                m.Idea != null &&
+                m.Idea.Specialty != null && m.Idea.Specialty.Profession != null &&
+                m.Idea.Specialty.Profession.Id == query.ProfessionId);
+        }
+        
+        if (!string.IsNullOrEmpty(query.EnglishName))
+        {
+            queryable = queryable.Where(m =>
+                m.Idea != null && m.Idea.EnglishName != null && m.Idea.EnglishName.ToLower().Trim().Contains(query.EnglishName.ToLower().Trim()));
+        }
+
+        if (query.Status != null)
+        {
+            queryable = queryable.Where(m => m.Status == query.Status);
+        }
+
+        queryable = BaseFilterHelper.Base(queryable, query);
+
+        return queryable;
     }
 
     private static IQueryable<StageIdea>? StageIdea(IQueryable<StageIdea> queryable, StageIdeaGetAllQuery query)
