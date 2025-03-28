@@ -382,8 +382,6 @@ public partial class FPTMatchingDbContext : BaseDbContext
             entity.HasOne(d => d.Idea).WithMany(p => p.IdeaHistories)
                 .HasForeignKey(d => d.IdeaId);
             
-            entity.HasOne(d => d.Council).WithMany(p => p.IdeaHistoryOfCouncils)
-                .HasForeignKey(d => d.CouncilId);
         });
 
         modelBuilder.Entity<IdeaHistoryRequest>(entity =>
@@ -394,12 +392,6 @@ public partial class FPTMatchingDbContext : BaseDbContext
 
             entity.Property(e => e.Id).ValueGeneratedOnAdd()
                 .HasDefaultValueSql("gen_random_uuid()");
-
-            entity.HasOne(d => d.IdeaHistory).WithMany(p => p.IdeaHistoryRequests)
-                .HasForeignKey(d => d.IdeaHistoryId);
-
-            entity.HasOne(d => d.Reviewer).WithMany(p => p.IdeaHistoryRequestOfReviewers)
-                .HasForeignKey(d => d.ReviewerId);
         });
         
         modelBuilder.Entity<Specialty>(entity =>

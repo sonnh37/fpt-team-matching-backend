@@ -61,6 +61,7 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
     {
         var toDay = DateTime.Now.Date;
         var ideas = await _dbContext.Ideas
+            .Include(e => e.Owner)
             .Include(e => e.StageIdea)
             .Where(e =>
                 e.IsDeleted == false &&

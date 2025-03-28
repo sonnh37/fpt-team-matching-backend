@@ -397,7 +397,6 @@ public class IdeaService : BaseService<Idea>, IIdeaService
             {
                 foreach (var idea in ideas)
                 {
-                    idea.StageIdea = null;
                     var totalCouncils = await _ideaRequestRepository.CountCouncilsForIdea(idea.Id);
                     var totalApproved = await _ideaRequestRepository.CountApprovedCouncilsForIdea(idea.Id);
                     var totalRejected = await _ideaRequestRepository.CountRejectedCouncilsForIdea(idea.Id);
@@ -443,9 +442,7 @@ public class IdeaService : BaseService<Idea>, IIdeaService
 
                     idea.IdeaCode = newIdeaCode;
                     //Check neu owner la student thi tao project
-                    // Error: do khi list idea , de update thi ko dc include 
-                    var owner = await _unitOfWork.UserRepository.GetById(idea.OwnerId.Value);
-                    var isStudent = owner.UserXRoles.Any(e => e.Role.RoleName == "Student");
+                    var isStudent = idea.Owner.UserXRoles.Any(e => e.Role.RoleName == "Student");
                     if (isStudent)
                     {
                         //Tạo mã nhóm
@@ -463,6 +460,8 @@ public class IdeaService : BaseService<Idea>, IIdeaService
                         var res = await _unitOfWork.SaveChanges();
                     }
                 }
+                idea.Owner = null;
+                idea.StageIdea = null;
                 idea.Status = status;
                 _ideaRepository.Update(idea);
                 await _unitOfWork.SaveChanges();
