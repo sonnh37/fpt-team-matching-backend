@@ -6,11 +6,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using FPT.TeamMatching.Domain.Models.Requests.Queries.MentorIdeaRequest;
 
 namespace FPT.TeamMatching.Domain.Contracts.Services
 {
     public interface IMentorIdeaRequestService: IBaseService
     {
         Task<BusinessResult> StudentRequestIdea(StudentRequest request);
+
+        Task<BusinessResult> GetUserMentorIdeaRequests(MentorIdeaRequestGetAllQuery query);
     }
 }
