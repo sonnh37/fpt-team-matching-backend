@@ -1,4 +1,5 @@
 ﻿using FPT.TeamMatching.Domain.Contracts.Services.Bases;
+using FPT.TeamMatching.Domain.Models.Requests.Commands.IdeaHistories;
 using FPT.TeamMatching.Domain.Models.Responses;
 using System;
 using System.Collections.Generic;
@@ -10,6 +11,6 @@ namespace FPT.TeamMatching.Domain.Contracts.Services
 {
     public interface IIdeaHistoryService: IBaseService
     {
-        //Task<BusinessResult> StudentUpdateIdea();
+        Task<BusinessResult> StudentUpdateIdea(StudentUpdateIdeaCommand request);
     }
 }
