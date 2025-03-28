@@ -15,7 +15,7 @@ public class IdeaHistoryRequest : BaseEntity
 
     public DateTimeOffset? ProcessDate { get; set; }
 
-    public virtual IdeaHistory? IdeaHistory { get; set; }
+    //public virtual IdeaHistory? IdeaHistory { get; set; }
 
-    public virtual User? Reviewer { get; set; }
+    //public virtual User? Reviewer { get; set; }
 }
