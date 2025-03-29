@@ -10,6 +10,7 @@ public enum TeamMemberRole
 
 public enum TeamMemberStatus
 {
+    Pending,
     InProgress,  
     Passed,     
     Failed     

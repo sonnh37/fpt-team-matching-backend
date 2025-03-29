@@ -13,8 +13,18 @@ namespace FPT.TeamMatching.Data.Repositories
 {
     public class MentorIdeaRequestRepository : BaseRepository<MentorIdeaRequest>, IMentorIdeaRequestRepository
     {
+        private readonly FPTMatchingDbContext _dbContext;
         public MentorIdeaRequestRepository(FPTMatchingDbContext dbContext) : base(dbContext)
         {
+            _dbContext = dbContext;
+        }
+
+        public async Task<List<MentorIdeaRequest>?> GetByIdeaId(Guid ideaId)
+        {
+            var requests = await _dbContext.MentorIdeaRequests.Where(e => e.IsDeleted == false &&
+                                                                e.IdeaId == ideaId)
+                                                        .ToListAsync();
+            return requests;
         }
     }
 }

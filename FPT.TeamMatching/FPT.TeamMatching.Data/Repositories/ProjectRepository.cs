@@ -19,8 +19,10 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
 
     public async Task<Project?> GetProjectByUserIdLogin(Guid userId)
     {
-        var teamMember = await _context.TeamMembers.Where(e => e.UserId == userId && e.LeaveDate == null && e.IsDeleted == false)
-            .FirstOrDefaultAsync();
+        var teamMember = await _context.TeamMembers.Where(e => e.UserId == userId &&
+                                                    e.LeaveDate == null && 
+                                                    e.IsDeleted == false)
+                                                    .FirstOrDefaultAsync();
         if (teamMember != null)
         {
             var project = await _context.Projects.Where(e => e.Id == teamMember.ProjectId)
@@ -73,7 +75,7 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
     {
         var teamMember = await _context.TeamMembers.Where(e => e.IsDeleted == false &&
                                                 e.UserId == userId &&
-                                                e.Status == TeamMemberStatus.InProgress)
+                                                e.Status == TeamMemberStatus.Pending)
                                             .FirstOrDefaultAsync();
         if (teamMember != null)
         {
@@ -83,5 +85,25 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
             return project;
         }
         return null;
+    }
+
+    public async Task<int> NumberOfInProgressProjectInSemester(Guid semesterId)
+    {
+        var number = await _context.Projects.Where(e => e.Status == ProjectStatus.InProgress &&
+                                                          e.IsDeleted == false &&
+                                                          e.Idea != null &&
+                                                          e.Idea.StageIdea != null &&
+                                                          e.Idea.StageIdea.SemesterId == semesterId)
+                                            .CountAsync();
+        return number;
+    }
+
+    public async Task<Project?> GetProjectByLeaderId(Guid leaderId)
+    {
+        var project = await _context.Projects.Where(e => e.IsDeleted == false &&
+                                                    e.LeaderId == leaderId &&
+                                                    e.Status == ProjectStatus.Pending)
+                                            .FirstOrDefaultAsync();
+        return project;
     }
 }
