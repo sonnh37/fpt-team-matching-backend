@@ -15,5 +15,6 @@ namespace FPT.TeamMatching.Domain.Contracts.Services
         Task<BusinessResult> StudentRequestIdea(StudentRequest request);
 
         Task<BusinessResult> GetUserMentorIdeaRequests(MentorIdeaRequestGetAllQuery query);
+        Task<BusinessResult> GetMentorMentorIdeaRequests(MentorIdeaRequestGetAllQuery query);
     }
 }

@@ -28,9 +28,16 @@ namespace FPT.TeamMatching.API.Controllers
         }
         
         [HttpGet("get-user-mentor-idea-requests")]
-        public async Task<IActionResult> GetUserMentorIdeaRequestsByType([FromQuery] MentorIdeaRequestGetAllQuery query)
+        public async Task<IActionResult> GetUserMentorIdeaRequests([FromQuery] MentorIdeaRequestGetAllQuery query)
         {
             var msg = await _service.GetUserMentorIdeaRequests(query);
+            return Ok(msg);
+        }
+        
+        [HttpGet("get-mentor-mentor-idea-requests")]
+        public async Task<IActionResult> GetMentorMentorIdeaRequests([FromQuery] MentorIdeaRequestGetAllQuery query)
+        {
+            var msg = await _service.GetMentorMentorIdeaRequests(query);
             return Ok(msg);
         }
 
