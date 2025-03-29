@@ -18,7 +18,7 @@ namespace FPT.TeamMatching.Data.Repositories
         private readonly IUserRepository _userRepository;
         
         private readonly FPTMatchingDbContext _dbContext;
-        public MentorIdeaRequestRepository(FPTMatchingDbContext dbContext, IUserRepository userRepository) :
+        public MentorIdeaRequestRepository(FPTMatchingDbContext dbContext, IUserRepository userRepository) : base(dbContext)
         {
             _userRepository = userRepository;
             _dbContext = dbContext;
