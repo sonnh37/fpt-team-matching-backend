@@ -154,7 +154,7 @@ public class IdeaService : BaseService<Idea>, IIdeaService
                     .WithStatus(Const.FAIL_CODE)
                     .WithMessage(Const.FAIL_SAVE_MSG);
             }
-            
+
             return new ResponseBuilder()
                 .WithStatus(Const.SUCCESS_CODE)
                 .WithMessage(Const.SUCCESS_SAVE_MSG);
@@ -209,7 +209,7 @@ public class IdeaService : BaseService<Idea>, IIdeaService
                 {
                     return new ResponseBuilder()
                         .WithStatus(Const.FAIL_CODE)
-                        .WithMessage("Don't exist submentor with given idea");
+                        .WithMessage("Don't exist submentor with given id");
                 }
             }
 
@@ -231,7 +231,7 @@ public class IdeaService : BaseService<Idea>, IIdeaService
                     .WithStatus(Const.FAIL_CODE)
                     .WithMessage(Const.FAIL_SAVE_MSG);
             }
-            
+
             ideaEntity.Status = IdeaStatus.Pending;
             ideaEntity.StageIdeaId = stageIdea.Id;
             ideaEntity.OwnerId = userId;
@@ -419,51 +419,57 @@ public class IdeaService : BaseService<Idea>, IIdeaService
 
     private async Task UpdateIdea(Idea idea, IdeaStatus status)
     {
-        if (status == IdeaStatus.Approved)
+        try
         {
             if (idea.StageIdeaId != null)
             {
-                //Gen idea code 
-                var stageIdea = await _unitOfWork.StageIdeaRepository.GetById((Guid)idea.StageIdeaId);
-                var semester = await _semesterRepository.GetById((Guid)stageIdea.SemesterId);
-                if (semester == null) return;
-                var semesterCode = semester.SemesterCode;
-                var semesterPrefix = semester.SemesterPrefixName;
-                //get so luong idea dc duyet ok cua ki
-                var numberOfIdeas = await _ideaRepository.NumberApprovedIdeasOfSemester(semester.Id);
-
-                // Tạo số thứ tự tiếp theo
-                int nextNumber = numberOfIdeas + 1;
-
-                // Tạo mã Idea mới theo định dạng: semesterPrefix + semesterCode + "SE" + số thứ tự (2 chữ số)
-                string newIdeaCode = $"{semesterPrefix}{semesterCode}SE{nextNumber:D2}";
-
-                idea.IdeaCode = newIdeaCode;
-                //Check neu owner la student thi tao project
-               // Error: do khi list idea , de update thi ko dc include 
-               var owner = await _unitOfWork.UserRepository.GetById(idea.OwnerId.Value);
-               var isStudent = owner.UserXRoles.Any(e => e.Role.RoleName == "Student");
-                if (isStudent)
+                if (status == IdeaStatus.Approved)
                 {
-                    //Tạo mã nhóm
-                    string newTeamCode = $"{semesterCode}SE{nextNumber:D3}";
-                    //Tao project
-                    var project = new Project
-                    {
-                        LeaderId = isStudent ? idea.OwnerId : null,
-                        IdeaId = idea.Id,
-                        TeamCode = newTeamCode,
-                        Status = ProjectStatus.InProgress,
-                        TeamSize = idea.MaxTeamSize
-                    };
-                    _projectRepository.Add(project);
-                    var res = await _unitOfWork.SaveChanges();
-                }
-            }
+                    //Gen idea code 
+                    var stageIdea = await _unitOfWork.StageIdeaRepository.GetById((Guid)idea.StageIdeaId);
+                    var semester = await _semesterRepository.GetById((Guid)stageIdea.SemesterId);
+                    if (semester == null) return;
+                    var semesterCode = semester.SemesterCode;
+                    var semesterPrefix = semester.SemesterPrefixName;
+                    //get so luong idea dc duyet ok cua ki
+                    var numberOfIdeas = await _ideaRepository.NumberApprovedIdeasOfSemester(semester.Id);
 
-            idea.Status = status;
-            _ideaRepository.Update(idea);
-            await _unitOfWork.SaveChanges();
+                    // Tạo số thứ tự tiếp theo
+                    int nextNumber = numberOfIdeas + 1;
+
+                    // Tạo mã Idea mới theo định dạng: semesterPrefix + semesterCode + "SE" + số thứ tự (2 chữ số)
+                    string newIdeaCode = $"{semesterPrefix}{semesterCode}SE{nextNumber:D2}";
+
+                    idea.IdeaCode = newIdeaCode;
+                    //Check neu owner la student thi tao project
+                    var isStudent = idea.Owner.UserXRoles.Any(e => e.Role.RoleName == "Student");
+                    if (isStudent)
+                    {
+                        //Tạo mã nhóm
+                        string newTeamCode = $"{semesterCode}SE{nextNumber:D3}";
+                        //Tao project
+                        var project = new Project
+                        {
+                            LeaderId = isStudent ? idea.OwnerId : null,
+                            IdeaId = idea.Id,
+                            TeamCode = newTeamCode,
+                            Status = ProjectStatus.InProgress,
+                            TeamSize = idea.MaxTeamSize
+                        };
+                        _projectRepository.Add(project);
+                        var res = await _unitOfWork.SaveChanges();
+                    }
+                }
+                idea.Owner = null;
+                idea.StageIdea = null;
+                idea.Status = status;
+                _ideaRepository.Update(idea);
+                await _unitOfWork.SaveChanges();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("error update idea" + ex);
         }
     }
 }

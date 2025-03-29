@@ -10,6 +10,7 @@ using FPT.TeamMatching.Domain.Models.Requests.Queries.Ideas;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Invitations;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Likes;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Notifications;
+using FPT.TeamMatching.Domain.Models.Requests.Queries.StageIdeas;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Users;
 
 namespace FPT.TeamMatching.Domain.Utilities.Filters;
@@ -23,8 +24,10 @@ public static class FilterHelper
         {
             UserGetAllQuery userQuery =>
                 User((queryable as IQueryable<User>)!, userQuery) as IQueryable<TEntity>,
+            StageIdeaGetAllQuery stageIdeaQuery =>
+                StageIdea((queryable as IQueryable<StageIdea>)!, stageIdeaQuery) as IQueryable<TEntity>,
             CommentGetAllQuery commentQuery =>
-            Comment((queryable as IQueryable<Comment>)!, commentQuery) as IQueryable<TEntity>,
+                Comment((queryable as IQueryable<Comment>)!, commentQuery) as IQueryable<TEntity>,
             IdeaRequestGetAllQuery ideaRequestQuery =>
                 IdeaRequest((queryable as IQueryable<IdeaRequest>)!, ideaRequestQuery) as IQueryable<TEntity>,
             IdeaGetAllQuery ideaQuery =>
@@ -38,10 +41,20 @@ public static class FilterHelper
             LikeGetAllQuery likeQuery =>
                 Like((queryable as IQueryable<Like>)!, likeQuery) as IQueryable<TEntity>,
             _ => BaseFilterHelper.Base(queryable, query),
-            
-
-
         };
+    }
+
+    private static IQueryable<StageIdea>? StageIdea(IQueryable<StageIdea> queryable, StageIdeaGetAllQuery query)
+    {
+        if (query.SemesterId != null)
+        {
+            queryable = queryable.Where(m =>
+                m.SemesterId != null && m.SemesterId == query.SemesterId);
+        }
+
+        queryable = BaseFilterHelper.Base(queryable, query);
+
+        return queryable;
     }
 
     private static IQueryable<Invitation>? Invitation(IQueryable<Invitation> queryable, InvitationGetAllQuery query)
@@ -57,8 +70,9 @@ public static class FilterHelper
         return queryable;
     }
 
-    
-    private static IQueryable<Notification>? Notification(IQueryable<Notification> queryable, NotificationGetAllQuery query)
+
+    private static IQueryable<Notification>? Notification(IQueryable<Notification> queryable,
+        NotificationGetAllQuery query)
     {
         if (query.Type != null)
         {
@@ -84,6 +98,7 @@ public static class FilterHelper
             queryable = queryable.Where(m =>
                 m.ProjectId == query.ProjectId);
         }
+
         if (query.UserId != null)
         {
             queryable = queryable.Where(m =>
@@ -97,12 +112,12 @@ public static class FilterHelper
 
     private static IQueryable<Like>? Like(IQueryable<Like> queryable, LikeGetAllQuery query)
     {
-     
         if (query.BlogId != null)
         {
             queryable = queryable.Where(m =>
                 m.BlogId == query.BlogId);
         }
+
         if (query.UserId != null)
         {
             queryable = queryable.Where(m =>
@@ -186,18 +201,18 @@ public static class FilterHelper
                      .Trim().ToLower()))
             );
         }
+
         if (!string.IsNullOrEmpty(query.Email))
         {
             string searchEmail = query.Email.Trim().ToLower();
             queryable = queryable.Where(m => m.Email.ToLower() == searchEmail);
-
         }
 
         queryable = BaseFilterHelper.Base(queryable, query);
 
         return queryable;
     }
-    
+
     private static IQueryable<IdeaRequest>? IdeaRequest(IQueryable<IdeaRequest> queryable, IdeaRequestGetAllQuery query)
     {
         if (query.Status.HasValue)
@@ -212,7 +227,7 @@ public static class FilterHelper
     }
 
 
-    private static IQueryable<Comment>? Comment(IQueryable<Comment> queryable, CommentGetAllQuery  query)
+    private static IQueryable<Comment>? Comment(IQueryable<Comment> queryable, CommentGetAllQuery query)
     {
         if (query.BlogId != null)
         {

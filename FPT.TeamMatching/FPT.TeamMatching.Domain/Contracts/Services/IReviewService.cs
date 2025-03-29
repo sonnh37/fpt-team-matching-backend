@@ -1,5 +1,6 @@
 ﻿using FPT.TeamMatching.Domain.Contracts.Services.Bases;
 using FPT.TeamMatching.Domain.Entities;
+using FPT.TeamMatching.Domain.Models;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Reviews;
 using FPT.TeamMatching.Domain.Models.Responses;
 using Microsoft.AspNetCore.Http;
@@ -14,4 +15,5 @@ public interface IReviewService : IBaseService
     Task<BusinessResult> StudentSubmitReview(SubmitReviewCommand request);
     Task<BusinessResult> ImportExcel(IFormFile file, int reviewNumber, Guid semesterId);
     Task<BusinessResult> GetReviewByReviewNumberAndSemesterIdPaging(int number, Guid semesterId);
+    Task<BusinessResult> UpdateFilerReview(UploadFileUrl request);
 }

@@ -64,5 +64,12 @@ namespace FPT.TeamMatching.API.Controllers
 
             return Ok(businessResult);
         }
+
+        [HttpPost("student-request-idea")]
+        public async Task<IActionResult> StudentRequest([FromBody] StudentRequest request)
+        {
+            var msg = await _service.StudentRequestIdea(request);
+            return Ok(msg);
+        }
     }
 }

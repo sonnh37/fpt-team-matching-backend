@@ -243,6 +243,7 @@ public class MappingProfile : Profile
         CreateMap<MentorIdeaRequest, MentorIdeaRequestResult>().ReverseMap();
         CreateMap<MentorIdeaRequest, MentorIdeaRequestCreateCommand>().ReverseMap();
         CreateMap<MentorIdeaRequest, MentorIdeaRequestUpdateCommand>().ReverseMap();
+        CreateMap<MentorIdeaRequest, StudentRequest>().ReverseMap();
 
         #endregion
 

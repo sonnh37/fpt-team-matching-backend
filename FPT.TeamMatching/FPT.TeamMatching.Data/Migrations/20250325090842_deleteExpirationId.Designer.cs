@@ -3,6 +3,7 @@ using System;
 using FPT.TeamMatching.Data.Context;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace FPT.TeamMatching.Data.Migrations
 {
     [DbContext(typeof(FPTMatchingDbContext))]
-    partial class FPTMatchingDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250325090842_deleteExpirationId")]
+    partial class deleteExpirationId
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -340,6 +343,9 @@ namespace FPT.TeamMatching.Data.Migrations
                         .HasColumnType("uuid")
                         .HasDefaultValueSql("gen_random_uuid()");
 
+                    b.Property<Guid?>("CouncilId")
+                        .HasColumnType("uuid");
+
                     b.Property<string>("CreatedBy")
                         .HasColumnType("text");
 
@@ -370,14 +376,11 @@ namespace FPT.TeamMatching.Data.Migrations
                     b.Property<DateTimeOffset?>("UpdatedDate")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<Guid?>("UserId")
-                        .HasColumnType("uuid");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("IdeaId");
+                    b.HasIndex("CouncilId");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("IdeaId");
 
                     b.ToTable("IdeaHistory", (string)null);
                 });
@@ -422,12 +425,11 @@ namespace FPT.TeamMatching.Data.Migrations
                     b.Property<DateTimeOffset?>("UpdatedDate")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<Guid?>("UserId")
-                        .HasColumnType("uuid");
-
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("IdeaHistoryId");
+
+                    b.HasIndex("ReviewerId");
 
                     b.ToTable("IdeaHistoryRequest", (string)null);
                 });
@@ -1474,22 +1476,32 @@ namespace FPT.TeamMatching.Data.Migrations
 
             modelBuilder.Entity("FPT.TeamMatching.Domain.Entities.IdeaHistory", b =>
                 {
+                    b.HasOne("FPT.TeamMatching.Domain.Entities.User", "Council")
+                        .WithMany("IdeaHistoryOfCouncils")
+                        .HasForeignKey("CouncilId");
+
                     b.HasOne("FPT.TeamMatching.Domain.Entities.Idea", "Idea")
                         .WithMany("IdeaHistories")
                         .HasForeignKey("IdeaId");
 
-                    b.HasOne("FPT.TeamMatching.Domain.Entities.User", null)
-                        .WithMany("IdeaHistoryOfCouncils")
-                        .HasForeignKey("UserId");
+                    b.Navigation("Council");
 
                     b.Navigation("Idea");
                 });
 
             modelBuilder.Entity("FPT.TeamMatching.Domain.Entities.IdeaHistoryRequest", b =>
                 {
-                    b.HasOne("FPT.TeamMatching.Domain.Entities.User", null)
+                    b.HasOne("FPT.TeamMatching.Domain.Entities.IdeaHistory", "IdeaHistory")
+                        .WithMany("IdeaHistoryRequests")
+                        .HasForeignKey("IdeaHistoryId");
+
+                    b.HasOne("FPT.TeamMatching.Domain.Entities.User", "Reviewer")
                         .WithMany("IdeaHistoryRequestOfReviewers")
-                        .HasForeignKey("UserId");
+                        .HasForeignKey("ReviewerId");
+
+                    b.Navigation("IdeaHistory");
+
+                    b.Navigation("Reviewer");
                 });
 
             modelBuilder.Entity("FPT.TeamMatching.Domain.Entities.IdeaRequest", b =>
@@ -1740,6 +1752,11 @@ namespace FPT.TeamMatching.Data.Migrations
                     b.Navigation("MentorIdeaRequests");
 
                     b.Navigation("Project");
+                });
+
+            modelBuilder.Entity("FPT.TeamMatching.Domain.Entities.IdeaHistory", b =>
+                {
+                    b.Navigation("IdeaHistoryRequests");
                 });
 
             modelBuilder.Entity("FPT.TeamMatching.Domain.Entities.Profession", b =>

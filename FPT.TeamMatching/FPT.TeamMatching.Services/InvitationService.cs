@@ -112,11 +112,13 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
                     .WithMessage("User do not exist");
             }
 
-            var haveInvite = await _invitationRepository.GetInvitationOfUserByProjectId((Guid)command.ProjectId, user.Id);
-            if (haveInvite != null) {
+            var haveInvite =
+                await _invitationRepository.GetInvitationOfUserByProjectId((Guid)command.ProjectId, user.Id);
+            if (haveInvite != null)
+            {
                 return new ResponseBuilder()
-                  .WithStatus(Const.FAIL_CODE)
-                  .WithMessage("Student has request join team");
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("Student has request join team");
             }
 
             //check student co idea pending hay approve k
@@ -127,6 +129,7 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
                     .WithStatus(Const.FAIL_CODE)
                     .WithMessage("Student has idea");
             }
+
             //check student trong teammember in process OR pass
             var inTeamMember = await StudentInTeamMember(user.Id);
             if (inTeamMember)
@@ -135,6 +138,7 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
                     .WithStatus(Const.FAIL_CODE)
                     .WithMessage("Student is in team now");
             }
+
             //check project exist
             var project = await _projectRepository.GetById((Guid)command.ProjectId);
             if (project == null)
@@ -157,6 +161,7 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
                     .WithStatus(Const.SUCCESS_CODE)
                     .WithMessage(Const.SUCCESS_SAVE_MSG);
             }
+
             return new ResponseBuilder()
                 .WithStatus(Const.FAIL_CODE)
                 .WithMessage(Const.FAIL_SAVE_MSG);
@@ -176,12 +181,13 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
         {
             //check sl trong team
             bool members = await CheckCountMembersInTeam((Guid)command.ProjectId);
-            if(!members)
+            if (!members)
             {
                 return new ResponseBuilder()
                     .WithStatus(Const.FAIL_CODE)
                     .WithMessage("Project has maximum members");
             }
+
             //check student co idea pending hay approve k
             var haveIdea = await StudentHaveIdea((Guid)command.ReceiverId);
             if (haveIdea)
@@ -190,6 +196,7 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
                     .WithStatus(Const.FAIL_CODE)
                     .WithMessage("Student has idea");
             }
+
             //check student trong teammember in process OR pass
             var inTeamMember = await StudentInTeamMember((Guid)command.ReceiverId);
             if (inTeamMember)
@@ -228,24 +235,132 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
             if (user == null)
             {
                 return new ResponseBuilder()
-                .WithStatus(Const.FAIL_CODE)
-                .WithMessage("User haven't login!");
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("User haven't login!");
             }
+
             var invitation = await _invitationRepository.GetInvitationOfUserByProjectId(projectId, user.Id);
             if (invitation == null)
             {
                 return new ResponseBuilder()
-                .WithStatus(Const.FAIL_CODE)
-                .WithMessage("User haven't sent invitation to given project!");
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("User haven't sent invitation to given project!");
             }
+
             _invitationRepository.DeletePermanently(invitation);
             bool saveChange = await _unitOfWork.SaveChanges();
             if (saveChange)
             {
                 return new ResponseBuilder()
-                .WithStatus(Const.SUCCESS_CODE)
-                .WithMessage(Const.SUCCESS_DELETE_MSG);
+                    .WithStatus(Const.SUCCESS_CODE)
+                    .WithMessage(Const.SUCCESS_DELETE_MSG);
             }
+
+            return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage(Const.FAIL_DELETE_MSG);
+        }
+        catch (Exception ex)
+        {
+            var errorMessage = $"An error occurred in {typeof(InvitationResult).Name}: {ex.Message}";
+            return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage(errorMessage);
+        }
+    }
+
+    public async Task<BusinessResult> ApproveInvitationOfTeamByMe(Guid projectId)
+    {
+        try
+        {
+            var user = await GetUserAsync();
+            if (user == null)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("User haven't login!");
+            }
+
+            var invitation = await _invitationRepository.GetInvitationOfTeamByProjectIdAndMe(projectId, user.Id);
+            if (invitation == null)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("Team haven't sent invitation!");
+            }
+
+            var teamMember = new TeamMember
+            {
+                UserId = user.Id,
+                ProjectId = invitation.ProjectId,
+                Role = TeamMemberRole.Member,
+                JoinDate = DateTime.UtcNow,
+                LeaveDate = null,
+                Status = TeamMemberStatus.InProgress
+            };
+            await SetBaseEntityForCreation(teamMember);
+            _teamMemberRepository.Add(teamMember);
+            var saveChange = await _unitOfWork.SaveChanges();
+            if (saveChange)
+            {
+                invitation.Status = InvitationStatus.Accepted;
+                await SetBaseEntityForUpdate(invitation);
+                _invitationRepository.Update(invitation);
+                var saveChange_ = await _unitOfWork.SaveChanges();
+                if (saveChange_)
+                {
+                    return new ResponseBuilder()
+                        .WithStatus(Const.SUCCESS_CODE)
+                        .WithMessage(Const.SUCCESS_DELETE_MSG);
+                }
+
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage(Const.FAIL_DELETE_MSG);
+            }
+
+            return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage(Const.FAIL_DELETE_MSG);
+        }
+        catch (Exception ex)
+        {
+            var errorMessage = $"An error occurred in {typeof(InvitationResult).Name}: {ex.Message}";
+            return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage(errorMessage);
+        }
+    }
+
+    public async Task<BusinessResult> CancelInvitationOfTeamByMe(Guid projectId)
+    {
+        try
+        {
+            var user = await GetUserAsync();
+            if (user == null)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("User haven't login!");
+            }
+
+            var invitation = await _invitationRepository.GetInvitationOfTeamByProjectIdAndMe(projectId, user.Id);
+            if (invitation == null)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("Team haven't sent invitation!");
+            }
+
+            _invitationRepository.DeletePermanently(invitation);
+            var saveChange_ = await _unitOfWork.SaveChanges();
+            if (saveChange_)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(Const.SUCCESS_CODE)
+                    .WithMessage(Const.SUCCESS_DELETE_MSG);
+            }
+
             return new ResponseBuilder()
                 .WithStatus(Const.FAIL_CODE)
                 .WithMessage(Const.FAIL_DELETE_MSG);
@@ -288,44 +403,47 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
         {
             return haveIdea = false;
         }
-        foreach (var idea in  ideas)
+
+        foreach (var idea in ideas)
         {
             if (idea.Status != IdeaStatus.Rejected)
             {
                 haveIdea = true;
             }
         }
+
         return haveIdea;
     }
 
     private async Task<bool> StudentInTeamMember(Guid userId)
     {
-        var teamMembers =await _teamMemberRepository.GetTeamMemberByUserId(userId);
+        var teamMembers = await _teamMemberRepository.GetTeamMemberByUserId(userId);
         bool haveTeamMember = false;
         if (!teamMembers.Any())
         {
             haveTeamMember = false;
         }
-        foreach (var teamMember in  teamMembers)
+
+        foreach (var teamMember in teamMembers)
         {
             if (teamMember.Status != TeamMemberStatus.Failed)
             {
                 haveTeamMember = true;
             }
         }
+
         return haveTeamMember;
     }
 
     private async Task<bool> CheckCountMembersInTeam(Guid projectId)
     {
         var teammember = await _projectRepository.GetById(projectId);
-        var count = teammember.TeamMembers.Where(x=> x.IsDeleted = false).Count();
+        var count = teammember.TeamMembers.Where(x => x.IsDeleted = false).Count();
         if (count <= teammember.TeamSize)
         {
             return true;
         }
+
         return false;
     }
-
-
 }

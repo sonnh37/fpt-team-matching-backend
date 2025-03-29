@@ -12,6 +12,7 @@ public static class IncludeHelper
         return (queryable switch
         {
             IQueryable<Idea> ideas => Idea(ideas) as IQueryable<TEntity>,
+            IQueryable<Semester> semesters => Semester(semesters) as IQueryable<TEntity>,
             IQueryable<IdeaRequest> ideaRequests => IdeaRequest(ideaRequests) as IQueryable<TEntity>,
             IQueryable<Project> projects => Project(projects) as IQueryable<TEntity>,
             IQueryable<Profession> professions => Profession(professions) as IQueryable<TEntity>,
@@ -26,6 +27,12 @@ public static class IncludeHelper
         })!;
     }
 
+    private static IQueryable<Semester> Semester(IQueryable<Semester> queryable)
+    {
+        queryable = queryable.Include(m => m.StageIdeas);
+        return queryable;
+    }
+    
     private static IQueryable<IdeaRequest> IdeaRequest(IQueryable<IdeaRequest> queryable)
     {
         queryable = queryable.Include(m => m.Idea)
@@ -126,6 +133,7 @@ public static class IncludeHelper
         queryable = queryable
             .Include(x => x.Project)
             .ThenInclude(y => y.Idea)
+            .ThenInclude(y => y.IdeaHistories)
             .Include(d => d.Reviewer1)
             .Include(d => d.Reviewer2);
         return queryable;

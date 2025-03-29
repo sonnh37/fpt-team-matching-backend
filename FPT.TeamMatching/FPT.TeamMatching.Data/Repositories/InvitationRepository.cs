@@ -29,15 +29,32 @@ public class InvitationRepository : BaseRepository<Invitation>, IInvitationRepos
         return i;
     }
     
+    public async Task<Invitation?> GetInvitationOfTeamByProjectIdAndMe(Guid projectId, Guid userId)
+    {
+        var i = await _dbContext.Invitations.Where(e => e.Status != null 
+                                                        && e.ProjectId == projectId 
+                                                        && e.ReceiverId == userId 
+                                                        && e.Status.Value == InvitationStatus.Pending
+                                                        && e.IsDeleted == false)
+            .SingleOrDefaultAsync();
+        return i;
+    }
+    
     public async Task<(List<Invitation>, int)> GetUserInvitationsByType(InvitationGetByTypeQuery query, Guid userId)
     {
         var queryable = GetQueryable(m => m.Type == query.Type);
         queryable = query.Type switch
         {
+            // Get ra list đã gửi những ai
             InvitationType.SentByStudent => queryable.Where(m => m.SenderId == userId),
+            
+            // Get ra list đã nhận bởi team nào
             InvitationType.SendByTeam => queryable.Where(m => m.ReceiverId == userId),
             _ => queryable
         };
+
+        queryable = queryable.Include(m => m.Project);
+        
         
         if (query.IsPagination)
         {

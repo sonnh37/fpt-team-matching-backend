@@ -137,7 +137,10 @@ builder.Services.AddHangfire(config =>
 });
 builder.Services.AddHangfireServer();
 builder.Services.AddScoped<IJobHangfireService, JobHangFireService>();
-
+builder.Services.AddHangfireServer(options =>
+{
+    options.Queues = new[] { builder.Configuration.GetSection("HANGFIRE_SERVER_LOCAL").Value };
+});
 #endregion
 
 #region Cloudinary
@@ -157,15 +160,15 @@ builder.Services.AddSingleton<RedisUtil>();
 builder.Services.AddQuartz(q =>
 {
     //Review creation job
-    var jobKey1 = new JobKey("ReviewCreationJob");
+    //var jobKey1 = new JobKey("ReviewCreationJob");
 
-    q.AddJob<ReviewCreationJob>(opts => opts.WithIdentity(jobKey1));
+    //q.AddJob<ReviewCreationJob>(opts => opts.WithIdentity(jobKey1));
 
-    q.AddTrigger(opts => opts
-        .ForJob(jobKey1)
-        .WithIdentity("ReviewCreationTrigger")
-        .WithSchedule(CronScheduleBuilder
-        .DailyAtHourAndMinute(22, 59)));
+    //q.AddTrigger(opts => opts
+    //    .ForJob(jobKey1)
+    //    .WithIdentity("ReviewCreationTrigger")
+    //    .WithSchedule(CronScheduleBuilder
+    //    .DailyAtHourAndMinute(22, 59)));
 
     //public result idea job
     //var jobKey2 = new JobKey("PublicResultIdeaJob");
@@ -176,7 +179,7 @@ builder.Services.AddQuartz(q =>
     //    .ForJob(jobKey2)
     //    .WithIdentity("PublicResultIdeaTrigger")
     //    .WithSchedule(CronScheduleBuilder
-    //    .DailyAtHourAndMinute(22,58)));
+    //    .DailyAtHourAndMinute(21, 32)));
 
 });
 
