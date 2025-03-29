@@ -68,6 +68,7 @@ public class IdeaService : BaseService<Idea>, IIdeaService
         }
     }
 
+    
     public async Task<BusinessResult> StudentCreatePending(IdeaStudentCreatePendingCommand idea)
     {
         try

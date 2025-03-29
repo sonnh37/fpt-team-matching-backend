@@ -29,6 +29,15 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
         return ideas;
     }
 
+    public async Task<IList<Idea>> GetIdeasByTypeMentorAndEnterprise()
+    {
+        var ideas = await _dbContext.Ideas.Where(e => e.Type == IdeaType.Enterprise || e.Type == IdeaType.Lecturer)
+            .Include(e => e.IdeaRequests).ThenInclude(e => e.Reviewer)
+            .Include(e => e.StageIdea)
+            .ToListAsync();
+        return ideas;
+    }
+
     public async Task<Idea?> GetLatestIdeaByUserAndStatus(Guid userId, IdeaStatus status)
     {
         return await GetQueryable<Idea>()

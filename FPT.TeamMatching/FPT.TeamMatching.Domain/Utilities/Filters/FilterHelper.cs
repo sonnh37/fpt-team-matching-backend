@@ -187,12 +187,10 @@ public static class FilterHelper
                 m.Specialty.Profession.Id == query.ProfessionId);
         }
 
-        if (query.Type != null)
+        if (query.Types.Count > 0)
         {
             queryable = queryable.Where(m =>
-                m.Owner != null && m.Owner.UserXRoles.Any(uxr =>
-                    uxr.Role != null && uxr.Role.RoleName != null &&
-                    uxr.Role.RoleName.ToLower().Trim() == query.Type.ToString()!.ToLower().Trim()));
+                m.Type != null && query.Types.Contains(m.Type.Value));
         }
 
         if (query.Status != null)

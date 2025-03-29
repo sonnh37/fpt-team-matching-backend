@@ -69,10 +69,17 @@ public static class IncludeHelper
     private static IQueryable<Idea> Idea(IQueryable<Idea> queryable)
     {
         queryable = queryable
-            .Include(m => m.IdeaRequests)
-            .Include(m => m.Owner)
-            .ThenInclude(u => u.UserXRoles)
-            .ThenInclude(ur => ur.Role);
+                .Include(m => m.IdeaRequests)
+                .Include(m => m.Owner)
+                .ThenInclude(u => u.UserXRoles)
+                .ThenInclude(ur => ur.Role)
+                .Include(m => m.Project)
+                .Include(m => m.Mentor)
+                .Include(m => m.SubMentor)
+                .Include(m => m.StageIdea)
+                .Include(m => m.MentorIdeaRequests)
+                .Include(m => m.Specialty).ThenInclude(m => m.Profession)
+            ;
         queryable = queryable.Include(m => m.Project);
         return queryable;
     }

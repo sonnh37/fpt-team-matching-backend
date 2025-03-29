@@ -17,7 +17,7 @@ namespace FPT.TeamMatching.Domain.Models.Requests.Queries.Ideas
         public Guid? MentorId { get; set; }
         public Guid? SubMentorId { get; set; }
 
-        public IdeaType? Type { get; set; }
+        public List<IdeaType> Types { get; set; } = new List<IdeaType>();
     
         public Guid? SpecialtyId { get; set; }
 
