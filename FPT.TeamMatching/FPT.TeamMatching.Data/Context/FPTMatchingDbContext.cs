@@ -131,7 +131,6 @@ public partial class FPTMatchingDbContext : BaseDbContext
 
             entity.Property(e => e.Id).ValueGeneratedOnAdd()
                 .HasDefaultValueSql("gen_random_uuid()");
-            entity.Property(e => e.FileCv).HasMaxLength(1);
 
             entity.HasOne(d => d.Blog).WithMany(p => p.BlogCvs)
                 .HasForeignKey(d => d.BlogId);

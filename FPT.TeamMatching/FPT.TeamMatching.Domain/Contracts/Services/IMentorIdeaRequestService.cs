@@ -12,5 +12,6 @@ namespace FPT.TeamMatching.Domain.Contracts.Services
     public interface IMentorIdeaRequestService: IBaseService
     {
         Task<BusinessResult> StudentRequestIdea(StudentRequest request);
+        Task<BusinessResult> MentorResponse(MentorIdeaRequestUpdateCommand request);
     }
 }

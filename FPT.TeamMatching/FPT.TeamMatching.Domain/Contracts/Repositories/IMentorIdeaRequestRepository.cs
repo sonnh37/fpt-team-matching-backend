@@ -10,5 +10,6 @@ namespace FPT.TeamMatching.Domain.Contracts.Repositories
 {
     public interface IMentorIdeaRequestRepository: IBaseRepository<MentorIdeaRequest>
     {
+        Task<List<MentorIdeaRequest>?> GetByIdeaId(Guid ideaId);
     }
 }
