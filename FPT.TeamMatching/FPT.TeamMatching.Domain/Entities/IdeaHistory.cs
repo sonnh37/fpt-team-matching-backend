@@ -7,8 +7,6 @@ public class IdeaHistory : BaseEntity
 {
     public Guid? IdeaId { get; set; }
 
-    public Guid? CouncilId { get; set; }
-    
     public string? FileUpdate { get; set; }
     
     public IdeaHistoryStatus? Status { get; set; }
@@ -17,7 +15,5 @@ public class IdeaHistory : BaseEntity
 
     public virtual Idea? Idea { get; set; }
 
-    public virtual User? Council { get; set; }
-    
-    public virtual ICollection<IdeaHistoryRequest> IdeaHistoryRequests { get; set; } = new List<IdeaHistoryRequest>();
+    //public virtual ICollection<IdeaHistoryRequest> IdeaHistoryRequests { get; set; } = new List<IdeaHistoryRequest>();
 }
