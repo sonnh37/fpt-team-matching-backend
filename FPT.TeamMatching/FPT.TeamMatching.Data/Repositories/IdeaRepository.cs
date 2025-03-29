@@ -59,18 +59,18 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
 
     public async Task<int> NumberApprovedIdeasOfSemester(Guid? semesterId)
     {
-        var maxNumber = await _dbContext.Ideas.Where(e => e.Status == IdeaStatus.Approved &&
+        var number = await _dbContext.Ideas.Where(e => e.Status == IdeaStatus.Approved &&
                                                           e.IsDeleted == false &&
                                                           e.StageIdea != null &&
                                                           e.StageIdea.SemesterId == semesterId).CountAsync();
-        return maxNumber;
+        return number;
     }
 
     public async Task<List<Idea>> GetIdeaWithResultDateIsToday()
     {
         var toDay = DateTime.Now.Date;
         var ideas = await _dbContext.Ideas
-            .Include(e => e.Owner)
+            .Include(e => e.Owner).ThenInclude(e => e.UserXRoles).ThenInclude(e => e.Role)
             .Include(e => e.StageIdea)
             .Where(e =>
                 e.IsDeleted == false &&

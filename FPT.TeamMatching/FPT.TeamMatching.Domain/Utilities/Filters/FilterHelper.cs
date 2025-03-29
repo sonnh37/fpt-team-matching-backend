@@ -2,6 +2,7 @@
 using FPT.TeamMatching.Domain.Entities.Base;
 using FPT.TeamMatching.Domain.Enums;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Base;
+using FPT.TeamMatching.Domain.Models.Requests.Queries.BlogCvs;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Blogs;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Comments;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.IdeaRequests;
@@ -38,6 +39,8 @@ public static class FilterHelper
                 Invitation((queryable as IQueryable<Invitation>)!, invitationQuery) as IQueryable<TEntity>,
             BlogGetAllQuery blogQuery =>
                 Blog((queryable as IQueryable<Blog>)!, blogQuery) as IQueryable<TEntity>,
+            BlogCvGetAllQuery blogCvQuery =>
+                BlogCv((queryable as IQueryable<BlogCv>)!, blogCvQuery) as IQueryable<TEntity>,
             LikeGetAllQuery likeQuery =>
                 Like((queryable as IQueryable<Like>)!, likeQuery) as IQueryable<TEntity>,
             _ => BaseFilterHelper.Base(queryable, query),
@@ -165,7 +168,17 @@ public static class FilterHelper
         return queryable;
     }
 
-    private static IQueryable<Idea>? Idea(IQueryable<Idea> queryable, IdeaGetAllQuery query)
+    private static IQueryable<BlogCv>? BlogCv(IQueryable<BlogCv> queryable, BlogCvGetAllQuery query)
+    {
+
+        if (query.BlogId != null)
+        {
+            queryable = queryable.Where(m =>
+                m.BlogId == query.BlogId);
+        }
+        return queryable;
+    }
+        private static IQueryable<Idea>? Idea(IQueryable<Idea> queryable, IdeaGetAllQuery query)
     {
         if (query.IsExistedTeam != null) queryable = queryable.Where(m => query.IsExistedTeam.Value == m.IsExistedTeam);
 

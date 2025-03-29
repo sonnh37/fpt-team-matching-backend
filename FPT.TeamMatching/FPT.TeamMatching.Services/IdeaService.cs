@@ -22,6 +22,7 @@ public class IdeaService : BaseService<Idea>, IIdeaService
     private readonly IProjectRepository _projectRepository;
     private readonly IUserRepository _userRepository;
     private readonly IStageIdeaRepositoty _stageIdeaRepositoty;
+    private readonly ITeamMemberRepository _teamMemberRepository;
 
     public IdeaService(IMapper mapper, IUnitOfWork unitOfWork) : base(mapper, unitOfWork)
     {
@@ -31,6 +32,7 @@ public class IdeaService : BaseService<Idea>, IIdeaService
         _projectRepository = unitOfWork.ProjectRepository;
         _userRepository = unitOfWork.UserRepository;
         _stageIdeaRepositoty = unitOfWork.StageIdeaRepository;
+        _teamMemberRepository = unitOfWork.TeamMemberRepository;
     }
 
 
@@ -237,6 +239,7 @@ public class IdeaService : BaseService<Idea>, IIdeaService
             ideaEntity.StageIdeaId = stageIdea.Id;
             ideaEntity.OwnerId = userId;
             ideaEntity.MentorId = userId;
+            ideaEntity.IsExistedTeam = false;
             if (idea.IsEnterpriseTopic)
             {
                 ideaEntity.Type = IdeaType.Enterprise;
@@ -432,45 +435,102 @@ public class IdeaService : BaseService<Idea>, IIdeaService
                     if (semester == null) return;
                     var semesterCode = semester.SemesterCode;
                     var semesterPrefix = semester.SemesterPrefixName;
-                    //get so luong idea dc duyet ok cua ki
+                    //get so luong idea dc duyet approve cua ki
                     var numberOfIdeas = await _ideaRepository.NumberApprovedIdeasOfSemester(semester.Id);
 
                     // Tạo số thứ tự tiếp theo
-                    int nextNumber = numberOfIdeas + 1;
+                    int nextNumberIdea = numberOfIdeas + 1;
 
                     // Tạo mã Idea mới theo định dạng: semesterPrefix + semesterCode + "SE" + số thứ tự (2 chữ số)
-                    string newIdeaCode = $"{semesterPrefix}{semesterCode}SE{nextNumber:D2}";
+                    string newIdeaCode = $"{semesterPrefix}{semesterCode}SE{nextNumberIdea:D2}";
 
                     idea.IdeaCode = newIdeaCode;
                     //Check neu owner la student thi tao project
                     var isStudent = idea.Owner.UserXRoles.Any(e => e.Role.RoleName == "Student");
                     if (isStudent)
                     {
-                        //Tạo mã nhóm
-                        string newTeamCode = $"{semesterCode}SE{nextNumber:D3}";
-                        //Tao project
-                        var project = new Project
+                        //check xem co team chua - co project chua
+                        var existedProject = await _projectRepository.GetProjectByLeaderId((Guid)idea.OwnerId);
+                        if (existedProject == null)
                         {
-                            LeaderId = isStudent ? idea.OwnerId : null,
-                            IdeaId = idea.Id,
-                            TeamCode = newTeamCode,
-                            Status = ProjectStatus.InProgress,
-                            TeamSize = idea.MaxTeamSize
-                        };
-                        _projectRepository.Add(project);
-                        var res = await _unitOfWork.SaveChanges();
+                            //Tao project
+                            var project = new Project
+                            {
+                                LeaderId = isStudent ? idea.OwnerId : null,
+                                IdeaId = idea.Id,
+                                //TeamCode = newTeamCode,
+                                Status = ProjectStatus.Pending,
+                                TeamSize = idea.MaxTeamSize
+                            };
+                            await SetBaseEntityForCreation(project);
+                            _projectRepository.Add(project);
+                            var isSuccess = await _unitOfWork.SaveChanges();
+                            if (!isSuccess)
+                            {
+                                return ;
+                            }
+                            //Tao teamMember
+                            var teamMember = new TeamMember
+                            {
+                                UserId = idea.OwnerId,
+                                ProjectId = project.Id,
+                                Role = TeamMemberRole.Leader,
+                                JoinDate = DateTime.UtcNow,
+                                Status = TeamMemberStatus.Pending,
+                            };
+                            await SetBaseEntityForCreation(teamMember);
+                            _teamMemberRepository.Add(teamMember);
+                            isSuccess = await _unitOfWork.SaveChanges();
+                            if (!isSuccess)
+                            {
+                                return;
+                            }
+                        } else
+                        {
+                            existedProject.IdeaId = idea.Id;
+                            await SetBaseEntityForUpdate(existedProject);
+                            _projectRepository.Update(existedProject);
+                            var isSuccess = await _unitOfWork.SaveChanges();
+                            if (!isSuccess)
+                            {
+                                return;
+                            }
+                        }
+                        
                     }
                 }
+                //update idea
                 idea.Owner = null;
                 idea.StageIdea = null;
                 idea.Status = status;
+                await SetBaseEntityForUpdate(idea);
                 _ideaRepository.Update(idea);
-                await _unitOfWork.SaveChanges();
+                var isSucess = await _unitOfWork.SaveChanges();
+                if (!isSucess)
+                {
+                    return;
+                }
             }
         }
         catch (Exception ex)
         {
             Console.WriteLine("error update idea" + ex);
+        }
+    }
+
+    public async Task AutoUpdateProjectInProgress()
+    {
+        try
+        {
+            //get projects cua ki den ngay bat dau inprogress - ngay khoa
+            //update project
+                //update status
+                //update teamCode
+                //update status cua teammember
+        }
+        catch (Exception ex)
+        {
+            return;
         }
     }
 }

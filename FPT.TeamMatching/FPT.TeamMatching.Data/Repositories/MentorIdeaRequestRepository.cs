@@ -16,11 +16,20 @@ namespace FPT.TeamMatching.Data.Repositories
     public class MentorIdeaRequestRepository : BaseRepository<MentorIdeaRequest>, IMentorIdeaRequestRepository
     {
         private readonly IUserRepository _userRepository;
-
+        
+        private readonly FPTMatchingDbContext _dbContext;
         public MentorIdeaRequestRepository(FPTMatchingDbContext dbContext, IUserRepository userRepository) :
-            base(dbContext)
         {
             _userRepository = userRepository;
+            _dbContext = dbContext;
+        }
+
+        public async Task<List<MentorIdeaRequest>?> GetByIdeaId(Guid ideaId)
+        {
+            var requests = await _dbContext.MentorIdeaRequests.Where(e => e.IsDeleted == false &&
+                                                                e.IdeaId == ideaId)
+                                                        .ToListAsync();
+            return requests;
         }
 
         private async Task<User?> GetUserById(Guid id)

@@ -296,7 +296,7 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
                 Role = TeamMemberRole.Member,
                 JoinDate = DateTime.UtcNow,
                 LeaveDate = null,
-                Status = TeamMemberStatus.InProgress
+                Status = TeamMemberStatus.Pending
             };
             await SetBaseEntityForCreation(teamMember);
             _teamMemberRepository.Add(teamMember);

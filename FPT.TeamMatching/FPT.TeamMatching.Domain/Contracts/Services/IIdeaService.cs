@@ -21,5 +21,6 @@ namespace FPT.TeamMatching.Domain.Contracts.Services
         Task<BusinessResult> UpdateStatusIdea(IdeaUpdateStatusCommand command);
 
         Task AutoUpdateIdeaStatus();
+        Task AutoUpdateProjectInProgress();
     }
 }
