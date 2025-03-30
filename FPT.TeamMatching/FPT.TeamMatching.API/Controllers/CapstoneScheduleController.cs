@@ -1,4 +1,5 @@
 ﻿using FPT.TeamMatching.Domain.Contracts.Services;
+using FPT.TeamMatching.Domain.Models;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.CapstoneSchedules;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.CapstoneSchedules;
 using FPT.TeamMatching.Domain.Models.Results;
@@ -61,6 +62,13 @@ namespace FPT.TeamMatching.API.Controllers
         {
             var businessResult = await _service.DeleteById(request.Id, request.IsPermanent);
 
+            return Ok(businessResult);
+        }
+
+        [HttpPost("/import-excel")]
+        public async Task<IActionResult> ImportExcelFile([FromForm]CapstoneImportRequest request)
+        {
+            var businessResult = await _service.ImportExcelFile(request.file, request.Stage);
             return Ok(businessResult);
         }
     }

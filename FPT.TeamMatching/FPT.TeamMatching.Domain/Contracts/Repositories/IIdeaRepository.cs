@@ -25,4 +25,5 @@ public interface IIdeaRepository : IBaseRepository<Idea>
     Task<Idea?> GetIdeaApproveInSemesterOfUser(Guid userId, Guid semesterId);
 
     Task<int> NumberOfIdeaMentorOrOwner(Guid userId);
+    Task<List<Idea>> GetIdeasByIdeaCodes(string[] ideaCode);
 }
