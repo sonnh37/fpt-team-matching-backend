@@ -35,4 +35,5 @@ public class UnitOfWork : BaseUnitOfWork<FPTMatchingDbContext>, IUnitOfWork
     public IIdeaHistoryRequestRepository IdeaHistoryRequestRepository => GetRepository<IIdeaHistoryRequestRepository>();
     public IStageIdeaRepositoty StageIdeaRepository => GetRepository<IStageIdeaRepositoty>();
     public IMentorIdeaRequestRepository MentorIdeaRequestRepository => GetRepository<IMentorIdeaRequestRepository>();
+    public ICapstoneScheduleRepository CapstoneScheduleRepository => GetRepository<ICapstoneScheduleRepository>();
 }

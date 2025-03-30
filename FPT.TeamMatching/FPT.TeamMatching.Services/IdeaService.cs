@@ -430,7 +430,7 @@ public class IdeaService : BaseService<Idea>, IIdeaService
                 if (status == IdeaStatus.Approved)
                 {
                     //Gen idea code 
-                    var stageIdea = await _unitOfWork.StageIdeaRepository.GetById((Guid)idea.StageIdeaId);
+                    var stageIdea = await _stageIdeaRepositoty.GetById((Guid)idea.StageIdeaId);
                     var semester = await _semesterRepository.GetById((Guid)stageIdea.SemesterId);
                     if (semester == null) return;
                     var semesterCode = semester.SemesterCode;
@@ -467,7 +467,7 @@ public class IdeaService : BaseService<Idea>, IIdeaService
                             var isSuccess = await _unitOfWork.SaveChanges();
                             if (!isSuccess)
                             {
-                                return ;
+                                return;
                             }
                             //Tao teamMember
                             var teamMember = new TeamMember
@@ -485,7 +485,8 @@ public class IdeaService : BaseService<Idea>, IIdeaService
                             {
                                 return;
                             }
-                        } else
+                        }
+                        else
                         {
                             existedProject.IdeaId = idea.Id;
                             await SetBaseEntityForUpdate(existedProject);
@@ -496,7 +497,7 @@ public class IdeaService : BaseService<Idea>, IIdeaService
                                 return;
                             }
                         }
-                        
+
                     }
                 }
                 //update idea
@@ -523,10 +524,41 @@ public class IdeaService : BaseService<Idea>, IIdeaService
         try
         {
             //get projects cua ki den ngay bat dau inprogress - ngay khoa
+            var projects = await _projectRepository.GetProjectsInFourthWeekByToday();
             //update project
+            foreach (var project in projects)
+            {
+                var semester = project.Idea.StageIdea.Semester;
                 //update status
+                project.Status = ProjectStatus.InProgress;
                 //update teamCode
+                    //get so luong project InProgress cua ki
+                    var numberOfProjects = await _projectRepository.NumberOfInProgressProjectInSemester(semester.Id);
+                    // Tạo số thứ tự tiếp theo
+                    int nextNumber = numberOfProjects + 1;
+                    string semesterCode = semester.SemesterCode;
+                    //Tạo mã nhóm
+                    string newTeamCode = $"{semesterCode}SE{nextNumber:D3}";
+                    project.Idea = null;
+                _projectRepository.Update(project);
+                var isSuccess = await _unitOfWork.SaveChanges();
+                if (!isSuccess)
+                {
+                    return;
+                }
                 //update status cua teammember
+                var teamMembers = await _teamMemberRepository.GetMembersOfTeamByProjectId(project.Id);
+                foreach (var teamMember in teamMembers)
+                {
+                    teamMember.Status = TeamMemberStatus.InProgress;
+                }
+                _teamMemberRepository.UpdateRange(teamMembers);
+                isSuccess = await _unitOfWork.SaveChanges();
+                if (!isSuccess)
+                {
+                    return;
+                }
+            }
         }
         catch (Exception ex)
         {

@@ -139,4 +139,9 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
             })
             .ToListAsync();
     }
+
+    public async Task<List<Idea>> GetIdeasByIdeaCodes(string[] ideaCode)
+    {
+        return await _dbContext.Ideas.Include(x => x.Project).Where(x => ideaCode.Contains(x.IdeaCode)).ToListAsync();
+    }
 }
