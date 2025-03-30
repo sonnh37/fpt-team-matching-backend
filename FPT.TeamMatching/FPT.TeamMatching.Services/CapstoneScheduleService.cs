@@ -12,21 +12,49 @@ using ExcelDataReader;
 using FPT.TeamMatching.Domain.Models.Responses;
 using FPT.TeamMatching.Domain.Utilities;
 using Microsoft.AspNetCore.Http;
+using FPT.TeamMatching.Domain.Models.Requests.Commands.CapstoneSchedules;
+using FPT.TeamMatching.Domain.Contracts.Repositories;
+using FPT.TeamMatching.Domain.Models.Results;
 
 namespace FPT.TeamMatching.Services
 {
     class CapStoneReader
     {
-        public string IdeaCode {get; set;}
-        public string Date {get; set;}
-        public string Time {get; set;}
-        public string HallName {get; set;}
+        public string IdeaCode { get; set; }
+        public string Date { get; set; }
+        public string Time { get; set; }
+        public string HallName { get; set; }
     }
     public class CapstoneScheduleService : BaseService<CapstoneSchedule>, ICapstoneScheduleService
     {
+        private readonly ICapstoneScheduleRepository _capstoneScheduleRepository;
         public CapstoneScheduleService(IMapper mapper, IUnitOfWork unitOfWork) : base(mapper, unitOfWork)
         {
-          
+            _capstoneScheduleRepository = _unitOfWork.CapstoneScheduleRepository;
+        }
+
+        public async Task<BusinessResult> GetBySemesterIdAndStage(CapstoneScheduleFilter command)
+        {
+            try
+            {
+                var capstoneSchedules = await _capstoneScheduleRepository.GetBySemesterIdAndStage(command.SemesterId, command.Stage);
+                if (capstoneSchedules.Count == 0)
+                {
+                    return new ResponseBuilder()
+                    .WithStatus(Const.NOT_FOUND_CODE)
+                    .WithMessage(Const.NOT_FOUND_MSG);
+                }
+                return new ResponseBuilder()
+                    .WithData(_mapper.Map<List<CapstoneScheduleResult>>(capstoneSchedules))
+                    .WithStatus(Const.SUCCESS_CODE)
+                    .WithMessage(Const.SUCCESS_READ_MSG);
+            }
+            catch (Exception e)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage(e.Message);
+            }
         }
 
         public async Task<BusinessResult> ImportExcelFile(IFormFile file, int stage)
@@ -40,7 +68,7 @@ namespace FPT.TeamMatching.Services
                         .WithStatus(Const.FAIL_CODE)
                         .WithMessage("No file uploaded!");
                 }
-                
+
                 var uploadsFolder = $"{Directory.GetCurrentDirectory()}\\UploadFiles";
 
                 if (!Directory.Exists(uploadsFolder))
@@ -54,7 +82,7 @@ namespace FPT.TeamMatching.Services
                 using (var stream = new FileStream(filePath, FileMode.Create))
                 {
                     file.CopyTo(stream);
-                    
+
                     using (var reader = ExcelReaderFactory.CreateReader(stream))
                     {
                         // skip 2 dòng tiêu đề
@@ -79,13 +107,12 @@ namespace FPT.TeamMatching.Services
                         } while (reader.NextResult());
                     }
                 }
-                
+
                 var ideaCodes = capStoneReaders.Select(x => x.IdeaCode).Distinct().ToArray();
 
                 var ideas = await _unitOfWork.IdeaRepository.GetIdeasByIdeaCodes(ideaCodes);
                 List<CapstoneSchedule> capstones = new List<CapstoneSchedule>();
-                
-                
+
                 // Quy hoạch động 
                 Dictionary<string, CapStoneReader> readerDict = capStoneReaders
                     .ToDictionary(x => x.IdeaCode, x => x);
@@ -106,10 +133,10 @@ namespace FPT.TeamMatching.Services
 
                 _unitOfWork.CapstoneScheduleRepository.AddRange(capstones);
                 await _unitOfWork.SaveChanges();
-                
+
                 return new ResponseBuilder()
                     .WithStatus(Const.SUCCESS_CODE)
-                    .WithMessage(Const.SUCCESS_SAVE_MSG); 
+                    .WithMessage(Const.SUCCESS_SAVE_MSG);
             }
             catch (Exception e)
             {
