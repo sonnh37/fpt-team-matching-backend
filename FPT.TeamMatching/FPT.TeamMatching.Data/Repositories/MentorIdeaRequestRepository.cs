@@ -87,10 +87,17 @@ namespace FPT.TeamMatching.Data.Repositories
                 IdeaType.Lecturer
             };
             var queryable_idea = GetQueryable<Idea>();
-            var ideaIdsForMentorWithNoTeam = await queryable_idea.Where(m => !m.IsExistedTeam && m.Type != null
+            // var ideaIdsForMentorWithNoTeam = await queryable_idea.Where(m => !m.IsExistedTeam && m.Type != null
+            //     && types.Contains(m.Type.Value) && m.OwnerId == userId).Select(m => m.Id).ToListAsync();
+            // queryable = queryable.Where(m =>
+            //         m.IdeaId != null && ideaIdsForMentorWithNoTeam.Contains(m.IdeaId.Value))
+            //     .Include(m => m.Project)
+            //     .Include(m => m.Idea);
+            
+            var ideaIds = await queryable_idea.Where(m => m.Type != null
                 && types.Contains(m.Type.Value) && m.OwnerId == userId).Select(m => m.Id).ToListAsync();
             queryable = queryable.Where(m =>
-                    m.IdeaId != null && ideaIdsForMentorWithNoTeam.Contains(m.IdeaId.Value))
+                    m.IdeaId != null && ideaIds.Contains(m.IdeaId.Value))
                 .Include(m => m.Project)
                 .Include(m => m.Idea);
 

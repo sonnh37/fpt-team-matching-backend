@@ -42,25 +42,28 @@ namespace FPT.TeamMatching.Services
                 if (idea == null)
                 {
                     return new ResponseBuilder()
-                    .WithStatus(Const.NOT_FOUND_CODE)
-                    .WithMessage("Khong tim thay idea");
+                        .WithStatus(Const.NOT_FOUND_CODE)
+                        .WithMessage("Khong tim thay idea");
                 }
+
                 //check project exist
                 var project = await _projectRepository.GetById(request.ProjectId);
                 if (project == null)
                 {
                     return new ResponseBuilder()
-                    .WithStatus(Const.NOT_FOUND_CODE)
-                    .WithMessage("Khong tim thay project");
+                        .WithStatus(Const.NOT_FOUND_CODE)
+                        .WithMessage("Khong tim thay project");
                 }
+
                 //check team co toi thieu 4ng
                 var tm = await _teamMemberRepository.GetMembersOfTeamByProjectId(project.Id);
                 if (tm != null && tm.Count < 4)
                 {
                     return new ResponseBuilder()
-                    .WithStatus(Const.FAIL_CODE)
-                    .WithMessage("Nhóm phải có tối thiểu 4 người");
+                        .WithStatus(Const.FAIL_CODE)
+                        .WithMessage("Nhóm phải có tối thiểu 4 người");
                 }
+
                 var entity = new MentorIdeaRequest
                 {
                     ProjectId = request.ProjectId,
@@ -72,13 +75,13 @@ namespace FPT.TeamMatching.Services
                 if (isSuccess)
                 {
                     return new ResponseBuilder()
-                    .WithStatus(Const.SUCCESS_CODE)
-                    .WithMessage(Const.SUCCESS_SAVE_MSG);
+                        .WithStatus(Const.SUCCESS_CODE)
+                        .WithMessage(Const.SUCCESS_SAVE_MSG);
                 }
-                return new ResponseBuilder()
-                .WithStatus(Const.FAIL_CODE)
-                .WithMessage(Const.FAIL_DELETE_MSG);
 
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage(Const.FAIL_DELETE_MSG);
             }
             catch (Exception ex)
             {
@@ -88,7 +91,7 @@ namespace FPT.TeamMatching.Services
                     .WithMessage(errorMessage);
             }
         }
-        
+
         public async Task<BusinessResult> GetUserMentorIdeaRequests(MentorIdeaRequestGetAllQuery query)
         {
             try
@@ -130,7 +133,7 @@ namespace FPT.TeamMatching.Services
                     .WithMessage(errorMessage);
             }
         }
-        
+
         public async Task<BusinessResult> GetMentorMentorIdeaRequests(MentorIdeaRequestGetAllQuery query)
         {
             try
@@ -173,36 +176,40 @@ namespace FPT.TeamMatching.Services
             }
         }
 
-        public async Task<BusinessResult> MentorResponse(MentorIdeaRequestUpdateCommand request)
+        public async Task<BusinessResult> UpdateMentorIdeaRequestStatus(MentorIdeaRequestUpdateCommand request)
         {
             try
             {
+                var iSaveChanges = false;
                 if (request.ProjectId == null || request.IdeaId == null || request.Status == null)
                 {
                     return new ResponseBuilder()
-                    .WithStatus(Const.FAIL_CODE)
-                    .WithMessage("Nhập không đủ field");
+                        .WithStatus(Const.FAIL_CODE)
+                        .WithMessage("Nhập không đủ field");
                 }
+
                 var mentorIdeaRequest = await _mentorIdeaRequestRepository.GetById(request.Id);
                 var project = await _projectRepository.GetById((Guid)request.ProjectId);
                 var idea = await _ideaRepository.GetById((Guid)request.IdeaId);
                 if (mentorIdeaRequest == null)
                 {
                     return new ResponseBuilder()
-                    .WithStatus(Const.NOT_FOUND_CODE)
-                    .WithMessage("Không tìm thấy request");
+                        .WithStatus(Const.NOT_FOUND_CODE)
+                        .WithMessage("Không tìm thấy request");
                 }
+
                 if (project == null)
                 {
                     return new ResponseBuilder()
-                    .WithStatus(Const.NOT_FOUND_CODE)
-                    .WithMessage("Không tìm thấy team");
+                        .WithStatus(Const.NOT_FOUND_CODE)
+                        .WithMessage("Không tìm thấy team");
                 }
+
                 if (idea == null)
                 {
                     return new ResponseBuilder()
-                    .WithStatus(Const.NOT_FOUND_CODE)
-                    .WithMessage("Không tìm thấy đề tài");
+                        .WithStatus(Const.NOT_FOUND_CODE)
+                        .WithMessage("Không tìm thấy đề tài");
                 }
 
                 //nếu reject -> update 1 reject
@@ -210,11 +217,12 @@ namespace FPT.TeamMatching.Services
                 {
                     mentorIdeaRequest.Status = MentorIdeaRequestStatus.Rejected;
                     _mentorIdeaRequestRepository.Update(mentorIdeaRequest);
-                    await _unitOfWork.SaveChanges();
+                    iSaveChanges = await _unitOfWork.SaveChanges();
+                    if (!iSaveChanges) return HandlerFail("Failed to save changes for approved request");
 
                     return new ResponseBuilder()
-                    .WithStatus(Const.SUCCESS_CODE)
-                    .WithMessage(Const.SUCCESS_SAVE_MSG);
+                        .WithStatus(Const.SUCCESS_CODE)
+                        .WithMessage(Const.SUCCESS_SAVE_MSG);
                 }
                 //nếu apprrove -> update 1 approve, others reject 
                 else if (request.Status == MentorIdeaRequestStatus.Approved)
@@ -224,27 +232,37 @@ namespace FPT.TeamMatching.Services
                     //update
                     foreach (var item in mentorIdeaRequests)
                     {
-                        item.Status = (item.Id == request.Id) ? MentorIdeaRequestStatus.Approved : MentorIdeaRequestStatus.Rejected;
+                        item.Status = (item.Id == request.Id)
+                            ? MentorIdeaRequestStatus.Approved
+                            : MentorIdeaRequestStatus.Rejected;
                         await SetBaseEntityForUpdate(item);
                     }
+
                     _mentorIdeaRequestRepository.UpdateRange(mentorIdeaRequests);
-                    await _unitOfWork.SaveChanges();
+                    iSaveChanges = await _unitOfWork.SaveChanges();
+                    if (!iSaveChanges)
+                        return HandlerFail("Failed to save changes for update range mentor idea request");
+
                     //idea: cap nhat isExistedTeam
                     idea.IsExistedTeam = true;
                     _ideaRepository.Update(idea);
-                    await _unitOfWork.SaveChanges();
+                    iSaveChanges = await _unitOfWork.SaveChanges();
+                    if (!iSaveChanges) return HandlerFail("Failed to save changes for update idea");
+
                     //gan ideaId vao project
                     project.IdeaId = idea.Id;
                     _projectRepository.Update(project);
-                    await _unitOfWork.SaveChanges();
+                    iSaveChanges = await _unitOfWork.SaveChanges();
+                    if (!iSaveChanges) return HandlerFail("Failed to save changes for update project");
+
                     return new ResponseBuilder()
-                    .WithStatus(Const.SUCCESS_CODE)
-                    .WithMessage(Const.SUCCESS_SAVE_MSG);
+                        .WithStatus(Const.SUCCESS_CODE)
+                        .WithMessage(Const.SUCCESS_SAVE_MSG);
                 }
 
                 return new ResponseBuilder()
-                .WithStatus(Const.FAIL_CODE)
-                .WithMessage(Const.FAIL_SAVE_MSG);
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage(Const.FAIL_SAVE_MSG);
             }
             catch (Exception ex)
             {
@@ -254,8 +272,5 @@ namespace FPT.TeamMatching.Services
                     .WithMessage(errorMessage);
             }
         }
-
     }
-    
-    
 }

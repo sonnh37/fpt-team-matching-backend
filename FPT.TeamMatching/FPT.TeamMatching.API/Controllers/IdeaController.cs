@@ -25,6 +25,13 @@ public class IdeaController : ControllerBase
         var msg = await _service.GetAll<IdeaResult>(query);
         return Ok(msg);
     }
+    
+    [HttpGet("supervisors")]
+    public async Task<IActionResult> GetIdeasOfSupervisors([FromQuery] IdeaGetListOfSupervisorsQuery query)
+    {
+        var msg = await _service.GetIdeasOfSupervisors<IdeaResult>(query);
+        return Ok(msg);
+    }
 
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetById([FromRoute] Guid id)
@@ -99,6 +106,8 @@ public class IdeaController : ControllerBase
         var businessResult = await _service.GetCurrentIdeaByStatus(request);
         return Ok(businessResult);
     }
+    
+    
 
 }
 

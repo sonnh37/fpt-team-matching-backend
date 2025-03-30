@@ -8,6 +8,7 @@ using FPT.TeamMatching.Domain.Models.Requests.Commands.Ideas;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Ideas;
 using FPT.TeamMatching.Domain.Models.Responses;
 using FPT.TeamMatching.Domain.Models.Results;
+using FPT.TeamMatching.Domain.Models.Results.Bases;
 using FPT.TeamMatching.Domain.Utilities;
 using FPT.TeamMatching.Services.Bases;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
@@ -391,6 +392,48 @@ public class IdeaService : BaseService<Idea>, IIdeaService
             return HandlerError(ex.Message);
         }
     }
+    
+    public async Task<BusinessResult> GetIdeasOfSupervisors<TResult>(IdeaGetListOfSupervisorsQuery query) where TResult : BaseResult
+    {
+        try
+        {
+            List<TResult>? results;
+
+            var (data, total) = await _ideaRepository.GetIdeasOfSupervisors(query);
+
+            results = _mapper.Map<List<TResult>>(data);
+
+            if (results.Count == 0)
+                return new ResponseBuilder()
+                    .WithData(results)
+                    .WithStatus(Const.NOT_FOUND_CODE)
+                    .WithMessage(Const.NOT_FOUND_MSG);
+
+            // GetAll 
+            if (!query.IsPagination)
+                return new ResponseBuilder()
+                        .WithData(results)
+                        .WithStatus(Const.SUCCESS_CODE)
+                        .WithMessage(Const.SUCCESS_READ_MSG)
+                    ;
+
+            // GetAll with pagination
+            var tableResponse = new PaginatedResult(query, results, total);
+
+            return new ResponseBuilder()
+                .WithData(tableResponse)
+                .WithStatus(Const.SUCCESS_CODE)
+                .WithMessage(Const.SUCCESS_READ_MSG);
+        }
+        catch (Exception ex)
+        {
+            var errorMessage = $"An error occurred in {typeof(TResult).Name}: {ex.Message}";
+            return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage(errorMessage);
+        }
+    }
+
 
     public async Task AutoUpdateIdeaStatus()
     {
