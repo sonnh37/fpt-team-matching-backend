@@ -20,7 +20,7 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
     public async Task<Project?> GetProjectByUserIdLogin(Guid userId)
     {
         var teamMember = await _context.TeamMembers.Where(e => e.UserId == userId &&
-                                                    e.LeaveDate == null && 
+                                                    e.LeaveDate == null &&
                                                     e.IsDeleted == false)
                                                     .FirstOrDefaultAsync();
         if (teamMember != null)
@@ -79,7 +79,7 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
                                             .FirstOrDefaultAsync();
         if (teamMember != null)
         {
-            var project = await _context.Projects.Where(e => e.IsDeleted ==false &&
+            var project = await _context.Projects.Where(e => e.IsDeleted == false &&
                                                 e.Id == teamMember.ProjectId)
                                             .FirstOrDefaultAsync();
             return project;
@@ -105,5 +105,19 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
                                                     e.Status == ProjectStatus.Pending)
                                             .FirstOrDefaultAsync();
         return project;
+    }
+
+    public async Task<List<Project>?> GetProjectsInFourthWeekByToday()
+    {
+        DateTime today = DateTime.UtcNow.Date;
+
+        var projects = await _context.Projects.Where(p => p.Idea != null &&
+                                            p.Idea.StageIdea != null &&
+                                            p.Idea.StageIdea.Semester != null &&
+                                            p.Idea.StageIdea.Semester.StartDate != null &&
+                                            p.Idea.StageIdea.Semester.StartDate.Value.UtcDateTime.AddDays(3 * 7) == today)
+                                            .Include(e => e.Idea).ThenInclude(e => e.StageIdea).ThenInclude(e => e.Semester)
+                                            .ToListAsync();
+        return projects;
     }
 }
