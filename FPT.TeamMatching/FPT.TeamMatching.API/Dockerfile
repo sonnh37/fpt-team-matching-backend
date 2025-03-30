@@ -20,4 +20,7 @@ RUN dotnet publish "FPT.TeamMatching.API.csproj" -c $BUILD_CONFIGURATION -o /app
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+USER root
+RUN chmod -R 755 /app
+USER $APP_UID
 ENTRYPOINT ["dotnet", "FPT.TeamMatching.API.dll"]

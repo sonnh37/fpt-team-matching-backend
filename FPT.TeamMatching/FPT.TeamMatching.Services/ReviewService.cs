@@ -180,7 +180,7 @@ public class ReviewService : BaseService<Review>, IReviewService
                 .WithStatus(Const.FAIL_CODE)
                 .WithMessage("No file uploaded!");
             }
-            var uploadsFolder = $"{Directory.GetCurrentDirectory()}\\UploadFiles";
+            var uploadsFolder = $"{Directory.GetCurrentDirectory()}/UploadFiles";
 
             if (!Directory.Exists(uploadsFolder))
             {

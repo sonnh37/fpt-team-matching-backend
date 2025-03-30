@@ -65,7 +65,7 @@ namespace FPT.TeamMatching.API.Controllers
             return Ok(businessResult);
         }
 
-        [HttpPost("/import-excel")]
+        [HttpPost("import-excel")]
         public async Task<IActionResult> ImportExcelFile([FromForm]CapstoneImportRequest request)
         {
             var businessResult = await _service.ImportExcelFile(request.file, request.Stage);

@@ -6,6 +6,8 @@
     build:
       context: .
       dockerfile: FPT.TeamMatching.API/Dockerfile
+    volumes:
+      - ./FPT.TeamMatching.API/UploadFiles:/app/UploadFiles
     env_file:
       - FPT.TeamMatching.API/.env
   redis:

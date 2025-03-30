@@ -69,7 +69,7 @@ namespace FPT.TeamMatching.Services
                         .WithMessage("No file uploaded!");
                 }
 
-                var uploadsFolder = $"{Directory.GetCurrentDirectory()}\\UploadFiles";
+                var uploadsFolder = $"{Directory.GetCurrentDirectory()}/UploadFiles";
 
                 if (!Directory.Exists(uploadsFolder))
                 {
