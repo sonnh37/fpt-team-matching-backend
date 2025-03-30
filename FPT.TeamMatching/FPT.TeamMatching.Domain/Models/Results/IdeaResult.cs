@@ -55,6 +55,9 @@ namespace FPT.TeamMatching.Domain.Models.Results
         public ICollection<IdeaRequestResult> IdeaRequests { get; set; } = new List<IdeaRequestResult>();
         
         public ICollection<IdeaHistoryResult> IdeaHistories { get; set; } = new List<IdeaHistoryResult>();
+        
+        public ICollection<MentorIdeaRequestResult> MentorIdeaRequests { get; set; } = new List<MentorIdeaRequestResult>();
+
 
     }
 }

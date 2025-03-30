@@ -32,7 +32,7 @@ public static class IncludeHelper
         queryable = queryable.Include(m => m.StageIdeas);
         return queryable;
     }
-    
+
     private static IQueryable<IdeaRequest> IdeaRequest(IQueryable<IdeaRequest> queryable)
     {
         queryable = queryable.Include(m => m.Idea)
@@ -60,10 +60,9 @@ public static class IncludeHelper
     private static IQueryable<Comment> Comments(IQueryable<Comment> queryable)
     {
         queryable = queryable.Include(m => m.User);
-       
+
         return queryable;
     }
-
 
 
     private static IQueryable<Invitation> Invitation(IQueryable<Invitation> queryable)
@@ -78,10 +77,17 @@ public static class IncludeHelper
     private static IQueryable<Idea> Idea(IQueryable<Idea> queryable)
     {
         queryable = queryable
-            .Include(m => m.IdeaRequests)
-            .Include(m => m.Owner)
-            .ThenInclude(u => u.UserXRoles)
-            .ThenInclude(ur => ur.Role);
+                .Include(m => m.IdeaRequests)
+                .Include(m => m.Owner)
+                .ThenInclude(u => u.UserXRoles)
+                .ThenInclude(ur => ur.Role)
+                .Include(m => m.Project)
+                .Include(m => m.Mentor)
+                .Include(m => m.SubMentor)
+                .Include(m => m.StageIdea)
+                .Include(m => m.MentorIdeaRequests)
+                .Include(m => m.Specialty).ThenInclude(m => m.Profession)
+            ;
         queryable = queryable.Include(m => m.Project);
         return queryable;
     }
@@ -119,12 +125,14 @@ public static class IncludeHelper
         // queryable = queryable
         //     .Include(m => m.Tasks);
 
-        queryable = queryable.Include(e => e.TeamMembers).ThenInclude(e => e.User).Include(e => e.Idea)
-            .ThenInclude(e => e.Specialty).ThenInclude(e => e.Profession);
+        queryable = queryable.Include(e => e.TeamMembers).ThenInclude(e => e.User)
+            .Include(e => e.Idea)
+            .ThenInclude(e => e.Specialty).ThenInclude(e => e.Profession)
+            .Include(m => m.Idea).ThenInclude(m => m.Owner);
 
         return queryable;
     }
-    
+
     private static IQueryable<Review> Review(IQueryable<Review> queryable)
     {
         // queryable = queryable
