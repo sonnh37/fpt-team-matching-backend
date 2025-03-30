@@ -539,6 +539,7 @@ public class IdeaService : BaseService<Idea>, IIdeaService
                     //Tạo mã nhóm
                     string newTeamCode = $"{semesterCode}SE{nextNumber:D3}";
                     project.Idea = null;
+                await SetBaseEntityForUpdate(project);
                 _projectRepository.Update(project);
                 var isSuccess = await _unitOfWork.SaveChanges();
                 if (!isSuccess)
@@ -549,6 +550,7 @@ public class IdeaService : BaseService<Idea>, IIdeaService
                 var teamMembers = await _teamMemberRepository.GetMembersOfTeamByProjectId(project.Id);
                 foreach (var teamMember in teamMembers)
                 {
+                    await SetBaseEntityForUpdate(teamMember);
                     teamMember.Status = TeamMemberStatus.InProgress;
                 }
                 _teamMemberRepository.UpdateRange(teamMembers);

@@ -110,12 +110,12 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
     public async Task<List<Project>?> GetProjectsInFourthWeekByToday()
     {
         DateTime today = DateTime.UtcNow.Date;
-
+        
         var projects = await _context.Projects.Where(p => p.Idea != null &&
                                             p.Idea.StageIdea != null &&
                                             p.Idea.StageIdea.Semester != null &&
                                             p.Idea.StageIdea.Semester.StartDate != null &&
-                                            p.Idea.StageIdea.Semester.StartDate.Value.UtcDateTime.AddDays(3 * 7) == today)
+                                            p.Idea.StageIdea.Semester.StartDate.Value.UtcDateTime.AddDays(3 * 7).Date == today)
                                             .Include(e => e.Idea).ThenInclude(e => e.StageIdea).ThenInclude(e => e.Semester)
                                             .ToListAsync();
         return projects;
