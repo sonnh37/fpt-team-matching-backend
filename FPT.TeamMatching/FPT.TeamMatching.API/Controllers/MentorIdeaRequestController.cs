@@ -72,7 +72,7 @@ namespace FPT.TeamMatching.API.Controllers
             return Ok(msg);
         }
 
-        [HttpPut("mentor-response")]
+        [HttpPut("update-status")]
         public async Task<IActionResult> MentorRespnse([FromBody] MentorIdeaRequestUpdateCommand request)
         {
             var businessResult = await _service.MentorResponse(request);
