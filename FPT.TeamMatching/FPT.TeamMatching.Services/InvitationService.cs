@@ -274,13 +274,6 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
         try
         {
             var user = await GetUserAsync();
-            if (user == null)
-            {
-                return new ResponseBuilder()
-                    .WithStatus(Const.FAIL_CODE)
-                    .WithMessage("User haven't login!");
-            }
-
             var invitation = await _invitationRepository.GetInvitationOfTeamByProjectIdAndMe(projectId, user.Id);
             if (invitation == null)
             {
@@ -288,7 +281,7 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
                     .WithStatus(Const.FAIL_CODE)
                     .WithMessage("Team haven't sent invitation!");
             }
-
+            //add teammember
             var teamMember = new TeamMember
             {
                 UserId = user.Id,
@@ -303,15 +296,28 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
             var saveChange = await _unitOfWork.SaveChanges();
             if (saveChange)
             {
+                //update status invitation
                 invitation.Status = InvitationStatus.Accepted;
                 await SetBaseEntityForUpdate(invitation);
                 _invitationRepository.Update(invitation);
                 var saveChange_ = await _unitOfWork.SaveChanges();
                 if (saveChange_)
                 {
+                    //update +1 teamszie
+                    var project = await _projectRepository.GetById(projectId);
+                    project.TeamSize += 1;
+                    await SetBaseEntityForUpdate(project);
+                    _projectRepository.Update(project);
+                    var saveChange__ = await _unitOfWork.SaveChanges();
+                    if (saveChange__)
+                    {
+                        return new ResponseBuilder()
+                            .WithStatus(Const.SUCCESS_CODE)
+                            .WithMessage(Const.SUCCESS_DELETE_MSG);
+                    }
                     return new ResponseBuilder()
-                        .WithStatus(Const.SUCCESS_CODE)
-                        .WithMessage(Const.SUCCESS_DELETE_MSG);
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage(Const.FAIL_DELETE_MSG);
                 }
 
                 return new ResponseBuilder()
@@ -337,13 +343,6 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
         try
         {
             var user = await GetUserAsync();
-            if (user == null)
-            {
-                return new ResponseBuilder()
-                    .WithStatus(Const.FAIL_CODE)
-                    .WithMessage("User haven't login!");
-            }
-
             var invitation = await _invitationRepository.GetInvitationOfTeamByProjectIdAndMe(projectId, user.Id);
             if (invitation == null)
             {
