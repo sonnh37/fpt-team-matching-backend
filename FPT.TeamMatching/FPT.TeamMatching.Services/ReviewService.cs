@@ -299,7 +299,6 @@ public class ReviewService : BaseService<Review>, IReviewService
                                 continue;
                             }
                             var reviewEntity = _mapper.Map<Review>(review);
-                            date.AddHours(7);
                             reviewEntity.ReviewDate = date.ToUniversalTime();
                             reviewEntity.Slot = slot;
                             reviewEntity.Room = room;

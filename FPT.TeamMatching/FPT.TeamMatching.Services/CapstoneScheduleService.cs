@@ -96,7 +96,7 @@ namespace FPT.TeamMatching.Services
                         capstones.Add(new CapstoneSchedule
                         {
                             ProjectId = idea.Project.Id,
-                            Date = DateTime.Parse(reader.Date),
+                            Date = DateTime.Parse(reader.Date).ToUniversalTime(),
                             Time = reader.Time,
                             HallName = reader.HallName,
                             Stage = stage,
