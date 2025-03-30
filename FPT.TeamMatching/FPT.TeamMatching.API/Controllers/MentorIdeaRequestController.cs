@@ -26,6 +26,20 @@ namespace FPT.TeamMatching.API.Controllers
             var msg = await _service.GetAll<MentorIdeaRequestResult>(query);
             return Ok(msg);
         }
+        
+        [HttpGet("get-user-mentor-idea-requests")]
+        public async Task<IActionResult> GetUserMentorIdeaRequests([FromQuery] MentorIdeaRequestGetAllQuery query)
+        {
+            var msg = await _service.GetUserMentorIdeaRequests(query);
+            return Ok(msg);
+        }
+        
+        [HttpGet("get-mentor-mentor-idea-requests")]
+        public async Task<IActionResult> GetMentorMentorIdeaRequests([FromQuery] MentorIdeaRequestGetAllQuery query)
+        {
+            var msg = await _service.GetMentorMentorIdeaRequests(query);
+            return Ok(msg);
+        }
 
         [HttpGet("{id:guid}")]
         public async Task<IActionResult> GetById([FromRoute] Guid id)
@@ -72,10 +86,10 @@ namespace FPT.TeamMatching.API.Controllers
             return Ok(msg);
         }
 
-        [HttpPut("update-status")]
-        public async Task<IActionResult> MentorRespnse([FromBody] MentorIdeaRequestUpdateCommand request)
+        [HttpPut("status")]
+        public async Task<IActionResult> UpdateMentorIdeaRequestStatus([FromBody] MentorIdeaRequestUpdateCommand request)
         {
-            var businessResult = await _service.MentorResponse(request);
+            var businessResult = await _service.UpdateMentorIdeaRequestStatus(request);
             return Ok(businessResult);
         }
     }

@@ -1,5 +1,6 @@
 ﻿using FPT.TeamMatching.Domain.Enums;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Base;
+using Newtonsoft.Json;
 
 namespace FPT.TeamMatching.Domain.Models.Requests.Commands.Projects;
 

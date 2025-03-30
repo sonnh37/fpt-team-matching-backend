@@ -18,11 +18,11 @@ public class ProjectResult : BaseResult
 
     public int? TeamSize { get; set; }
 
-    public  IdeaResult? Idea { get; set; }
+    public IdeaResult? Idea { get; set; }
 
-    public  ICollection<TeamMemberResult> TeamMembers { get; set; } = new List<TeamMemberResult>();
+    public ICollection<TeamMemberResult> TeamMembers { get; set; } = new List<TeamMemberResult>();
 
-    public virtual ICollection<InvitationResult> Invitations { get; set; } = new List<InvitationResult>();
+    public ICollection<InvitationResult> Invitations { get; set; } = new List<InvitationResult>();
 
-    public virtual ICollection<ReviewResult> Reviews { get; set; } = new List<ReviewResult>();
+    public ICollection<ReviewResult> Reviews { get; set; } = new List<ReviewResult>();
 }

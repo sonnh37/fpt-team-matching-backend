@@ -3,6 +3,7 @@ using FPT.TeamMatching.Domain.Entities;
 using FPT.TeamMatching.Domain.Enums;
 using FPT.TeamMatching.Domain.Models;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Ideas;
+using FPT.TeamMatching.Domain.Models.Requests.Queries.Ideas;
 
 namespace FPT.TeamMatching.Domain.Contracts.Repositories;
 
@@ -26,4 +27,6 @@ public interface IIdeaRepository : IBaseRepository<Idea>
 
     Task<int> NumberOfIdeaMentorOrOwner(Guid userId);
     Task<List<Idea>> GetIdeasByIdeaCodes(string[] ideaCode);
+
+    Task<(List<Idea>, int)> GetIdeasOfSupervisors(IdeaGetListOfSupervisorsQuery query);
 }

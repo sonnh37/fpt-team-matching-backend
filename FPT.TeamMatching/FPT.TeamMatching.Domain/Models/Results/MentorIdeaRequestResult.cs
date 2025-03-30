@@ -15,5 +15,9 @@ namespace FPT.TeamMatching.Domain.Models.Results
         public Guid? IdeaId { get; set; }
 
         public MentorIdeaRequestStatus? Status { get; set; }
+        
+        public ProjectResult? Project { get; set; }
+
+        public IdeaResult? Idea { get; set; }
     }
 }

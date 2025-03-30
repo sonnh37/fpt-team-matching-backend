@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Text.RegularExpressions;
 using FPT.TeamMatching.Domain.Models;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Reviews;
+using FPT.TeamMatching.Domain.Models.Requests.Queries.Ideas;
 
 namespace FPT.TeamMatching.Data.Repositories;
 
@@ -23,6 +24,15 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
     public async Task<IList<Idea>> GetIdeasByUserId(Guid userId)
     {
         var ideas = await _dbContext.Ideas.Where(e => e.OwnerId == userId)
+            .Include(e => e.IdeaRequests).ThenInclude(e => e.Reviewer)
+            .Include(e => e.StageIdea)
+            .ToListAsync();
+        return ideas;
+    }
+
+    public async Task<IList<Idea>> GetIdeasByTypeMentorAndEnterprise()
+    {
+        var ideas = await _dbContext.Ideas.Where(e => e.Type == IdeaType.Enterprise || e.Type == IdeaType.Lecturer)
             .Include(e => e.IdeaRequests).ThenInclude(e => e.Reviewer)
             .Include(e => e.StageIdea)
             .ToListAsync();
@@ -51,9 +61,9 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
     public async Task<int> NumberApprovedIdeasOfSemester(Guid? semesterId)
     {
         var number = await _dbContext.Ideas.Where(e => e.Status == IdeaStatus.Approved &&
-                                                          e.IsDeleted == false &&
-                                                          e.StageIdea != null &&
-                                                          e.StageIdea.SemesterId == semesterId).CountAsync();
+                                                       e.IsDeleted == false &&
+                                                       e.StageIdea != null &&
+                                                       e.StageIdea.SemesterId == semesterId).CountAsync();
         return number;
     }
 
@@ -134,5 +144,58 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
     public async Task<List<Idea>> GetIdeasByIdeaCodes(string[] ideaCode)
     {
         return await _dbContext.Ideas.Include(x => x.Project).Where(x => ideaCode.Contains(x.IdeaCode)).ToListAsync();
+    }
+
+    public async Task<(List<Idea>, int)> GetIdeasOfSupervisors(IdeaGetListOfSupervisorsQuery query)
+    {
+        var queryable = GetQueryable();
+        queryable = queryable
+            .Include(m => m.IdeaRequests)
+            .Include(m => m.Owner)
+            .ThenInclude(u => u.UserXRoles)
+            .ThenInclude(ur => ur.Role)
+            .Include(m => m.Project)
+            .Include(m => m.Mentor)
+            .Include(m => m.SubMentor)
+            .Include(m => m.StageIdea)
+            .Include(m => m.MentorIdeaRequests)
+            .Include(m => m.Specialty).ThenInclude(m => m.Profession);
+        // 
+        // queryable = queryable.Where(m => m.MentorIdeaRequests.All(x => x.Status != MentorIdeaRequestStatus.Approved));
+
+        if (!string.IsNullOrEmpty(query.EnglishName))
+        {
+            queryable = queryable.Where(m =>
+                m.EnglishName != null && m.EnglishName.ToLower().Trim().Contains(query.EnglishName.ToLower().Trim()));
+        }
+        
+        if (query.IsExistedTeam != null) queryable = queryable.Where(m => query.IsExistedTeam.Value == m.IsExistedTeam);
+
+        if (query.Types.Count > 0)
+        {
+            queryable = queryable.Where(m =>
+                m.Type != null && query.Types.Contains(m.Type.Value));
+        }
+
+        if (query.Status != null)
+        {
+            queryable = queryable.Where(m => m.Status == query.Status);
+        }
+
+        //
+        if (query.IsPagination)
+        {
+            var totalOrigin = queryable.Count();
+            queryable = Sort(queryable, query);
+            var results = await GetQueryablePagination(queryable, query).ToListAsync();
+
+            return (results, totalOrigin);
+        }
+        else
+        {
+            queryable = Sort(queryable, query);
+            var results = await queryable.ToListAsync();
+            return (results, results.Count);
+        }
     }
 }
