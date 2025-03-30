@@ -382,7 +382,6 @@ public class IdeaService : BaseService<Idea>, IIdeaService
                 .WithStatus(Const.SUCCESS_CODE)
                 .WithMessage(Const.SUCCESS_SAVE_MSG);
 
-
             return msg;
         }
         catch (Exception ex)
