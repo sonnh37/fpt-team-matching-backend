@@ -65,11 +65,18 @@ namespace FPT.TeamMatching.API.Controllers
             return Ok(businessResult);
         }
 
-        [HttpPost("/import-excel")]
+        [HttpPost("import-excel")]
         public async Task<IActionResult> ImportExcelFile([FromForm]CapstoneImportRequest request)
         {
             var businessResult = await _service.ImportExcelFile(request.file, request.Stage);
             return Ok(businessResult);
+        }
+
+        [HttpPost("get-by-semester-id-and-stage")]
+        public async Task<IActionResult> GetBySemesterIdAndStage([FromBody] CapstoneScheduleFilter command)
+        {
+            var msg = await _service.GetBySemesterIdAndStage(command);
+            return Ok(msg);
         }
     }
 }

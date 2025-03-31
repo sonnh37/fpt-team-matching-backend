@@ -17,6 +17,8 @@ public class Project : BaseEntity
 
     public int? TeamSize { get; set; }
 
+    public int? DefenseStage { get; set; }
+
     public virtual User? Leader { get; set; }
 
     public virtual Idea? Idea { get; set; }

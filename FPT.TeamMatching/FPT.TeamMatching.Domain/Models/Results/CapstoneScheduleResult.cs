@@ -18,5 +18,7 @@ namespace FPT.TeamMatching.Domain.Models.Results
         public string? HallName { get; set; }
 
         public int? Stage { get; set; }
+
+        public ProjectResult? Project { get; set; }
     }
 }

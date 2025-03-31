@@ -384,7 +384,6 @@ public class IdeaService : BaseService<Idea>, IIdeaService
                 .WithStatus(Const.SUCCESS_CODE)
                 .WithMessage(Const.SUCCESS_SAVE_MSG);
 
-
             return msg;
         }
         catch (Exception ex)
@@ -567,7 +566,7 @@ public class IdeaService : BaseService<Idea>, IIdeaService
         try
         {
             //get projects cua ki den ngay bat dau inprogress - ngay khoa
-            var projects = await _projectRepository.GetProjectsInFourthWeekByToday();
+            var projects = await _projectRepository.GetProjectsStartingNow();
             //update project
             foreach (var project in projects)
             {
@@ -583,6 +582,7 @@ public class IdeaService : BaseService<Idea>, IIdeaService
                     //Tạo mã nhóm
                     string newTeamCode = $"{semesterCode}SE{nextNumber:D3}";
                     project.Idea = null;
+                await SetBaseEntityForUpdate(project);
                 _projectRepository.Update(project);
                 var isSuccess = await _unitOfWork.SaveChanges();
                 if (!isSuccess)
@@ -593,6 +593,7 @@ public class IdeaService : BaseService<Idea>, IIdeaService
                 var teamMembers = await _teamMemberRepository.GetMembersOfTeamByProjectId(project.Id);
                 foreach (var teamMember in teamMembers)
                 {
+                    await SetBaseEntityForUpdate(teamMember);
                     teamMember.Status = TeamMemberStatus.InProgress;
                 }
                 _teamMemberRepository.UpdateRange(teamMembers);

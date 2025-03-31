@@ -7,6 +7,7 @@ using FPT.TeamMatching.Domain.Models.Requests.Commands.IdeaHistories;
 using FPT.TeamMatching.Domain.Models.Responses;
 using FPT.TeamMatching.Domain.Models.Results;
 using FPT.TeamMatching.Domain.Utilities;
+using FPT.TeamMatching.Domain.Enums;
 using FPT.TeamMatching.Services.Bases;
 using System;
 using System.Collections.Generic;
@@ -24,6 +25,41 @@ namespace FPT.TeamMatching.Services
         {
             _ideaHistoryRepository = unitOfWork.IdeaHistoryRepository;
             _ideaRepository = unitOfWork.IdeaRepository;
+        }
+
+        public async Task<BusinessResult> LecturerUpdate(LecturerUpdateCommand request)
+        {
+            try
+            {
+                var ideaHistory = await _ideaHistoryRepository.GetById((Guid)request.Id);
+                if (ideaHistory == null)
+                {
+                    return new ResponseBuilder()
+                        .WithStatus(Const.NOT_FOUND_CODE)
+                        .WithMessage(Const.NOT_FOUND_MSG);
+                }
+                ideaHistory.Status = request.Status;
+                ideaHistory.Comment = request.Comment;
+                await SetBaseEntityForUpdate(ideaHistory);
+                _ideaHistoryRepository.Update(ideaHistory);
+                var isSuccess = await _unitOfWork.SaveChanges();
+                if (isSuccess)
+                {
+                    return new ResponseBuilder()
+                        .WithStatus(Const.SUCCESS_CODE)
+                        .WithMessage(Const.SUCCESS_SAVE_MSG);
+                }
+                return new ResponseBuilder()
+                        .WithStatus(Const.FAIL_CODE)
+                        .WithMessage(Const.FAIL_SAVE_MSG);
+            }
+            catch (Exception ex)
+            {
+                var errorMessage = $"An error occurred in {typeof(IdeaHistoryResult).Name}: {ex.Message}";
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage(errorMessage);
+            }
         }
 
         public async Task<BusinessResult> StudentUpdateIdea(StudentUpdateIdeaCommand request)

@@ -17,4 +17,6 @@ public class ProjectCreateCommand : CreateCommand
     public ProjectStatus? Status { get; set; }
 
     public int? TeamSize { get; set; }
+
+    public int? DefenseStage { get; set; }
 }

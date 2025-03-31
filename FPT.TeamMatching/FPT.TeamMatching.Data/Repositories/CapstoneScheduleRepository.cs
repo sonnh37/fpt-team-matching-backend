@@ -13,8 +13,25 @@ namespace FPT.TeamMatching.Data.Repositories
 {
     public class CapstoneScheduleRepository : BaseRepository<CapstoneSchedule>, ICapstoneScheduleRepository
     {
+        private readonly FPTMatchingDbContext _context;
         public CapstoneScheduleRepository(FPTMatchingDbContext dbContext) : base(dbContext)
         {
+            _context = dbContext;
+        }
+
+        public Task<List<CapstoneSchedule>?> GetBySemesterIdAndStage(Guid semesterId, int stage)
+        {
+            var capstoneSchedules = _context.CapstoneSchedules.Where(e => e.IsDeleted == false &&
+                                                                    e.Stage == stage &&
+                                                                    e.Project.Idea.StageIdea.Semester.Id == semesterId)
+                                                                .Include(e => e.Project)
+                                                                .ThenInclude(e => e.Idea)
+                                                                .ThenInclude(e => e.Mentor)
+                                                                .Include(e => e.Project)
+                                                                .ThenInclude(e => e.Idea)
+                                                                .ThenInclude(e => e.SubMentor)
+                                                                .ToListAsync();
+            return capstoneSchedules;
         }
     }
 }
