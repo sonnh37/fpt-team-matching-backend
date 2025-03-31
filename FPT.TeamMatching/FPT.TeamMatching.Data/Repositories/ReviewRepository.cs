@@ -38,7 +38,6 @@ public class ReviewRepository : BaseRepository<Review>, IReviewRepository
     {
         var query = await _dbContext.Reviews.Where(e =>
                                     e.IsDeleted == false &&
-                                    //sua db
                                     e.Number == number &&
                                     e.Project != null &&
                                     e.Project.Idea != null &&

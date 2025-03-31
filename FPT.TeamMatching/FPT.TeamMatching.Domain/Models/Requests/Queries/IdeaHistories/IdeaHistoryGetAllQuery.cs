@@ -18,6 +18,8 @@ namespace FPT.TeamMatching.Domain.Models.Requests.Queries.IdeaHistories
 
         public IdeaHistoryStatus? Status { get; set; }
 
+        public string? Comment { get; set; }
+
         public int ReviewStage { get; set; }
     }
 }
