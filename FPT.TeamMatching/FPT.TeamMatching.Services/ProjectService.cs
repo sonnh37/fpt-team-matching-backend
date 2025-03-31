@@ -12,6 +12,7 @@ using FPT.TeamMatching.Domain.Models.Responses;
 using FPT.TeamMatching.Domain.Models.Results;
 using FPT.TeamMatching.Domain.Utilities;
 using FPT.TeamMatching.Services.Bases;
+// ReSharper disable All
 
 namespace FPT.TeamMatching.Services;
 
@@ -44,43 +45,29 @@ public class ProjectService : BaseService<Project>, IProjectService
         try
         {
             var userId = GetUserIdFromClaims();
-            if (userId != null)
-            {
-                var project = await _projectRepository.GetProjectByUserIdLogin(userId.Value);
-                if (project == null)
-                {
-                    return new ResponseBuilder()
-                        .WithStatus(Const.FAIL_CODE)
-                        .WithMessage("Người dùng không có project đang tồn tại");
-                }
+            if (userId == null) return HandlerFailAuth();
 
-                if (project != null && project.Status == Domain.Enums.ProjectStatus.Pending ||
-                    project.Status == Domain.Enums.ProjectStatus.InProgress)
-                {
-                    var result = _mapper.Map<ProjectResult>(project);
-                    if (result == null)
-                        return new ResponseBuilder()
-                            .WithData(result)
-                            .WithStatus(Const.NOT_FOUND_CODE)
-                            .WithMessage(Const.NOT_FOUND_MSG);
+            var project = await _projectRepository.GetProjectByUserIdLogin(userId.Value);
+            if (project == null) return HandlerFail("Người dùng không có project đang tồn tại");
 
-                    return new ResponseBuilder()
-                        .WithData(result)
-                        .WithStatus(Const.SUCCESS_CODE)
-                        .WithMessage(Const.SUCCESS_READ_MSG);
-                }
-            }
+            if (project.Status == ProjectStatus.Canceled ||
+                project.Status == ProjectStatus.Completed)
+                return HandlerFail("Người dùng không có project đang tồn tại trong kì này");
+            
+            var result = _mapper.Map<ProjectResult>(project);
+            if (result == null)
+                return new ResponseBuilder()
+                    .WithStatus(Const.NOT_FOUND_CODE)
+                    .WithMessage(Const.NOT_FOUND_MSG);
 
             return new ResponseBuilder()
-                .WithStatus(Const.FAIL_CODE)
-                .WithMessage("Người dùng chưa đăng nhập");
+                .WithData(result)
+                .WithStatus(Const.SUCCESS_CODE)
+                .WithMessage(Const.SUCCESS_READ_MSG);
         }
         catch (Exception ex)
         {
-            var errorMessage = $"An error {typeof(ProjectResult).Name}: {ex.Message}";
-            return new ResponseBuilder()
-                .WithStatus(Const.FAIL_CODE)
-                .WithMessage(errorMessage);
+            return HandlerError(ex.Message);
         }
     }
 

@@ -30,10 +30,7 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
                 .ThenInclude(e => e.User).Include(e => e.Idea)
                 .ThenInclude(e => e.Specialty)
                 .ThenInclude(e => e.Profession)
-                .Include(e => e.Invitations.Where(e1 => e1.Status != null && e1.Type != null && e1.SenderId != null
-                                                        && (e1.Status.Value == InvitationStatus.Pending
-                                                            && e1.Type.Value == InvitationType.SentByStudent
-                                                            && e1.SenderId == userId)))
+                .Include(e => e.Invitations)
                 .FirstOrDefaultAsync();
             if (project != null)
             {
