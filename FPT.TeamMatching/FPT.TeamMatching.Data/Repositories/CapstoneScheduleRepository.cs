@@ -25,6 +25,11 @@ namespace FPT.TeamMatching.Data.Repositories
                                                                     e.Stage == stage &&
                                                                     e.Project.Idea.StageIdea.Semester.Id == semesterId)
                                                                 .Include(e => e.Project)
+                                                                .ThenInclude(e => e.Idea)
+                                                                .ThenInclude(e => e.Mentor)
+                                                                .Include(e => e.Project)
+                                                                .ThenInclude(e => e.Idea)
+                                                                .ThenInclude(e => e.SubMentor)
                                                                 .ToListAsync();
             return capstoneSchedules;
         }
