@@ -8,4 +8,6 @@ public class InvitationGetByTypeQuery : GetQueryableQuery
     public InvitationType? Type { get; set; }
     
     public InvitationStatus? Status { get; set; } 
+    
+    public Guid? ProjectId { get; set; } 
 }

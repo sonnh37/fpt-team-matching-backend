@@ -12,6 +12,8 @@ using FPT.TeamMatching.Domain.Models.Responses;
 using FPT.TeamMatching.Domain.Models.Results;
 using FPT.TeamMatching.Domain.Utilities;
 using FPT.TeamMatching.Services.Bases;
+using Microsoft.EntityFrameworkCore;
+
 // ReSharper disable All
 
 namespace FPT.TeamMatching.Services;
@@ -159,6 +161,58 @@ public class ProjectService : BaseService<Project>, IProjectService
         catch (Exception ex)
         {
             var errorMessage = $"An error {typeof(ProjectResult).Name}: {ex.Message}";
+            return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage(errorMessage);
+        }
+    }
+    
+    public new async Task<BusinessResult> DeleteById(Guid id, bool isPermanent = false)
+    {
+        try
+        {
+            if (isPermanent)
+            {
+                // 
+                
+                
+                // Delete Project
+                var isDeleted = await DeleteEntityPermanently(id);
+                return isDeleted
+                    ? new ResponseBuilder()
+                        .WithStatus(Const.SUCCESS_CODE)
+                        .WithMessage(Const.SUCCESS_DELETE_MSG)
+                    : new ResponseBuilder()
+                        .WithStatus(Const.FAIL_CODE)
+                        .WithMessage(Const.FAIL_DELETE_MSG);
+            }
+
+            var entity = await DeleteEntity(id);
+
+            return entity != null
+                ? new ResponseBuilder()
+                    .WithStatus(Const.SUCCESS_CODE)
+                    .WithMessage(Const.SUCCESS_SAVE_MSG)
+                : new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage(Const.FAIL_SAVE_MSG);
+        }
+        catch (DbUpdateException dbEx)
+        {
+            if (dbEx.InnerException?.Message.Contains("FOREIGN KEY") == true)
+            {
+                var errorMessage = "Không thể xóa vì dữ liệu đang được tham chiếu ở bảng khác.";
+                return new ResponseBuilder()
+                        .WithStatus(Const.FAIL_CODE)
+                        .WithMessage(errorMessage)
+                    ;
+            }
+
+            throw;
+        }
+        catch (Exception ex)
+        {
+            var errorMessage = $"An error occurred while deleting {typeof(Project).Name} with ID {id}: {ex.Message}";
             return new ResponseBuilder()
                 .WithStatus(Const.FAIL_CODE)
                 .WithMessage(errorMessage);

@@ -79,8 +79,8 @@ public class InvitationRepository : BaseRepository<Invitation>, IInvitationRepos
 
     public async Task<(List<Invitation>, int)> GetLeaderInvitationsByType(InvitationGetByTypeQuery query, Guid userId)
     {
-        var queryable = GetQueryable(m => m.Type == query.Type);
-        queryable = queryable
+        var queryable = GetQueryable();
+        queryable = queryable.Where(m => m.Type == query.Type && m.ProjectId == query.ProjectId)
             .Include(m => m.Project)
             .Include(m => m.Receiver)
             .Include(m => m.Sender);

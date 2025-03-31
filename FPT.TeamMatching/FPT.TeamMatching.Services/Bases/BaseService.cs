@@ -307,7 +307,7 @@ public abstract class BaseService<TEntity> : BaseService, IBaseService
         entity.UpdatedBy = user.Email;
     }
 
-    private async Task<TEntity?> DeleteEntity(Guid id)
+    protected async Task<TEntity?> DeleteEntity(Guid id)
     {
         var entity = await _baseRepository.GetById(id);
         if (entity == null) return null;
@@ -319,7 +319,7 @@ public abstract class BaseService<TEntity> : BaseService, IBaseService
         return saveChanges ? entity : null;
     }
 
-    private async Task<bool> DeleteEntityPermanently(Guid id)
+    protected async Task<bool> DeleteEntityPermanently(Guid id)
     {
         var entity = await _baseRepository.GetById(id);
         if (entity == null) return false;
