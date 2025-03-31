@@ -18,6 +18,8 @@ public class ProjectResult : BaseResult
 
     public int? TeamSize { get; set; }
 
+    public int? DefenseStage { get; set; }
+
     public IdeaResult? Idea { get; set; }
 
     public ICollection<TeamMemberResult> TeamMembers { get; set; } = new List<TeamMemberResult>();
