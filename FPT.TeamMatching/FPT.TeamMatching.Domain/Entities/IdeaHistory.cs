@@ -11,6 +11,8 @@ public class IdeaHistory : BaseEntity
     
     public IdeaHistoryStatus? Status { get; set; }
 
+    public string? Comment { get; set; }
+
     public int ReviewStage  { get; set; }
 
     public virtual Idea? Idea { get; set; }

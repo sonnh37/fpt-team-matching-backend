@@ -71,5 +71,13 @@ namespace FPT.TeamMatching.API.Controllers
             var msg = await _service.StudentUpdateIdea(request);
             return Ok(msg);
         }
+
+        [HttpPut("lecturer-update")]
+        public async Task<IActionResult> LecturerUpdate([FromBody] LecturerUpdateCommand command)
+        {
+            var businessResult = await _service.LecturerUpdate(command);
+
+            return Ok(businessResult);
+        }
     }
 }

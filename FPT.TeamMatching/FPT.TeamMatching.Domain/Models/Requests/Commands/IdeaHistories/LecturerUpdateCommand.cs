@@ -8,18 +8,10 @@ using System.Threading.Tasks;
 
 namespace FPT.TeamMatching.Domain.Models.Requests.Commands.IdeaHistories
 {
-    public class IdeaHistoryCreateCommand: CreateCommand
+    public class LecturerUpdateCommand: UpdateCommand
     {
-        public Guid? IdeaId { get; set; }
-
-        public Guid? CouncilId { get; set; }
-
-        public string? FileUpdate { get; set; }
-
         public IdeaHistoryStatus? Status { get; set; }
 
         public string? Comment { get; set; }
-
-        public int ReviewStage { get; set; }
     }
 }

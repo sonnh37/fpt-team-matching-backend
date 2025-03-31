@@ -12,5 +12,6 @@ namespace FPT.TeamMatching.Domain.Contracts.Services
     public interface IIdeaHistoryService: IBaseService
     {
         Task<BusinessResult> StudentUpdateIdea(StudentUpdateIdeaCommand request);
+        Task<BusinessResult> LecturerUpdate(LecturerUpdateCommand request);
     }
 }

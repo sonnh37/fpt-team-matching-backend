@@ -566,7 +566,7 @@ public class IdeaService : BaseService<Idea>, IIdeaService
         try
         {
             //get projects cua ki den ngay bat dau inprogress - ngay khoa
-            var projects = await _projectRepository.GetProjectsInFourthWeekByToday();
+            var projects = await _projectRepository.GetProjectsStartingNow();
             //update project
             foreach (var project in projects)
             {
