@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace FPT.TeamMatching.Data.Migrations
 {
     [DbContext(typeof(FPTMatchingDbContext))]
-    [Migration("20250331132324_editProject")]
-    partial class editProject
+    [Migration("20250331134426_UpdateProject")]
+    partial class UpdateProject
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -1388,7 +1388,8 @@ namespace FPT.TeamMatching.Data.Migrations
                 {
                     b.HasOne("FPT.TeamMatching.Domain.Entities.Project", "Project")
                         .WithMany("Blogs")
-                        .HasForeignKey("ProjectId");
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("FPT.TeamMatching.Domain.Entities.User", "User")
                         .WithMany("Blogs")
@@ -1418,7 +1419,8 @@ namespace FPT.TeamMatching.Data.Migrations
                 {
                     b.HasOne("FPT.TeamMatching.Domain.Entities.Project", "Project")
                         .WithMany("CapstoneSchedules")
-                        .HasForeignKey("ProjectId");
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("Project");
                 });
@@ -1519,7 +1521,8 @@ namespace FPT.TeamMatching.Data.Migrations
                 {
                     b.HasOne("FPT.TeamMatching.Domain.Entities.Project", "Project")
                         .WithMany("Invitations")
-                        .HasForeignKey("ProjectId");
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("FPT.TeamMatching.Domain.Entities.User", "Receiver")
                         .WithMany("InvitationOfReceivers")
@@ -1559,7 +1562,8 @@ namespace FPT.TeamMatching.Data.Migrations
 
                     b.HasOne("FPT.TeamMatching.Domain.Entities.Project", "Project")
                         .WithMany("MentorIdeaRequests")
-                        .HasForeignKey("ProjectId");
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("Idea");
 
@@ -1652,7 +1656,8 @@ namespace FPT.TeamMatching.Data.Migrations
                 {
                     b.HasOne("FPT.TeamMatching.Domain.Entities.Project", "Project")
                         .WithMany("Reviews")
-                        .HasForeignKey("ProjectId");
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("FPT.TeamMatching.Domain.Entities.User", "Reviewer1")
                         .WithMany("Reviewer1s")
@@ -1704,7 +1709,8 @@ namespace FPT.TeamMatching.Data.Migrations
                 {
                     b.HasOne("FPT.TeamMatching.Domain.Entities.Project", "Project")
                         .WithMany("TeamMembers")
-                        .HasForeignKey("ProjectId");
+                        .HasForeignKey("ProjectId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("FPT.TeamMatching.Domain.Entities.User", "User")
                         .WithMany("TeamMembers")
