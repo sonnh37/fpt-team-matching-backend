@@ -12,6 +12,18 @@ namespace FPT.TeamMatching.Data.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
+                name: "Conversations",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "text", nullable: false),
+                    ConversationName = table.Column<string>(type: "text", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Conversations", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Profession",
                 columns: table => new
                 {
@@ -99,6 +111,44 @@ namespace FPT.TeamMatching.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ConversationMembers",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "text", nullable: false),
+                    UserId = table.Column<string>(type: "text", nullable: true),
+                    ConversationId = table.Column<string>(type: "text", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ConversationMembers", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ConversationMembers_Conversations_ConversationId",
+                        column: x => x.ConversationId,
+                        principalTable: "Conversations",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Messages",
+                columns: table => new
+                {
+                    Id = table.Column<string>(type: "text", nullable: false),
+                    ConversationId = table.Column<string>(type: "text", nullable: true),
+                    SendById = table.Column<string>(type: "text", nullable: true),
+                    Content = table.Column<string>(type: "text", nullable: true),
+                    CreatedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Messages", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Messages_Conversations_ConversationId",
+                        column: x => x.ConversationId,
+                        principalTable: "Conversations",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Specialty",
                 columns: table => new
                 {
@@ -131,6 +181,7 @@ namespace FPT.TeamMatching.Data.Migrations
                     StartDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     EndDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     ResultDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    StageNumber = table.Column<int>(type: "integer", nullable: false),
                     CreatedBy = table.Column<string>(type: "text", nullable: true),
                     CreatedDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
                     UpdatedBy = table.Column<string>(type: "text", nullable: true),
@@ -145,6 +196,34 @@ namespace FPT.TeamMatching.Data.Migrations
                         name: "FK_StageIdea_Semester_SemesterId",
                         column: x => x.SemesterId,
                         principalTable: "Semester",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "IdeaHistoryRequest",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false, defaultValueSql: "gen_random_uuid()"),
+                    IdeaHistoryId = table.Column<Guid>(type: "uuid", nullable: true),
+                    ReviewerId = table.Column<Guid>(type: "uuid", nullable: true),
+                    Content = table.Column<string>(type: "text", nullable: true),
+                    Status = table.Column<string>(type: "text", nullable: true),
+                    ProcessDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: true),
+                    CreatedBy = table.Column<string>(type: "text", nullable: true),
+                    CreatedDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
+                    UpdatedBy = table.Column<string>(type: "text", nullable: true),
+                    UpdatedDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
+                    Note = table.Column<string>(type: "text", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_IdeaHistoryRequest", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_IdeaHistoryRequest_User_UserId",
+                        column: x => x.UserId,
+                        principalTable: "User",
                         principalColumn: "Id");
                 });
 
@@ -370,10 +449,11 @@ namespace FPT.TeamMatching.Data.Migrations
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false, defaultValueSql: "gen_random_uuid()"),
                     IdeaId = table.Column<Guid>(type: "uuid", nullable: true),
-                    CouncilId = table.Column<Guid>(type: "uuid", nullable: true),
                     FileUpdate = table.Column<string>(type: "text", nullable: true),
                     Status = table.Column<string>(type: "text", nullable: true),
+                    Comment = table.Column<string>(type: "text", nullable: true),
                     ReviewStage = table.Column<int>(type: "integer", nullable: false),
+                    UserId = table.Column<Guid>(type: "uuid", nullable: true),
                     CreatedBy = table.Column<string>(type: "text", nullable: true),
                     CreatedDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
                     UpdatedBy = table.Column<string>(type: "text", nullable: true),
@@ -390,8 +470,8 @@ namespace FPT.TeamMatching.Data.Migrations
                         principalTable: "Idea",
                         principalColumn: "Id");
                     table.ForeignKey(
-                        name: "FK_IdeaHistory_User_CouncilId",
-                        column: x => x.CouncilId,
+                        name: "FK_IdeaHistory_User_UserId",
+                        column: x => x.UserId,
                         principalTable: "User",
                         principalColumn: "Id");
                 });
@@ -440,6 +520,7 @@ namespace FPT.TeamMatching.Data.Migrations
                     TeamName = table.Column<string>(type: "text", nullable: true),
                     Status = table.Column<string>(type: "text", nullable: true),
                     TeamSize = table.Column<int>(type: "integer", nullable: true),
+                    DefenseStage = table.Column<int>(type: "integer", nullable: true),
                     UserId = table.Column<Guid>(type: "uuid", nullable: true),
                     CreatedBy = table.Column<string>(type: "text", nullable: true),
                     CreatedDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
@@ -464,38 +545,6 @@ namespace FPT.TeamMatching.Data.Migrations
                     table.ForeignKey(
                         name: "FK_Project_User_UserId",
                         column: x => x.UserId,
-                        principalTable: "User",
-                        principalColumn: "Id");
-                });
-
-            migrationBuilder.CreateTable(
-                name: "IdeaHistoryRequest",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false, defaultValueSql: "gen_random_uuid()"),
-                    IdeaHistoryId = table.Column<Guid>(type: "uuid", nullable: true),
-                    ReviewerId = table.Column<Guid>(type: "uuid", nullable: true),
-                    Content = table.Column<string>(type: "text", nullable: true),
-                    Status = table.Column<string>(type: "text", nullable: true),
-                    ProcessDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
-                    CreatedBy = table.Column<string>(type: "text", nullable: true),
-                    CreatedDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
-                    UpdatedBy = table.Column<string>(type: "text", nullable: true),
-                    UpdatedDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
-                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
-                    Note = table.Column<string>(type: "text", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_IdeaHistoryRequest", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_IdeaHistoryRequest_IdeaHistory_IdeaHistoryId",
-                        column: x => x.IdeaHistoryId,
-                        principalTable: "IdeaHistory",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_IdeaHistoryRequest_User_ReviewerId",
-                        column: x => x.ReviewerId,
                         principalTable: "User",
                         principalColumn: "Id");
                 });
@@ -526,7 +575,8 @@ namespace FPT.TeamMatching.Data.Migrations
                         name: "FK_Blog_Project_ProjectId",
                         column: x => x.ProjectId,
                         principalTable: "Project",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Blog_User_UserId",
                         column: x => x.UserId,
@@ -558,7 +608,8 @@ namespace FPT.TeamMatching.Data.Migrations
                         name: "FK_CapstoneSchedule_Project_ProjectId",
                         column: x => x.ProjectId,
                         principalTable: "Project",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -586,7 +637,8 @@ namespace FPT.TeamMatching.Data.Migrations
                         name: "FK_Invitation_Project_ProjectId",
                         column: x => x.ProjectId,
                         principalTable: "Project",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Invitation_User_ReceiverId",
                         column: x => x.ReceiverId,
@@ -626,7 +678,8 @@ namespace FPT.TeamMatching.Data.Migrations
                         name: "FK_MentorIdeaRequest_Project_ProjectId",
                         column: x => x.ProjectId,
                         principalTable: "Project",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -638,7 +691,6 @@ namespace FPT.TeamMatching.Data.Migrations
                     Number = table.Column<int>(type: "integer", nullable: false),
                     Description = table.Column<string>(type: "text", nullable: true),
                     FileUpload = table.Column<string>(type: "text", nullable: true),
-                    ExpirationDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
                     ReviewDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
                     Room = table.Column<string>(type: "text", nullable: true),
                     Slot = table.Column<int>(type: "integer", nullable: true),
@@ -658,7 +710,8 @@ namespace FPT.TeamMatching.Data.Migrations
                         name: "FK_Review_Project_ProjectId",
                         column: x => x.ProjectId,
                         principalTable: "Project",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Review_User_Reviewer1Id",
                         column: x => x.Reviewer1Id,
@@ -696,7 +749,8 @@ namespace FPT.TeamMatching.Data.Migrations
                         name: "FK_TeamMember_Project_ProjectId",
                         column: x => x.ProjectId,
                         principalTable: "Project",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_TeamMember_User_UserId",
                         column: x => x.UserId,
@@ -711,7 +765,7 @@ namespace FPT.TeamMatching.Data.Migrations
                     Id = table.Column<Guid>(type: "uuid", nullable: false, defaultValueSql: "gen_random_uuid()"),
                     UserId = table.Column<Guid>(type: "uuid", nullable: true),
                     BlogId = table.Column<Guid>(type: "uuid", nullable: true),
-                    FileCv = table.Column<string>(type: "character varying(1)", maxLength: 1, nullable: true),
+                    FileCv = table.Column<string>(type: "text", nullable: true),
                     CreatedBy = table.Column<string>(type: "text", nullable: true),
                     CreatedDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
                     UpdatedBy = table.Column<string>(type: "text", nullable: true),
@@ -794,30 +848,6 @@ namespace FPT.TeamMatching.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Feedback",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false, defaultValueSql: "gen_random_uuid()"),
-                    ReviewId = table.Column<Guid>(type: "uuid", nullable: true),
-                    Comment = table.Column<string>(type: "text", nullable: true),
-                    CreatedBy = table.Column<string>(type: "text", nullable: true),
-                    CreatedDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
-                    UpdatedBy = table.Column<string>(type: "text", nullable: true),
-                    UpdatedDate = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
-                    IsDeleted = table.Column<bool>(type: "boolean", nullable: false),
-                    Note = table.Column<string>(type: "text", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Feedback", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Feedback_Review_ReviewId",
-                        column: x => x.ReviewId,
-                        principalTable: "Review",
-                        principalColumn: "Id");
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Rate",
                 columns: table => new
                 {
@@ -884,9 +914,9 @@ namespace FPT.TeamMatching.Data.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Feedback_ReviewId",
-                table: "Feedback",
-                column: "ReviewId");
+                name: "IX_ConversationMembers_ConversationId",
+                table: "ConversationMembers",
+                column: "ConversationId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Idea_MentorId",
@@ -914,24 +944,19 @@ namespace FPT.TeamMatching.Data.Migrations
                 column: "SubMentorId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_IdeaHistory_CouncilId",
-                table: "IdeaHistory",
-                column: "CouncilId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_IdeaHistory_IdeaId",
                 table: "IdeaHistory",
                 column: "IdeaId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_IdeaHistoryRequest_IdeaHistoryId",
-                table: "IdeaHistoryRequest",
-                column: "IdeaHistoryId");
+                name: "IX_IdeaHistory_UserId",
+                table: "IdeaHistory",
+                column: "UserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_IdeaHistoryRequest_ReviewerId",
+                name: "IX_IdeaHistoryRequest_UserId",
                 table: "IdeaHistoryRequest",
-                column: "ReviewerId");
+                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_IdeaRequest_IdeaId",
@@ -977,6 +1002,11 @@ namespace FPT.TeamMatching.Data.Migrations
                 name: "IX_MentorIdeaRequest_ProjectId",
                 table: "MentorIdeaRequest",
                 column: "ProjectId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Messages_ConversationId",
+                table: "Messages",
+                column: "ConversationId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Notification_UserId",
@@ -1099,7 +1129,10 @@ namespace FPT.TeamMatching.Data.Migrations
                 name: "Comment");
 
             migrationBuilder.DropTable(
-                name: "Feedback");
+                name: "ConversationMembers");
+
+            migrationBuilder.DropTable(
+                name: "IdeaHistory");
 
             migrationBuilder.DropTable(
                 name: "IdeaHistoryRequest");
@@ -1117,6 +1150,9 @@ namespace FPT.TeamMatching.Data.Migrations
                 name: "MentorIdeaRequest");
 
             migrationBuilder.DropTable(
+                name: "Messages");
+
+            migrationBuilder.DropTable(
                 name: "Notification");
 
             migrationBuilder.DropTable(
@@ -1126,19 +1162,19 @@ namespace FPT.TeamMatching.Data.Migrations
                 name: "RefreshToken");
 
             migrationBuilder.DropTable(
+                name: "Review");
+
+            migrationBuilder.DropTable(
                 name: "SkillProfile");
 
             migrationBuilder.DropTable(
                 name: "UserXRole");
 
             migrationBuilder.DropTable(
-                name: "Review");
-
-            migrationBuilder.DropTable(
-                name: "IdeaHistory");
-
-            migrationBuilder.DropTable(
                 name: "Blog");
+
+            migrationBuilder.DropTable(
+                name: "Conversations");
 
             migrationBuilder.DropTable(
                 name: "TeamMember");

@@ -100,14 +100,11 @@ public class IdeaController : ControllerBase
         return Ok(businessResult);
     }
     
-    [HttpGet("me/get-by-status")]
-    public async Task<IActionResult> GetCurrentIdeaByStatus([FromQuery] IdeaGetCurrentByStatus request)
+    [HttpGet("me/by-status")]
+    public async Task<IActionResult> GetUserIdeasByStatus([FromQuery] IdeaGetListForUserByStatus request)
     {
-        var businessResult = await _service.GetCurrentIdeaByStatus(request);
+        var businessResult = await _service.GetUserIdeasByStatus(request);
         return Ok(businessResult);
     }
-    
-    
-
 }
 

@@ -7,6 +7,8 @@ namespace FPT.TeamMatching.Domain.Contracts.Services;
 
 public interface IInvitationService : IBaseService
 {
+    Task<BusinessResult> GetUserInvitationsByStatus(InvitationGetListForUserByStatus query);
+
     Task<BusinessResult> GetUserInvitationsByType(InvitationGetByTypeQuery query);
     Task<BusinessResult> GetLeaderInvitationsByType(InvitationGetByTypeQuery query);
     Task<BusinessResult> TeamCreatePending(InvitationTeamCreatePendingCommand command);

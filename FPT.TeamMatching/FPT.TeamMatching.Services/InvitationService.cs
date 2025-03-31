@@ -57,6 +57,48 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
         }
     }
 
+    public async Task<BusinessResult> GetUserInvitationsByStatus(InvitationGetListForUserByStatus query)
+    {
+        try
+        {
+            List<InvitationResult>? results;
+            var userIdClaim = GetUserIdFromClaims();
+
+            if (userIdClaim == null)
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("You need to authenticate with TeamMatching.");
+
+            var userId = userIdClaim.Value;
+            // get by type
+            var (data, total) = await _invitationRepository.GetUserInvitationsByStatus(query, userId);
+
+            results = _mapper.Map<List<InvitationResult>>(data);
+
+            // GetAll 
+            if (!query.IsPagination)
+                return new ResponseBuilder()
+                    .WithData(results)
+                    .WithStatus(Const.SUCCESS_CODE)
+                    .WithMessage(Const.SUCCESS_READ_MSG);
+
+            // GetAll with pagination
+            var tableResponse = new PaginatedResult(query, results, total);
+
+            return new ResponseBuilder()
+                .WithData(tableResponse)
+                .WithStatus(Const.SUCCESS_CODE)
+                .WithMessage(Const.SUCCESS_READ_MSG);
+        }
+        catch (Exception ex)
+        {
+            var errorMessage = $"An error occurred in {typeof(InvitationResult).Name}: {ex.Message}";
+            return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage(errorMessage);
+        }
+    }
+
     public async Task<BusinessResult> GetUserInvitationsByType(InvitationGetByTypeQuery query)
     {
         try
