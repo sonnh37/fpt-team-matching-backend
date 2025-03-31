@@ -180,7 +180,7 @@ public class ReviewService : BaseService<Review>, IReviewService
                 .WithStatus(Const.FAIL_CODE)
                 .WithMessage("No file uploaded!");
             }
-            var uploadsFolder = $"{Directory.GetCurrentDirectory()}/UploadFiles";
+            var uploadsFolder = $"{Directory.GetCurrentDirectory()}\\UploadFiles";
 
             if (!Directory.Exists(uploadsFolder))
             {
@@ -217,7 +217,7 @@ public class ReviewService : BaseService<Review>, IReviewService
                                 continue;
                             }
                             //check project exist
-                            var project = customIdeaModel.FirstOrDefault(x => x.TeamCode == teamCode);
+                            var project = customIdeaModel.FirstOrDefault(x => x.TeamCode.TrimEnd('\r', '\n') == teamCode);
                             if (project == null)
                             {
                                 continue;
@@ -229,7 +229,7 @@ public class ReviewService : BaseService<Review>, IReviewService
                                 continue;
                             }
                             //check idea code giong vs idea code cua project
-                            if (project.IdeaCode != ideaCode)
+                            if (project.IdeaCode.TrimEnd('\r', '\n') != ideaCode)
                             {
                                 continue;
                             }
