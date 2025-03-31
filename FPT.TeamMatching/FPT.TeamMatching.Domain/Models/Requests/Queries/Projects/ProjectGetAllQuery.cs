@@ -22,6 +22,8 @@ public class ProjectGetAllQuery : GetQueryableQuery
 
     public int? TeamSize { get; set; }
 
+    public int? DefenseStage { get; set; }
+
     public Guid? ProfessionId { get; set; }
 
     public Guid? SpecialtyId { get; set; }
