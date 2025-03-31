@@ -98,6 +98,53 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
                 .WithMessage(errorMessage);
         }
     }
+    
+    public async Task<BusinessResult> GetLeaderInvitationsByType(InvitationGetByTypeQuery query)
+    {
+        try
+        {
+            List<InvitationResult>? results;
+            var userIdClaim = GetUserIdFromClaims();
+
+            if (userIdClaim == null)
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("You need to authenticate with TeamMatching.");
+
+            var userId = userIdClaim.Value;
+            var userInTeamMember = await _teamMemberRepository.GetTeamMemberActiveByUserId(userId);
+            if (userInTeamMember == null) return HandlerFail("You not in team member");
+            var isLeader = userInTeamMember.Role == TeamMemberRole.Leader;
+            if(!isLeader) return HandlerFail("You do not have role leader team member");
+            
+            // get by type
+            var (data, total) = await _invitationRepository.GetLeaderInvitationsByType(query, userId);
+
+            results = _mapper.Map<List<InvitationResult>>(data);
+
+            // GetAll 
+            if (!query.IsPagination)
+                return new ResponseBuilder()
+                    .WithData(results)
+                    .WithStatus(Const.SUCCESS_CODE)
+                    .WithMessage(Const.SUCCESS_READ_MSG);
+
+            // GetAll with pagination
+            var tableResponse = new PaginatedResult(query, results, total);
+
+            return new ResponseBuilder()
+                .WithData(tableResponse)
+                .WithStatus(Const.SUCCESS_CODE)
+                .WithMessage(Const.SUCCESS_READ_MSG);
+        }
+        catch (Exception ex)
+        {
+            var errorMessage = $"An error occurred in {typeof(InvitationResult).Name}: {ex.Message}";
+            return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage(errorMessage);
+        }
+    }
 
     public async Task<BusinessResult> StudentCreatePending(InvitationStudentCreatePendingCommand command)
     {
@@ -174,6 +221,154 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
                 .WithMessage(errorMessage);
         }
     }
+    
+    // đồng ý lời mời từ team bởi cá nhân
+    public async Task<BusinessResult> ApproveOrRejectInvitationFromTeamByMe(InvitationUpdateCommand command)
+    {
+        try
+        {
+            var userIdFromClaim = GetUserIdFromClaims();
+            if (userIdFromClaim == null) return HandlerFailAuth();
+
+            var userId = userIdFromClaim.Value;
+            
+            var invitation = await _invitationRepository.GetById(command.Id);
+            if (invitation == null)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("Team haven't sent invitation!");
+            }
+            
+            if (command.Status == InvitationStatus.Rejected)
+            {
+                _invitationRepository.DeletePermanently(invitation);
+                var saveChange_ = await _unitOfWork.SaveChanges();
+                if (!saveChange_)
+                {
+                    return HandlerFail("Can not saving changes!");
+                }
+                
+                return new ResponseBuilder()
+                    .WithStatus(Const.SUCCESS_CODE)
+                    .WithMessage(Const.SUCCESS_DELETE_MSG);
+            }
+
+            var teamMember = new TeamMember
+            {
+                UserId = userId,
+                ProjectId = invitation.ProjectId,
+                Role = TeamMemberRole.Member,
+                JoinDate = DateTime.UtcNow,
+                LeaveDate = null,
+                Status = TeamMemberStatus.Pending
+            };
+            await SetBaseEntityForCreation(teamMember);
+            _teamMemberRepository.Add(teamMember);
+            var saveChange = await _unitOfWork.SaveChanges();
+            if (saveChange)
+            {
+                invitation.Status = InvitationStatus.Accepted;
+                await SetBaseEntityForUpdate(invitation);
+                _invitationRepository.Update(invitation);
+                var saveChange_ = await _unitOfWork.SaveChanges();
+                if (saveChange_)
+                {
+                    return new ResponseBuilder()
+                        .WithStatus(Const.SUCCESS_CODE)
+                        .WithMessage(Const.SUCCESS_DELETE_MSG);
+                }
+
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage(Const.FAIL_DELETE_MSG);
+            }
+
+            return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage(Const.FAIL_DELETE_MSG);
+        }
+        catch (Exception ex)
+        {
+            var errorMessage = $"An error occurred in {typeof(InvitationResult).Name}: {ex.Message}";
+            return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage(errorMessage);
+        }
+    }
+
+    
+    // đồng ý lời mời từ cá nhân bởi leader
+     public async Task<BusinessResult> ApproveOrRejectInvitationFromPersonalizeByLeader(InvitationUpdateCommand command)
+    {
+        try
+        {
+            var invitation = await _invitationRepository.GetById(command.Id);
+            if (invitation == null)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("Personal haven't sent invitation for Team!");
+            }
+
+            if (command.Status == InvitationStatus.Rejected)
+            {
+                _invitationRepository.DeletePermanently(invitation);
+                var saveChange_ = await _unitOfWork.SaveChanges();
+                if (!saveChange_)
+                {
+                    return HandlerFail("Can not saving changes!");
+                }
+                
+                return new ResponseBuilder()
+                    .WithStatus(Const.SUCCESS_CODE)
+                    .WithMessage(Const.SUCCESS_DELETE_MSG);
+            }
+
+            var teamMember = new TeamMember
+            {
+                UserId = invitation.SenderId,
+                ProjectId = invitation.ProjectId,
+                Role = TeamMemberRole.Member,
+                JoinDate = DateTime.UtcNow,
+                LeaveDate = null,
+                Status = TeamMemberStatus.Pending
+            };
+            await SetBaseEntityForCreation(teamMember);
+            _teamMemberRepository.Add(teamMember);
+            var saveChange = await _unitOfWork.SaveChanges();
+            if (saveChange)
+            {
+                invitation.Status = InvitationStatus.Accepted;
+                await SetBaseEntityForUpdate(invitation);
+                _invitationRepository.Update(invitation);
+                var saveChange_ = await _unitOfWork.SaveChanges();
+                if (saveChange_)
+                {
+                    return new ResponseBuilder()
+                        .WithStatus(Const.SUCCESS_CODE)
+                        .WithMessage(Const.SUCCESS_DELETE_MSG);
+                }
+
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage(Const.FAIL_DELETE_MSG);
+            }
+
+            return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage(Const.FAIL_DELETE_MSG);
+        }
+        catch (Exception ex)
+        {
+            var errorMessage = $"An error occurred in {typeof(InvitationResult).Name}: {ex.Message}";
+            return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage(errorMessage);
+        }
+    }
+
+   
 
     public async Task<BusinessResult> TeamCreatePending(InvitationTeamCreatePendingCommand command)
     {

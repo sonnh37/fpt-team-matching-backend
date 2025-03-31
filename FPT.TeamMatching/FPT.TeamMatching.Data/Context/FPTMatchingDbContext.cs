@@ -203,6 +203,30 @@ public partial class FPTMatchingDbContext : BaseDbContext
 
             entity.HasOne(d => d.Idea).WithOne(p => p.Project)
                 .HasForeignKey<Project>(d => d.IdeaId);
+            
+            entity.HasMany(p => p.TeamMembers)
+                .WithOne(t => t.Project)
+                .OnDelete(DeleteBehavior.Cascade);
+    
+            entity.HasMany(p => p.Invitations)
+                .WithOne(i => i.Project)
+                .OnDelete(DeleteBehavior.Cascade);
+    
+            entity.HasMany(p => p.Reviews)
+                .WithOne(r => r.Project)
+                .OnDelete(DeleteBehavior.Cascade);
+    
+            entity.HasMany(p => p.Blogs)
+                .WithOne(b => b.Project)
+                .OnDelete(DeleteBehavior.Cascade);
+    
+            entity.HasMany(p => p.CapstoneSchedules)
+                .WithOne(c => c.Project)
+                .OnDelete(DeleteBehavior.Cascade);
+    
+            entity.HasMany(p => p.MentorIdeaRequests)
+                .WithOne(m => m.Project)
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<Rate>(entity =>

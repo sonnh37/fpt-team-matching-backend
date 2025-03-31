@@ -307,7 +307,7 @@ public abstract class BaseService<TEntity> : BaseService, IBaseService
         entity.UpdatedBy = user.Email;
     }
 
-    private async Task<TEntity?> DeleteEntity(Guid id)
+    protected async Task<TEntity?> DeleteEntity(Guid id)
     {
         var entity = await _baseRepository.GetById(id);
         if (entity == null) return null;
@@ -319,7 +319,7 @@ public abstract class BaseService<TEntity> : BaseService, IBaseService
         return saveChanges ? entity : null;
     }
 
-    private async Task<bool> DeleteEntityPermanently(Guid id)
+    protected async Task<bool> DeleteEntityPermanently(Guid id)
     {
         var entity = await _baseRepository.GetById(id);
         if (entity == null) return false;
@@ -389,7 +389,7 @@ public abstract class BaseService<TEntity> : BaseService, IBaseService
     {
         var errorMessage = $"An error {typeof(TEntity).Name}: {message}";
         return new ResponseBuilder()
-            .WithStatus(Const.FAIL_CODE)
+            .WithStatus(Const.ERROR_SYSTEM_CODE)
             .WithMessage(errorMessage);
     }
 
@@ -406,4 +406,13 @@ public abstract class BaseService<TEntity> : BaseService, IBaseService
             .WithStatus(Const.FAIL_CODE)
             .WithMessage(message);
     }
+    
+    protected BusinessResult HandlerFailAuth()
+    {
+        return new ResponseBuilder()
+            .WithStatus(Const.FAIL_UNAUTHORIZED_CODE)
+            .WithMessage(Const.FAIL_UNAUTHORIZED_MSG);
+    }
+    
+    
 }

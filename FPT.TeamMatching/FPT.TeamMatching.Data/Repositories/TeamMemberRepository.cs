@@ -15,10 +15,10 @@ public class TeamMemberRepository : BaseRepository<TeamMember>, ITeamMemberRepos
     }
 
     // Get teammber mà user đang active
-    public Task<TeamMember?> GetTeamMemberActiveByUserId(Guid userId)
+    public async Task<TeamMember?> GetTeamMemberActiveByUserId(Guid userId)
     {
         var queryable = GetQueryable(m => m.UserId == userId && m.IsDeleted == false);
-        return queryable.FirstOrDefaultAsync();
+        return await queryable.FirstOrDefaultAsync();
     }
 
     public async Task<List<TeamMember>> GetTeamMemberByUserId(Guid userId)

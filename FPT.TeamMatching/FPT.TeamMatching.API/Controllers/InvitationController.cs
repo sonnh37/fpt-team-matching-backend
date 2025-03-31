@@ -32,6 +32,13 @@ public class InvitationController : ControllerBase
         return Ok(msg);
     }
 
+    [HttpGet("get-leader-invitations-by-type")]
+    public async Task<IActionResult> GetLeaderInvitationsByType([FromQuery] InvitationGetByTypeQuery query)
+    {
+        var msg = await _service.GetLeaderInvitationsByType(query);
+        return Ok(msg);
+    }
+
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetById([FromRoute] Guid id)
     {
@@ -112,18 +119,19 @@ public class InvitationController : ControllerBase
         return Ok(businessResult);
     }
 
-    [HttpPut("approve-invitation-of-team-by-me/by-project-id/{projectId:guid}")]
-    public async Task<IActionResult> ApproveInvitationOfTeamByMe([FromRoute] Guid projectId)
+    [HttpPut("approve-or-reject-invitation-from-team-by-me")]
+    public async Task<IActionResult> ApproveOrRejectInvitationFromTeamByMe([FromBody] InvitationUpdateCommand command)
     {
-        var businessResult = await _service.ApproveInvitationOfTeamByMe(projectId);
+        var businessResult = await _service.ApproveOrRejectInvitationFromTeamByMe(command);
 
         return Ok(businessResult);
     }
-    
-    [HttpPut("cancel-invitation-of-team-by-me/by-project-id/{projectId:guid}")]
-    public async Task<IActionResult> CancelInvitationOfTeamByMe([FromRoute] Guid projectId)
+
+    [HttpPut("approve-or-reject-invitation-from-personalize-by-leader")]
+    public async Task<IActionResult> ApproveOrRejectInvitationFromPersonalizeByLeader(
+        [FromBody] InvitationUpdateCommand command)
     {
-        var businessResult = await _service.CancelInvitationOfTeamByMe(projectId);
+        var businessResult = await _service.ApproveOrRejectInvitationFromPersonalizeByLeader(command);
 
         return Ok(businessResult);
     }

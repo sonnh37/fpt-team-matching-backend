@@ -6,36 +6,45 @@ public static class Const
 {
     #region Error Codes
 
-    public const int ERROR_EXCEPTION_CODE = -4;
-
+    public const int ERROR_SYSTEM_CODE = -4;
+    public const string ERROR_SYSTEM_MSG = "System error occurred. Please try again or contact support.";
     #endregion
 
     #region Success Codes
 
     public const int SUCCESS_CODE = 1;
 
-    public const string SUCCESS_SAVE_MSG = "Data has been saved successfully.";
-    public const string SUCCESS_READ_MSG = "Data retrieved successfully.";
-    public const string SUCCESS_DELETE_MSG = "Data deleted successfully.";
+    public const string SUCCESS_SAVE_MSG = "Saved successfully.";
+    public const string SUCCESS_DELETE_MSG = "Deleted successfully.";
+    public const string SUCCESS_READ_MSG = "Read successfully.";
 
     #endregion
 
     #region Fail code
 
     public const int FAIL_CODE = -1;
-    public const string FAIL_SAVE_MSG = "Save fail";
-    public const string FAIL_READ_MSG = "Get fail";
-    public const string FAIL_DELETE_MSG = "Delete fail";
+    public const string FAIL_SAVE_MSG = "Failed to save data.";
+    public const string FAIL_READ_MSG = "Failed to read data.";
+    public const string FAIL_DELETE_MSG = "Failed to delete data.";
 
     #endregion
 
     #region Not Found Codes
 
     public const int NOT_FOUND_CODE = -2;
-    public const string NOT_FOUND_MSG = "Not found";
+    public const string NOT_FOUND_MSG = "The requested resource was not found.";
 
     #endregion
 
+    #region Authorization Codes
+
+    public const int FAIL_UNAUTHORIZED_CODE = -5;
+    public const string FAIL_UNAUTHORIZED_MSG = "Unauthorized access.";
+    public const string FAIL_FORBIDDEN_MSG = "Access denied. You don't have permission.";
+
+    #endregion
+
+    
     #region Url api
 
     private const string BaseApi = "api";
@@ -59,7 +68,7 @@ public static class Const
     public const string API_COMMENTS = $"{BaseApi}/comments";
 
     public const string API_LIKES = $"{BaseApi}/likes";
-    
+
     public const string API_AUTH = $"{BaseApi}/auth";
 
     public const string API_BLOGCVS = $"{BaseApi}/blog-cvs";
@@ -101,7 +110,7 @@ public static class Const
     public const string SortFieldDefault = "CreatedDate";
 
     public const string HANGFIRE = $"{BaseApi}/hangfire";
-    
+
     public const string API_HUBS = $"{BaseApi}/api_hubs";
 
     #endregion
@@ -111,7 +120,7 @@ public static class Const
     public const int PageNumberDefault = 1;
 
     public const bool IsPagination = false;
-    
+
     public const bool IsPermanent = false;
 
     public const int PageSizeDefault = 10;

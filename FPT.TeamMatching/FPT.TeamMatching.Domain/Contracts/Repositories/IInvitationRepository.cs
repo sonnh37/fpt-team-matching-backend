@@ -8,5 +8,6 @@ public interface IInvitationRepository : IBaseRepository<Invitation>
 {
     Task<Invitation?> GetInvitationOfUserByProjectId(Guid projectId, Guid userId);
     Task<(List<Invitation>, int)> GetUserInvitationsByType(InvitationGetByTypeQuery query, Guid userId);
+    Task<(List<Invitation>, int)> GetLeaderInvitationsByType(InvitationGetByTypeQuery query, Guid userId);
     Task<Invitation?> GetInvitationOfTeamByProjectIdAndMe(Guid projectId, Guid userId);
 }
