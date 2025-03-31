@@ -25,14 +25,21 @@ public class InvitationController : ControllerBase
         return Ok(msg);
     }
 
-    [HttpGet("get-user-invitations-by-type")]
+    [HttpGet("me/by-type")]
     public async Task<IActionResult> GetUserInvitationsByType([FromQuery] InvitationGetByTypeQuery query)
     {
         var msg = await _service.GetUserInvitationsByType(query);
         return Ok(msg);
     }
+    
+    [HttpGet("me/by-status")]
+    public async Task<IActionResult> GetUserInvitationsByStatus([FromQuery] InvitationGetListForUserByStatus query)
+    {
+        var msg = await _service.GetUserInvitationsByStatus(query);
+        return Ok(msg);
+    }
 
-    [HttpGet("get-leader-invitations-by-type")]
+    [HttpGet("me/by-type-with-role-leader")]
     public async Task<IActionResult> GetLeaderInvitationsByType([FromQuery] InvitationGetByTypeQuery query)
     {
         var msg = await _service.GetLeaderInvitationsByType(query);

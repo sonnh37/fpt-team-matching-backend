@@ -76,6 +76,30 @@ public class InvitationRepository : BaseRepository<Invitation>, IInvitationRepos
             return (results, results.Count);
         }
     }
+    
+    public async Task<(List<Invitation>, int)> GetUserInvitationsByStatus(InvitationGetListForUserByStatus query, Guid userId)
+    {
+        var queryable = GetQueryable(m => m.Status == query.Status);
+        queryable = queryable
+            .Include(m => m.Project)
+            .Include(m => m.Receiver)
+            .Include(m => m.Sender);
+
+        if (query.IsPagination)
+        {
+            var totalOrigin = queryable.Count();
+            queryable = Sort(queryable, query);
+            var results = await GetQueryablePagination(queryable, query).ToListAsync();
+
+            return (results, totalOrigin);
+        }
+        else
+        {
+            queryable = Sort(queryable, query);
+            var results = await queryable.ToListAsync();
+            return (results, results.Count);
+        }
+    }
 
     public async Task<(List<Invitation>, int)> GetLeaderInvitationsByType(InvitationGetByTypeQuery query, Guid userId)
     {
