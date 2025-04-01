@@ -120,6 +120,17 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
         return project;
     }
 
+    public async Task<List<Project>?> GetInProgressProjectBySemesterId(Guid semesterId)
+    {
+        var projects = await _context.Projects.Where(e => e.Status == ProjectStatus.InProgress &&
+                                                           e.IsDeleted == false &&
+                                                           e.Idea != null &&
+                                                           e.Idea.StageIdea != null &&
+                                                           e.Idea.StageIdea.SemesterId == semesterId)
+                                             .ToListAsync();
+        return projects;
+    }
+
     //public async Task<List<Project>?> GetProjectsInFourthWeekByToday()
     //{
     //    DateTime today = DateTime.UtcNow.Date;

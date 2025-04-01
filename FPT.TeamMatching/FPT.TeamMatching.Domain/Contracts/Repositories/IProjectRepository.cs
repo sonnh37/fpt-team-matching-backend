@@ -12,6 +12,7 @@ public interface IProjectRepository : IBaseRepository<Project>
     Task<Project?> GetProjectByCode(string code);
     Task<Project?> GetProjectOfUserLogin(Guid userId);
     Task<int> NumberOfInProgressProjectInSemester(Guid semesterId);
+    Task<List<Project>?> GetInProgressProjectBySemesterId(Guid semesterId);
     Task<Project?> GetProjectByLeaderId(Guid leaderId);
     Task<List<Project>> GetProjectBySemesterIdAndDefenseStage(Guid semesterId, int defenseStage);
     //Task<List<Project>?> GetProjectsInFourthWeekByToday();
