@@ -13,6 +13,7 @@ namespace FPT.TeamMatching.Data.Repositories;
 public class InvitationRepository : BaseRepository<Invitation>, IInvitationRepository
 {
     private readonly FPTMatchingDbContext _dbContext;
+
     public InvitationRepository(FPTMatchingDbContext dbContext) : base(dbContext)
     {
         _dbContext = dbContext;
@@ -20,42 +21,43 @@ public class InvitationRepository : BaseRepository<Invitation>, IInvitationRepos
 
     public async Task<Invitation?> GetInvitationOfUserByProjectId(Guid projectId, Guid userId)
     {
-        var i = await _dbContext.Invitations.Where(e => e.Status != null 
-                                            && e.ProjectId == projectId 
-                                            && e.SenderId == userId 
-                                            && e.Status.Value == InvitationStatus.Pending
-                                            && e.IsDeleted == false)
-                                            .SingleOrDefaultAsync();
-        return i;
-    }
-    
-    public async Task<Invitation?> GetInvitationOfTeamByProjectIdAndMe(Guid projectId, Guid userId)
-    {
-        var i = await _dbContext.Invitations.Where(e => e.Status != null 
-                                                        && e.ProjectId == projectId 
-                                                        && e.ReceiverId == userId 
+        var i = await _dbContext.Invitations.Where(e => e.Status != null
+                                                        && e.ProjectId == projectId
+                                                        && e.SenderId == userId
                                                         && e.Status.Value == InvitationStatus.Pending
                                                         && e.IsDeleted == false)
             .SingleOrDefaultAsync();
         return i;
     }
-    
+
+    public async Task<Invitation?> GetInvitationOfTeamByProjectIdAndMe(Guid projectId, Guid userId)
+    {
+        var i = await _dbContext.Invitations.Where(e => e.Status != null
+                                                        && e.ProjectId == projectId
+                                                        && e.ReceiverId == userId
+                                                        && e.Status.Value == InvitationStatus.Pending
+                                                        && e.IsDeleted == false)
+            .SingleOrDefaultAsync();
+        return i;
+    }
+
     public async Task<(List<Invitation>, int)> GetUserInvitationsByType(InvitationGetByTypeQuery query, Guid userId)
     {
         var queryable = GetQueryable(m => m.Type == query.Type);
+        queryable = queryable
+            .Include(m => m.Project)
+            .Include(m => m.Receiver)
+            .Include(m => m.Sender);
         queryable = query.Type switch
         {
             // Get ra list đã gửi những ai
             InvitationType.SentByStudent => queryable.Where(m => m.SenderId == userId),
-            
+
             // Get ra list đã nhận bởi team nào
             InvitationType.SendByTeam => queryable.Where(m => m.ReceiverId == userId),
             _ => queryable
         };
 
-        queryable = queryable.Include(m => m.Project);
-        
-        
         if (query.IsPagination)
         {
             // Tổng số count sau khi  filter khi chưa lọc trang
@@ -64,7 +66,74 @@ public class InvitationRepository : BaseRepository<Invitation>, IInvitationRepos
             queryable = Sort(queryable, query);
             // Lọc trang
             var results = await GetQueryablePagination(queryable, query).ToListAsync();
-            
+
+            return (results, totalOrigin);
+        }
+        else
+        {
+            queryable = Sort(queryable, query);
+            var results = await queryable.ToListAsync();
+            return (results, results.Count);
+        }
+    }
+    
+    public async Task<(List<Invitation>, int)> GetUserInvitationsByStatus(InvitationGetListForUserByStatus query, Guid userId)
+    {
+        var queryable = GetQueryable(m => m.Status == query.Status);
+        queryable = queryable
+            .Include(m => m.Project)
+            .Include(m => m.Receiver)
+            .Include(m => m.Sender);
+
+        if (query.IsPagination)
+        {
+            var totalOrigin = queryable.Count();
+            queryable = Sort(queryable, query);
+            var results = await GetQueryablePagination(queryable, query).ToListAsync();
+
+            return (results, totalOrigin);
+        }
+        else
+        {
+            queryable = Sort(queryable, query);
+            var results = await queryable.ToListAsync();
+            return (results, results.Count);
+        }
+    }
+
+    public async Task<(List<Invitation>, int)> GetLeaderInvitationsByType(InvitationGetByTypeQuery query, Guid userId)
+    {
+        var queryable = GetQueryable();
+        queryable = queryable.Where(m => m.Type == query.Type && m.ProjectId == query.ProjectId)
+            .Include(m => m.Project)
+            .Include(m => m.Receiver)
+            .Include(m => m.Sender);
+
+        if (query.Status != null)
+        {
+            queryable = queryable.Where(m => m.Status == query.Status);
+        }
+        
+        queryable = query.Type switch
+        {
+            // Get ra list đã gửi những ai
+            InvitationType.SentByStudent => queryable.Where(m => m.ReceiverId == userId),
+
+            // Get ra list đã nhận bởi team nào
+            InvitationType.SendByTeam => queryable.Where(m => m.SenderId == userId),
+            _ => queryable
+        };
+
+
+        if (query.IsPagination)
+        {
+            // Tổng số count sau khi  filter khi chưa lọc trang
+            var totalOrigin = queryable.Count();
+            // Sắp sếp
+            queryable = Sort(queryable, query);
+            // Lọc trang
+            var results = await GetQueryablePagination(queryable, query).ToListAsync();
+
             return (results, totalOrigin);
         }
         else

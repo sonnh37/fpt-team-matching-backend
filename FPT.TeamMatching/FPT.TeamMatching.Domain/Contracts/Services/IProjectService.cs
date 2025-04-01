@@ -12,4 +12,6 @@ public interface IProjectService : IBaseService
     Task<BusinessResult> GetProjectByUserIdLogin();
     Task<BusinessResult> CreateProjectAndTeammember(TeamCreateCommand command);
     Task<BusinessResult> GetProjectOfUserLogin();
+
+    new Task<BusinessResult> DeleteById(Guid id, bool isPermanent = false);
 }

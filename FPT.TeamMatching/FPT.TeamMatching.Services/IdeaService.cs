@@ -294,7 +294,7 @@ public class IdeaService : BaseService<Idea>, IIdeaService
         }
     }
 
-    public async Task<BusinessResult> GetCurrentIdeaByStatus(IdeaGetCurrentByStatus query)
+    public async Task<BusinessResult> GetUserIdeasByStatus(IdeaGetListForUserByStatus query)
     {
         try
         {
@@ -304,6 +304,38 @@ public class IdeaService : BaseService<Idea>, IIdeaService
             if (query.Status == null) return HandlerFail("Status cannot be null");
 
             var ideas = await _ideaRepository.GetCurrentIdeaByUserIdAndStatus(userId.Value, query.Status.Value);
+            var result = _mapper.Map<List<IdeaResult>>(ideas);
+            if (result == null)
+                return new ResponseBuilder()
+                    .WithStatus(Const.NOT_FOUND_CODE)
+                    .WithMessage(Const.NOT_FOUND_MSG);
+
+            return new ResponseBuilder()
+                .WithData(result)
+                .WithStatus(Const.SUCCESS_CODE)
+                .WithMessage(Const.SUCCESS_READ_MSG);
+        }
+        catch (Exception ex)
+        {
+            var errorMessage = $"An error {typeof(IdeaResult).Name}: {ex.Message}";
+            return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage(errorMessage);
+        }
+    }
+    
+    public async Task<BusinessResult> GetUserIdeasByStatusWithCurrentStageIdea(IdeaGetCurrentStageForUserByStatus query)
+    {
+        try
+        {
+            var userId = GetUserIdFromClaims();
+            if (userId == null) return HandlerError("User does not exist");
+
+            if (query.Status == null) return HandlerFail("Status cannot be null");
+
+            var currentStageIdea = await _stageIdeaRepositoty.GetCurrentStageIdea();
+            if (currentStageIdea == null) return HandlerFail("Current stage Idea does not exist");
+            var ideas = await _ideaRepository.GetUserIdeasByStatusWithCurrentStageIdea(userId, query.Status, currentStageIdea.Id);
             var result = _mapper.Map<List<IdeaResult>>(ideas);
             if (result == null)
                 return new ResponseBuilder()

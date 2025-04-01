@@ -10,10 +10,13 @@ namespace FPT.TeamMatching.Domain.Contracts.Repositories;
 public interface IIdeaRepository : IBaseRepository<Idea>
 {
     Task<IList<Idea>> GetIdeasByUserId(Guid userId);
-    
+
     Task<int> NumberApprovedIdeasOfSemester(Guid? semesterId);
 
     Task<List<Idea>> GetCurrentIdeaByUserIdAndStatus(Guid userId, IdeaStatus status);
+
+    Task<List<Idea>> GetUserIdeasByStatusWithCurrentStageIdea(Guid? userId, IdeaStatus? status,
+        Guid? currentStageIdeaId);
 
     Task<Idea?> GetLatestIdeaByUserAndStatus(Guid userId, IdeaStatus status);
 

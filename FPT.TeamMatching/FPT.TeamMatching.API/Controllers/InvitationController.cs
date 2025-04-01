@@ -25,10 +25,24 @@ public class InvitationController : ControllerBase
         return Ok(msg);
     }
 
-    [HttpGet("get-user-invitations-by-type")]
+    [HttpGet("me/by-type")]
     public async Task<IActionResult> GetUserInvitationsByType([FromQuery] InvitationGetByTypeQuery query)
     {
         var msg = await _service.GetUserInvitationsByType(query);
+        return Ok(msg);
+    }
+    
+    [HttpGet("me/by-status")]
+    public async Task<IActionResult> GetUserInvitationsByStatus([FromQuery] InvitationGetListForUserByStatus query)
+    {
+        var msg = await _service.GetUserInvitationsByStatus(query);
+        return Ok(msg);
+    }
+
+    [HttpGet("me/by-type-with-role-leader")]
+    public async Task<IActionResult> GetLeaderInvitationsByType([FromQuery] InvitationGetByTypeQuery query)
+    {
+        var msg = await _service.GetLeaderInvitationsByType(query);
         return Ok(msg);
     }
 
@@ -112,18 +126,19 @@ public class InvitationController : ControllerBase
         return Ok(businessResult);
     }
 
-    [HttpPut("approve-invitation-of-team-by-me/by-project-id/{projectId:guid}")]
-    public async Task<IActionResult> ApproveInvitationOfTeamByMe([FromRoute] Guid projectId)
+    [HttpPut("approve-or-reject-invitation-from-team-by-me")]
+    public async Task<IActionResult> ApproveOrRejectInvitationFromTeamByMe([FromBody] InvitationUpdateCommand command)
     {
-        var businessResult = await _service.ApproveInvitationOfTeamByMe(projectId);
+        var businessResult = await _service.ApproveOrRejectInvitationFromTeamByMe(command);
 
         return Ok(businessResult);
     }
-    
-    [HttpPut("cancel-invitation-of-team-by-me/by-project-id/{projectId:guid}")]
-    public async Task<IActionResult> CancelInvitationOfTeamByMe([FromRoute] Guid projectId)
+
+    [HttpPut("approve-or-reject-invitation-from-personalize-by-leader")]
+    public async Task<IActionResult> ApproveOrRejectInvitationFromPersonalizeByLeader(
+        [FromBody] InvitationUpdateCommand command)
     {
-        var businessResult = await _service.CancelInvitationOfTeamByMe(projectId);
+        var businessResult = await _service.ApproveOrRejectInvitationFromPersonalizeByLeader(command);
 
         return Ok(businessResult);
     }

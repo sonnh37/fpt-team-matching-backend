@@ -15,10 +15,12 @@ namespace FPT.TeamMatching.Data.Repositories;
 public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
 {
     private readonly FPTMatchingDbContext _dbContext;
+    private readonly IStageIdeaRepositoty _stageIdeaRepositoty;
 
-    public IdeaRepository(FPTMatchingDbContext dbContext) : base(dbContext)
+    public IdeaRepository(FPTMatchingDbContext dbContext, IStageIdeaRepositoty stageIdeaRepositoty) : base(dbContext)
     {
         _dbContext = dbContext;
+        _stageIdeaRepositoty = stageIdeaRepositoty;
     }
 
     public async Task<IList<Idea>> GetIdeasByUserId(Guid userId)
@@ -50,6 +52,20 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
     {
         var ideas = await _dbContext.Ideas.Where(e => e.OwnerId == userId
                                                       && e.Status == status)
+            .OrderByDescending(m => m.CreatedDate)
+            .Include(m => m.StageIdea)
+            .Include(e => e.IdeaRequests).ThenInclude(e => e.Reviewer)
+            .ToListAsync();
+
+        return ideas;
+    }
+    
+    public async Task<List<Idea>> GetUserIdeasByStatusWithCurrentStageIdea(Guid? userId, IdeaStatus? status, Guid? stageIdeaId)
+    {
+        var ideas = await _dbContext.Ideas.Where(e => e.OwnerId == userId
+                                                      && e.Status == status
+                                                      && e.StageIdeaId == stageIdeaId
+                                                      )
             .OrderByDescending(m => m.CreatedDate)
             .Include(m => m.StageIdea)
             .Include(e => e.IdeaRequests).ThenInclude(e => e.Reviewer)
