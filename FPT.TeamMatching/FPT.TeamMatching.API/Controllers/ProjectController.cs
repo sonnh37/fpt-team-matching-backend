@@ -4,6 +4,7 @@ using FPT.TeamMatching.Domain.Models.Requests.Queries.Projects;
 using FPT.TeamMatching.Domain.Models.Results;
 using FPT.TeamMatching.Domain.Utilities;
 using FPT.TeamMatching.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -25,6 +26,14 @@ public class ProjectController : ControllerBase
     {
         var msg = await _service.GetAll<ProjectResult>(query);
         return Ok(msg);
+    }
+    
+    [HttpGet("me/mentor-projects")]
+    [Authorize(Roles = "Lecturer")]
+    public async Task<IActionResult> GetProjectsForMentor([FromQuery] ProjectGetListForMentorQuery query)
+    {
+        var businessResult = await _service.GetProjectsForMentor(query);
+        return Ok(businessResult);
     }
 
     [HttpGet("{id:guid}")]
