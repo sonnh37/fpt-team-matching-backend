@@ -397,37 +397,183 @@ public class ReviewService : BaseService<Review>, IReviewService
         try
         {
             var projects = await GetProjectInProgress();
+            var reviews = GetReview();
             using (XLWorkbook wb = new XLWorkbook())
             {
-                var ws = wb.AddWorksheet(projects, "Danh sách nhóm được ra bảo vệ");
-                // Chèn dòng đầu tiên
-                ws.Row(1).InsertRowsAbove(1); // Chèn một dòng mới phía trên
+                // Lấy số dòng của projects
+                int projectRowCount = projects.Rows.Count;
 
-                // Gộp 6 cột đầu tiên
-                ws.Range("A1:F1").Merge();
+                // Lấy số dòng của reviews
+                int reviewRowCount = reviews.Rows.Count;
+
+                // Nếu reviews có ít dòng hơn, thêm các dòng trống vào cuối
+                if (reviewRowCount < projectRowCount)
+                {
+                    int missingRows = projectRowCount - reviewRowCount;
+                    for (int i = 0; i < missingRows; i++)
+                    {
+                        reviews.Rows.Add("");
+                    }
+                }
+                #region Sheet Review 1
+                var ws1 = wb.Worksheets.Add("Review 1");
+                
+                ws1.Cell(1,1).InsertTable(projects).Theme = XLTableTheme.TableStyleLight1;
+                ws1.Cell(1,9).InsertTable(reviews).Theme = XLTableTheme.TableStyleLight2;
+                // Chèn dòng đầu tiên
+                ws1.Row(1).InsertRowsAbove(1); // Chèn một dòng mới phía trên
+
+                // Gộp 7 cột project info
+                ws1.Range("B1:H1").Merge();
 
                 // Gán tiêu đề
-                ws.Cell("A1").Value = "LỊCH BẢO VỆ ĐỒ ÁN TỐT NGHIỆP";
+                ws1.Cell("B1").Value = "PROJECTS INFORMATION";
 
                 // Định dạng tiêu đề
-                ws.Cell("A1").Style.Font.Bold = true;
-                ws.Cell("A1").Style.Font.FontSize = 14;
-                ws.Cell("A1").Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-                ws.Cell("A1").Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+                ws1.Cell("B1").Style.Font.Bold = true;
+                ws1.Cell("B1").Style.Font.FontSize = 14;
+                ws1.Cell("B1").Style.Font.FontColor = XLColor.Red;
+                ws1.Cell("B1").Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
 
-                // Định dạng hàng tiêu đề (STT, Mã đề tài,...)
-                var headerRow = ws.Range("A2:F2");
-                headerRow.Style.Font.Bold = true;
-                headerRow.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-                headerRow.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
-                headerRow.Style.Fill.BackgroundColor = XLColor.LightGray; // Màu nền tiêu đề
+                // Định dạng hàng tiêu đề project info
+                var headerProjectInfoRow1 = ws1.Range("A2:H2");
+                headerProjectInfoRow1.Style.Font.Bold = true;
+                headerProjectInfoRow1.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
 
-                // Căn giữa toàn bộ cột "STT"
-                ws.Column("A").Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-                ws.Column("A").Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+                // Gộp 5 cột review
+                ws1.Range("I1:M1").Merge();
+
+                // Gán tiêu đề
+                ws1.Cell("I1").Value = "REVIEW 1";
+
+                // Định dạng tiêu đề
+                ws1.Cell("I1").Style.Font.Bold = true;
+                ws1.Cell("I1").Style.Font.FontSize = 14;
+                ws1.Cell("I1").Style.Font.FontColor = XLColor.DarkBlue;
+                ws1.Cell("I1").Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+                // Định dạng hàng tiêu đề review
+                var headerReviewRow1 = ws1.Range("I2:M2");
+                headerReviewRow1.Style.Font.Bold = true;
+                headerReviewRow1.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+                // Căn giữa 
+                ws1.Column("A").Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+                ws1.Column("G").Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+                ws1.Column("H").Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
 
                 // Tự động điều chỉnh độ rộng cột
-                ws.Columns().AdjustToContents();
+                ws1.Columns().AdjustToContents();
+                #endregion
+
+                #region Sheet Review 2
+                var ws2 = wb.AddWorksheet("Review 2");
+                
+                ws2.Cell(1, 1).InsertTable(projects).Theme = XLTableTheme.TableStyleLight1;
+                ws2.Cell(1, 9).InsertTable(reviews).Theme = XLTableTheme.TableStyleLight4;
+                // Chèn dòng đầu tiên
+                ws2.Row(1).InsertRowsAbove(1); // Chèn một dòng mới phía trên
+
+                // Gộp 7 cột project info
+                ws2.Range("B1:H1").Merge();
+
+                // Gán tiêu đề
+                ws2.Cell("B1").Value = "PROJECTS INFORMATION";
+
+                // Định dạng tiêu đề
+                ws2.Cell("B1").Style.Font.Bold = true;
+                ws2.Cell("B1").Style.Font.FontSize = 14;
+                ws2.Cell("B1").Style.Font.FontColor = XLColor.Red;
+                ws2.Cell("B1").Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+                // Định dạng hàng tiêu đề project info
+                var headerProjectInfoRow2 = ws2.Range("A2:H2");
+                headerProjectInfoRow2.Style.Font.Bold = true;
+                headerProjectInfoRow2.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+                // Gộp 5 cột review
+                ws2.Range("I1:M1").Merge();
+
+                // Gán tiêu đề
+                ws2.Cell("I1").Value = "REVIEW 2";
+
+                // Định dạng tiêu đề
+                ws2.Cell("I1").Style.Font.Bold = true;
+                ws2.Cell("I1").Style.Font.FontSize = 14;
+                ws2.Cell("I1").Style.Font.FontColor = XLColor.DarkGreen;
+                ws2.Cell("I1").Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+                // Định dạng hàng tiêu đề review
+                var headerReviewRow2 = ws2.Range("I2:M2");
+                headerReviewRow2.Style.Font.Bold = true;
+                headerReviewRow2.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+                // Căn giữa 
+                ws2.Column("A").Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+                ws2.Column("G").Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+                ws2.Column("H").Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+                // Tự động điều chỉnh độ rộng cột
+                ws2.Columns().AdjustToContents();
+                #endregion
+
+                #region Sheet Review 3
+                var ws3 = wb.AddWorksheet("Review 3");
+
+                ws3.Cell(1, 1).InsertTable(projects).Theme = XLTableTheme.TableStyleLight1;
+                ws3.Cell(1, 9).InsertTable(reviews).Theme = XLTableTheme.TableStyleLight5;
+                // Chèn dòng đầu tiên
+                ws3.Row(1).InsertRowsAbove(1); // Chèn một dòng mới phía trên
+
+                // Gộp 7 cột project info
+                ws3.Range("B1:H1").Merge();
+
+                // Gán tiêu đề
+                ws3.Cell("B1").Value = "PROJECTS INFORMATION";
+
+                // Định dạng tiêu đề
+                ws3.Cell("B1").Style.Font.Bold = true;
+                ws3.Cell("B1").Style.Font.FontSize = 14;
+                ws3.Cell("B1").Style.Font.FontColor = XLColor.Red;
+                ws3.Cell("B1").Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+                // Định dạng hàng tiêu đề project info
+                var headerProjectInfoRow3 = ws3.Range("A2:H2");
+                headerProjectInfoRow3.Style.Font.Bold = true;
+                headerProjectInfoRow3.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+                // Gộp 5 cột review
+                ws3.Range("I1:M1").Merge();
+
+                // Gán tiêu đề
+                ws3.Cell("I1").Value = "REVIEW 3";
+
+                // Định dạng tiêu đề
+                ws3.Cell("I1").Style.Font.Bold = true;
+                ws3.Cell("I1").Style.Font.FontSize = 14;
+                ws3.Cell("I1").Style.Font.FontColor = XLColor.DarkPastelPurple;
+                ws3.Cell("I1").Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+                // Định dạng hàng tiêu đề review
+                var headerReviewRow3 = ws3.Range("I2:M2");
+                headerReviewRow3.Style.Font.Bold = true;
+                headerReviewRow3.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+                // Căn giữa 
+                ws3.Column("A").Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+                ws3.Column("G").Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+                ws3.Column("H").Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+
+                // Tự động điều chỉnh độ rộng cột
+                ws3.Columns().AdjustToContents();
+                #endregion
+
                 using (MemoryStream ms = new MemoryStream())
                 {
                     wb.SaveAs(ms);
@@ -460,11 +606,6 @@ public class ReviewService : BaseService<Review>, IReviewService
         dt.Columns.Add("GVHD");
         dt.Columns.Add("GVHD1");
         dt.Columns.Add("GVHD2");
-        dt.Columns.Add("Reviewer 1");
-        dt.Columns.Add("Reviewer 2");
-        dt.Columns.Add("Date");
-        dt.Columns.Add("Slot");
-        dt.Columns.Add("Room");
 
         var currentSemester = await _semesterRepository.GetCurrentSemester();
         if (currentSemester == null)
@@ -482,9 +623,19 @@ public class ReviewService : BaseService<Review>, IReviewService
             dt.Rows.Add(index++, item.Idea.IdeaCode, item.TeamCode,
                 item.Idea.EnglishName, item.Idea.VietNamName,
                 item.Idea.Mentor.LastName + " " + item.Idea.Mentor.FirstName,
-                item.Idea.Mentor.Email.Split('@')[0],
-                (item.Idea.SubMentorId == null ? null : item.Idea.SubMentor.Email.Split('@')[0]));
+                item.Idea.Mentor.Code,
+                (item.Idea.SubMentorId == null ? null : item.Idea.SubMentor.Code));
         });
+        return dt;
+    }
+    private DataTable GetReview()
+    {
+        DataTable dt = new DataTable();
+        dt.Columns.Add("Reviewer 1");
+        dt.Columns.Add("Reviewer 2");
+        dt.Columns.Add("Date");
+        dt.Columns.Add("Slot");
+        dt.Columns.Add("Room");
         return dt;
     }
 }
