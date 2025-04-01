@@ -17,6 +17,8 @@ public class TeamMember : BaseEntity
     
     public TeamMemberStatus? Status { get; set; }
 
+    public MentorConclusionOptions? MentorConclusion {  get; set; }
+
     public virtual Project? Project { get; set; }
     
     public virtual User? User { get; set; }
