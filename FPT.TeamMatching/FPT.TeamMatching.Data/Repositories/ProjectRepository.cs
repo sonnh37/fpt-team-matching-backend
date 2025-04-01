@@ -104,17 +104,30 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
         return project;
     }
 
-    public async Task<List<Project>?> GetProjectsInFourthWeekByToday()
+    public async Task<List<Project>> GetProjectBySemesterIdAndDefenseStage(Guid semesterId, int defenseStage)
     {
-        DateTime today = DateTime.UtcNow.Date;
-        
-        var projects = await _context.Projects.Where(p => p.Idea != null &&
-                                            p.Idea.StageIdea != null &&
-                                            p.Idea.StageIdea.Semester != null &&
-                                            p.Idea.StageIdea.Semester.StartDate != null &&
-                                            p.Idea.StageIdea.Semester.StartDate.Value.UtcDateTime.AddDays(3 * 7).Date == today)
-                                            .Include(e => e.Idea).ThenInclude(e => e.StageIdea).ThenInclude(e => e.Semester)
-                                            .ToListAsync();
-        return projects;
+        var project = await _context.Projects.Where(e => e.IsDeleted == false &&
+                                                    e.DefenseStage == defenseStage &&
+                                                    e.Idea != null &&
+                                                    e.Idea.StageIdea != null &&
+                                                    e.Idea.StageIdea.Semester != null &&
+                                                    e.Idea.StageIdea.Semester.Id == semesterId)
+                                                .Include(e => e.Idea)
+                                                .ToListAsync();
+        return project;
     }
+
+    //public async Task<List<Project>?> GetProjectsInFourthWeekByToday()
+    //{
+    //    DateTime today = DateTime.UtcNow.Date;
+
+    //    var projects = await _context.Projects.Where(p => p.Idea != null &&
+    //                                        p.Idea.StageIdea != null &&
+    //                                        p.Idea.StageIdea.Semester != null &&
+    //                                        p.Idea.StageIdea.Semester.StartDate != null &&
+    //                                        p.Idea.StageIdea.Semester.StartDate.Value.UtcDateTime.AddDays(3 * 7).Date == today)
+    //                                        .Include(e => e.Idea).ThenInclude(e => e.StageIdea).ThenInclude(e => e.Semester)
+    //                                        .ToListAsync();
+    //    return projects;
+    //}
 }

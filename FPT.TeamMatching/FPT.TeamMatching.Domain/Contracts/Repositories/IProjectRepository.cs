@@ -10,7 +10,7 @@ public interface IProjectRepository : IBaseRepository<Project>
     Task<Project?> GetProjectByCode(string code);
     Task<Project?> GetProjectOfUserLogin(Guid userId);
     Task<int> NumberOfInProgressProjectInSemester(Guid semesterId);
-    Task<Project?> GetProjectByLeaderId(Guid leaderId); 
-
-    Task<List<Project>?> GetProjectsInFourthWeekByToday();
+    Task<Project?> GetProjectByLeaderId(Guid leaderId);
+    Task<List<Project>> GetProjectBySemesterIdAndDefenseStage(Guid semesterId, int defenseStage);
+    //Task<List<Project>?> GetProjectsInFourthWeekByToday();
 }

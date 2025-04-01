@@ -23,6 +23,8 @@ public class Project : BaseEntity
 
     public virtual Idea? Idea { get; set; }
 
+    public virtual MentorFeedback? MentorFeedback { get; set; }
+
     public virtual ICollection<Invitation> Invitations { get; set; } = new List<Invitation>();
 
     public virtual ICollection<Review> Reviews { get; set; } = new List<Review>();

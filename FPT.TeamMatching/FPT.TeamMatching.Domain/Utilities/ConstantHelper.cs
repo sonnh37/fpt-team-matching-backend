@@ -107,6 +107,8 @@ public static class Const
 
     public const string API_IDEA_HISTORY_REQUESTS = $"{BaseApi}/idea-history-requests";
 
+    public const string API_MENTOR_FEEDBACKS = $"{BaseApi}/mentor-feedbacks";
+
     public const string SortFieldDefault = "CreatedDate";
 
     public const string HANGFIRE = $"{BaseApi}/hangfire";

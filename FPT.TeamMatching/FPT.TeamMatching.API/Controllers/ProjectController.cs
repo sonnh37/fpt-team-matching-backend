@@ -86,4 +86,21 @@ public class ProjectController : ControllerBase
         return Ok(businessResult);
     }
 
+    [HttpGet("export-excel/{defenseStage:int}")]
+    public async Task<IActionResult> ExportExcel([FromRoute] int defenseStage)
+    {
+        // Gọi service để xuất Excel
+        var businessResult = await _service.ExportExcelTeamsDefense(defenseStage);
+
+        // Kiểm tra kết quả trả về
+        if (businessResult.Status == Const.SUCCESS_CODE && businessResult.Data is byte[] fileBytes)
+        {
+            // Trả về file Excel cho người dùng
+            return File(fileBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "DanhSachNhomDuocRaBaoVe.xlsx");
+        }
+
+        // Trả về kết quả lỗi nếu không có dữ liệu
+        return Ok(businessResult);
+    }
+
 }

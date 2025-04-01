@@ -14,6 +14,8 @@ public class TeamMemberGetAllQuery : GetQueryableQuery
     public DateTimeOffset? JoinDate { get; set; }
 
     public DateTimeOffset? LeaveDate { get; set; }
-    
+
     public TeamMemberStatus? Status { get; set; }
+
+    public MentorConclusionOptions? MentorConclusion { get; set; }
 }

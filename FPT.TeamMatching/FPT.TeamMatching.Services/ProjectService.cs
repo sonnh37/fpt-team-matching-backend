@@ -1,5 +1,8 @@
 ﻿using AutoMapper;
+using ClosedXML.Excel;
 using CloudinaryDotNet.Core;
+using DocumentFormat.OpenXml.Office2010.Excel;
+using DocumentFormat.OpenXml.Spreadsheet;
 using FPT.TeamMatching.Domain.Contracts.Repositories;
 using FPT.TeamMatching.Domain.Contracts.Services;
 using FPT.TeamMatching.Domain.Contracts.UnitOfWorks;
@@ -13,6 +16,7 @@ using FPT.TeamMatching.Domain.Models.Results;
 using FPT.TeamMatching.Domain.Utilities;
 using FPT.TeamMatching.Services.Bases;
 using Microsoft.EntityFrameworkCore;
+using System.Data;
 
 // ReSharper disable All
 
@@ -23,6 +27,7 @@ public class ProjectService : BaseService<Project>, IProjectService
     private readonly IProjectRepository _projectRepository;
     private readonly ITeamMemberService _serviceTeam;
     private readonly ITeamMemberRepository _teamMemberRepository;
+    private readonly ISemesterRepository _semesterRepository;
 
     public ProjectService(IMapper mapper, IUnitOfWork unitOfWork, ITeamMemberService teamMemberService) : base(mapper,
         unitOfWork)
@@ -30,6 +35,7 @@ public class ProjectService : BaseService<Project>, IProjectService
         _projectRepository = unitOfWork.ProjectRepository;
         _serviceTeam = teamMemberService;
         _teamMemberRepository = unitOfWork.TeamMemberRepository;
+        _semesterRepository = unitOfWork.SemesterRepository;
     }
 
     //public async Task<Project?> GetProjectByUserId(Guid userId)
@@ -55,7 +61,7 @@ public class ProjectService : BaseService<Project>, IProjectService
             if (project.Status == ProjectStatus.Canceled ||
                 project.Status == ProjectStatus.Completed)
                 return HandlerFail("Người dùng không có project đang tồn tại trong kì này");
-            
+
             var result = _mapper.Map<ProjectResult>(project);
             if (result == null)
                 return new ResponseBuilder()
@@ -166,16 +172,13 @@ public class ProjectService : BaseService<Project>, IProjectService
                 .WithMessage(errorMessage);
         }
     }
-    
+
     public new async Task<BusinessResult> DeleteById(Guid id, bool isPermanent = false)
     {
         try
         {
             if (isPermanent)
             {
-                // 
-                
-                
                 // Delete Project
                 var isDeleted = await DeleteEntityPermanently(id);
                 return isDeleted
@@ -217,5 +220,93 @@ public class ProjectService : BaseService<Project>, IProjectService
                 .WithStatus(Const.FAIL_CODE)
                 .WithMessage(errorMessage);
         }
+    }
+
+    public async Task<BusinessResult> ExportExcelTeamsDefense(int defenseStage)
+    {
+        try
+        {
+            var teamDefense = await GetTeamsDefense(defenseStage);
+            using (XLWorkbook wb = new XLWorkbook())
+            {
+                var ws = wb.AddWorksheet(teamDefense, "Danh sách nhóm được ra bảo vệ");
+                // Chèn dòng đầu tiên
+                ws.Row(1).InsertRowsAbove(1); // Chèn một dòng mới phía trên
+
+                // Gộp 6 cột đầu tiên
+                ws.Range("A1:F1").Merge();
+
+                // Gán tiêu đề
+                ws.Cell("A1").Value = "LỊCH BẢO VỆ ĐỒ ÁN TỐT NGHIỆP";
+
+                // Định dạng tiêu đề
+                ws.Cell("A1").Style.Font.Bold = true;
+                ws.Cell("A1").Style.Font.FontSize = 14;
+                ws.Cell("A1").Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                ws.Cell("A1").Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+
+                // Định dạng hàng tiêu đề (STT, Mã đề tài,...)
+                var headerRow = ws.Range("A2:F2");
+                headerRow.Style.Font.Bold = true;
+                headerRow.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                headerRow.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+                headerRow.Style.Fill.BackgroundColor = XLColor.LightGray; // Màu nền tiêu đề
+
+                // Căn giữa toàn bộ cột "STT"
+                ws.Column("A").Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                ws.Column("A").Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+
+                // Tự động điều chỉnh độ rộng cột
+                ws.Columns().AdjustToContents();
+                using (MemoryStream ms = new MemoryStream())
+                {
+                    wb.SaveAs(ms);
+                    byte[] fileBytes = ms.ToArray();
+                    return new ResponseBuilder()
+                        .WithData(fileBytes)
+                    .WithStatus(Const.SUCCESS_CODE)
+                    .WithMessage(Const.SUCCESS_READ_MSG);
+                }
+            }
+        }
+
+        catch (Exception ex)
+        {
+            var errorMessage = $"An error occurred while export excel";
+            return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage(errorMessage);
+        }
+    }
+
+    private async Task<DataTable> GetTeamsDefense(int defenseStage)
+    {
+        DataTable dt = new DataTable();
+        dt.Columns.Add("STT");
+        dt.Columns.Add("Mã đề tài");
+        dt.Columns.Add("Tên đề tài tiếng anh");
+        dt.Columns.Add("Ngày");
+        dt.Columns.Add("Thời gian");
+        dt.Columns.Add("Hội trường");
+
+        var currentSemester = await _semesterRepository.GetCurrentSemester();
+        if (currentSemester == null)
+        {
+            return dt;
+        }
+        var teamDefenses = await _projectRepository.GetProjectBySemesterIdAndDefenseStage(currentSemester.Id, defenseStage);
+        if (teamDefenses == null)
+        {
+            return dt;
+        }
+        if (teamDefenses.Count > 0)
+        {
+            int index = 1;
+            teamDefenses.ForEach(item =>
+            {
+                dt.Rows.Add(index++, item.Idea.IdeaCode, item.Idea.EnglishName);
+            });
+        }
+        return dt;
     }
 }
