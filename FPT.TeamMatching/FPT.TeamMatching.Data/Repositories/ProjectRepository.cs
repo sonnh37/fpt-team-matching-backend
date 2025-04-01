@@ -4,6 +4,8 @@ using FPT.TeamMatching.Data.Repositories.Base;
 using FPT.TeamMatching.Domain.Contracts.Repositories;
 using FPT.TeamMatching.Domain.Entities;
 using FPT.TeamMatching.Domain.Enums;
+using FPT.TeamMatching.Domain.Models.Requests.Queries.Projects;
+using FPT.TeamMatching.Domain.Utilities.Filters;
 using Microsoft.EntityFrameworkCore;
 
 namespace FPT.TeamMatching.Data.Repositories;
@@ -20,9 +22,9 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
     public async Task<Project?> GetProjectByUserIdLogin(Guid userId)
     {
         var teamMember = await _context.TeamMembers.Where(e => e.UserId == userId &&
-                                                    e.LeaveDate == null &&
-                                                    e.IsDeleted == false)
-                                                    .FirstOrDefaultAsync();
+                                                               e.LeaveDate == null &&
+                                                               e.IsDeleted == false)
+            .FirstOrDefaultAsync();
         if (teamMember != null)
         {
             var project = await _context.Projects.Where(e => e.Id == teamMember.ProjectId)
@@ -71,49 +73,50 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
     public async Task<Project?> GetProjectOfUserLogin(Guid userId)
     {
         var teamMember = await _context.TeamMembers.Where(e => e.IsDeleted == false &&
-                                                e.UserId == userId &&
-                                                e.Status == TeamMemberStatus.Pending)
-                                            .FirstOrDefaultAsync();
+                                                               e.UserId == userId &&
+                                                               e.Status == TeamMemberStatus.Pending)
+            .FirstOrDefaultAsync();
         if (teamMember != null)
         {
             var project = await _context.Projects.Where(e => e.IsDeleted == false &&
-                                                e.Id == teamMember.ProjectId)
-                                            .FirstOrDefaultAsync();
+                                                             e.Id == teamMember.ProjectId)
+                .FirstOrDefaultAsync();
             return project;
         }
+
         return null;
     }
 
     public async Task<int> NumberOfInProgressProjectInSemester(Guid semesterId)
     {
         var number = await _context.Projects.Where(e => e.Status == ProjectStatus.InProgress &&
-                                                          e.IsDeleted == false &&
-                                                          e.Idea != null &&
-                                                          e.Idea.StageIdea != null &&
-                                                          e.Idea.StageIdea.SemesterId == semesterId)
-                                            .CountAsync();
+                                                        e.IsDeleted == false &&
+                                                        e.Idea != null &&
+                                                        e.Idea.StageIdea != null &&
+                                                        e.Idea.StageIdea.SemesterId == semesterId)
+            .CountAsync();
         return number;
     }
 
     public async Task<Project?> GetProjectByLeaderId(Guid leaderId)
     {
         var project = await _context.Projects.Where(e => e.IsDeleted == false &&
-                                                    e.LeaderId == leaderId &&
-                                                    e.Status == ProjectStatus.Pending)
-                                            .FirstOrDefaultAsync();
+                                                         e.LeaderId == leaderId &&
+                                                         e.Status == ProjectStatus.Pending)
+            .FirstOrDefaultAsync();
         return project;
     }
 
     public async Task<List<Project>> GetProjectBySemesterIdAndDefenseStage(Guid semesterId, int defenseStage)
     {
         var project = await _context.Projects.Where(e => e.IsDeleted == false &&
-                                                    e.DefenseStage == defenseStage &&
-                                                    e.Idea != null &&
-                                                    e.Idea.StageIdea != null &&
-                                                    e.Idea.StageIdea.Semester != null &&
-                                                    e.Idea.StageIdea.Semester.Id == semesterId)
-                                                .Include(e => e.Idea)
-                                                .ToListAsync();
+                                                         e.DefenseStage == defenseStage &&
+                                                         e.Idea != null &&
+                                                         e.Idea.StageIdea != null &&
+                                                         e.Idea.StageIdea.Semester != null &&
+                                                         e.Idea.StageIdea.Semester.Id == semesterId)
+            .Include(e => e.Idea)
+            .ToListAsync();
         return project;
     }
 
@@ -141,4 +144,31 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
     //                                        .ToListAsync();
     //    return projects;
     //}
+
+    public async Task<(List<Project>, int)> GetProjectsForMentor(ProjectGetListForMentorQuery query, Guid userId)
+    {
+        var queryable = GetQueryable();
+        queryable = queryable
+            .Include(m => m.Idea)
+            .Include(m => m.Leader)
+            .Include(m => m.MentorFeedback);
+
+        queryable = queryable.Where(m => m.Idea != null && m.Idea.MentorId == userId);
+        
+        queryable = BaseFilterHelper.Base(queryable, query);
+        if (query.IsPagination)
+        {
+            var totalOrigin = queryable.Count();
+            queryable = Sort(queryable, query);
+            var results = await GetQueryablePagination(queryable, query).ToListAsync();
+
+            return (results, totalOrigin);
+        }
+        else
+        {
+            queryable = Sort(queryable, query);
+            var results = await queryable.ToListAsync();
+            return (results, results.Count);
+        }
+    }
 }

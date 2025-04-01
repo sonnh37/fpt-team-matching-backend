@@ -377,6 +377,27 @@ public partial class FPTMatchingDbContext : BaseDbContext
             
             entity.HasOne(d => d.Specialty).WithMany(p => p.Ideas)
                 .HasForeignKey(d => d.SpecialtyId);
+            
+            // Add these cascade configurations
+            entity.HasOne(d => d.Project)
+                .WithOne(p => p.Idea)
+                .HasForeignKey<Project>(d => d.IdeaId)
+                .OnDelete(DeleteBehavior.SetNull);
+    
+            entity.HasMany(d => d.IdeaRequests)
+                .WithOne(p => p.Idea)
+                .HasForeignKey(d => d.IdeaId)
+                .OnDelete(DeleteBehavior.Cascade);
+    
+            entity.HasMany(d => d.IdeaHistories)
+                .WithOne(p => p.Idea)
+                .HasForeignKey(d => d.IdeaId)
+                .OnDelete(DeleteBehavior.Cascade);
+    
+            entity.HasMany(d => d.MentorIdeaRequests)
+                .WithOne(p => p.Idea)
+                .HasForeignKey(d => d.IdeaId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<IdeaRequest>(entity =>
