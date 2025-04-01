@@ -15,9 +15,11 @@ public class TeamMemberResult : BaseResult
     public DateTimeOffset? JoinDate { get; set; }
 
     public DateTimeOffset? LeaveDate { get; set; }
-    
+
     public TeamMemberStatus? Status { get; set; }
-    
+
+    public MentorConclusionOptions? MentorConclusion { get; set; }
+
     public UserResult? User { get; set; }
     
     public ProjectResult? Project { get; set; }

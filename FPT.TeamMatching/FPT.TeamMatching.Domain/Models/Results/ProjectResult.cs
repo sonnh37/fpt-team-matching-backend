@@ -22,6 +22,8 @@ public class ProjectResult : BaseResult
 
     public IdeaResult? Idea { get; set; }
 
+    public MentorFeedbackResult? MentorFeedback { get; set; }
+
     public ICollection<TeamMemberResult> TeamMembers { get; set; } = new List<TeamMemberResult>();
 
     public ICollection<InvitationResult> Invitations { get; set; } = new List<InvitationResult>();
