@@ -79,7 +79,7 @@ public class ReviewController : ControllerBase
     }
 
     [HttpPost("get-by-review-number-and-semester-id")]
-    public async Task<IActionResult> ImportExcel([FromBody] ReviewFilterRequest request)
+    public async Task<IActionResult> GetByReviewNumberAndSemesterId([FromBody] ReviewFilterRequest request)
     {
         var businessResult = await _service.GetReviewByReviewNumberAndSemesterIdPaging
                                     (request.Number, request.SemesterId);
@@ -93,6 +93,22 @@ public class ReviewController : ControllerBase
         return Ok(result);
     }
 
+    [HttpGet("export-excel-for-reviews")]
+    public async Task<IActionResult> ExportExcel()
+    {
+        // Gọi service để xuất Excel
+        var businessResult = await _service.ExportExcelForReviews();
+
+        // Kiểm tra kết quả trả về
+        if (businessResult.Status == Const.SUCCESS_CODE && businessResult.Data is byte[] fileBytes)
+        {
+            // Trả về file Excel cho người dùng
+            return File(fileBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "Lich_3_Buoi_Review.xlsx");
+        }
+
+        // Trả về kết quả lỗi nếu không có dữ liệu
+        return Ok(businessResult);
+    }
     //[HttpPut("council-assign-reviewers")]
     //public async Task<IActionResult> CouncilAssignReviewers([FromBody] CouncilAssignReviewers request)
     //{

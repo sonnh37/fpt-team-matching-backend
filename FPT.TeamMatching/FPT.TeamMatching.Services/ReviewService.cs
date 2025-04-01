@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using ClosedXML.Excel;
 using ExcelDataReader;
 using FPT.TeamMatching.Domain.Contracts.Repositories;
 using FPT.TeamMatching.Domain.Contracts.Services;
@@ -13,6 +14,7 @@ using FPT.TeamMatching.Services.Bases;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Pipelines.Sockets.Unofficial.Arenas;
+using System.Data;
 
 namespace FPT.TeamMatching.Services;
 
@@ -388,5 +390,101 @@ public class ReviewService : BaseService<Review>, IReviewService
                 .WithStatus(Const.FAIL_CODE)
                 .WithMessage(errorMessage);
         }
+    }
+
+    public async Task<BusinessResult> ExportExcelForReviews()
+    {
+        try
+        {
+            var projects = await GetProjectInProgress();
+            using (XLWorkbook wb = new XLWorkbook())
+            {
+                var ws = wb.AddWorksheet(projects, "Danh sách nhóm được ra bảo vệ");
+                // Chèn dòng đầu tiên
+                ws.Row(1).InsertRowsAbove(1); // Chèn một dòng mới phía trên
+
+                // Gộp 6 cột đầu tiên
+                ws.Range("A1:F1").Merge();
+
+                // Gán tiêu đề
+                ws.Cell("A1").Value = "LỊCH BẢO VỆ ĐỒ ÁN TỐT NGHIỆP";
+
+                // Định dạng tiêu đề
+                ws.Cell("A1").Style.Font.Bold = true;
+                ws.Cell("A1").Style.Font.FontSize = 14;
+                ws.Cell("A1").Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                ws.Cell("A1").Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+
+                // Định dạng hàng tiêu đề (STT, Mã đề tài,...)
+                var headerRow = ws.Range("A2:F2");
+                headerRow.Style.Font.Bold = true;
+                headerRow.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                headerRow.Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+                headerRow.Style.Fill.BackgroundColor = XLColor.LightGray; // Màu nền tiêu đề
+
+                // Căn giữa toàn bộ cột "STT"
+                ws.Column("A").Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                ws.Column("A").Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
+
+                // Tự động điều chỉnh độ rộng cột
+                ws.Columns().AdjustToContents();
+                using (MemoryStream ms = new MemoryStream())
+                {
+                    wb.SaveAs(ms);
+                    byte[] fileBytes = ms.ToArray();
+                    return new ResponseBuilder()
+                        .WithData(fileBytes)
+                    .WithStatus(Const.SUCCESS_CODE)
+                    .WithMessage(Const.SUCCESS_READ_MSG);
+                }
+            }
+        }
+
+        catch (Exception ex)
+        {
+            var errorMessage = $"An error occurred while export excel";
+            return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage(errorMessage);
+        }
+    }
+
+    private async Task<DataTable> GetProjectInProgress()
+    {
+        DataTable dt = new DataTable();
+        dt.Columns.Add("STT");
+        dt.Columns.Add("Mã đề tài");
+        dt.Columns.Add("Mã nhóm");
+        dt.Columns.Add("Tên đề tài Tiếng Anh/ Tiếng Nhật");
+        dt.Columns.Add("Tên đề tài Tiếng Việt");
+        dt.Columns.Add("GVHD");
+        dt.Columns.Add("GVHD1");
+        dt.Columns.Add("GVHD2");
+        dt.Columns.Add("Reviewer 1");
+        dt.Columns.Add("Reviewer 2");
+        dt.Columns.Add("Date");
+        dt.Columns.Add("Slot");
+        dt.Columns.Add("Room");
+
+        var currentSemester = await _semesterRepository.GetCurrentSemester();
+        if (currentSemester == null)
+        {
+            return dt;
+        }
+        var projects = await _projectRepository.GetInProgressProjectBySemesterId(currentSemester.Id);
+        if (projects.Count == 0)
+        {
+            return dt;
+        }
+        int index = 1;
+        projects.ForEach(item =>
+        {
+            dt.Rows.Add(index++, item.Idea.IdeaCode, item.TeamCode,
+                item.Idea.EnglishName, item.Idea.VietNamName,
+                item.Idea.Mentor.LastName + " " + item.Idea.Mentor.FirstName,
+                item.Idea.Mentor.Email.Split('@')[0],
+                (item.Idea.SubMentorId == null ? null : item.Idea.SubMentor.Email.Split('@')[0]));
+        });
+        return dt;
     }
 }

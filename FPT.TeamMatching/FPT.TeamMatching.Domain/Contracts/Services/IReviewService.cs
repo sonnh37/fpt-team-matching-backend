@@ -16,4 +16,5 @@ public interface IReviewService : IBaseService
     Task<BusinessResult> ImportExcel(IFormFile file, int reviewNumber, Guid semesterId);
     Task<BusinessResult> GetReviewByReviewNumberAndSemesterIdPaging(int number, Guid semesterId);
     Task<BusinessResult> UpdateFilerReview(UploadFileUrl request);
+    Task<BusinessResult> ExportExcelForReviews();
 }
