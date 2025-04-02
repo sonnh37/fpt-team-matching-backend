@@ -5,12 +5,15 @@ using FPT.TeamMatching.Domain.Contracts.UnitOfWorks;
 using FPT.TeamMatching.Domain.Entities;
 using FPT.TeamMatching.Domain.Enums;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Ideas;
+using FPT.TeamMatching.Domain.Models.Requests.Commands.Notifications;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Ideas;
 using FPT.TeamMatching.Domain.Models.Responses;
 using FPT.TeamMatching.Domain.Models.Results;
 using FPT.TeamMatching.Domain.Models.Results.Bases;
 using FPT.TeamMatching.Domain.Utilities;
 using FPT.TeamMatching.Services.Bases;
+using FPT.TeamMatching.Services.Hubs;
+using Microsoft.AspNetCore.SignalR;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace FPT.TeamMatching.Services;
@@ -24,8 +27,9 @@ public class IdeaService : BaseService<Idea>, IIdeaService
     private readonly IUserRepository _userRepository;
     private readonly IStageIdeaRepositoty _stageIdeaRepositoty;
     private readonly ITeamMemberRepository _teamMemberRepository;
+    private readonly INotificationService _notificationService;
 
-    public IdeaService(IMapper mapper, IUnitOfWork unitOfWork) : base(mapper, unitOfWork)
+    public IdeaService(IMapper mapper, IUnitOfWork unitOfWork, INotificationService notificationService) : base(mapper, unitOfWork)
     {
         _ideaRepository = unitOfWork.IdeaRepository;
         _ideaRequestRepository = unitOfWork.IdeaRequestRepository;
@@ -34,6 +38,7 @@ public class IdeaService : BaseService<Idea>, IIdeaService
         _userRepository = unitOfWork.UserRepository;
         _stageIdeaRepositoty = unitOfWork.StageIdeaRepository;
         _teamMemberRepository = unitOfWork.TeamMemberRepository;
+        _notificationService = notificationService;
     }
 
 
@@ -281,6 +286,15 @@ public class IdeaService : BaseService<Idea>, IIdeaService
                     .WithMessage(Const.FAIL_SAVE_MSG);
             }
 
+            var command = new NotificationCreateCommand
+            {
+                UserId = userId,
+                Description = "Test, create idea",
+                Type = NotificationType.General,
+                IsRead = false,
+            };
+            await _notificationService.CreateOrUpdate<NotificationResult>(command);
+            
             return new ResponseBuilder()
                 .WithStatus(Const.SUCCESS_CODE)
                 .WithMessage(Const.SUCCESS_SAVE_MSG);

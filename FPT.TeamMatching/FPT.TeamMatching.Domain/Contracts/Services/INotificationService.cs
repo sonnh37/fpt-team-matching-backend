@@ -13,6 +13,6 @@ public interface INotificationService : IBaseService
     Task<BusinessResult> GetNotificationByUserId(Guid userId);
     Task<BusinessResult> UpdateSeenNotification(Guid notificationId);
     Task<BusinessResult> DeleteNotification(Guid notificationId);
-    Task<BusinessResult> GetNotificationsByCurrentUser(NotificationGetAllByCurrentUserQuery query);
-    new Task<BusinessResult> CreateOrUpdate<TResult>(CreateOrUpdateCommand createOrUpdateCommand) where TResult : BaseResult;
+    Task<BusinessResult> GetNotificationsByCurrentUser(NotificationGetAllByCurrentUserQuery query); 
+    Task<BusinessResult> CreateOrUpdate(CreateOrUpdateCommand createOrUpdateCommand);
 }
