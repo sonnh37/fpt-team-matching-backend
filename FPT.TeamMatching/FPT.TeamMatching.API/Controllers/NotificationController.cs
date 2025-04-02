@@ -5,6 +5,7 @@ using FPT.TeamMatching.Domain.Models.Requests.Queries.Notifications;
 using FPT.TeamMatching.Domain.Models.Responses;
 using FPT.TeamMatching.Domain.Models.Results;
 using FPT.TeamMatching.Domain.Utilities;
+using FPT.TeamMatching.Services.Hubs;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
@@ -73,21 +74,7 @@ public class NotificationController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] NotificationCreateCommand request)
     {
-        var userIdClaim = HttpContext.User.FindFirst("Id");
-        var userId = userIdClaim?.Value;
-
-        if (string.IsNullOrEmpty(userId))
-        {
-            return Ok(new ResponseBuilder()
-                .WithStatus(Const.FAIL_CODE)
-                .WithMessage("Not logged in")
-                );
-        }
-
         var msg = await _notificationService.CreateOrUpdate<NotificationResult>(request);
-        if (msg.Status == 1)
-            await _hubContext.Clients.User(userId).SendAsync("ReceiveNotification", msg.Data);
-
         return Ok(msg);
     }
 
@@ -95,7 +82,7 @@ public class NotificationController : ControllerBase
     public async Task<IActionResult> Update([FromBody] NotificationUpdateCommand request)
     {
         var businessResult = await _notificationService.CreateOrUpdate<NotificationResult>(request);
-
+    
         return Ok(businessResult);
     }
 

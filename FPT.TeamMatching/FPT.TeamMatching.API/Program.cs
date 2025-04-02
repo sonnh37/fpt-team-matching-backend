@@ -11,6 +11,7 @@ using FPT.TeamMatching.Domain.Contracts.Services;
 using FPT.TeamMatching.Domain.Models;
 using FPT.TeamMatching.Domain.Utilities.Redis;
 using FPT.TeamMatching.Services;
+using FPT.TeamMatching.Services.Hubs;
 using Hangfire;
 using Hangfire.PostgreSql;
 using Microsoft.AspNetCore.Authentication;

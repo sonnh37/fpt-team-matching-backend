@@ -13,8 +13,6 @@ public class ProfileStudentUpdateCommand : UpdateCommand
 
     public string? Bio { get; set; }
 
-    public string? Code { get; set; }
-
     public string? Achievement { get; set; }
 
     public string? ExperienceProject { get; set; }

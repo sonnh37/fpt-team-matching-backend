@@ -13,6 +13,7 @@ using FPT.TeamMatching.Domain.Models.Results.Bases;
 using FPT.TeamMatching.Domain.Utilities;
 using FPT.TeamMatching.Domain.Utilities.Filters;
 using FPT.TeamMatching.Services.Bases;
+using FPT.TeamMatching.Services.Hubs;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 
@@ -21,23 +22,36 @@ namespace FPT.TeamMatching.Services;
 public class NotificationService : BaseService<Notification>, INotificationService
 {
     private readonly INotificationRepository _notificationRepository;
+    private readonly IHubContext<NotificationHub> _hubContext;
 
-    public NotificationService(IUnitOfWork unitOfWork, IMapper mapper) : base(mapper, unitOfWork)
+    public NotificationService(
+        IUnitOfWork unitOfWork, 
+        IMapper mapper,
+        IHubContext<NotificationHub> hubContext) : base(mapper, unitOfWork)
     {
         _notificationRepository = unitOfWork.NotificationRepository;
+        _hubContext = hubContext;
+    }
+    
+    public async Task SendNotification(string userId, object data)
+    {
+        await _hubContext.Clients.User(userId).SendAsync("ReceiveNotification", data);
     }
 
-    public new async Task<BusinessResult> CreateOrUpdate<TResult>(CreateOrUpdateCommand createOrUpdateCommand)
-        where TResult : BaseResult
+    public async Task<BusinessResult> CreateOrUpdate(CreateOrUpdateCommand createOrUpdateCommand)
     {
         try
         {
             var entity = await CreateOrUpdateEntity(createOrUpdateCommand);
-            var result = _mapper.Map<TResult>(entity);
+            var result = _mapper.Map<NotificationResult>(entity);
             if (result == null)
                 return new ResponseBuilder()
                     .WithStatus(Const.FAIL_CODE)
                     .WithMessage(Const.FAIL_SAVE_MSG);
+
+            if (result.UserId == null) return HandlerFail("Not found user id in message");
+            
+            await SendNotification(result.UserId.Value.ToString(), result);
 
             var msg = new ResponseBuilder()
                 .WithData(result)
