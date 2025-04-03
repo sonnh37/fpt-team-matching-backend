@@ -10,5 +10,6 @@ namespace FPT.TeamMatching.Domain.Contracts.Repositories
 {
     public interface IIdeaHistoryRepository: IBaseRepository<IdeaHistory>
     {
+        Task<List<IdeaHistory>> GetAllByIdeaId(Guid ideaId);
     }
 }
