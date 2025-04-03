@@ -26,6 +26,12 @@ namespace FPT.TeamMatching.API.Controllers
             var msg = await _service.GetAll<IdeaHistoryResult>(query);
             return Ok(msg);
         }
+        [HttpGet("idea/{ideaId:guid}")]
+        public async Task<IActionResult> GetAll([FromRoute] Guid ideaId)
+        {
+            var msg = await _service.GetAllIdeaHistoryByIdeaId(ideaId);
+            return Ok(msg);
+        }
 
         [HttpGet("{id:guid}")]
         public async Task<IActionResult> GetById([FromRoute] Guid id)

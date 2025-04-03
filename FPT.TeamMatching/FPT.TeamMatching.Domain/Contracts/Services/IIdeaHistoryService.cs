@@ -13,5 +13,6 @@ namespace FPT.TeamMatching.Domain.Contracts.Services
     {
         Task<BusinessResult> StudentUpdateIdea(StudentUpdateIdeaCommand request);
         Task<BusinessResult> LecturerUpdate(LecturerUpdateCommand request);
+        Task<BusinessResult> GetAllIdeaHistoryByIdeaId(Guid ideaId);
     }
 }

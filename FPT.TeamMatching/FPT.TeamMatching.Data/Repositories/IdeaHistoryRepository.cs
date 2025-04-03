@@ -18,5 +18,10 @@ namespace FPT.TeamMatching.Data.Repositories
         {
             _dbContext = dbContext;
         }
+
+        public async Task<List<IdeaHistory>> GetAllByIdeaId(Guid ideaId)
+        {
+           return await GetQueryable().Where(h => h.IdeaId == ideaId).ToListAsync();
+        }
     }
 }

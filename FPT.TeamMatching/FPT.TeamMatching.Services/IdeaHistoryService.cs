@@ -76,6 +76,25 @@ namespace FPT.TeamMatching.Services
             }
         }
 
+        public async Task<BusinessResult> GetAllIdeaHistoryByIdeaId(Guid ideaId)
+        {
+            try
+            {
+                var result = await _ideaHistoryRepository.GetAllByIdeaId(ideaId);
+                return new ResponseBuilder()
+                    .WithStatus(Const.SUCCESS_CODE)
+                    .WithData(result)
+                    .WithMessage(Const.SUCCESS_READ_MSG); 
+            }
+            catch (Exception e)
+            {
+                var errorMessage = $"An error occurred in {typeof(IdeaHistoryResult).Name}: {e.Message}";
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage(errorMessage);
+            }
+        }
+
         public async Task<BusinessResult> StudentUpdateIdea(StudentUpdateIdeaCommand request)
         {
             try
