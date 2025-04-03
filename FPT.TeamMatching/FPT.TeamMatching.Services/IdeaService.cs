@@ -12,9 +12,6 @@ using FPT.TeamMatching.Domain.Models.Results;
 using FPT.TeamMatching.Domain.Models.Results.Bases;
 using FPT.TeamMatching.Domain.Utilities;
 using FPT.TeamMatching.Services.Bases;
-using FPT.TeamMatching.Services.Hubs;
-using Microsoft.AspNetCore.SignalR;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace FPT.TeamMatching.Services;
 
@@ -76,7 +73,6 @@ public class IdeaService : BaseService<Idea>, IIdeaService
         }
     }
 
-    
     public async Task<BusinessResult> StudentCreatePending(IdeaStudentCreatePendingCommand idea)
     {
         try
@@ -163,6 +159,17 @@ public class IdeaService : BaseService<Idea>, IIdeaService
                     .WithStatus(Const.FAIL_CODE)
                     .WithMessage(Const.FAIL_SAVE_MSG);
             }
+            //gửi noti cho mentor
+            var command = new NotificationCreateCommand
+            {
+                UserId = idea.MentorId,
+                Description = "Đề tài " + idea.Abbreviations + "đang chờ bạn duyệt với vai trò Mentor",
+                Type = NotificationType.General,
+                IsRead = false,
+            };
+            await _notificationService.CreateForUser(command);
+
+            //check có submentor thì gửi noti 
 
             return new ResponseBuilder()
                 .WithStatus(Const.SUCCESS_CODE)
@@ -285,15 +292,16 @@ public class IdeaService : BaseService<Idea>, IIdeaService
                     .WithStatus(Const.FAIL_CODE)
                     .WithMessage(Const.FAIL_SAVE_MSG);
             }
+            //check có submentor thì gửi noti 
 
-            var command = new NotificationCreateCommand
-            {
-                UserId = userId,
-                Description = "Test, create idea",
-                Type = NotificationType.General,
-                IsRead = false,
-            };
-            await _notificationService.CreateOrUpdate<NotificationResult>(command);
+            //var command = new NotificationCreateCommand
+            //{
+            //    UserId = userId,
+            //    Description = "Test, create idea",
+            //    Type = NotificationType.General,
+            //    IsRead = false,
+            //};
+            //await _notificationService.CreateOrUpdate<NotificationResult>(command);
             
             return new ResponseBuilder()
                 .WithStatus(Const.SUCCESS_CODE)
@@ -478,7 +486,6 @@ public class IdeaService : BaseService<Idea>, IIdeaService
                 .WithMessage(errorMessage);
         }
     }
-
 
     public async Task AutoUpdateIdeaStatus()
     {

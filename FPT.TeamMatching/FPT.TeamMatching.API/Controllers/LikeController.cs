@@ -37,7 +37,7 @@ public class LikeController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] LikeCreateCommand request)
     {
-        var msg = await _likeservice.CreateOrUpdate<LikeResult>(request);
+        var msg = await _likeservice.CreateLike(request);
         return Ok(msg);
     }
 

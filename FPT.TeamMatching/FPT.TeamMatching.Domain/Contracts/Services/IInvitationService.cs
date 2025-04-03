@@ -8,14 +8,13 @@ namespace FPT.TeamMatching.Domain.Contracts.Services;
 public interface IInvitationService : IBaseService
 {
     Task<BusinessResult> GetUserInvitationsByStatus(InvitationGetListForUserByStatus query);
-
     Task<BusinessResult> GetUserInvitationsByType(InvitationGetByTypeQuery query);
     Task<BusinessResult> GetLeaderInvitationsByType(InvitationGetByTypeQuery query);
-    Task<BusinessResult> TeamCreatePending(InvitationTeamCreatePendingCommand command);
-    Task<BusinessResult> StudentCreatePending(InvitationStudentCreatePendingCommand command);
+    Task<BusinessResult> CreatePendingByTeam(InvitationTeamCreatePendingCommand command);//
+    Task<BusinessResult> CreatePendingByStudent(InvitationStudentCreatePendingCommand command);//
     Task<BusinessResult> CheckIfStudentSendInvitationByProjectId(Guid projectId);
     Task<BusinessResult> DeletePermanentInvitation(Guid projectId);
 
-    Task<BusinessResult> ApproveOrRejectInvitationFromTeamByMe(InvitationUpdateCommand command);
-    Task<BusinessResult> ApproveOrRejectInvitationFromPersonalizeByLeader(InvitationUpdateCommand command);
+    Task<BusinessResult> ApproveOrRejectInvitationFromTeamByMe(InvitationUpdateCommand command);//
+    Task<BusinessResult> ApproveOrRejectInvitationFromPersonalizeByLeader(InvitationUpdateCommand command);//
 }
