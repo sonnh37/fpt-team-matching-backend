@@ -67,7 +67,8 @@ public static class IncludeHelper
 
     private static IQueryable<Invitation> Invitation(IQueryable<Invitation> queryable)
     {
-        queryable = queryable.Include(m => m.Project);
+        queryable = queryable.Include(m => m.Project).ThenInclude(e => e.Idea).ThenInclude(e => e.SubMentor)
+                            .Include(m => m.Project).ThenInclude(e => e.Idea).ThenInclude(e => e.Mentor);
         queryable = queryable.Include(m => m.Sender);
         queryable = queryable.Include(m => m.Receiver);
 

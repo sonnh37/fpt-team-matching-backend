@@ -14,6 +14,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using FPT.TeamMatching.Domain.Models.Requests.Commands.Notifications;
 
 namespace FPT.TeamMatching.Services
 {
@@ -21,10 +22,12 @@ namespace FPT.TeamMatching.Services
     {
         private readonly IIdeaHistoryRepository _ideaHistoryRepository;
         private readonly IIdeaRepository _ideaRepository;
-        public IdeaHistoryService(IMapper mapper, IUnitOfWork unitOfWork) : base(mapper, unitOfWork)
+        private readonly INotificationService _notificationService;
+        public IdeaHistoryService(IMapper mapper, IUnitOfWork unitOfWork, INotificationService notificationService) : base(mapper, unitOfWork)
         {
             _ideaHistoryRepository = unitOfWork.IdeaHistoryRepository;
             _ideaRepository = unitOfWork.IdeaRepository;
+            _notificationService = notificationService;
         }
 
         public async Task<BusinessResult> LecturerUpdate(LecturerUpdateCommand request)
@@ -45,6 +48,17 @@ namespace FPT.TeamMatching.Services
                 var isSuccess = await _unitOfWork.SaveChanges();
                 if (isSuccess)
                 {
+                    //noti duyệt sửa đề tài
+                    var noti = new NotificationCreateForGroup
+                    {
+                        Description = ideaHistory.Idea.Mentor.Code + 
+                                        " đã duyệt yêu cầu chỉnh sửa đề tài sau review " + ideaHistory.ReviewStage + 
+                                        " của nhóm bạn. Hãy kiểm tra!",
+                        Type = NotificationType.General,
+                        IsRead = false,
+                    };
+                    await _notificationService.CreateForTeam(noti, ideaHistory.Idea.Project.Id);
+                    //
                     return new ResponseBuilder()
                         .WithStatus(Const.SUCCESS_CODE)
                         .WithMessage(Const.SUCCESS_SAVE_MSG);
@@ -109,6 +123,16 @@ namespace FPT.TeamMatching.Services
                 var isSuccess = await _unitOfWork.SaveChanges();
                 if (isSuccess)
                 {
+                    //noti chỉnh sửa đề tài cho mentor
+                    var noti = new NotificationCreateCommand
+                    {
+                        UserId = idea.MentorId,
+                        Description = "Đề tài " + idea.Abbreviations + " gửi yêu cầu chỉnh sửa sau review " + ideaHistory.ReviewStage,
+                        Type = NotificationType.General,
+                        IsRead = false,
+                    };
+                    await _notificationService.CreateForUser(noti);
+                    //
                     return new ResponseBuilder()
                         .WithStatus(Const.SUCCESS_CODE)
                         .WithMessage(Const.SUCCESS_SAVE_MSG);

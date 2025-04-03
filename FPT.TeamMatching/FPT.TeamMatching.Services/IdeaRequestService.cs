@@ -9,12 +9,12 @@ using FPT.TeamMatching.Domain.Models.Responses;
 using FPT.TeamMatching.Domain.Models.Results;
 using FPT.TeamMatching.Domain.Utilities;
 using FPT.TeamMatching.Services.Bases;
-using Microsoft.EntityFrameworkCore;
-using System.Text.RegularExpressions;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Ideas;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Base;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.IdeaRequests;
 using FPT.TeamMatching.Domain.Models.Results.Bases;
+using FPT.TeamMatching.Domain.Models.Requests.Commands.Notifications;
+using NetTopologySuite.Triangulate.Tri;
 
 namespace FPT.TeamMatching.Services;
 
@@ -25,8 +25,9 @@ public class IdeaRequestService : BaseService<IdeaRequest>, IIdeaRequestService
     private readonly ISemesterRepository _semesterRepository;
     private readonly IUserRepository _userRepository;
     private readonly IIdeaService _ideaService;
+    private readonly INotificationService _notificationService;
 
-    public IdeaRequestService(IMapper mapper, IUnitOfWork unitOfWork, IIdeaService ideaService) : base(mapper,
+    public IdeaRequestService(IMapper mapper, IUnitOfWork unitOfWork, IIdeaService ideaService, INotificationService notificationService) : base(mapper,
         unitOfWork)
     {
         _ideaRequestRepository = unitOfWork.IdeaRequestRepository;
@@ -34,6 +35,7 @@ public class IdeaRequestService : BaseService<IdeaRequest>, IIdeaRequestService
         _semesterRepository = unitOfWork.SemesterRepository;
         _userRepository = unitOfWork.UserRepository;
         _ideaService = ideaService;
+        _notificationService = notificationService;
     }
 
     public async Task<BusinessResult>
@@ -164,11 +166,24 @@ public class IdeaRequestService : BaseService<IdeaRequest>, IIdeaRequestService
 
             _ideaRequestRepository.AddRange(newIdeaRequests);
             var check = await _unitOfWork.SaveChanges();
-
-            return check
-                ? new ResponseBuilder().WithStatus(Const.SUCCESS_CODE)
-                    .WithMessage("Created council requests successfully.")
-                : new ResponseBuilder().WithStatus(Const.FAIL_CODE)
+            if (check)
+            {
+                var idea = await _ideaRepository.GetById((Guid)command.IdeaId);
+                //send noti cho 3 nguoi council
+                var request = new NotificationCreateForGroup
+                {
+                    Description = "Đề tài " + idea.Abbreviations + "đang chờ bạn duyệt với vai trò Council",
+                    Type = NotificationType.General,
+                    IsRead = false,
+                };
+                await _notificationService.CreateForGroup(request, councils.Select(e => e.Id).ToList());
+                //
+                return new ResponseBuilder()
+                    .WithStatus(Const.SUCCESS_CODE)
+                   .WithMessage("Created council requests successfully.");
+            }
+            return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
                     .WithMessage("Failed to create council requests.");
         }
         catch (Exception ex)
@@ -225,36 +240,35 @@ public class IdeaRequestService : BaseService<IdeaRequest>, IIdeaRequestService
         {
             if (totalApproved == 1)
                 return await _ideaService.UpdateStatusIdea(new IdeaUpdateStatusCommand
-                    { Id = ideaId, Status = IdeaStatus.Approved });
+                { Id = ideaId, Status = IdeaStatus.Approved });
 
             if (totalRejected == 1)
                 return await _ideaService.UpdateStatusIdea(new IdeaUpdateStatusCommand
-                    { Id = ideaId, Status = IdeaStatus.Rejected });
+                { Id = ideaId, Status = IdeaStatus.Rejected });
         }
         else if (totalCouncils == 2)
         {
             if (totalApproved == 2)
                 return await _ideaService.UpdateStatusIdea(new IdeaUpdateStatusCommand
-                    { Id = ideaId, Status = IdeaStatus.Approved });
+                { Id = ideaId, Status = IdeaStatus.Approved });
 
             if (totalRejected == 2)
                 return await _ideaService.UpdateStatusIdea(new IdeaUpdateStatusCommand
-                    { Id = ideaId, Status = IdeaStatus.Rejected });
+                { Id = ideaId, Status = IdeaStatus.Rejected });
         }
         else if (totalCouncils == 3)
         {
             if (totalApproved > totalRejected)
                 return await _ideaService.UpdateStatusIdea(new IdeaUpdateStatusCommand
-                    { Id = ideaId, Status = IdeaStatus.Approved });
+                { Id = ideaId, Status = IdeaStatus.Approved });
 
             if (totalRejected > totalApproved)
                 return await _ideaService.UpdateStatusIdea(new IdeaUpdateStatusCommand
-                    { Id = ideaId, Status = IdeaStatus.Rejected });
+                { Id = ideaId, Status = IdeaStatus.Rejected });
         }
 
         return new ResponseBuilder().WithStatus(Const.SUCCESS_CODE).WithMessage(Const.SUCCESS_SAVE_MSG);
     }
-
 
     //public async Task<BusinessResult> CouncilResponse(IdeaRequestLecturerOrCouncilResponseCommand command)
     //{
@@ -274,20 +288,20 @@ public class IdeaRequestService : BaseService<IdeaRequest>, IIdeaRequestService
 
     //            var idea = await _ideaRepository.GetById(ideaRequestOld.IdeaId.Value);
 
-                
+
     //                 ////Gen idea code 
     //                 //var semester = await _semesterRepository.GetById((Guid)idea.SemesterId);
     //                 //var semesterCode = semester.SemesterCode;
-                
+
     //                 ////lấy số thứ tự đề tài lớn nhất của kì học 
     //                 //var maxNumber = await _ideaRepository.MaxNumberOfSemester((Guid)idea.SemesterId);
-                
+
     //                 //// Tạo số thứ tự tiếp theo
     //                 //int nextNumber = maxNumber + 1;
-                
+
     //                 //// Tạo mã Idea mới theo định dạng: semesterCode + "SE" + số thứ tự (2 chữ số)
     //                 //string newIdeaCode = $"{semesterCode}SE{nextNumber:D2}";
-                
+
     //                 //idea.IdeaCode = newIdeaCode;
     //             }
 
@@ -348,6 +362,16 @@ public class IdeaRequestService : BaseService<IdeaRequest>, IIdeaRequestService
                 bool saveChange = await _unitOfWork.SaveChanges();
                 if (saveChange)
                 {
+                    //noti cho owner
+                    var noti = new NotificationCreateCommand
+                    {
+                        UserId = idea.OwnerId,
+                        Description = "Đề tài " + idea.Abbreviations + " đã được " + idea.Mentor.Code + "(Mentor) duyệt. Hãy kiểm tra kết quả!",
+                        Type = NotificationType.General,
+                        IsRead = false,
+                    };
+                    await _notificationService.CreateForUser(noti);
+                    //
                     return new ResponseBuilder()
                         .WithStatus(Const.SUCCESS_CODE)
                         .WithMessage(Const.SUCCESS_SAVE_MSG);

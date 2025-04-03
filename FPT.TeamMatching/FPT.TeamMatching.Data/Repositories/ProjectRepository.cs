@@ -127,6 +127,8 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
                                                            e.Idea != null &&
                                                            e.Idea.StageIdea != null &&
                                                            e.Idea.StageIdea.SemesterId == semesterId)
+                                                .Include(e => e.Idea).ThenInclude(e => e.Mentor)
+                                                .Include(e => e.Idea).ThenInclude(e => e.SubMentor)
                                              .ToListAsync();
         return projects;
     }

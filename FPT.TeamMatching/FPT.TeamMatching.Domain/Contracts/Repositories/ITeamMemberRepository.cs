@@ -13,5 +13,4 @@ public interface ITeamMemberRepository : IBaseRepository<TeamMember>
 
     //get list thanh vien hien tai cua team
     Task<List<TeamMember>?> GetMembersOfTeamByProjectId(Guid projectId);
-
 }

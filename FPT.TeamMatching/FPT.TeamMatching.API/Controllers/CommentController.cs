@@ -37,7 +37,7 @@ public class CommentController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CommentCreateCommand request)
     {
-        var msg = await _Commentservice.CreateOrUpdate<CommentResult>(request);
+        var msg = await _Commentservice.CreateComment(request);
         return Ok(msg);
     }
 

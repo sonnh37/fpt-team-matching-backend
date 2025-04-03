@@ -37,7 +37,7 @@ public class BlogCvController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] BlogCvCreateCommand request)
     {
-        var msg = await _service.CreateOrUpdate<BlogCvResult>(request);
+        var msg = await _service.CreateBlogCv(request);
         return Ok(msg);
     }
 
