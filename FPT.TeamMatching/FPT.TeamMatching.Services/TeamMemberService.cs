@@ -80,22 +80,25 @@ public class TeamMemberService : BaseService<TeamMember>, ITeamMemberService
                 var teamMember = await _teamMemberRepository.GetById(request.Id);
                 if (teamMember == null)
                 {
-                    continue;
+                    return new ResponseBuilder()
+                    .WithStatus(Const.NOT_FOUND_CODE)
+                    .WithMessage(Const.NOT_FOUND_MSG);
                 }
                 teamMember.MentorConclusion = request.MentorConclusion;
                 teamMember.Attitude = request.Attitude;
                 await SetBaseEntityForUpdate(teamMember);
                 _teamMemberRepository.Update(teamMember);
-                var isSuccess = await _unitOfWork.SaveChanges();
-                if (!isSuccess)
-                {
-                    continue;
-                }
             }
-
+            var isSuccess = await _unitOfWork.SaveChanges();
+            if (!isSuccess)
+            {
+                return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage(Const.FAIL_SAVE_MSG); 
+            }
             return new ResponseBuilder()
-                .WithMessage(Const.SUCCESS_SAVE_MSG)
-                .WithStatus(Const.SUCCESS_CODE);
+                .WithStatus(Const.SUCCESS_CODE)
+                .WithMessage(Const.SUCCESS_SAVE_MSG);
         }
         catch (Exception ex)
         {
