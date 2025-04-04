@@ -309,7 +309,7 @@ public class IdeaService : BaseService<Idea>, IIdeaService
             {
                 UserId = userId,
                 Description = "Test, create idea",
-                Type = NotificationType.General,
+                Type = NotificationType.SystemWide,
                 IsRead = false,
             };
             await _notificationService.CreateOrUpdate<NotificationResult>(command);
