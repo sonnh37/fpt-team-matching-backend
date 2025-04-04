@@ -17,6 +17,7 @@ public static class IncludeHelper
             IQueryable<Project> projects => Project(projects) as IQueryable<TEntity>,
             IQueryable<Profession> professions => Profession(professions) as IQueryable<TEntity>,
             IQueryable<User> users => User(users) as IQueryable<TEntity>,
+            IQueryable<TeamMember> teammembers => TeamMember(teammembers) as IQueryable<TEntity>,
             IQueryable<Blog> blogs => Blogs(blogs) as IQueryable<TEntity>,
             IQueryable<BlogCv> blogcvs => BlogCvs(blogcvs) as IQueryable<TEntity>,
             IQueryable<Comment> comments => Comments(comments) as IQueryable<TEntity>,
@@ -116,8 +117,20 @@ public static class IncludeHelper
             .Include(m => m.UserXRoles)
             .ThenInclude(x => x.Role)
             .Include(m => m.Notifications)
-            .Include(m => m.TeamMembers);
+            .Include(m => m.TeamMembers)
+            .Include(m=>m.ProfileStudent).ThenInclude(x=>x.SkillProfiles);
 
+        return queryable;
+    }
+
+    private static IQueryable<TeamMember> TeamMember(IQueryable<TeamMember> queryable)
+    {
+        // queryable = queryable
+        //     .Include(m => m.Tasks);
+
+        queryable = queryable
+            .Include(m => m.User);
+          
         return queryable;
     }
 

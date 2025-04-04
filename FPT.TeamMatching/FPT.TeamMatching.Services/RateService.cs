@@ -7,12 +7,14 @@ using FPT.TeamMatching.Services.Bases;
 
 namespace FPT.TeamMatching.Services;
 
-public class RateService : BaseService<Rate>, ISpecialtyService
+public class RateService : BaseService<Rate>, IRateService
 {
+
     private readonly IRateRepository _service;
 
     public RateService(IMapper mapper, IUnitOfWork unitOfWork) : base(mapper, unitOfWork)
     {
-        _service = _unitOfWork.RateRepository;
+
+        _service = unitOfWork.RateRepository;
     }
 }

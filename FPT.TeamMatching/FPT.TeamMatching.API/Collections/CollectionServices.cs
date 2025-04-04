@@ -13,7 +13,7 @@ public static class CollectionServices
         services.AddTransient<IBlogService, BlogService>();
         services.AddTransient<ILikeService, LikeService>();
         services.AddTransient<ICommentService, CommentService>();
-        services.AddTransient<ISpecialtyService, RateService>();
+        services.AddTransient<IRateService, RateService>();
         services.AddTransient<IBlogCvService, BlogCvService>();
         services.AddTransient<ITeamMemberService, TeamMemberService>();
         services.AddTransient<IAuthService, AuthService>();
@@ -36,7 +36,6 @@ public static class CollectionServices
         services.AddTransient<IStageIdeaService, StageIdeaService>();
         services.AddTransient<ICapstoneScheduleService, CapstoneScheduleService>();
         services.AddTransient<IMentorIdeaRequestService, MentorIdeaRequestService>();
-
         services.AddSingleton<IUserIdProvider, CustomUserIdProvider>();
 
         services.AddTransient<IApiHubService, ApiHubService>();
