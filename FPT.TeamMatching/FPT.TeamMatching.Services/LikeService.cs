@@ -56,7 +56,7 @@ public class LikeService : BaseService<Like>, ILikeService
                 {
                     UserId = blog.UserId,
                     Description = user.Code + " đã thích bài viết của bạn",
-                    Type = NotificationType.General,
+                    Type = NotificationType.Individual,
                     IsRead = false,
                 };
                 await _notificationService.CreateForUser(noti);

@@ -18,4 +18,6 @@ public class TeamMemberCreateCommand : CreateCommand
     public TeamMemberStatus? Status { get; set; }
 
     public MentorConclusionOptions? MentorConclusion { get; set; }
+
+    public string? Attitude { get; set; }
 }

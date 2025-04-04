@@ -4,11 +4,12 @@ namespace FPT.TeamMatching.Domain.Entities;
 
 public class Rate : BaseEntity
 {
+
     public Guid? RateForId { get; set; }
 
     public Guid? RateById { get; set; }
 
-    public int NumbOfStar { get; set; }
+    public double NumbOfStar { get; set; }
 
     public string? Content { get; set; }
 
