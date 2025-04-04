@@ -18,4 +18,7 @@ public class TeamMemberGetAllQuery : GetQueryableQuery
     public TeamMemberStatus? Status { get; set; }
 
     public MentorConclusionOptions? MentorConclusion { get; set; }
+
+    public string? Attitude { get; set; }
+
 }

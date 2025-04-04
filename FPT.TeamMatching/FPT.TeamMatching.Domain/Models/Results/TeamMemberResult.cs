@@ -20,6 +20,8 @@ public class TeamMemberResult : BaseResult
 
     public MentorConclusionOptions? MentorConclusion { get; set; }
 
+    public string? Attitude { get; set; }
+
     public UserResult? User { get; set; }
     
     public ProjectResult? Project { get; set; }

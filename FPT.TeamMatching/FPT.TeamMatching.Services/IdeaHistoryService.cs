@@ -54,7 +54,7 @@ namespace FPT.TeamMatching.Services
                         Description = ideaHistory.Idea.Mentor.Code + 
                                         " đã duyệt yêu cầu chỉnh sửa đề tài sau review " + ideaHistory.ReviewStage + 
                                         " của nhóm bạn. Hãy kiểm tra!",
-                        Type = NotificationType.General,
+                        Type = NotificationType.Team,
                         IsRead = false,
                     };
                     await _notificationService.CreateForTeam(noti, ideaHistory.Idea.Project.Id);
@@ -128,7 +128,7 @@ namespace FPT.TeamMatching.Services
                     {
                         UserId = idea.MentorId,
                         Description = "Đề tài " + idea.Abbreviations + " gửi yêu cầu chỉnh sửa sau review " + ideaHistory.ReviewStage,
-                        Type = NotificationType.General,
+                        Type = NotificationType.Individual,
                         IsRead = false,
                     };
                     await _notificationService.CreateForUser(noti);

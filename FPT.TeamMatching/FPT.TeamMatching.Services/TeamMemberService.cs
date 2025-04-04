@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using DocumentFormat.OpenXml.Drawing.Diagrams;
 using FPT.TeamMatching.Domain.Contracts.Repositories;
 using FPT.TeamMatching.Domain.Contracts.Services;
 using FPT.TeamMatching.Domain.Contracts.UnitOfWorks;
@@ -20,7 +21,7 @@ public class TeamMemberService : BaseService<TeamMember>, ITeamMemberService
         _teamMemberRepository = _unitOfWork.TeamMemberRepository;
     }
 
-    public  async Task<BusinessResult> GetTeamMemberByUserId()
+    public async Task<BusinessResult> GetTeamMemberByUserId()
     {
         try
         {
@@ -28,7 +29,7 @@ public class TeamMemberService : BaseService<TeamMember>, ITeamMemberService
             if (userId == null) return HandlerFail("No user found");
             var teamMemberCurrentUser = await _teamMemberRepository.GetMemberByUserId((Guid)userId.Value);
             if (teamMemberCurrentUser == null) return HandlerFail("No user found in team members");
-            
+
             return new ResponseBuilder()
                 .WithData(teamMemberCurrentUser)
                 .WithMessage(Const.SUCCESS_READ_MSG)
@@ -51,7 +52,7 @@ public class TeamMemberService : BaseService<TeamMember>, ITeamMemberService
 
             teamMemberCurrentUser.LeaveDate = DateTime.UtcNow;
             teamMemberCurrentUser.IsDeleted = true;
-        
+
             await SetBaseEntityForUpdate(teamMemberCurrentUser);
             _teamMemberRepository.DeletePermanently(teamMemberCurrentUser);
 
@@ -61,6 +62,38 @@ public class TeamMemberService : BaseService<TeamMember>, ITeamMemberService
 
             return new ResponseBuilder()
                 .WithData(teamMemberCurrentUser)
+                .WithMessage(Const.SUCCESS_SAVE_MSG)
+                .WithStatus(Const.SUCCESS_CODE);
+        }
+        catch (Exception ex)
+        {
+            return HandlerError(ex.Message);
+        }
+    }
+
+    public async Task<BusinessResult> UpdateTeamMemberByMentor(List<MentorUpdate> requests)
+    {
+        try
+        {
+            foreach (var request in requests)
+            {
+                var teamMember = await _teamMemberRepository.GetById(request.Id);
+                if (teamMember == null)
+                {
+                    continue;
+                }
+                teamMember.MentorConclusion = request.MentorConclusion;
+                teamMember.Attitude = request.Attitude;
+                await SetBaseEntityForUpdate(teamMember);
+                _teamMemberRepository.Update(teamMember);
+                var isSuccess = await _unitOfWork.SaveChanges();
+                if (!isSuccess)
+                {
+                    continue;
+                }
+            }
+
+            return new ResponseBuilder()
                 .WithMessage(Const.SUCCESS_SAVE_MSG)
                 .WithStatus(Const.SUCCESS_CODE);
         }

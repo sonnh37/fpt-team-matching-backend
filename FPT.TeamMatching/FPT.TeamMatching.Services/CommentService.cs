@@ -62,7 +62,7 @@ public class CommentService : BaseService<Comment>, ICommentService
                 {
                     UserId = blog.UserId,
                     Description = user.Code + " đã bình luận về bài viết của bạn",
-                    Type = NotificationType.General,
+                    Type = NotificationType.Individual,
                     IsRead = false,
                 };
                 await _notificationService.CreateForUser(noti);
