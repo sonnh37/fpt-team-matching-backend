@@ -9,4 +9,6 @@ public class RateUpdateCommand : UpdateCommand
     public Guid? RateById { get; set; }
 
     public int NumbOfStar { get; set; }
+
+    public string? Content { get; set; }
 }
