@@ -250,7 +250,7 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
                 {
                     UserId = project.LeaderId,
                     Description = user.Code + " đã gửi yêu cầu tham gia nhóm",
-                    Type = NotificationType.General,
+                    Type = NotificationType.Individual,
                     IsRead = false,
                 };
                 await _notificationService.CreateForUser(noti);
@@ -318,7 +318,7 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
                 {
                     UserId = command.ReceiverId,
                     Description = "Nhóm " + teamName + " đã gửi lời mời tham gia nhóm",
-                    Type = NotificationType.General,
+                    Type = NotificationType.Individual,
                     IsRead = false,
                 };
                 await _notificationService.CreateForUser(noti);
@@ -372,7 +372,7 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
                 {
                     UserId = invitation.SenderId,
                     Description = invitation.Receiver.Code + "đã từ chối lời mời tham gia nhóm của bạn",
-                    Type = NotificationType.General,
+                    Type = NotificationType.Individual,
                     IsRead = false,
                 };
                 await _notificationService.CreateForUser(noti);
@@ -406,7 +406,7 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
                     var noti = new NotificationCreateForGroup
                     {
                         Description = invitation.Receiver.Code + "đã đồng ý lời mời tham gia nhóm của bạn",
-                        Type = NotificationType.General,
+                        Type = NotificationType.Individual,
                         IsRead = false,
                     };
                     await _notificationService.CreateForTeam(noti, (Guid)invitation.ProjectId);
@@ -460,7 +460,7 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
                 {
                     UserId = invitation.SenderId,
                     Description = "Lời mời tham gia nhóm " + teamName + " của bạn đã bị từ chối",
-                    Type = NotificationType.General,
+                    Type = NotificationType.Individual,
                     IsRead = false,
                 };
                 await _notificationService.CreateForUser(noti);
@@ -500,10 +500,10 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
                     ////noti đến team
                     var noti1 = new NotificationCreateForGroup
                     {
-                        Description = invitation.Receiver.Code + "đã được chấp nhận tham gia nhóm của bạn",
-                        Type = NotificationType.General,
+                        Description = invitation.Receiver   .Code + "đã được chấp nhận tham gia nhóm của bạn",
+                        Type = NotificationType.Individual,
                         IsRead = false,
-                    };
+                    };  
                     await _notificationService.CreateForTeam(noti1, invitation.Project.Id);
 
 
@@ -517,7 +517,7 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
                     {
                         UserId = invitation.SenderId,
                         Description = "Lời mời tham gia nhóm " + teamName + " của bạn đã được chấp nhận",
-                        Type = NotificationType.General,
+                        Type = NotificationType.Individual,
                         IsRead = false,
                     };
                     await _notificationService.CreateForUser(noti2);

@@ -173,7 +173,7 @@ public class IdeaRequestService : BaseService<IdeaRequest>, IIdeaRequestService
                 var request = new NotificationCreateForGroup
                 {
                     Description = "Đề tài " + idea.Abbreviations + "đang chờ bạn duyệt với vai trò Council",
-                    Type = NotificationType.General,
+                    Type = NotificationType.Individual,
                     IsRead = false,
                 };
                 await _notificationService.CreateForGroup(request, councils.Select(e => e.Id).ToList());
@@ -367,7 +367,7 @@ public class IdeaRequestService : BaseService<IdeaRequest>, IIdeaRequestService
                     {
                         UserId = idea.OwnerId,
                         Description = "Đề tài " + idea.Abbreviations + " đã được " + idea.Mentor.Code + "(Mentor) duyệt. Hãy kiểm tra kết quả!",
-                        Type = NotificationType.General,
+                        Type = NotificationType.Individual,
                         IsRead = false,
                     };
                     await _notificationService.CreateForUser(noti);

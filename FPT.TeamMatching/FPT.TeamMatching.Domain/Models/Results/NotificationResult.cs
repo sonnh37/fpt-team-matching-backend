@@ -8,6 +8,8 @@ public class NotificationResult : BaseResult
 {
     public Guid? UserId { get; set; }
 
+    public Guid? ProjectId { get; set; }
+
     public string? Description { get; set; }
 
     public NotificationType? Type { get; set; }
@@ -15,4 +17,6 @@ public class NotificationResult : BaseResult
     public bool IsRead { get; set; }
 
     public UserResult? User { get; set; }
+
+    public ProjectResult? Project { get; set; }
 }

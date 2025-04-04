@@ -22,7 +22,7 @@ public class NotificationRepository : BaseRepository<Notification>, INotificatio
     public async Task<List<Notification>> GetAllNotificationByUserId(Guid userId)
     {
         var result = await _dbContext.Notifications.Include(m => m.User)
-            .Where(x => (x.UserId == null && x.Type == NotificationType.General) ||
+            .Where(x => (x.UserId == null && x.Type == NotificationType.Individual) ||
                         (x.UserId != null && x.UserId == userId))
             .ToListAsync();
 
@@ -35,7 +35,7 @@ public class NotificationRepository : BaseRepository<Notification>, INotificatio
         
         // Filter and include
         queryable = queryable.Include(m => m.User)
-            .Where(x => (x.UserId == null && x.Type == NotificationType.General) ||
+            .Where(x => (x.UserId == null && x.Type == NotificationType.Individual) ||
                         (x.UserId != null && x.UserId == userId));
         // End
         if (query.IsPagination)

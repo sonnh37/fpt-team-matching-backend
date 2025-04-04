@@ -164,7 +164,7 @@ public class IdeaService : BaseService<Idea>, IIdeaService
             {
                 UserId = idea.MentorId,
                 Description = "Đề tài " + idea.Abbreviations + "đang chờ bạn duyệt với vai trò Mentor",
-                Type = NotificationType.General,
+                Type = NotificationType.Individual,
                 IsRead = false,
             };
             await _notificationService.CreateForUser(command);
