@@ -51,7 +51,7 @@ public class FileUploadService : IFileUploadService
         var uploadParams = new ImageUploadParams
         {
             File = new FileDescription(userId.ToString(), stream),
-            PublicId = $"{userId}/{Path.GetExtension(request.File.FileName)}",
+            PublicId = $"{userId}/{request.File.FileName}",
             Folder = $"Signed/{request.FolderName}",
             Overwrite = true
         };
@@ -66,7 +66,7 @@ public class FileUploadService : IFileUploadService
         var uploadParams = new RawUploadParams
         {
             File = new FileDescription(userId.ToString(), stream),
-            PublicId = $"{userId}/{Path.GetExtension(request.File.FileName)}",
+            PublicId = $"{userId}/{request.File.FileName}",
             Folder = $"Signed/{request.FolderName}",
             Overwrite = true
         };
