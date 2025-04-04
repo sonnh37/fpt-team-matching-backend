@@ -8,14 +8,8 @@ using System.Threading.Tasks;
 
 namespace FPT.TeamMatching.Domain.Models.Requests.Commands.Notifications
 {
-    public class NotificationCreateForGroup: CreateCommand
+    public class NotificationCreateForSystemWide: CreateCommand
     {
-        public Guid? ProjectId { get; set; }
-
         public string? Description { get; set; }
-
-        public NotificationType? Type { get; set; }
-
-        public bool? IsRead { get; set; }
     }
 }

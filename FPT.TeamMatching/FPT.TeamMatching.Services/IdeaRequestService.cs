@@ -170,7 +170,7 @@ public class IdeaRequestService : BaseService<IdeaRequest>, IIdeaRequestService
             {
                 var idea = await _ideaRepository.GetById((Guid)command.IdeaId);
                 //send noti cho 3 nguoi council
-                var request = new NotificationCreateForGroup
+                var request = new NotificationCreateForIndividual
                 {
                     Description = "Đề tài " + idea.Abbreviations + "đang chờ bạn duyệt với vai trò Council",
                     Type = NotificationType.Individual,

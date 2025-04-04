@@ -403,7 +403,7 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
                 if (saveChange_)
                 {
                     //noti đồng ý lời mời vào nhóm
-                    var noti = new NotificationCreateForGroup
+                    var noti = new NotificationCreateForIndividual
                     {
                         Description = invitation.Receiver.Code + "đã đồng ý lời mời tham gia nhóm của bạn",
                         Type = NotificationType.Individual,
@@ -498,7 +498,7 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
                 {
                     //noti phản hồi đồng ý của team đến receiver
                     ////noti đến team
-                    var noti1 = new NotificationCreateForGroup
+                    var noti1 = new NotificationCreateForIndividual
                     {
                         Description = invitation.Receiver   .Code + "đã được chấp nhận tham gia nhóm của bạn",
                         Type = NotificationType.Individual,

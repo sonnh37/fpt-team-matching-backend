@@ -49,7 +49,7 @@ namespace FPT.TeamMatching.Services
                 if (isSuccess)
                 {
                     //noti duyệt sửa đề tài
-                    var noti = new NotificationCreateForGroup
+                    var noti = new NotificationCreateForIndividual
                     {
                         Description = ideaHistory.Idea.Mentor.Code + 
                                         " đã duyệt yêu cầu chỉnh sửa đề tài sau review " + ideaHistory.ReviewStage + 

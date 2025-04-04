@@ -247,7 +247,7 @@ public class NotificationService : BaseService<Notification>, INotificationServi
         }
     }
 
-    public async Task<BusinessResult> CreateForGroup(NotificationCreateForGroup createCommand, List<Guid> userIds)
+    public async Task<BusinessResult> CreateForGroup(NotificationCreateForIndividual createCommand, List<Guid> userIds)
     {
         try
         {
@@ -289,7 +289,7 @@ public class NotificationService : BaseService<Notification>, INotificationServi
         }
     }
 
-    public async Task<BusinessResult> CreateForTeam(NotificationCreateForGroup createCommand, Guid projectId)
+    public async Task<BusinessResult> CreateForTeam(NotificationCreateForIndividual createCommand, Guid projectId)
     {
         try
         {

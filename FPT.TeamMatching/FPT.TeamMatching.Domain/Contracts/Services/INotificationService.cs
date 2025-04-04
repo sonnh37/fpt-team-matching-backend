@@ -17,7 +17,7 @@ public interface INotificationService : IBaseService
     //gửi noti cho 1 user
     Task<BusinessResult> CreateForUser(NotificationCreateCommand createCommand);
     //gửi noti cho list user
-    Task<BusinessResult> CreateForGroup(NotificationCreateForGroup createCommand, List<Guid> userIds);
+    Task<BusinessResult> CreateForGroup(NotificationCreateForIndividual createCommand, List<Guid> userIds);
     //gửi noti cho team
-    Task<BusinessResult> CreateForTeam(NotificationCreateForGroup createCommand, Guid projectId);
+    Task<BusinessResult> CreateForTeam(NotificationCreateForIndividual createCommand, Guid projectId);
 }
