@@ -114,6 +114,8 @@ public static class Const
     public const string HANGFIRE = $"{BaseApi}/hangfire";
 
     public const string API_HUBS = $"{BaseApi}/api_hubs";
+    
+    public const string API_FILE_UPLOAD = $"{BaseApi}/file-upload";
 
     #endregion
 
