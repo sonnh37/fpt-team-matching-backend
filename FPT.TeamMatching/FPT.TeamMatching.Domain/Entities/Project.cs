@@ -36,4 +36,6 @@ public class Project : BaseEntity
     public virtual ICollection<MentorIdeaRequest> MentorIdeaRequests { get; set; } = new List<MentorIdeaRequest>();
 
     public virtual ICollection<CapstoneSchedule> CapstoneSchedules { get; set; } = new List<CapstoneSchedule>();
+
+    public virtual ICollection<Notification> Notifications { get; set; } = new List<Notification>();
 }
