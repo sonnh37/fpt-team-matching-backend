@@ -9,4 +9,6 @@ public class RateCreateCommand : CreateCommand
     public Guid? RateById { get; set; }
 
     public int NumbOfStar { get; set; }
+
+    public string? Content { get; set; }
 }

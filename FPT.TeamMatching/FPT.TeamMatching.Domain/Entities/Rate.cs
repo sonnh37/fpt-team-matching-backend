@@ -4,6 +4,7 @@ namespace FPT.TeamMatching.Domain.Entities;
 
 public class Rate : BaseEntity
 {
+
     public Guid? RateForId { get; set; }
 
     public Guid? RateById { get; set; }

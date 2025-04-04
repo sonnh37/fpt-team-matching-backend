@@ -10,6 +10,8 @@ public class RateResult : BaseResult
 
     public int NumbOfStar { get; set; }
 
+    public string? Content { get; set; }
+
     public TeamMemberResult? RateFor { get; set; }
 
     public TeamMemberResult? RateBy { get; set; }
