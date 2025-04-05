@@ -53,12 +53,10 @@ public class BlogCvService : BaseService<BlogCv>, IBlogCvService
             if (isSuccess)
             {
                 //noti like cho ng viet blog
-                var noti = new NotificationCreateCommand
+                var noti = new NotificationCreateForIndividual
                 {
                     UserId = blog.UserId,
                     Description = user.Code + " gửi hồ sơ ứng tuyển qua bài viết của bạn",
-                    Type = NotificationType.Individual,
-                    IsRead = false,
                 };
                 await _notificationService.CreateForUser(noti);
                 //

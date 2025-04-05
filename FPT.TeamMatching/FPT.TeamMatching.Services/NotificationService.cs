@@ -206,60 +206,38 @@ public class NotificationService : BaseService<Notification>, INotificationServi
         }
     }
 
-    public async Task<BusinessResult> CreateForUser(NotificationCreateCommand createCommand)
+    public async Task<BusinessResult> CreateForGroupUsers(NotificationCreateForGroupUser createCommand, List<Guid> userIds)
     {
         try
         {
-            if (createCommand.UserId == null)
+            if (createCommand.Description?.Trim() == null)
             {
                 return new ResponseBuilder()
                 .WithStatus(Const.FAIL_CODE)
-                .WithMessage("Fill user id");
+                .WithMessage("Miêu tả của thông báo không thể bỏ trống");
             }
-            //1. Kiểm tra user có tồn tại trong hệ thống
-            var user = await _unitOfWork.UserRepository.GetById((Guid)createCommand.UserId);
-            if (user == null || user.IsDeleted) throw new Exception("User not found");
-            //2. Tạo thông báo
-            var noti = _mapper.Map<Notification>(createCommand);
-            noti.Id = Guid.NewGuid();
-            await SetBaseEntityForCreation(noti);
-            _notificationRepository.Add(noti);
-            var isSuccess = await _unitOfWork.SaveChanges();
-            if (isSuccess)
+            if (userIds.Count == 0)
             {
-                var rs = await _notificationRepository.GetById(noti.Id);
-                if (rs != null)
-                {
-                    //3. Push notification
-                    await SendNotification(noti.UserId.ToString(), rs);
-                }
                 return new ResponseBuilder()
                 .WithStatus(Const.FAIL_CODE)
-                .WithMessage(Const.FAIL_SAVE_MSG);
+                .WithMessage("Nhập danh sách user id");
             }
-            return new ResponseBuilder()
-            .WithStatus(Const.FAIL_CODE)
-            .WithMessage(Const.FAIL_SAVE_MSG);
-        }
-        catch (Exception e)
-        {
-            return new BusinessResult(Const.FAIL_CODE, e.Message);
-        }
-    }
-
-    public async Task<BusinessResult> CreateForGroup(NotificationCreateForGroup createCommand, List<Guid> userIds)
-    {
-        try
-        {
             foreach (var userId in userIds)
             {
                 //1. Kiểm tra user có tồn tại trong hệ thống
                 var user = await _unitOfWork.UserRepository.GetById(userId);
-                if (user == null || user.IsDeleted) throw new Exception("User not found");
+                if (user == null || user.IsDeleted)
+                {
+                    return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("Không tìm thấy user");
+                }
                 //2. Tạo thông báo
                 var noti = _mapper.Map<Notification>(createCommand);
-                noti.UserId = userId;
                 noti.Id = Guid.NewGuid();
+                noti.IsRead = false;
+                noti.UserId = userId;
+                noti.Type = NotificationType.Individual;
                 await SetBaseEntityForCreation(noti);
                 _notificationRepository.Add(noti);
                 var isSuccess = await _unitOfWork.SaveChanges();
@@ -271,7 +249,7 @@ public class NotificationService : BaseService<Notification>, INotificationServi
                         //3. Push notification
                         await SendNotification(userId.ToString(), rs);
                     }
-                    
+
                 }
             }
             var msg = new ResponseBuilder()
@@ -289,51 +267,222 @@ public class NotificationService : BaseService<Notification>, INotificationServi
         }
     }
 
-    public async Task<BusinessResult> CreateForTeam(NotificationCreateForGroup createCommand, Guid projectId)
+    public async Task<BusinessResult> CreateForUser(NotificationCreateForIndividual createCommand)
     {
         try
         {
-            var teamMembers = await _teamMemberRepository.GetMembersOfTeamByProjectId(projectId);
+            if (createCommand.UserId == null)
+            {
+                return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage("User id không thể là giá trị null");
+            }
+            if (createCommand.Description?.Trim() == null)
+            {
+                return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage("Miêu tả của thông báo không thể bỏ trống");
+            }
+            //1. Kiểm tra user có tồn tại trong hệ thống
+            var user = await _unitOfWork.UserRepository.GetById((Guid)createCommand.UserId);
+            if (user == null || user.IsDeleted)
+            {
+                return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage("Không tìm thấy user");
+            }
+            //2. Tạo thông báo
+            var noti = _mapper.Map<Notification>(createCommand);
+            noti.Id = Guid.NewGuid();
+            noti.IsRead = false;
+            noti.Type = NotificationType.Individual;
+            await SetBaseEntityForCreation(noti);
+            _notificationRepository.Add(noti);
+            var isSuccess = await _unitOfWork.SaveChanges();
+            if (isSuccess)
+            {
+                var rs = await _notificationRepository.GetById(noti.Id);
+                if (rs != null)
+                {
+                    //3. Push notification
+                    await SendNotification(noti.UserId.ToString(), rs);
+                }
+                //return new ResponseBuilder()
+                //.WithStatus(Const.FAIL_CODE)
+                //.WithMessage(Const.FAIL_SAVE_MSG);
+            }
+            return new ResponseBuilder()
+            .WithStatus(Const.FAIL_CODE)
+            .WithMessage(Const.FAIL_SAVE_MSG);
+        }
+        catch (Exception ex)
+        {
+            var errorMessage = $"An error occurred while updating {typeof(NotificationResult).Name}: {ex.Message}";
+            return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage(errorMessage);
+        }
+    }
+
+    public async Task<BusinessResult> CreateForTeam(NotificationCreateForTeam createCommand)
+    {
+        try
+        {
+            if (createCommand.Description?.Trim() == null)
+            {
+                return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage("Miêu tả của thông báo không thể bỏ trống");
+            }
+            if (createCommand.ProjectId == null)
+            {
+                return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage("Project id không thể là giá trị null");
+            }
+            var project = await _projectRepository.GetById((Guid)createCommand.ProjectId);
+            if (project == null)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("Không tìm thấy project");
+            }
+            var teamMembers = await _teamMemberRepository.GetMembersOfTeamByProjectId((Guid)createCommand.ProjectId);
             if (teamMembers == null)
             {
                 return new ResponseBuilder()
                     .WithStatus(Const.FAIL_CODE)
                     .WithMessage("Không có thành viên ở project này");
             }
-            var userIds = teamMembers.Select(e => e.UserId).ToList();
-            foreach (var userId in userIds)
+
+            //1. Tạo thông báo
+            var noti = _mapper.Map<Notification>(createCommand);
+            noti.Id = Guid.NewGuid();
+            noti.IsRead = false;
+            noti.Type = NotificationType.Team;
+            await SetBaseEntityForCreation(noti);
+            _notificationRepository.Add(noti);
+            var isSuccess = await _unitOfWork.SaveChanges();
+            if (isSuccess)
             {
-                //1. Kiểm tra user có tồn tại trong hệ thống
-                var user = await _unitOfWork.UserRepository.GetById((Guid)userId);
-                if (user == null || user.IsDeleted) throw new Exception("User not found");
-                //2. Tạo thông báo
-                var noti = _mapper.Map<Notification>(createCommand);
-                noti.UserId = userId;
-                noti.Id = Guid.NewGuid();
-                await SetBaseEntityForCreation(noti);
-                _notificationRepository.Add(noti);
-                var isSuccess = await _unitOfWork.SaveChanges();
-                if (isSuccess)
+                var rs = await _notificationRepository.GetById(noti.Id);
+                if (rs != null)
                 {
-                    var rs = await _notificationRepository.GetById(noti.Id);
-                    if (rs != null)
+                    //2. Push notification
+                    foreach (var teamMember in teamMembers)
                     {
-                        //3. Push notification
-                        await SendNotification(userId.ToString(), rs);
+                        if (teamMember.User == null) continue;
+                        await SendNotification(teamMember.User.Id.ToString(), rs);
                     }
-                    return new ResponseBuilder()
-                    .WithStatus(Const.FAIL_CODE)
-                    .WithMessage(Const.FAIL_SAVE_MSG);
                 }
                 return new ResponseBuilder()
                 .WithStatus(Const.FAIL_CODE)
                 .WithMessage(Const.FAIL_SAVE_MSG);
             }
-            var msg = new ResponseBuilder()
-                .WithStatus(Const.SUCCESS_CODE)
-                .WithMessage(Const.SUCCESS_SAVE_MSG);
+            return new ResponseBuilder()
+            .WithStatus(Const.FAIL_CODE)
+            .WithMessage(Const.FAIL_SAVE_MSG);
+        }
+        catch (Exception ex)
+        {
+            var errorMessage = $"An error occurred while updating {typeof(NotificationResult).Name}: {ex.Message}";
+            return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage(errorMessage);
+        }
+    }
 
-            return msg;
+    public async Task<BusinessResult> CreateForSystemWide(NotificationCreateForSystemWide createCommand)
+    {
+        try
+        {
+            if (createCommand.Description?.Trim() == null)
+            {
+                return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage("Miêu tả của thông báo không thể bỏ trống");
+            }
+            //1. Tạo thông báo
+            var noti = _mapper.Map<Notification>(createCommand);
+            noti.Id = Guid.NewGuid();
+            noti.IsRead = false;
+            noti.Type = NotificationType.SystemWide;
+            await SetBaseEntityForCreation(noti);
+            _notificationRepository.Add(noti);
+            var isSuccess = await _unitOfWork.SaveChanges();
+            if (isSuccess)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(Const.SUCCESS_CODE)
+                    .WithMessage(Const.SUCCESS_SAVE_MSG);
+            }
+            return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage(Const.FAIL_SAVE_MSG);
+            //if (isSuccess)
+            //{
+            //    var rs = await _notificationRepository.GetById(noti.Id);
+            //    if (rs != null)
+            //    {
+            //        //2. Push notification
+            //        await SendNotification(noti.UserId.ToString(), rs);
+            //    }
+            //    return new ResponseBuilder()
+            //    .WithStatus(Const.FAIL_CODE)
+            //    .WithMessage(Const.FAIL_SAVE_MSG);
+            //}
+            //return new ResponseBuilder()
+            //.WithStatus(Const.FAIL_CODE)
+            //.WithMessage(Const.FAIL_SAVE_MSG);
+        }
+        catch (Exception ex)
+        {
+            var errorMessage = $"An error occurred while updating {typeof(NotificationResult).Name}: {ex.Message}";
+            return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage(errorMessage);
+        }
+    }
+
+    public async Task<BusinessResult> CreateForRoleBased(NotificationCreateForRoleBased createCommand)
+    {
+        try
+        {
+            if (createCommand.Description?.Trim() == null)
+            {
+                return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage("Miêu tả của thông báo không thể bỏ trống");
+            }
+            if (createCommand.Role == null)
+            {
+                return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage("Role không thể là giá trị null");
+            }
+            //1. Tạo thông báo
+            var noti = _mapper.Map<Notification>(createCommand);
+            noti.Id = Guid.NewGuid();
+            noti.IsRead = false;
+            noti.Type = NotificationType.RoleBased;
+            await SetBaseEntityForCreation(noti);
+            _notificationRepository.Add(noti);
+            var isSuccess = await _unitOfWork.SaveChanges();
+            if (isSuccess)
+            {
+                var rs = await _notificationRepository.GetById(noti.Id);
+                if (rs != null)
+                {
+                    //3. Push notification
+                    //await SendNotification(noti.UserId.ToString(), rs);
+                }
+                return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage(Const.FAIL_SAVE_MSG);
+            }
+            return new ResponseBuilder()
+            .WithStatus(Const.FAIL_CODE)
+            .WithMessage(Const.FAIL_SAVE_MSG);
         }
         catch (Exception ex)
         {

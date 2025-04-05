@@ -49,15 +49,14 @@ namespace FPT.TeamMatching.Services
                 if (isSuccess)
                 {
                     //noti duyệt sửa đề tài
-                    var noti = new NotificationCreateForGroup
+                    var noti = new NotificationCreateForTeam
                     {
-                        Description = ideaHistory.Idea.Mentor.Code + 
-                                        " đã duyệt yêu cầu chỉnh sửa đề tài sau review " + ideaHistory.ReviewStage + 
+                        ProjectId = ideaHistory.Idea.Project.Id,
+                        Description = ideaHistory.Idea.Mentor.Code +
+                                        " đã duyệt yêu cầu chỉnh sửa đề tài sau review " + ideaHistory.ReviewStage +
                                         " của nhóm bạn. Hãy kiểm tra!",
-                        Type = NotificationType.Team,
-                        IsRead = false,
                     };
-                    await _notificationService.CreateForTeam(noti, ideaHistory.Idea.Project.Id);
+                    await _notificationService.CreateForTeam(noti);
                     //
                     return new ResponseBuilder()
                         .WithStatus(Const.SUCCESS_CODE)
@@ -124,12 +123,10 @@ namespace FPT.TeamMatching.Services
                 if (isSuccess)
                 {
                     //noti chỉnh sửa đề tài cho mentor
-                    var noti = new NotificationCreateCommand
+                    var noti = new NotificationCreateForIndividual
                     {
                         UserId = idea.MentorId,
                         Description = "Đề tài " + idea.Abbreviations + " gửi yêu cầu chỉnh sửa sau review " + ideaHistory.ReviewStage,
-                        Type = NotificationType.Individual,
-                        IsRead = false,
                     };
                     await _notificationService.CreateForUser(noti);
                     //

@@ -13,7 +13,9 @@ public class NotificationResult : BaseResult
     public string? Description { get; set; }
 
     public NotificationType? Type { get; set; }
-    
+
+    public string? Role { get; set; }
+
     public bool IsRead { get; set; }
 
     public UserResult? User { get; set; }
