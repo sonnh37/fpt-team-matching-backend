@@ -15,6 +15,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.MentorIdeaRequest;
+using FPT.TeamMatching.Domain.Models.Requests.Commands.Notifications;
 
 namespace FPT.TeamMatching.Services
 {
@@ -24,13 +25,15 @@ namespace FPT.TeamMatching.Services
         private readonly IIdeaRepository _ideaRepository;
         private readonly ITeamMemberRepository _teamMemberRepository;
         private readonly IMentorIdeaRequestRepository _mentorIdeaRequestRepository;
+        private readonly INotificationService _notificationService;
 
-        public MentorIdeaRequestService(IMapper mapper, IUnitOfWork unitOfWork) : base(mapper, unitOfWork)
+        public MentorIdeaRequestService(IMapper mapper, IUnitOfWork unitOfWork, INotificationService notificationService) : base(mapper, unitOfWork)
         {
             _projectRepository = _unitOfWork.ProjectRepository;
             _ideaRepository = _unitOfWork.IdeaRepository;
             _teamMemberRepository = _unitOfWork.TeamMemberRepository;
             _mentorIdeaRequestRepository = _unitOfWork.MentorIdeaRequestRepository;
+            _notificationService = notificationService;
         }
 
         public async Task<BusinessResult> StudentRequestIdea(StudentRequest request)
@@ -74,6 +77,14 @@ namespace FPT.TeamMatching.Services
                 bool isSuccess = await _unitOfWork.SaveChanges();
                 if (isSuccess)
                 {
+                    //noti cho mentor
+                    var noti = new NotificationCreateForIndividual
+                    {
+                        UserId = idea.MentorId,
+                        Description = "Nhóm " + project.TeamName + " đã gửi yêu cầu sử dụng đề tài đến bạn"
+                    };
+                    await _notificationService.CreateForUser(noti);
+
                     return new ResponseBuilder()
                         .WithStatus(Const.SUCCESS_CODE)
                         .WithMessage(Const.SUCCESS_SAVE_MSG);
@@ -219,7 +230,13 @@ namespace FPT.TeamMatching.Services
                     _mentorIdeaRequestRepository.Update(mentorIdeaRequest);
                     iSaveChanges = await _unitOfWork.SaveChanges();
                     if (!iSaveChanges) return HandlerFail("Failed to save changes for approved request");
-
+                    //noti cho nhom
+                    var noti = new NotificationCreateForTeam
+                    {
+                        ProjectId = project.Id,
+                        Description = "Mentor " + idea.Mentor.Code + "  đã duyệt yêu cầu sử dụng đề tài của nhóm bạn. Hãy kiểm tra!"
+                    };
+                    await _notificationService.CreateForTeam(noti);
                     return new ResponseBuilder()
                         .WithStatus(Const.SUCCESS_CODE)
                         .WithMessage(Const.SUCCESS_SAVE_MSG);
@@ -254,7 +271,12 @@ namespace FPT.TeamMatching.Services
                     _projectRepository.Update(project);
                     iSaveChanges = await _unitOfWork.SaveChanges();
                     if (!iSaveChanges) return HandlerFail("Failed to save changes for update project");
-
+                    //noti cho nhom
+                    var noti = new NotificationCreateForTeam
+                    {
+                        ProjectId = project.Id,
+                        Description = "Mentor " + idea.Mentor.Code + "  đã duyệt yêu cầu sử dụng đề tài của nhóm bạn. Hãy kiểm tra!"
+                    };
                     return new ResponseBuilder()
                         .WithStatus(Const.SUCCESS_CODE)
                         .WithMessage(Const.SUCCESS_SAVE_MSG);

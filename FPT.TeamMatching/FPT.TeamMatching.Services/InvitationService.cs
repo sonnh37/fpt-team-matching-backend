@@ -307,6 +307,12 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
             {
                 //noti lời mời vào nhóm
                 var project = await _projectRepository.GetById((Guid)command.ProjectId);
+                if (project == null)
+                {
+                    return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("Không tìm thấy project");
+                }
                 var teamName = "";
                 if (project.TeamName != null)
                 {
