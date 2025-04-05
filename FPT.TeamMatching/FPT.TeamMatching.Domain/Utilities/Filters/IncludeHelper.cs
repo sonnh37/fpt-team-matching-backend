@@ -142,7 +142,8 @@ public static class IncludeHelper
         queryable = queryable.Include(e => e.TeamMembers).ThenInclude(e => e.User)
             .Include(e => e.Idea)
             .ThenInclude(e => e.Specialty).ThenInclude(e => e.Profession)
-            .Include(m => m.Idea).ThenInclude(m => m.Owner);
+            .Include(m => m.Idea).ThenInclude(m => m.Owner)
+            .Include(x => x.MentorFeedback);
 
         return queryable;
     }
