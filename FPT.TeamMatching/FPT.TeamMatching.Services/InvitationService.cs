@@ -347,7 +347,7 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
 
             var userId = userIdFromClaim.Value;
             
-            var invitation = await _invitationRepository.GetById(command.Id);
+            var invitation = await _invitationRepository.GetById(command.Id, true);
             if (invitation == null)
             {
                 return new ResponseBuilder()
@@ -373,7 +373,7 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
                 //
                 return new ResponseBuilder()
                     .WithStatus(Const.SUCCESS_CODE)
-                    .WithMessage(Const.SUCCESS_DELETE_MSG);
+                    .WithMessage(Const.SUCCESS_SAVE_MSG);
             }
 
             var teamMember = new TeamMember
@@ -406,17 +406,14 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
                     //
                     return new ResponseBuilder()
                         .WithStatus(Const.SUCCESS_CODE)
-                        .WithMessage(Const.SUCCESS_DELETE_MSG);
+                        .WithMessage(Const.SUCCESS_SAVE_MSG);
                 }
-
-                return new ResponseBuilder()
-                    .WithStatus(Const.FAIL_CODE)
-                    .WithMessage(Const.FAIL_DELETE_MSG);
+                
             }
 
             return new ResponseBuilder()
                 .WithStatus(Const.FAIL_CODE)
-                .WithMessage(Const.FAIL_DELETE_MSG);
+                .WithMessage(Const.FAIL_SAVE_MSG);
         }
         catch (Exception ex)
         {
@@ -432,7 +429,7 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
     {
         try
         {
-            var invitation = await _invitationRepository.GetById(command.Id);
+            var invitation = await _invitationRepository.GetById(command.Id, true);
             if (invitation == null)
             {
                 return new ResponseBuilder()
@@ -445,7 +442,7 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
                 _invitationRepository.DeletePermanently(invitation);
                 //noti phản hồi từ chối của team đến receiver
                 var teamName = "";
-                if (invitation.Project.TeamName != null)
+                if (invitation.Project?.TeamName != null)
                 {
                     teamName = invitation.Project.TeamName;
                 }
@@ -464,7 +461,7 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
                 
                 return new ResponseBuilder()
                     .WithStatus(Const.SUCCESS_CODE)
-                    .WithMessage(Const.SUCCESS_DELETE_MSG);
+                    .WithMessage(Const.SUCCESS_SAVE_MSG);
             }
 
             var teamMember = new TeamMember
@@ -491,8 +488,8 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
                     ////noti đến team
                     var noti1 = new NotificationCreateForTeam
                     {
-                        ProjectId = invitation.Project.Id,
-                        Description = invitation.Receiver.Code + " đã được chấp nhận tham gia nhóm của bạn",
+                        ProjectId = invitation.Project?.Id,
+                        Description = invitation.Receiver?.Code + " đã được chấp nhận tham gia nhóm của bạn",
                     };  
                     await _notificationService.CreateForTeam(noti1);
 
@@ -511,17 +508,14 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
                     await _notificationService.CreateForUser(noti2);
                     return new ResponseBuilder()
                         .WithStatus(Const.SUCCESS_CODE)
-                        .WithMessage(Const.SUCCESS_DELETE_MSG);
+                        .WithMessage(Const.SUCCESS_SAVE_MSG);
                 }
 
-                return new ResponseBuilder()
-                    .WithStatus(Const.FAIL_CODE)
-                    .WithMessage(Const.FAIL_DELETE_MSG);
             }
 
             return new ResponseBuilder()
                 .WithStatus(Const.FAIL_CODE)
-                .WithMessage(Const.FAIL_DELETE_MSG);
+                .WithMessage(Const.FAIL_SAVE_MSG);
         }
         catch (Exception ex)
         {
