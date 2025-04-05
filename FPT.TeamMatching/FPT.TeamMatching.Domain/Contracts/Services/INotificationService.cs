@@ -14,10 +14,14 @@ public interface INotificationService : IBaseService
     Task<BusinessResult> DeleteNotification(Guid notificationId);
     Task<BusinessResult> GetNotificationsByCurrentUser(NotificationGetAllByCurrentUserQuery query); 
     Task<BusinessResult> CreateOrUpdate(CreateOrUpdateCommand createOrUpdateCommand);
-    //gửi noti cho 1 user
-    Task<BusinessResult> CreateForUser(NotificationCreateCommand createCommand);
     //gửi noti cho list user
-    Task<BusinessResult> CreateForGroup(NotificationCreateForIndividual createCommand, List<Guid> userIds);
+    Task<BusinessResult> CreateForGroupUsers(NotificationCreateForGroupUser createCommand, List<Guid> userIds);
+    //gửi noti cho invidual
+    Task<BusinessResult> CreateForUser(NotificationCreateForIndividual createCommand);
     //gửi noti cho team
-    Task<BusinessResult> CreateForTeam(NotificationCreateForIndividual createCommand, Guid projectId);
+    Task<BusinessResult> CreateForTeam(NotificationCreateForTeam createCommand);
+    //gửi noti cho all system
+    Task<BusinessResult> CreateForSystemWide(NotificationCreateForSystemWide createCommand);
+    //gửi noti cho role based
+    Task<BusinessResult> CreateForRoleBased(NotificationCreateForRoleBased createCommand);
 }
