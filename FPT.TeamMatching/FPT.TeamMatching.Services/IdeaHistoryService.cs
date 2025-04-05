@@ -34,7 +34,7 @@ namespace FPT.TeamMatching.Services
         {
             try
             {
-                var ideaHistory = await _ideaHistoryRepository.GetById((Guid)request.Id);
+                var ideaHistory = await _ideaHistoryRepository.GetById((Guid)request.Id, true);
                 if (ideaHistory == null)
                 {
                     return new ResponseBuilder()
