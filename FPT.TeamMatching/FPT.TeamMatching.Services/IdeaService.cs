@@ -160,12 +160,10 @@ public class IdeaService : BaseService<Idea>, IIdeaService
                     .WithMessage(Const.FAIL_SAVE_MSG);
             }
             //gửi noti cho mentor
-            var command = new NotificationCreateCommand
+            var command = new NotificationCreateForIndividual
             {
                 UserId = idea.MentorId,
                 Description = "Đề tài " + idea.Abbreviations + "đang chờ bạn duyệt với vai trò Mentor",
-                Type = NotificationType.Individual,
-                IsRead = false,
             };
             await _notificationService.CreateForUser(command);
 
