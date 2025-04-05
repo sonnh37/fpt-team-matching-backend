@@ -58,12 +58,10 @@ public class CommentService : BaseService<Comment>, ICommentService
             if (isSuccess)
             {
                 //noti comment cho ng viet blog
-                var noti = new NotificationCreateCommand
+                var noti = new NotificationCreateForIndividual
                 {
                     UserId = blog.UserId,
                     Description = user.Code + " đã bình luận về bài viết của bạn",
-                    Type = NotificationType.Individual,
-                    IsRead = false,
                 };
                 await _notificationService.CreateForUser(noti);
                 //

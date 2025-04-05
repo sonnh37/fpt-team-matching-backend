@@ -170,13 +170,11 @@ public class IdeaRequestService : BaseService<IdeaRequest>, IIdeaRequestService
             {
                 var idea = await _ideaRepository.GetById((Guid)command.IdeaId);
                 //send noti cho 3 nguoi council
-                var request = new NotificationCreateForGroup
+                var request = new NotificationCreateForGroupUser
                 {
                     Description = "Đề tài " + idea.Abbreviations + "đang chờ bạn duyệt với vai trò Council",
-                    Type = NotificationType.Individual,
-                    IsRead = false,
                 };
-                await _notificationService.CreateForGroup(request, councils.Select(e => e.Id).ToList());
+                await _notificationService.CreateForGroupUsers(request, councils.Select(e => e.Id).ToList());
                 //
                 return new ResponseBuilder()
                     .WithStatus(Const.SUCCESS_CODE)
@@ -363,12 +361,10 @@ public class IdeaRequestService : BaseService<IdeaRequest>, IIdeaRequestService
                 if (saveChange)
                 {
                     //noti cho owner
-                    var noti = new NotificationCreateCommand
+                    var noti = new NotificationCreateForIndividual
                     {
                         UserId = idea.OwnerId,
                         Description = "Đề tài " + idea.Abbreviations + " đã được " + idea.Mentor.Code + "(Mentor) duyệt. Hãy kiểm tra kết quả!",
-                        Type = NotificationType.Individual,
-                        IsRead = false,
                     };
                     await _notificationService.CreateForUser(noti);
                     //

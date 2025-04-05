@@ -246,12 +246,10 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
             if (saveChange)
             {
                 //noti cho leader 
-                var noti = new NotificationCreateCommand
+                var noti = new NotificationCreateForIndividual
                 {
                     UserId = project.LeaderId,
                     Description = user.Code + " đã gửi yêu cầu tham gia nhóm",
-                    Type = NotificationType.Individual,
-                    IsRead = false,
                 };
                 await _notificationService.CreateForUser(noti);
 
@@ -314,12 +312,10 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
                 {
                     teamName = project.TeamName;
                 }
-                var noti = new NotificationCreateCommand
+                var noti = new NotificationCreateForIndividual
                 {
                     UserId = command.ReceiverId,
                     Description = "Nhóm " + teamName + " đã gửi lời mời tham gia nhóm",
-                    Type = NotificationType.Individual,
-                    IsRead = false,
                 };
                 await _notificationService.CreateForUser(noti);
                 //
@@ -368,12 +364,10 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
                     return HandlerFail("Can not saving changes!");
                 }
                 //noti từ chối lời mời vào nhóm
-                var noti = new NotificationCreateCommand
+                var noti = new NotificationCreateForIndividual
                 {
                     UserId = invitation.SenderId,
                     Description = invitation.Receiver.Code + "đã từ chối lời mời tham gia nhóm của bạn",
-                    Type = NotificationType.Individual,
-                    IsRead = false,
                 };
                 await _notificationService.CreateForUser(noti);
                 //
@@ -403,13 +397,12 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
                 if (saveChange_)
                 {
                     //noti đồng ý lời mời vào nhóm
-                    var noti = new NotificationCreateForGroup
+                    var noti = new NotificationCreateForTeam
                     {
+                        ProjectId = invitation.ProjectId,
                         Description = invitation.Receiver.Code + "đã đồng ý lời mời tham gia nhóm của bạn",
-                        Type = NotificationType.Individual,
-                        IsRead = false,
                     };
-                    await _notificationService.CreateForTeam(noti, (Guid)invitation.ProjectId);
+                    await _notificationService.CreateForTeam(noti);
                     //
                     return new ResponseBuilder()
                         .WithStatus(Const.SUCCESS_CODE)
@@ -456,12 +449,10 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
                 {
                     teamName = invitation.Project.TeamName;
                 }
-                var noti = new NotificationCreateCommand
+                var noti = new NotificationCreateForIndividual
                 {
                     UserId = invitation.SenderId,
                     Description = "Lời mời tham gia nhóm " + teamName + " của bạn đã bị từ chối",
-                    Type = NotificationType.Individual,
-                    IsRead = false,
                 };
                 await _notificationService.CreateForUser(noti);
                 //
@@ -498,13 +489,12 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
                 {
                     //noti phản hồi đồng ý của team đến receiver
                     ////noti đến team
-                    var noti1 = new NotificationCreateForGroup
+                    var noti1 = new NotificationCreateForTeam
                     {
-                        Description = invitation.Receiver   .Code + "đã được chấp nhận tham gia nhóm của bạn",
-                        Type = NotificationType.Individual,
-                        IsRead = false,
+                        ProjectId = invitation.Project.Id,
+                        Description = invitation.Receiver.Code + " đã được chấp nhận tham gia nhóm của bạn",
                     };  
-                    await _notificationService.CreateForTeam(noti1, invitation.Project.Id);
+                    await _notificationService.CreateForTeam(noti1);
 
 
                     ////noti đến sender
@@ -513,12 +503,10 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
                     {
                         teamName = invitation.Project.TeamName;
                     }
-                    var noti2 = new NotificationCreateCommand
+                    var noti2 = new NotificationCreateForIndividual
                     {
                         UserId = invitation.SenderId,
                         Description = "Lời mời tham gia nhóm " + teamName + " của bạn đã được chấp nhận",
-                        Type = NotificationType.Individual,
-                        IsRead = false,
                     };
                     await _notificationService.CreateForUser(noti2);
                     return new ResponseBuilder()

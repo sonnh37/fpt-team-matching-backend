@@ -167,7 +167,7 @@ public class MappingProfile : Profile
 
         CreateMap<Notification, NotificationCreateCommand>().ReverseMap();
         CreateMap<Notification, NotificationResult>().ReverseMap();
-        CreateMap<Notification, NotificationCreateForGroup>().ReverseMap();
+        CreateMap<Notification, NotificationCreateForIndividual>().ReverseMap();
 
         #endregion
 
