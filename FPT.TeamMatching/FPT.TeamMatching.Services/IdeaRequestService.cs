@@ -172,7 +172,7 @@ public class IdeaRequestService : BaseService<IdeaRequest>, IIdeaRequestService
                 //send noti cho 3 nguoi council
                 var request = new NotificationCreateForGroupUser
                 {
-                    Description = "Đề tài " + idea.Abbreviations + "đang chờ bạn duyệt với vai trò Council",
+                    Description = "Đề tài " + idea.Abbreviations + " đang chờ bạn duyệt với vai trò Council",
                 };
                 await _notificationService.CreateForGroupUsers(request, councils.Select(e => e.Id).ToList());
                 //
