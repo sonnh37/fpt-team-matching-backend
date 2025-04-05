@@ -26,7 +26,8 @@ public class IdeaService : BaseService<Idea>, IIdeaService
     private readonly ITeamMemberRepository _teamMemberRepository;
     private readonly INotificationService _notificationService;
 
-    public IdeaService(IMapper mapper, IUnitOfWork unitOfWork, INotificationService notificationService) : base(mapper, unitOfWork)
+    public IdeaService(IMapper mapper, IUnitOfWork unitOfWork, INotificationService notificationService) : base(mapper,
+        unitOfWork)
     {
         _ideaRepository = unitOfWork.IdeaRepository;
         _ideaRequestRepository = unitOfWork.IdeaRequestRepository;
@@ -72,6 +73,7 @@ public class IdeaService : BaseService<Idea>, IIdeaService
                 .WithMessage(errorMessage);
         }
     }
+
 
     public async Task<BusinessResult> StudentCreatePending(IdeaStudentCreatePendingCommand idea)
     {
@@ -301,6 +303,7 @@ public class IdeaService : BaseService<Idea>, IIdeaService
             //};
             //await _notificationService.CreateOrUpdate<NotificationResult>(command);
             
+
             return new ResponseBuilder()
                 .WithStatus(Const.SUCCESS_CODE)
                 .WithMessage(Const.SUCCESS_SAVE_MSG);
@@ -343,7 +346,7 @@ public class IdeaService : BaseService<Idea>, IIdeaService
                 .WithMessage(errorMessage);
         }
     }
-    
+
     public async Task<BusinessResult> GetUserIdeasByStatusWithCurrentStageIdea(IdeaGetCurrentStageForUserByStatus query)
     {
         try
@@ -355,7 +358,8 @@ public class IdeaService : BaseService<Idea>, IIdeaService
 
             var currentStageIdea = await _stageIdeaRepositoty.GetCurrentStageIdea();
             if (currentStageIdea == null) return HandlerFail("Current stage Idea does not exist");
-            var ideas = await _ideaRepository.GetUserIdeasByStatusWithCurrentStageIdea(userId, query.Status, currentStageIdea.Id);
+            var ideas = await _ideaRepository.GetUserIdeasByStatusWithCurrentStageIdea(userId, query.Status,
+                currentStageIdea.Id);
             var result = _mapper.Map<List<IdeaResult>>(ideas);
             if (result == null)
                 return new ResponseBuilder()
@@ -443,8 +447,9 @@ public class IdeaService : BaseService<Idea>, IIdeaService
             return HandlerError(ex.Message);
         }
     }
-    
-    public async Task<BusinessResult> GetIdeasOfSupervisors<TResult>(IdeaGetListOfSupervisorsQuery query) where TResult : BaseResult
+
+    public async Task<BusinessResult> GetIdeasOfSupervisors<TResult>(IdeaGetListOfSupervisorsQuery query)
+        where TResult : BaseResult
     {
         try
         {
@@ -562,6 +567,7 @@ public class IdeaService : BaseService<Idea>, IIdeaService
                             {
                                 return;
                             }
+
                             //Tao teamMember
                             var teamMember = new TeamMember
                             {
@@ -593,6 +599,7 @@ public class IdeaService : BaseService<Idea>, IIdeaService
 
                     }
                 }
+
                 //update idea
                 idea.Owner = null;
                 idea.StageIdea = null;
@@ -625,14 +632,14 @@ public class IdeaService : BaseService<Idea>, IIdeaService
                 //update status
                 project.Status = ProjectStatus.InProgress;
                 //update teamCode
-                    //get so luong project InProgress cua ki
-                    var numberOfProjects = await _projectRepository.NumberOfInProgressProjectInSemester(semester.Id);
-                    // Tạo số thứ tự tiếp theo
-                    int nextNumber = numberOfProjects + 1;
-                    string semesterCode = semester.SemesterCode;
-                    //Tạo mã nhóm
-                    string newTeamCode = $"{semesterCode}SE{nextNumber:D3}";
-                    project.Idea = null;
+                //get so luong project InProgress cua ki
+                var numberOfProjects = await _projectRepository.NumberOfInProgressProjectInSemester(semester.Id);
+                // Tạo số thứ tự tiếp theo
+                int nextNumber = numberOfProjects + 1;
+                string semesterCode = semester.SemesterCode;
+                //Tạo mã nhóm
+                string newTeamCode = $"{semesterCode}SE{nextNumber:D3}";
+                project.Idea = null;
                 await SetBaseEntityForUpdate(project);
                 _projectRepository.Update(project);
                 var isSuccess = await _unitOfWork.SaveChanges();
@@ -640,6 +647,7 @@ public class IdeaService : BaseService<Idea>, IIdeaService
                 {
                     return;
                 }
+
                 //update status cua teammember
                 var teamMembers = await _teamMemberRepository.GetMembersOfTeamByProjectId(project.Id);
                 foreach (var teamMember in teamMembers)
@@ -647,6 +655,7 @@ public class IdeaService : BaseService<Idea>, IIdeaService
                     await SetBaseEntityForUpdate(teamMember);
                     teamMember.Status = TeamMemberStatus.InProgress;
                 }
+
                 _teamMemberRepository.UpdateRange(teamMembers);
                 isSuccess = await _unitOfWork.SaveChanges();
                 if (!isSuccess)
