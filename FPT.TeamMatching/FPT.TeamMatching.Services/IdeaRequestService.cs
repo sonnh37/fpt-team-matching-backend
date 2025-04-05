@@ -346,7 +346,7 @@ public class IdeaRequestService : BaseService<IdeaRequest>, IIdeaRequestService
                 await SetBaseEntityForUpdate(ideaRequestOld);
                 _ideaRequestRepository.Update(ideaRequestOld);
 
-                var idea = await _ideaRepository.GetById(ideaRequestOld.IdeaId.Value);
+                var idea = await _ideaRepository.GetById(ideaRequestOld.IdeaId.Value, true);
                 if (idea == null) return HandlerFail("Idea not found");
                 // # Lỗi do thay đổi db
                 // if (ideaRequestOld.Status == IdeaRequestStatus.MentorRejected)
