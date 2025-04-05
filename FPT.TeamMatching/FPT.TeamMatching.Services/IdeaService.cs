@@ -305,14 +305,6 @@ public class IdeaService : BaseService<Idea>, IIdeaService
             //};
             //await _notificationService.CreateOrUpdate<NotificationResult>(command);
             
-            var command = new NotificationCreateCommand
-            {
-                UserId = userId,
-                Description = "Test, create idea",
-                Type = NotificationType.SystemWide,
-                IsRead = false,
-            };
-            await _notificationService.CreateOrUpdate<NotificationResult>(command);
 
             return new ResponseBuilder()
                 .WithStatus(Const.SUCCESS_CODE)
