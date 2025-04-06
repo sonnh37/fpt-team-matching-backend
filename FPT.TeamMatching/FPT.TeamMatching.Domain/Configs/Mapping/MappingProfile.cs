@@ -26,6 +26,7 @@ using FPT.TeamMatching.Domain.Models.Requests.Commands.StageIdeas;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.CapstoneSchedules;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.MentorFeedbacks;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.MentorIdeaRequests;
+using FPT.TeamMatching.Domain.Models.Requests.Commands.Timelines;
 
 namespace FPT.TeamMatching.Domain.Configs.Mapping;
 
@@ -253,6 +254,13 @@ public class MappingProfile : Profile
         CreateMap<MentorFeedback, MentorFeedbackResult>().ReverseMap();
         CreateMap<MentorFeedbackCreateCommand, MentorFeedback>();
         CreateMap<MentorFeedbackUpdateCommand, MentorFeedback>();
+
+        #endregion
+
+        #region Timeline
+        CreateMap<Timeline, TimelineResult>().ReverseMap();
+        CreateMap<Timeline, TimelineCreateCommand>().ReverseMap();
+        CreateMap<Timeline, TimelineUpdateCommand>().ReverseMap();
 
         #endregion
 

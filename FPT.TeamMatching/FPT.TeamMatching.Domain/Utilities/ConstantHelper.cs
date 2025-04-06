@@ -44,7 +44,6 @@ public static class Const
 
     #endregion
 
-    
     #region Url api
 
     private const string BaseApi = "api";
@@ -108,6 +107,8 @@ public static class Const
     public const string API_IDEA_HISTORY_REQUESTS = $"{BaseApi}/idea-history-requests";
 
     public const string API_MENTOR_FEEDBACKS = $"{BaseApi}/mentor-feedbacks";
+
+    public const string API_TIMELINES = $"{BaseApi}/timelines";
 
     public const string SortFieldDefault = "CreatedDate";
 
