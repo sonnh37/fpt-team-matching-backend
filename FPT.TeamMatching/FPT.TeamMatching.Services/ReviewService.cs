@@ -412,14 +412,15 @@ public class ReviewService : BaseService<Review>, IReviewService
                     int missingRows = projectRowCount - reviewRowCount;
                     for (int i = 0; i < missingRows; i++)
                     {
-                        reviews.Rows.Add("");
+                        DataRow newRow = reviews.NewRow();
+                        reviews.Rows.Add(newRow);
                     }
                 }
                 #region Sheet Review 1
                 var ws1 = wb.Worksheets.Add("Review 1");
                 
                 ws1.Cell(1,1).InsertTable(projects).Theme = XLTableTheme.TableStyleLight1;
-                ws1.Cell(1,9).InsertTable(reviews).Theme = XLTableTheme.TableStyleLight2;
+                ws1.Cell(2,9).InsertTable(reviews).Theme = XLTableTheme.TableStyleLight2;
                 // Chèn dòng đầu tiên
                 ws1.Row(1).InsertRowsAbove(1); // Chèn một dòng mới phía trên
 
@@ -472,7 +473,7 @@ public class ReviewService : BaseService<Review>, IReviewService
                 var ws2 = wb.AddWorksheet("Review 2");
                 
                 ws2.Cell(1, 1).InsertTable(projects).Theme = XLTableTheme.TableStyleLight1;
-                ws2.Cell(1, 9).InsertTable(reviews).Theme = XLTableTheme.TableStyleLight4;
+                ws2.Cell(2, 9).InsertTable(reviews).Theme = XLTableTheme.TableStyleLight4;
                 // Chèn dòng đầu tiên
                 ws2.Row(1).InsertRowsAbove(1); // Chèn một dòng mới phía trên
 
@@ -525,7 +526,7 @@ public class ReviewService : BaseService<Review>, IReviewService
                 var ws3 = wb.AddWorksheet("Review 3");
 
                 ws3.Cell(1, 1).InsertTable(projects).Theme = XLTableTheme.TableStyleLight1;
-                ws3.Cell(1, 9).InsertTable(reviews).Theme = XLTableTheme.TableStyleLight5;
+                ws3.Cell(2, 9).InsertTable(reviews).Theme = XLTableTheme.TableStyleLight5;
                 // Chèn dòng đầu tiên
                 ws3.Row(1).InsertRowsAbove(1); // Chèn một dòng mới phía trên
 
@@ -598,6 +599,8 @@ public class ReviewService : BaseService<Review>, IReviewService
     private async Task<DataTable> GetProjectInProgress()
     {
         DataTable dt = new DataTable();
+        
+        dt.Rows.Add(dt.NewRow());
         dt.Columns.Add("STT");
         dt.Columns.Add("Mã đề tài");
         dt.Columns.Add("Mã nhóm");
@@ -606,7 +609,6 @@ public class ReviewService : BaseService<Review>, IReviewService
         dt.Columns.Add("GVHD");
         dt.Columns.Add("GVHD1");
         dt.Columns.Add("GVHD2");
-
         var currentSemester = await _semesterRepository.GetCurrentSemester();
         if (currentSemester == null)
         {
