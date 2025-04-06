@@ -71,6 +71,7 @@ public partial class FPTMatchingDbContext : BaseDbContext
 
     public virtual DbSet<MentorFeedback> MentorFeedbacks { get; set; } //
 
+    public virtual DbSet<Timeline> Timelines { get; set; } //
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -519,6 +520,19 @@ public partial class FPTMatchingDbContext : BaseDbContext
 
             entity.HasOne(d => d.Project).WithOne(p => p.MentorFeedback)
                 .HasForeignKey<MentorFeedback>(d => d.ProjectId);
+        });
+
+        modelBuilder.Entity<Timeline>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            entity.ToTable("Timeline");
+
+            entity.Property(e => e.Id).ValueGeneratedOnAdd()
+                .HasDefaultValueSql("gen_random_uuid()");
+
+            entity.HasOne(d => d.Semester).WithMany(p => p.Timelines)
+                .HasForeignKey(d => d.SemesterId);
         });
 
         OnModelCreatingPartial(modelBuilder);
