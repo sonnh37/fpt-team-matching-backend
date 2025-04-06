@@ -346,13 +346,8 @@ public class IdeaRequestService : BaseService<IdeaRequest>, IIdeaRequestService
                 await SetBaseEntityForUpdate(ideaRequestOld);
                 _ideaRequestRepository.Update(ideaRequestOld);
 
-                var idea = await _ideaRepository.GetById(ideaRequestOld.IdeaId.Value, true);
+                var idea = await _ideaRepository.GetById(ideaRequestOld.IdeaId.Value);
                 if (idea == null) return HandlerFail("Idea not found");
-                // # Lỗi do thay đổi db
-                // if (ideaRequestOld.Status == IdeaRequestStatus.MentorRejected)
-                // {
-                //     idea.Status = IdeaStatus.Rejected;
-                // }
 
                 await SetBaseEntityForUpdate(idea);
                 _ideaRepository.Update(idea);
@@ -360,11 +355,24 @@ public class IdeaRequestService : BaseService<IdeaRequest>, IIdeaRequestService
                 bool saveChange = await _unitOfWork.SaveChanges();
                 if (saveChange)
                 {
+                    if (idea.MentorId == null)
+                    {
+                        return new ResponseBuilder()
+                        .WithStatus(Const.NOT_FOUND_CODE)
+                        .WithMessage("De tai khong co mentor id");
+                    }
+                    var mentor = await _userRepository.GetById((Guid)idea.MentorId);
+                    if (mentor == null)
+                    {
+                        return new ResponseBuilder()
+                        .WithStatus(Const.NOT_FOUND_CODE)
+                        .WithMessage("De tai khong co mentor");
+                    }
                     //noti cho owner
                     var noti = new NotificationCreateForIndividual
                     {
                         UserId = idea.OwnerId,
-                        Description = "Đề tài " + idea.Abbreviations + " đã được " + idea.Mentor.Code + "(Mentor) duyệt. Hãy kiểm tra kết quả!",
+                        Description = "Đề tài " + idea.Abbreviations + " đã được " + mentor.Code + "(Mentor) duyệt. Hãy kiểm tra kết quả!",
                     };
                     await _notificationService.CreateForUser(noti);
                     //
