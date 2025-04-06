@@ -41,5 +41,6 @@ public static class CollectionRepositories
         services.AddScoped<ICapstoneScheduleRepository, CapstoneScheduleRepository>();
         services.AddScoped<IMentorIdeaRequestRepository, MentorIdeaRequestRepository>();
         services.AddScoped<IMentorFeedbackRepository, MentorFeedbackRepository>();
+        services.AddScoped<ITimelineRepository, TimelineRepository>();
     }
 }

@@ -39,6 +39,7 @@ public static class CollectionServices
         services.AddSingleton<IUserIdProvider, CustomUserIdProvider>();
         services.AddSingleton<IFileUploadService, FileUploadService>();
         services.AddTransient<IMentorFeedbackService, MentorFeedbackService>();
+        services.AddTransient<ITimelineService, TimelineService>();
 
         services.AddTransient<IApiHubService, ApiHubService>();
         services.AddTransient<ChatHub>();
