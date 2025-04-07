@@ -80,4 +80,12 @@ public class TeamMemberController : ControllerBase
 
         return Ok(businessResult);
     }
+
+    [HttpPut("update-by-mentor")]
+    public async Task<IActionResult> UpdateTeamMemberByMentor([FromBody] List<MentorUpdate> requests)
+    {
+        var businessResult = await _teammemberservice.UpdateTeamMemberByMentor(requests);
+
+        return Ok(businessResult);
+    }
 }

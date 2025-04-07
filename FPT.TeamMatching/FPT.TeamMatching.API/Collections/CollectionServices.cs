@@ -37,6 +37,9 @@ public static class CollectionServices
         services.AddTransient<ICapstoneScheduleService, CapstoneScheduleService>();
         services.AddTransient<IMentorIdeaRequestService, MentorIdeaRequestService>();
         services.AddSingleton<IUserIdProvider, CustomUserIdProvider>();
+        services.AddSingleton<IFileUploadService, FileUploadService>();
+        services.AddTransient<IMentorFeedbackService, MentorFeedbackService>();
+        services.AddTransient<ITimelineService, TimelineService>();
 
         services.AddTransient<IApiHubService, ApiHubService>();
         services.AddTransient<ChatHub>();

@@ -41,6 +41,7 @@ public class TeamMemberRepository : BaseRepository<TeamMember>, ITeamMemberRepos
         var tm = await _dbContext.TeamMembers.Where(e => e.IsDeleted == false &&
                                                     e.ProjectId == projectId &&
                                                     e.LeaveDate == null)
+                                                .Include(e => e.User)
                                                 .ToListAsync();
         return tm;
     }

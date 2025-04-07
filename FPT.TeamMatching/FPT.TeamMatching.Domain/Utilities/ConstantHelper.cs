@@ -44,7 +44,6 @@ public static class Const
 
     #endregion
 
-    
     #region Url api
 
     private const string BaseApi = "api";
@@ -109,11 +108,15 @@ public static class Const
 
     public const string API_MENTOR_FEEDBACKS = $"{BaseApi}/mentor-feedbacks";
 
+    public const string API_TIMELINES = $"{BaseApi}/timelines";
+
     public const string SortFieldDefault = "CreatedDate";
 
     public const string HANGFIRE = $"{BaseApi}/hangfire";
 
     public const string API_HUBS = $"{BaseApi}/api_hubs";
+    
+    public const string API_FILE_UPLOAD = $"{BaseApi}/file-upload";
 
     #endregion
 

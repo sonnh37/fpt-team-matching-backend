@@ -723,6 +723,9 @@ namespace FPT.TeamMatching.Data.Migrations
                     b.Property<Guid?>("ProjectId")
                         .HasColumnType("uuid");
 
+                    b.Property<string>("Role")
+                        .HasColumnType("text");
+
                     b.Property<string>("Type")
                         .HasColumnType("text");
 
@@ -924,8 +927,8 @@ namespace FPT.TeamMatching.Data.Migrations
                     b.Property<string>("Note")
                         .HasColumnType("text");
 
-                    b.Property<int>("NumbOfStar")
-                        .HasColumnType("integer");
+                    b.Property<double>("NumbOfStar")
+                        .HasColumnType("double precision");
 
                     b.Property<Guid?>("RateById")
                         .HasColumnType("uuid");
@@ -1329,6 +1332,50 @@ namespace FPT.TeamMatching.Data.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("TeamMember", (string)null);
+                });
+
+            modelBuilder.Entity("FPT.TeamMatching.Domain.Entities.Timeline", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("text");
+
+                    b.Property<DateTimeOffset?>("CreatedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset?>("EndDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Note")
+                        .HasColumnType("text");
+
+                    b.Property<Guid?>("SemesterId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset?>("StartDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Title")
+                        .HasColumnType("text");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("text");
+
+                    b.Property<DateTimeOffset?>("UpdatedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SemesterId");
+
+                    b.ToTable("Timeline", (string)null);
                 });
 
             modelBuilder.Entity("FPT.TeamMatching.Domain.Entities.User", b =>
@@ -1796,6 +1843,15 @@ namespace FPT.TeamMatching.Data.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("FPT.TeamMatching.Domain.Entities.Timeline", b =>
+                {
+                    b.HasOne("FPT.TeamMatching.Domain.Entities.Semester", "Semester")
+                        .WithMany("Timelines")
+                        .HasForeignKey("SemesterId");
+
+                    b.Navigation("Semester");
+                });
+
             modelBuilder.Entity("FPT.TeamMatching.Domain.Entities.UserXRole", b =>
                 {
                     b.HasOne("FPT.TeamMatching.Domain.Entities.Role", "Role")
@@ -1870,6 +1926,8 @@ namespace FPT.TeamMatching.Data.Migrations
                     b.Navigation("ProfileStudents");
 
                     b.Navigation("StageIdeas");
+
+                    b.Navigation("Timelines");
                 });
 
             modelBuilder.Entity("FPT.TeamMatching.Domain.Entities.Specialty", b =>

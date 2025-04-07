@@ -85,6 +85,7 @@ public class InvitationRepository : BaseRepository<Invitation>, IInvitationRepos
             .Include(m => m.Receiver)
             .Include(m => m.Sender);
 
+        queryable = queryable.Where(m => m.SenderId == userId);
         if (query.IsPagination)
         {
             var totalOrigin = queryable.Count();

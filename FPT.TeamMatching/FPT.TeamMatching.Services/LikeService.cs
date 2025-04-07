@@ -52,12 +52,10 @@ public class LikeService : BaseService<Like>, ILikeService
             if (isSuccess)
             {
                 //noti like cho ng viet blog
-                var noti = new NotificationCreateCommand
+                var noti = new NotificationCreateForIndividual
                 {
                     UserId = blog.UserId,
                     Description = user.Code + " đã thích bài viết của bạn",
-                    Type = NotificationType.General,
-                    IsRead = false,
                 };
                 await _notificationService.CreateForUser(noti);
                 //

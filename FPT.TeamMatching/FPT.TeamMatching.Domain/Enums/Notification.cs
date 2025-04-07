@@ -2,6 +2,8 @@ namespace FPT.TeamMatching.Domain.Enums;
 
 public enum NotificationType
 {
-    General,   // Chung
-    // đang động não
+    SystemWide,// Cả hệ thống
+    Individual, // Cá nhân
+    Team,// Nhóm
+    RoleBased// Theo role
 }

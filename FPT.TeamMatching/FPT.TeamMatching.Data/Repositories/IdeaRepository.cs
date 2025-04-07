@@ -54,6 +54,11 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
                                                       && e.Status == status)
             .OrderByDescending(m => m.CreatedDate)
             .Include(m => m.StageIdea)
+            .Include(m => m.Owner)
+            .Include(m => m.Mentor)
+            .Include(m => m.SubMentor)
+            .Include(m => m.Specialty)
+            .Include(m => m.Project)
             .Include(e => e.IdeaRequests).ThenInclude(e => e.Reviewer)
             .ToListAsync();
 

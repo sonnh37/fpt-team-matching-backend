@@ -246,12 +246,10 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
             if (saveChange)
             {
                 //noti cho leader 
-                var noti = new NotificationCreateCommand
+                var noti = new NotificationCreateForIndividual
                 {
                     UserId = project.LeaderId,
                     Description = user.Code + " đã gửi yêu cầu tham gia nhóm",
-                    Type = NotificationType.General,
-                    IsRead = false,
                 };
                 await _notificationService.CreateForUser(noti);
 
@@ -309,17 +307,21 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
             {
                 //noti lời mời vào nhóm
                 var project = await _projectRepository.GetById((Guid)command.ProjectId);
+                if (project == null)
+                {
+                    return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("Không tìm thấy project");
+                }
                 var teamName = "";
                 if (project.TeamName != null)
                 {
                     teamName = project.TeamName;
                 }
-                var noti = new NotificationCreateCommand
+                var noti = new NotificationCreateForIndividual
                 {
                     UserId = command.ReceiverId,
                     Description = "Nhóm " + teamName + " đã gửi lời mời tham gia nhóm",
-                    Type = NotificationType.General,
-                    IsRead = false,
                 };
                 await _notificationService.CreateForUser(noti);
                 //
@@ -351,7 +353,7 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
 
             var userId = userIdFromClaim.Value;
             
-            var invitation = await _invitationRepository.GetById(command.Id);
+            var invitation = await _invitationRepository.GetById(command.Id, true);
             if (invitation == null)
             {
                 return new ResponseBuilder()
@@ -368,18 +370,16 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
                     return HandlerFail("Can not saving changes!");
                 }
                 //noti từ chối lời mời vào nhóm
-                var noti = new NotificationCreateCommand
+                var noti = new NotificationCreateForIndividual
                 {
                     UserId = invitation.SenderId,
                     Description = invitation.Receiver.Code + "đã từ chối lời mời tham gia nhóm của bạn",
-                    Type = NotificationType.General,
-                    IsRead = false,
                 };
                 await _notificationService.CreateForUser(noti);
                 //
                 return new ResponseBuilder()
                     .WithStatus(Const.SUCCESS_CODE)
-                    .WithMessage(Const.SUCCESS_DELETE_MSG);
+                    .WithMessage(Const.SUCCESS_SAVE_MSG);
             }
 
             var teamMember = new TeamMember
@@ -403,27 +403,23 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
                 if (saveChange_)
                 {
                     //noti đồng ý lời mời vào nhóm
-                    var noti = new NotificationCreateForGroup
+                    var noti = new NotificationCreateForTeam
                     {
+                        ProjectId = invitation.ProjectId,
                         Description = invitation.Receiver.Code + "đã đồng ý lời mời tham gia nhóm của bạn",
-                        Type = NotificationType.General,
-                        IsRead = false,
                     };
-                    await _notificationService.CreateForTeam(noti, (Guid)invitation.ProjectId);
+                    await _notificationService.CreateForTeam(noti);
                     //
                     return new ResponseBuilder()
                         .WithStatus(Const.SUCCESS_CODE)
-                        .WithMessage(Const.SUCCESS_DELETE_MSG);
+                        .WithMessage(Const.SUCCESS_SAVE_MSG);
                 }
-
-                return new ResponseBuilder()
-                    .WithStatus(Const.FAIL_CODE)
-                    .WithMessage(Const.FAIL_DELETE_MSG);
+                
             }
 
             return new ResponseBuilder()
                 .WithStatus(Const.FAIL_CODE)
-                .WithMessage(Const.FAIL_DELETE_MSG);
+                .WithMessage(Const.FAIL_SAVE_MSG);
         }
         catch (Exception ex)
         {
@@ -439,7 +435,7 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
     {
         try
         {
-            var invitation = await _invitationRepository.GetById(command.Id);
+            var invitation = await _invitationRepository.GetById(command.Id, true);
             if (invitation == null)
             {
                 return new ResponseBuilder()
@@ -452,16 +448,14 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
                 _invitationRepository.DeletePermanently(invitation);
                 //noti phản hồi từ chối của team đến receiver
                 var teamName = "";
-                if (invitation.Project.TeamName != null)
+                if (invitation.Project?.TeamName != null)
                 {
                     teamName = invitation.Project.TeamName;
                 }
-                var noti = new NotificationCreateCommand
+                var noti = new NotificationCreateForIndividual
                 {
                     UserId = invitation.SenderId,
                     Description = "Lời mời tham gia nhóm " + teamName + " của bạn đã bị từ chối",
-                    Type = NotificationType.General,
-                    IsRead = false,
                 };
                 await _notificationService.CreateForUser(noti);
                 //
@@ -473,7 +467,7 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
                 
                 return new ResponseBuilder()
                     .WithStatus(Const.SUCCESS_CODE)
-                    .WithMessage(Const.SUCCESS_DELETE_MSG);
+                    .WithMessage(Const.SUCCESS_SAVE_MSG);
             }
 
             var teamMember = new TeamMember
@@ -498,13 +492,12 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
                 {
                     //noti phản hồi đồng ý của team đến receiver
                     ////noti đến team
-                    var noti1 = new NotificationCreateForGroup
+                    var noti1 = new NotificationCreateForTeam
                     {
-                        Description = invitation.Receiver.Code + "đã được chấp nhận tham gia nhóm của bạn",
-                        Type = NotificationType.General,
-                        IsRead = false,
-                    };
-                    await _notificationService.CreateForTeam(noti1, invitation.Project.Id);
+                        ProjectId = invitation.Project?.Id,
+                        Description = invitation.Receiver?.Code + " đã được chấp nhận tham gia nhóm của bạn",
+                    };  
+                    await _notificationService.CreateForTeam(noti1);
 
 
                     ////noti đến sender
@@ -513,27 +506,22 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
                     {
                         teamName = invitation.Project.TeamName;
                     }
-                    var noti2 = new NotificationCreateCommand
+                    var noti2 = new NotificationCreateForIndividual
                     {
                         UserId = invitation.SenderId,
                         Description = "Lời mời tham gia nhóm " + teamName + " của bạn đã được chấp nhận",
-                        Type = NotificationType.General,
-                        IsRead = false,
                     };
                     await _notificationService.CreateForUser(noti2);
                     return new ResponseBuilder()
                         .WithStatus(Const.SUCCESS_CODE)
-                        .WithMessage(Const.SUCCESS_DELETE_MSG);
+                        .WithMessage(Const.SUCCESS_SAVE_MSG);
                 }
 
-                return new ResponseBuilder()
-                    .WithStatus(Const.FAIL_CODE)
-                    .WithMessage(Const.FAIL_DELETE_MSG);
             }
 
             return new ResponseBuilder()
                 .WithStatus(Const.FAIL_CODE)
-                .WithMessage(Const.FAIL_DELETE_MSG);
+                .WithMessage(Const.FAIL_SAVE_MSG);
         }
         catch (Exception ex)
         {
