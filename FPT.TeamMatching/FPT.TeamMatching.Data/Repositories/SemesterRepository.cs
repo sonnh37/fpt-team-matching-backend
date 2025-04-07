@@ -41,7 +41,7 @@ namespace FPT.TeamMatching.Data.Repositories
         {
             var now = DateTime.UtcNow;
             var semester = await GetQueryable().Where(e => e.StartDate >  now)
-                                        .OrderByDescending(e => e.StartDate)
+                                        .OrderBy(e => e.StartDate)
                                         .FirstOrDefaultAsync();
             return semester;
         }

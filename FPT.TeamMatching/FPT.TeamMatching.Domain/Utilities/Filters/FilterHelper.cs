@@ -239,11 +239,11 @@ public static class FilterHelper
             );
         }
 
-        // if (!string.IsNullOrEmpty(query.Email))
-        // {
-        //     string searchEmail = query.Email.Trim().ToLower();
-        //     queryable = queryable.Where(m => m.Email.ToLower() == searchEmail);
-        // }
+        if (!string.IsNullOrEmpty(query.Email))
+        {
+            string searchEmail = query.Email.Trim().ToLower();
+            queryable = queryable.Where(m => m.Email.ToLower() == searchEmail);
+        }
         
         if (query.Department.HasValue)
         {
