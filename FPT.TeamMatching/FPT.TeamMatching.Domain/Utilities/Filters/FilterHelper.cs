@@ -143,6 +143,12 @@ public static class FilterHelper
             queryable = queryable.Where(m =>
                 m.UserId == query.UserId);
         }
+        if (!string.IsNullOrWhiteSpace(query.Title))
+        {
+            queryable = queryable.Where(m =>
+                m.Title.ToLower().StartsWith(query.Title.ToLower()));
+        }
+
 
         queryable = BaseFilterHelper.Base(queryable, query);
 
