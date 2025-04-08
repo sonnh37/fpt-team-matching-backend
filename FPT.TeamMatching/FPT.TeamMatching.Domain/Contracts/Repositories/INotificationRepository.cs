@@ -8,5 +8,5 @@ public interface INotificationRepository : IBaseRepository<Notification>
 {
     Task<List<Notification>> GetAllNotificationByUserId(Guid userId);
 
-    Task<(List<Notification>, int)> GetDataByCurrentUser(NotificationGetAllByCurrentUserQuery query, Guid userId);
+    Task<(List<Notification>, int)> GetDataByCurrentUser(NotificationGetAllByCurrentUserQuery query, Guid userId, Guid? projectId);
 }
