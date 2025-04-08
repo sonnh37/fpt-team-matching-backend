@@ -435,7 +435,7 @@ public class ReviewService : BaseService<Review>, IReviewService
                 ws1.Cell("B1").Style.Font.FontSize = 14;
                 ws1.Cell("B1").Style.Font.FontColor = XLColor.Red;
                 ws1.Cell("B1").Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-
+                
                 // Định dạng hàng tiêu đề project info
                 var headerProjectInfoRow1 = ws1.Range("A2:H2");
                 headerProjectInfoRow1.Style.Font.Bold = true;
@@ -464,7 +464,7 @@ public class ReviewService : BaseService<Review>, IReviewService
                 ws1.Column("G").Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
 
                 ws1.Column("H").Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-
+                ws1.Column("K").Style.DateFormat.Format = "mm-dd-yyyy";
                 // Tự động điều chỉnh độ rộng cột
                 ws1.Columns().AdjustToContents();
                 #endregion
@@ -601,14 +601,14 @@ public class ReviewService : BaseService<Review>, IReviewService
         DataTable dt = new DataTable();
         
         dt.Rows.Add(dt.NewRow());
-        dt.Columns.Add("STT");
-        dt.Columns.Add("Mã đề tài");
-        dt.Columns.Add("Mã nhóm");
-        dt.Columns.Add("Tên đề tài Tiếng Anh/ Tiếng Nhật");
-        dt.Columns.Add("Tên đề tài Tiếng Việt");
-        dt.Columns.Add("GVHD");
-        dt.Columns.Add("GVHD1");
-        dt.Columns.Add("GVHD2");
+        dt.Columns.Add("STT", typeof(int));
+        dt.Columns.Add("Mã đề tài", typeof(string));
+        dt.Columns.Add("Mã nhóm", typeof(string));
+        dt.Columns.Add("Tên đề tài Tiếng Anh/ Tiếng Nhật", typeof(string));
+        dt.Columns.Add("Tên đề tài Tiếng Việt", typeof(string));
+        dt.Columns.Add("GVHD", typeof(string));
+        dt.Columns.Add("GVHD1", typeof(string));
+        dt.Columns.Add("GVHD2", typeof(string));
         var currentSemester = await _semesterRepository.GetCurrentSemester();
         if (currentSemester == null)
         {
@@ -633,11 +633,11 @@ public class ReviewService : BaseService<Review>, IReviewService
     private DataTable GetReview()
     {
         DataTable dt = new DataTable();
-        dt.Columns.Add("Reviewer 1");
-        dt.Columns.Add("Reviewer 2");
-        dt.Columns.Add("Date");
-        dt.Columns.Add("Slot");
-        dt.Columns.Add("Room");
+        dt.Columns.Add("Reviewer 1", typeof(string));
+        dt.Columns.Add("Reviewer 2", typeof(string));
+        dt.Columns.Add("Date", typeof(DateOnly));
+        dt.Columns.Add("Slot", typeof(string));
+        dt.Columns.Add("Room", typeof(string));
         return dt;
     }
 }
