@@ -197,7 +197,7 @@ public class ReviewService : BaseService<Review>, IReviewService
             }
 
             var reviewList = await _userRepository.GetAllReviewerIdAndUsername();
-            var reviewUsernameList = reviewList.Select(x => x.Username).ToList();
+            var reviewUsernameList = reviewList.Select(x => x.Code).ToList();
             var customIdeaModel = await _ideaRepository.GetCustomIdea(semesterId, reviewNumber);
             var reviews = new List<Review>();
             using (var stream = File.Open(filePath, FileMode.Open, FileAccess.Read))

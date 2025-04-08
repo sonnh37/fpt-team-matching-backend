@@ -128,6 +128,7 @@ public class UserRepository : BaseRepository<User>, IUserRepository
                 {
                     Username = x.Username.ToLower(),
                     Id = x.Id,
+                    Code = x.Code.ToLower(),
                 }).Distinct().ToListAsync();
         return result;
     }
