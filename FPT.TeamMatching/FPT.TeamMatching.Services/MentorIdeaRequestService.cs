@@ -16,6 +16,7 @@ using System.Text;
 using System.Threading.Tasks;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.MentorIdeaRequest;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Notifications;
+using NetTopologySuite.Triangulate.Tri;
 
 namespace FPT.TeamMatching.Services
 {
@@ -46,7 +47,7 @@ namespace FPT.TeamMatching.Services
                 {
                     return new ResponseBuilder()
                         .WithStatus(Const.NOT_FOUND_CODE)
-                        .WithMessage("Khong tim thay idea");
+                        .WithMessage("Không tìm thấy đề tài");
                 }
 
                 //check project exist
@@ -55,7 +56,7 @@ namespace FPT.TeamMatching.Services
                 {
                     return new ResponseBuilder()
                         .WithStatus(Const.NOT_FOUND_CODE)
-                        .WithMessage("Khong tim thay project");
+                        .WithMessage("Không tìm thấy nhóm");
                 }
 
                 //check team co toi thieu 4ng
@@ -63,8 +64,8 @@ namespace FPT.TeamMatching.Services
                 if (tm != null && tm.Count < 4)
                 {
                     return new ResponseBuilder()
-                        .WithStatus(Const.FAIL_CODE)
-                        .WithMessage("Nhóm phải có tối thiểu 4 người");
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("Đề tài " + idea.Abbreviations + " yêu cầu nhóm có " + idea.MaxTeamSize + " thành viên. Nhóm hiện tại chưa đáp ứng điều kiện này.");
                 }
 
                 var entity = new MentorIdeaRequest
