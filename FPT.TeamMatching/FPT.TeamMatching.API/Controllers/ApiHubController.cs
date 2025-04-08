@@ -1,4 +1,5 @@
 using FPT.TeamMatching.Domain.Contracts.Services;
+using FPT.TeamMatching.Domain.Models;
 using FPT.TeamMatching.Domain.Utilities;
 using Microsoft.AspNetCore.Mvc;
 
@@ -21,6 +22,27 @@ public class ApiHubsController : ControllerBase
     public async Task<IActionResult> ScanCv(IFormFile file)
     {
         var msg = await _service.ScanCv(file);
+        return Ok(msg);
+    }
+
+    [HttpPost("get-similarities-project")]
+    public async Task<IActionResult> GetSimilaritiesProject([FromBody]GetSimilaritiesProjectModel model)
+    {
+        var msg = await _service.GetSamilatiryProject(model.Context);
+        return Ok(msg);
+    }
+
+    [HttpPost("get-recommend-blogs")]
+    public async Task<IActionResult> GetRecommendBlog([FromBody] GetRecommendModel recommendModel)
+    {
+        var msg = await _service.GetRecommendBlogs(recommendModel.CandidateInput);
+        return Ok(msg);
+    }
+
+    [HttpPost("get-recommend-users")]
+    public async Task<IActionResult> GetRecommendUsers([FromBody] GetRecommendModel recommendModel)
+    {
+        var msg = await _service.GetRecommendUsers(recommendModel.CandidateInput);
         return Ok(msg);
     }
 }
