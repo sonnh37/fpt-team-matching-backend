@@ -152,8 +152,8 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
                         Id = review.Id,
                         Number = review.Number,
                         Description = review.Description,
-                        Reviewer1 = review.Reviewer1Id,
-                        Reviewer2 = review.Reviewer2Id,
+                        Reviewer1Id = review.Reviewer1Id,
+                        Reviewer2Id = review.Reviewer2Id,
                         FileUpload = review.FileUpload,
                         ProjectId = review.ProjectId,
                     })
