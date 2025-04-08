@@ -45,4 +45,10 @@ public class TeamMemberRepository : BaseRepository<TeamMember>, ITeamMemberRepos
                                                 .ToListAsync();
         return tm;
     }
+    
+    public async Task<TeamMember?> GetByUserAndProject(Guid userId, Guid projectId)
+    {
+        return await _dbContext.TeamMembers
+            .FirstOrDefaultAsync(tm => tm.UserId == userId && tm.ProjectId == projectId);
+    }
 }
