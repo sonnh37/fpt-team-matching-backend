@@ -244,6 +244,12 @@ public static class FilterHelper
             string searchEmail = query.Email.Trim().ToLower();
             queryable = queryable.Where(m => m.Email.ToLower() == searchEmail);
         }
+        
+        if (query.Department.HasValue)
+        {
+            queryable = queryable.Where(m =>
+                m.Department == query.Department);
+        }
 
         queryable = BaseFilterHelper.Base(queryable, query);
 

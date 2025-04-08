@@ -168,6 +168,10 @@ public class MappingProfile : Profile
 
         CreateMap<Notification, NotificationCreateCommand>().ReverseMap();
         CreateMap<Notification, NotificationResult>().ReverseMap();
+        CreateMap<Notification, NotificationCreateForTeam>().ReverseMap();
+        CreateMap<Notification, NotificationCreateForRoleBased>().ReverseMap();
+        CreateMap<Notification, NotificationCreateForSystemWide>().ReverseMap();
+        CreateMap<Notification, NotificationCreateForGroupUser>().ReverseMap();
         CreateMap<Notification, NotificationCreateForIndividual>().ReverseMap();
 
         #endregion

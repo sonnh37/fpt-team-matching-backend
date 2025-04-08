@@ -28,7 +28,7 @@ namespace FPT.TeamMatching.Services
         {
             try
             {
-                var semester = await _unitOfWork.SemesterRepository.GetCurrentSemester();
+                var semester = await _unitOfWork.SemesterRepository.GetUpComingSemester();
                 if (semester == null) return HandlerFail("No semester found");
 
                 var entity = await _stageIdeaRepositoty.GetByStageNumberAndSemester(number, semester.Id);

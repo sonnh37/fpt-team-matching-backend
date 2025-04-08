@@ -228,7 +228,7 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
             }
 
             //check project exist
-            var project = await _projectRepository.GetById((Guid)command.ProjectId);
+            var project = await _projectRepository.GetById((Guid)command.ProjectId, true);
             if (project == null)
             {
                 return new ResponseBuilder()
