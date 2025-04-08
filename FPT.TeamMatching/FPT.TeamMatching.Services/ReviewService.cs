@@ -182,7 +182,7 @@ public class ReviewService : BaseService<Review>, IReviewService
                 .WithStatus(Const.FAIL_CODE)
                 .WithMessage("No file uploaded!");
             }
-            var uploadsFolder = $"{Directory.GetCurrentDirectory()}\\UploadFiles";
+            var uploadsFolder = $"{Directory.GetCurrentDirectory()}/UploadFiles";
 
             if (!Directory.Exists(uploadsFolder))
             {
@@ -193,7 +193,7 @@ public class ReviewService : BaseService<Review>, IReviewService
 
             using (var stream = new FileStream(filePath, FileMode.Create))
             {
-                file.CopyTo(stream);
+                await file.CopyToAsync(stream);
             }
 
             var reviewList = await _userRepository.GetAllReviewerIdAndUsername();
