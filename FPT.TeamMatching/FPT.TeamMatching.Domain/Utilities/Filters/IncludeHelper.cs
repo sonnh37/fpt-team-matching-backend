@@ -127,7 +127,7 @@ public static class IncludeHelper
             .Include(m => m.UserXRoles)
             .ThenInclude(x => x.Role)
             .Include(m => m.Notifications)
-            .Include(m => m.TeamMembers)
+            .Include(m => m.TeamMembers).ThenInclude(m => m.Project)
             .Include(m=>m.ProfileStudent).ThenInclude(x=>x.SkillProfiles);
 
         return queryable;

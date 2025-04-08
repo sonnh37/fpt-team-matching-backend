@@ -206,22 +206,25 @@ public class NotificationService : BaseService<Notification>, INotificationServi
         }
     }
 
-    public async Task<BusinessResult> CreateForGroupUsers(NotificationCreateForGroupUser createCommand, List<Guid> userIds)
+    public async Task<BusinessResult> CreateForGroupUsers(NotificationCreateForGroupUser createCommand,
+        List<Guid> userIds)
     {
         try
         {
             if (createCommand.Description?.Trim() == null)
             {
                 return new ResponseBuilder()
-                .WithStatus(Const.FAIL_CODE)
-                .WithMessage("Miêu tả của thông báo không thể bỏ trống");
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("Miêu tả của thông báo không thể bỏ trống");
             }
+
             if (userIds.Count == 0)
             {
                 return new ResponseBuilder()
-                .WithStatus(Const.FAIL_CODE)
-                .WithMessage("Nhập danh sách user id");
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("Nhập danh sách user id");
             }
+
             foreach (var userId in userIds)
             {
                 //1. Kiểm tra user có tồn tại trong hệ thống
@@ -229,9 +232,10 @@ public class NotificationService : BaseService<Notification>, INotificationServi
                 if (user == null || user.IsDeleted)
                 {
                     return new ResponseBuilder()
-                    .WithStatus(Const.FAIL_CODE)
-                    .WithMessage("Không tìm thấy user");
+                        .WithStatus(Const.FAIL_CODE)
+                        .WithMessage("Không tìm thấy user");
                 }
+
                 //2. Tạo thông báo
                 var noti = _mapper.Map<Notification>(createCommand);
                 noti.Id = Guid.NewGuid();
@@ -249,9 +253,9 @@ public class NotificationService : BaseService<Notification>, INotificationServi
                         //3. Push notification
                         await SendNotification(userId.ToString(), rs);
                     }
-
                 }
             }
+
             var msg = new ResponseBuilder()
                 .WithStatus(Const.SUCCESS_CODE)
                 .WithMessage(Const.SUCCESS_SAVE_MSG);
@@ -274,23 +278,26 @@ public class NotificationService : BaseService<Notification>, INotificationServi
             if (createCommand.UserId == null)
             {
                 return new ResponseBuilder()
-                .WithStatus(Const.FAIL_CODE)
-                .WithMessage("User id không thể là giá trị null");
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("User id không thể là giá trị null");
             }
+
             if (createCommand.Description?.Trim() == null)
             {
                 return new ResponseBuilder()
-                .WithStatus(Const.FAIL_CODE)
-                .WithMessage("Miêu tả của thông báo không thể bỏ trống");
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("Miêu tả của thông báo không thể bỏ trống");
             }
+
             //1. Kiểm tra user có tồn tại trong hệ thống
             var user = await _unitOfWork.UserRepository.GetById((Guid)createCommand.UserId);
             if (user == null || user.IsDeleted)
             {
                 return new ResponseBuilder()
-                .WithStatus(Const.FAIL_CODE)
-                .WithMessage("Không tìm thấy user");
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("Không tìm thấy user");
             }
+
             //2. Tạo thông báo
             var noti = _mapper.Map<Notification>(createCommand);
             noti.Id = Guid.NewGuid();
@@ -311,9 +318,10 @@ public class NotificationService : BaseService<Notification>, INotificationServi
                 //.WithStatus(Const.FAIL_CODE)
                 //.WithMessage(Const.FAIL_SAVE_MSG);
             }
+
             return new ResponseBuilder()
-            .WithStatus(Const.FAIL_CODE)
-            .WithMessage(Const.FAIL_SAVE_MSG);
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage(Const.FAIL_SAVE_MSG);
         }
         catch (Exception ex)
         {
@@ -331,15 +339,17 @@ public class NotificationService : BaseService<Notification>, INotificationServi
             if (createCommand.Description?.Trim() == null)
             {
                 return new ResponseBuilder()
-                .WithStatus(Const.FAIL_CODE)
-                .WithMessage("Miêu tả của thông báo không thể bỏ trống");
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("Miêu tả của thông báo không thể bỏ trống");
             }
+
             if (createCommand.ProjectId == null)
             {
                 return new ResponseBuilder()
-                .WithStatus(Const.FAIL_CODE)
-                .WithMessage("Project id không thể là giá trị null");
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("Project id không thể là giá trị null");
             }
+
             var project = await _projectRepository.GetById((Guid)createCommand.ProjectId);
             if (project == null)
             {
@@ -347,6 +357,7 @@ public class NotificationService : BaseService<Notification>, INotificationServi
                     .WithStatus(Const.FAIL_CODE)
                     .WithMessage("Không tìm thấy project");
             }
+
             var teamMembers = await _teamMemberRepository.GetMembersOfTeamByProjectId((Guid)createCommand.ProjectId);
             if (teamMembers == null)
             {
@@ -366,22 +377,23 @@ public class NotificationService : BaseService<Notification>, INotificationServi
             if (isSuccess)
             {
                 var rs = await _notificationRepository.GetById(noti.Id);
-                if (rs != null)
+                if (rs == null) return HandlerFail("No found notification");
+
+                //2. Push notification
+                foreach (var teamMember in teamMembers)
                 {
-                    //2. Push notification
-                    foreach (var teamMember in teamMembers)
-                    {
-                        if (teamMember.User == null) continue;
-                        await SendNotification(teamMember.User.Id.ToString(), rs);
-                    }
+                    if (teamMember.User == null) continue;
+                    await SendNotification(teamMember.User.Id.ToString(), rs);
                 }
+
                 return new ResponseBuilder()
+                    .WithStatus(Const.SUCCESS_CODE)
+                    .WithMessage(Const.FAIL_SAVE_MSG);
+            }
+
+            return new ResponseBuilder()
                 .WithStatus(Const.FAIL_CODE)
                 .WithMessage(Const.FAIL_SAVE_MSG);
-            }
-            return new ResponseBuilder()
-            .WithStatus(Const.FAIL_CODE)
-            .WithMessage(Const.FAIL_SAVE_MSG);
         }
         catch (Exception ex)
         {
@@ -399,9 +411,10 @@ public class NotificationService : BaseService<Notification>, INotificationServi
             if (createCommand.Description?.Trim() == null)
             {
                 return new ResponseBuilder()
-                .WithStatus(Const.FAIL_CODE)
-                .WithMessage("Miêu tả của thông báo không thể bỏ trống");
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("Miêu tả của thông báo không thể bỏ trống");
             }
+
             //1. Tạo thông báo
             var noti = _mapper.Map<Notification>(createCommand);
             noti.Id = Guid.NewGuid();
@@ -416,9 +429,10 @@ public class NotificationService : BaseService<Notification>, INotificationServi
                     .WithStatus(Const.SUCCESS_CODE)
                     .WithMessage(Const.SUCCESS_SAVE_MSG);
             }
+
             return new ResponseBuilder()
-                    .WithStatus(Const.FAIL_CODE)
-                    .WithMessage(Const.FAIL_SAVE_MSG);
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage(Const.FAIL_SAVE_MSG);
             //if (isSuccess)
             //{
             //    var rs = await _notificationRepository.GetById(noti.Id);
@@ -451,15 +465,17 @@ public class NotificationService : BaseService<Notification>, INotificationServi
             if (createCommand.Description?.Trim() == null)
             {
                 return new ResponseBuilder()
-                .WithStatus(Const.FAIL_CODE)
-                .WithMessage("Miêu tả của thông báo không thể bỏ trống");
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("Miêu tả của thông báo không thể bỏ trống");
             }
+
             if (createCommand.Role == null)
             {
                 return new ResponseBuilder()
-                .WithStatus(Const.FAIL_CODE)
-                .WithMessage("Role không thể là giá trị null");
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("Role không thể là giá trị null");
             }
+
             //1. Tạo thông báo
             var noti = _mapper.Map<Notification>(createCommand);
             noti.Id = Guid.NewGuid();
@@ -476,13 +492,15 @@ public class NotificationService : BaseService<Notification>, INotificationServi
                     //3. Push notification
                     //await SendNotification(noti.UserId.ToString(), rs);
                 }
+
                 return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage(Const.FAIL_SAVE_MSG);
+            }
+
+            return new ResponseBuilder()
                 .WithStatus(Const.FAIL_CODE)
                 .WithMessage(Const.FAIL_SAVE_MSG);
-            }
-            return new ResponseBuilder()
-            .WithStatus(Const.FAIL_CODE)
-            .WithMessage(Const.FAIL_SAVE_MSG);
         }
         catch (Exception ex)
         {
