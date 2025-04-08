@@ -172,10 +172,8 @@ public class NotificationService : BaseService<Notification>, INotificationServi
                 return HandlerFail("Not logged in");
             var userId = userIdClaim.Value;
 
-            // Tại sao ko gọi user ra include notification
-            // Vì ở user nếu như include thì sẽ gồm những include khác dẫn đến lấy những liệu ko lq
-            // Có thể gọi riêng user chỉ include notification nó thôi cũng đc, nhưng đang làm  service repo của notif
-            var (data, total) = await _notificationRepository.GetDataByCurrentUser(query, userId);
+            var project = await _unitOfWork.ProjectRepository.GetProjectByUserIdLogin(userId);
+            var (data, total) = await _notificationRepository.GetDataByCurrentUser(query, userId, project?.Id);
 
             var results = _mapper.Map<List<NotificationResult>>(data);
 
@@ -203,6 +201,80 @@ public class NotificationService : BaseService<Notification>, INotificationServi
         catch (Exception e)
         {
             return new BusinessResult(Const.FAIL_CODE, e.Message);
+        }
+    }
+
+    public async Task<BusinessResult> MarkAsReadAsync(Guid id)
+    {
+        try
+        {
+            var userIdClaim = GetUserIdFromClaims();
+            if (userIdClaim == null)
+                return HandlerFail("Not logged in");
+            var userId = userIdClaim.Value;
+
+            var notification = await _notificationRepository.GetById(id);
+
+            if (notification == null)
+                return HandlerFail("Notification not found");
+
+            if (notification.UserId != userIdClaim)
+                return HandlerFail("Unauthorized to mark this notification as read");
+
+            if (notification.IsRead)
+                return HandlerFail("Notification is already read");
+
+            notification.IsRead = true;
+            await SetBaseEntityForUpdate(notification);
+            _notificationRepository.Update(notification);
+            var isSaveChanges = await _unitOfWork.SaveChanges();
+            if (!isSaveChanges)
+                return HandlerFail("Save error.");
+
+            return new ResponseBuilder()
+                .WithStatus(Const.SUCCESS_CODE)
+                .WithMessage(Const.SUCCESS_READ_MSG);
+        }
+        catch (Exception e)
+        {
+            return HandlerError(e.Message);
+        }
+    }
+
+    public async Task<BusinessResult> MarkAllAsReadAsync()
+    {
+        try
+        {
+            var userIdClaim = GetUserIdFromClaims();
+            if (userIdClaim == null)
+                return HandlerFail("Not logged in");
+            var userId = userIdClaim.Value;
+
+            var notifications = await _notificationRepository.GetQueryable(n => n.UserId == userId && !n.IsRead)
+                .ToListAsync();
+
+            if (!notifications.Any())
+                return new ResponseBuilder()
+                    .WithStatus(Const.SUCCESS_CODE)
+                    .WithMessage(Const.SUCCESS_READ_MSG);
+
+            foreach (var notification in notifications)
+            {
+                notification.IsRead = true;
+                await SetBaseEntityForUpdate(notification);
+            }
+
+            var isSaveChanges = await _unitOfWork.SaveChanges();
+            if (!isSaveChanges)
+                return HandlerFail("Save error.");
+
+            return new ResponseBuilder()
+                .WithStatus(Const.SUCCESS_CODE)
+                .WithMessage($"Marked {notifications.Count} notifications as read");
+        }
+        catch (Exception e)
+        {
+            return HandlerError(e.Message);
         }
     }
 

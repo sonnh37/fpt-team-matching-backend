@@ -23,7 +23,10 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
     {
         var teamMember = await _context.TeamMembers.Where(e => e.UserId == userId &&
                                                                e.LeaveDate == null &&
+                                                               (e.Status != TeamMemberStatus.Failed ||
+                                                                e.Status != TeamMemberStatus.Passed) &&
                                                                e.IsDeleted == false)
+            .OrderByDescending(m => m.CreatedDate)
             .FirstOrDefaultAsync();
         if (teamMember != null)
         {
@@ -123,13 +126,13 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
     public async Task<List<Project>?> GetInProgressProjectBySemesterId(Guid semesterId)
     {
         var projects = await _context.Projects.Where(e => e.Status == ProjectStatus.InProgress &&
-                                                           e.IsDeleted == false &&
-                                                           e.Idea != null &&
-                                                           e.Idea.StageIdea != null &&
-                                                           e.Idea.StageIdea.SemesterId == semesterId)
-                                                .Include(e => e.Idea).ThenInclude(e => e.Mentor)
-                                                .Include(e => e.Idea).ThenInclude(e => e.SubMentor)
-                                             .ToListAsync();
+                                                          e.IsDeleted == false &&
+                                                          e.Idea != null &&
+                                                          e.Idea.StageIdea != null &&
+                                                          e.Idea.StageIdea.SemesterId == semesterId)
+            .Include(e => e.Idea).ThenInclude(e => e.Mentor)
+            .Include(e => e.Idea).ThenInclude(e => e.SubMentor)
+            .ToListAsync();
         return projects;
     }
 
@@ -156,7 +159,7 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
             .Include(m => m.MentorFeedback);
 
         queryable = queryable.Where(m => m.Idea != null && m.Idea.MentorId == userId);
-        
+
         queryable = BaseFilterHelper.Base(queryable, query);
         if (query.IsPagination)
         {

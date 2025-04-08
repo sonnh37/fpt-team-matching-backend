@@ -54,6 +54,20 @@ public class NotificationController : ControllerBase
         return Ok(businessResult);
     }
 
+    [HttpPut("{id}/mark-as-read")]
+    public async Task<IActionResult> MarkAsRead(Guid id)
+    {
+        var result = await _notificationService.MarkAsReadAsync(id);
+        return Ok(result);
+    }
+
+    [HttpPut("mark-all-as-read")]
+    public async Task<IActionResult> MarkAllAsRead()
+    {
+        var result = await _notificationService.MarkAllAsReadAsync();
+        return Ok(result);
+    }
+    
     [Authorize]
     [HttpGet]
     public async Task<IActionResult> GetAll([FromQuery] NotificationGetAllQuery query)
