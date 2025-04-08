@@ -29,4 +29,5 @@ public interface IUserService : IBaseService
     // Task<BusinessResult> GetByRefreshToken(UserGetByRefreshTokenQuery request);
 
     Task<BusinessResult> GetStudentDoNotHaveTeam();
+    Task<BusinessResult> GetAllReviewer();
 }

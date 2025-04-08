@@ -92,6 +92,9 @@ namespace FPT.TeamMatching.Services
                         {
                             while (reader.Read())
                             {
+                                var ideaCodeRaw = reader.GetValue(1);
+                                if (ideaCodeRaw == null || string.IsNullOrWhiteSpace(ideaCodeRaw.ToString()))
+                                    break;
                                 var ideaCode = reader.GetValue(1).ToString();
                                 var date = reader.GetValue(3).ToString();
                                 var time = reader.GetValue(4).ToString();
