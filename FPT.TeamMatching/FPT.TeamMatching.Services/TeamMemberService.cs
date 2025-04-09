@@ -144,7 +144,7 @@ public class TeamMemberService : BaseService<TeamMember>, ITeamMemberService
                     .WithMessage(Const.SUCCESS_SAVE_MSG);
                 }
             }
-            if (requests.defenseNumber == 2)
+            else if (requests.defenseNumber == 2)
             {
                 //check status cua cac thanh vien
                 var isStatusOfDefense1 = requests.updateList.Where(e => e.Status == Domain.Enums.TeamMemberStatus.Fail1 ||
@@ -187,6 +187,10 @@ public class TeamMemberService : BaseService<TeamMember>, ITeamMemberService
                         .WithStatus(Const.FAIL_CODE)
                         .WithMessage("Defense number is 1 or 2");
             }
+
+            return new ResponseBuilder()
+                .WithStatus(Const.SUCCESS_CODE)
+                .WithMessage(Const.SUCCESS_SAVE_MSG);
         }
         catch (Exception ex)
         {
