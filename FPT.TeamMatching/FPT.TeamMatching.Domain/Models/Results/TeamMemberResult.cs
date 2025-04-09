@@ -22,6 +22,10 @@ public class TeamMemberResult : BaseResult
 
     public string? Attitude { get; set; }
 
+    public string? CommentDefense1 { get; set; }
+
+    public string? CommentDefense2 { get; set; }
+
     public UserResult? User { get; set; }
     
     public ProjectResult? Project { get; set; }

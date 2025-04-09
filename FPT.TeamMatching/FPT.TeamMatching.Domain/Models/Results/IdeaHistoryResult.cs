@@ -23,5 +23,8 @@ namespace FPT.TeamMatching.Domain.Models.Results
 
         public int ReviewStage  { get; set; }
 
+        public virtual IdeaResult? Idea { get; set; }
+
+
     }
 }

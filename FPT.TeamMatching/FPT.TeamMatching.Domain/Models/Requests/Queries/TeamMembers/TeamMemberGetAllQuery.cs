@@ -21,4 +21,8 @@ public class TeamMemberGetAllQuery : GetQueryableQuery
 
     public string? Attitude { get; set; }
 
+    public string? CommentDefense1 { get; set; }
+
+    public string? CommentDefense2 { get; set; }
+
 }

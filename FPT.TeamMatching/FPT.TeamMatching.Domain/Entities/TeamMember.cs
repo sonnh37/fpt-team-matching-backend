@@ -21,6 +21,10 @@ public class TeamMember : BaseEntity
 
     public string? Attitude { get; set; }
 
+    public string? CommentDefense1 { get; set; }
+
+    public string? CommentDefense2 { get; set; }
+
     public virtual Project? Project { get; set; }
     
     public virtual User? User { get; set; }
