@@ -97,7 +97,7 @@ public class ReviewService : BaseService<Review>, IReviewService
         }
         foreach (var project in projects)
         {
-            for (int i = 1; i <= 4; i++)
+            for (int i = 1; i <= 3; i++)
             {
                 var review = new Review
                 {
@@ -121,7 +121,7 @@ public class ReviewService : BaseService<Review>, IReviewService
         try
         {
             var entities = await _reviewRepository.GetByProjectId(projectId);
-            var reviewResult = _mapper.Map<List<Review>>(entities);
+            var reviewResult = _mapper.Map<List<ReviewResult>>(entities);
 
             return new ResponseBuilder()
                 .WithData(reviewResult)
