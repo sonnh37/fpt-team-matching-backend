@@ -78,5 +78,12 @@ namespace FPT.TeamMatching.API.Controllers
             var msg = await _service.GetBySemesterIdAndStage(command);
             return Ok(msg);
         }
+
+        [HttpGet("get-by-project-id/{projectId:guid}")]
+        public async Task<IActionResult> GetByProjectId(Guid projectId)
+        {
+            var msg = await _service.GetByProjectId(projectId);
+            return Ok(msg);
+        }
     }
 }

@@ -867,8 +867,9 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
 
         foreach (var teamMember in teamMembers)
         {
-            if (teamMember.Status != TeamMemberStatus.Failed)
-            {
+            //if (teamMember.Status != TeamMemberStatus.Failed)
+            if (teamMember.Status != TeamMemberStatus.Fail2 && teamMember.Status != TeamMemberStatus.Fail1)
+                {
                 haveTeamMember = true;
             }
         }

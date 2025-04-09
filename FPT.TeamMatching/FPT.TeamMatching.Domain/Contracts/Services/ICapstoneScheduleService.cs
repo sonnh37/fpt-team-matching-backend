@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using FPT.TeamMatching.Domain.Models.Responses;
 using Microsoft.AspNetCore.Http;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.CapstoneSchedules;
+using FPT.TeamMatching.Domain.Entities;
 
 namespace FPT.TeamMatching.Domain.Contracts.Services
 {
@@ -14,5 +15,6 @@ namespace FPT.TeamMatching.Domain.Contracts.Services
     {
         Task<BusinessResult> ImportExcelFile(IFormFile file, int stage);
         Task<BusinessResult> GetBySemesterIdAndStage(CapstoneScheduleFilter command);
+        Task<BusinessResult> GetByProjectId(Guid projectId);
     }
 }
