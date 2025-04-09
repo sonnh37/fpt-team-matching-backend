@@ -13,6 +13,6 @@ public interface IInvitationRepository : IBaseRepository<Invitation>
     Task<Invitation?> GetInvitationOfTeamByProjectIdAndMe(Guid projectId, Guid userId);
     
     // Trong IInvitationRepository
-    Task<List<Invitation>> GetPendingInvitationsForUserToProject(Guid userId, Guid projectId, Guid excludeInvitationId);
+    Task<List<Invitation>> GetPendingInvitationsForProjectFromOtherSendersAsync(Guid userId, Guid projectId, Guid excludeInvitationId);
 
 }

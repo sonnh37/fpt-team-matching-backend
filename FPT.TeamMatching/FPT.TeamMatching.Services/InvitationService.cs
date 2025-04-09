@@ -567,21 +567,21 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
             // 1. Lấy những status Pending có cùng ProjectId -> Auto Rejected
             // 2. Lấy những status Pending có cùng SenderId -> Auto Rejected
             // # Chưa tối ưu đc 
-            var otherPendingInvitations = await _invitationRepository.GetPendingInvitationsForUserToProject(
-                invitationIncluded.SenderId.Value,
-                invitationIncluded.ProjectId.Value,
-                invitationIncluded.Id
-            );
+            // var otherPendingInvitations = await _invitationRepository.GetPendingInvitationsForProjectFromOtherSendersAsync(
+            //     invitationIncluded.SenderId.Value,
+            //     invitationIncluded.ProjectId.Value,
+            //     invitationIncluded.Id
+            // );
 
-            if (isLastSlot)
-            {
-                foreach (var otherInvitation in otherPendingInvitations)
-                {
-                    otherInvitation.Status = InvitationStatus.Rejected;
-                    await SetBaseEntityForUpdate(otherInvitation);
-                    _invitationRepository.Update(otherInvitation);
-                }
-            }
+            // if (isLastSlot)
+            // {
+            //     foreach (var otherInvitation in otherPendingInvitations)
+            //     {
+            //         otherInvitation.Status = InvitationStatus.Rejected;
+            //         await SetBaseEntityForUpdate(otherInvitation);
+            //         _invitationRepository.Update(otherInvitation);
+            //     }
+            // }
 
             // Lưu tất cả thay đổi
             var saveResult = await _unitOfWork.SaveChanges();
@@ -591,24 +591,24 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
             }
 
             // Gửi thông báo
-            if (isLastSlot)
-            {
-                foreach (var otherInvitation in otherPendingInvitations)
-                {
-                    if (otherInvitation.ProjectId != null)
-                    {
-                        var projectOfOtherInvitation  = await _projectRepository.GetById(otherInvitation.ProjectId.Value);
-                        var teamName = projectOfOtherInvitation?.TeamName ?? "the team";
-                        var noti = new NotificationCreateForIndividual
-                        {
-                            UserId = otherInvitation.SenderId,
-                            Description =
-                                $"Your invitation to join {teamName} was auto-rejected because the team is now full",
-                        };
-                        await _notificationService.CreateForUser(noti);
-                    }
-                }
-            }
+            // if (isLastSlot)
+            // {
+            //     foreach (var otherInvitation in otherPendingInvitations)
+            //     {
+            //         if (otherInvitation.ProjectId != null)
+            //         {
+            //             var projectOfOtherInvitation  = await _projectRepository.GetById(otherInvitation.ProjectId.Value);
+            //             var teamName = projectOfOtherInvitation?.TeamName ?? "the team";
+            //             var noti = new NotificationCreateForIndividual
+            //             {
+            //                 UserId = otherInvitation.SenderId,
+            //                 Description =
+            //                     $"Your invitation to join {teamName} was auto-rejected because the team is now full",
+            //             };
+            //             await _notificationService.CreateForUser(noti);
+            //         }
+            //     }
+            // }
 
             await _notificationService.CreateForTeam(new NotificationCreateForTeam
             {
