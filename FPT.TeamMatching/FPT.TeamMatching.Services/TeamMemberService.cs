@@ -15,10 +15,12 @@ namespace FPT.TeamMatching.Services;
 public class TeamMemberService : BaseService<TeamMember>, ITeamMemberService
 {
     private readonly ITeamMemberRepository _teamMemberRepository;
+    private readonly IProjectRepository _projectRepository;
 
     public TeamMemberService(IMapper mapper, IUnitOfWork unitOfWork) : base(mapper, unitOfWork)
     {
         _teamMemberRepository = _unitOfWork.TeamMemberRepository;
+        _projectRepository = _unitOfWork.ProjectRepository;
     }
 
     public async Task<BusinessResult> GetTeamMemberByUserId()
@@ -71,6 +73,66 @@ public class TeamMemberService : BaseService<TeamMember>, ITeamMemberService
         }
     }
 
+    public async Task<BusinessResult> UpdateTeamMemberByManager(List<ManagerUpdate> requests)
+    {
+        try
+        {
+            foreach (var request in requests)
+            {
+                var teamMember = await _teamMemberRepository.GetById(request.Id);
+                if (teamMember == null)
+                {
+                    return new ResponseBuilder()
+                    .WithStatus(Const.NOT_FOUND_CODE)
+                    .WithMessage(Const.NOT_FOUND_MSG);
+                }
+                teamMember.Status = request.Status;
+                await SetBaseEntityForUpdate(teamMember);
+                _teamMemberRepository.Update(teamMember);
+            }
+            var isSuccess = await _unitOfWork.SaveChanges();
+            if (!isSuccess)
+            {
+                return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage(Const.FAIL_SAVE_MSG);
+            }
+            //check nếu team có fail1 thì đổi defenseStage sang 2
+            var hasFail1 = requests.Where(e => e.Status == Domain.Enums.TeamMemberStatus.Fail1).Any();
+            if (hasFail1)
+            {
+                var teamMember = await _teamMemberRepository.GetById(requests[0].Id);
+                var project = await _projectRepository.GetById((Guid)teamMember.ProjectId);
+                if (project == null)
+                {
+                    return new ResponseBuilder()
+                    .WithStatus(Const.NOT_FOUND_CODE)
+                    .WithMessage(Const.NOT_FOUND_MSG);
+                }
+                project.DefenseStage = 2;
+                await SetBaseEntityForUpdate(project);
+                _projectRepository.Update(project);
+                var isSuccess2 = await _unitOfWork.SaveChanges();
+                if (!isSuccess)
+                {
+                    return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage(Const.FAIL_SAVE_MSG);
+                }
+                return new ResponseBuilder()
+                .WithStatus(Const.SUCCESS_CODE)
+                .WithMessage(Const.SUCCESS_SAVE_MSG);
+            }
+            return new ResponseBuilder()
+                .WithStatus(Const.SUCCESS_CODE)
+                .WithMessage(Const.SUCCESS_SAVE_MSG);
+        }
+        catch (Exception ex)
+        {
+            return HandlerError(ex.Message);
+        }
+    }
+
     public async Task<BusinessResult> UpdateTeamMemberByMentor(List<MentorUpdate> requests)
     {
         try
@@ -95,7 +157,7 @@ public class TeamMemberService : BaseService<TeamMember>, ITeamMemberService
             {
                 return new ResponseBuilder()
                 .WithStatus(Const.FAIL_CODE)
-                .WithMessage(Const.FAIL_SAVE_MSG); 
+                .WithMessage(Const.FAIL_SAVE_MSG);
             }
             return new ResponseBuilder()
                 .WithStatus(Const.SUCCESS_CODE)

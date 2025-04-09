@@ -140,7 +140,8 @@ public class UserRepository : BaseRepository<User>, IUserRepository
                                             (// Chưa có nhóm (không có TeamMembers nào)
                                             !e.TeamMembers.Any() ||
                                             // Có nhóm nhưng tất cả status đều "Fail"
-                                            e.TeamMembers.All(tm => tm.Status == TeamMemberStatus.Failed)))
+                                            //e.TeamMembers.All(tm => tm.Status == TeamMemberStatus.Failed)))
+                                            e.TeamMembers.All(tm => tm.Status == TeamMemberStatus.Fail2)))
                                             .ToListAsync();
         return students;
     }
