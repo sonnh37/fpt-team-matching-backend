@@ -56,8 +56,8 @@ public class TeamMemberRepository : BaseRepository<TeamMember>, ITeamMemberRepos
     {
         var hasTeam = GetQueryable(m => m.UserId == userId &&
                                     m.IsDeleted == false &&
-                                    m.Status == Domain.Enums.TeamMemberStatus.InProgress ||
-                                    m.Status == Domain.Enums.TeamMemberStatus.Pending)
+                                    (m.Status == Domain.Enums.TeamMemberStatus.InProgress ||
+                                    m.Status == Domain.Enums.TeamMemberStatus.Pending))
                                     .AnyAsync();
         return hasTeam;
     }
