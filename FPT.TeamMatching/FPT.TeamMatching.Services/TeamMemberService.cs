@@ -86,6 +86,7 @@ public class TeamMemberService : BaseService<TeamMember>, ITeamMemberService
                 }
                 teamMember.MentorConclusion = request.MentorConclusion;
                 teamMember.Attitude = request.Attitude;
+                teamMember.Note = request.Note;
                 await SetBaseEntityForUpdate(teamMember);
                 _teamMemberRepository.Update(teamMember);
             }
