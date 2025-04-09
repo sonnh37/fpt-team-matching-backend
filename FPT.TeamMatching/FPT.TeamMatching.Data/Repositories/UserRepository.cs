@@ -19,6 +19,57 @@ public class UserRepository : BaseRepository<User>, IUserRepository
     public UserRepository(FPTMatchingDbContext dbContext) : base(dbContext)
     {
     }
+    
+    public async Task<(List<User>, int)> GetAllByCouncilWithIdeaRequestPending(UserGetAllQuery query)
+    {
+        var queryable = GetQueryable();
+        queryable = queryable.Include(m => m.UserXRoles).ThenInclude(m => m.Role);
+
+        queryable = queryable.Where(m =>
+            m.UserXRoles.Any(uxr => uxr.Role != null && uxr.Role.RoleName == "Council"));
+
+        queryable = queryable
+            .Where(m => m.IdeaRequestOfReviewers.Any(n => n.Status == IdeaRequestStatus.Pending))
+            .Include(m => m.IdeaRequestOfReviewers
+                .Where(n => n.Status == IdeaRequestStatus.Pending));
+        
+        if (query.Department.HasValue)
+        {
+            queryable = queryable.Where(m =>
+                m.Department == query.Department);
+        }
+        
+        if (!string.IsNullOrEmpty(query.EmailOrFullname))
+        {
+            queryable = queryable.Where(m =>
+                m.LastName != null && m.FirstName != null &&
+                ((m.Email != null && m.Email.Contains(query.EmailOrFullname.Trim().ToLower())) ||
+                 (m.LastName.Trim().ToLower() + " " + m.FirstName.Trim().ToLower()).Contains(query.EmailOrFullname
+                     .Trim().ToLower()))
+            );
+        }
+
+        queryable = BaseFilterHelper.Base(queryable, query);
+        
+        if (query.IsPagination)
+        {
+            // Tổng số count sau khi  filter khi chưa lọc trang
+            var totalOrigin = queryable.Count();
+            // Sắp sếp
+            queryable = Sort(queryable, query);
+            // Lọc trang
+            var results = await GetQueryablePagination(queryable, query).ToListAsync();
+
+            return (results, totalOrigin);
+        }
+        else
+        {
+            queryable = Sort(queryable, query);
+            var results = await queryable.ToListAsync();
+            return (results, results.Count);
+        }
+    }
+
 
     public async Task<User?> GetUserByUsernameOrEmail(string key)
     {
