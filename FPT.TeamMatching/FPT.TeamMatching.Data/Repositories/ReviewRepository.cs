@@ -20,6 +20,8 @@ public class ReviewRepository : BaseRepository<Review>, IReviewRepository
     {
         var reviews = await _dbContext.Reviews
                             .Where(e => e.ProjectId == projectId && e.IsDeleted == false)
+                            .Include(x => x.Reviewer1)
+                            .Include(x => x.Reviewer2)
                             .ToListAsync();
         return reviews;
     }

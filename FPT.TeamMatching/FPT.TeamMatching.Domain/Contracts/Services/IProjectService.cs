@@ -16,5 +16,6 @@ public interface IProjectService : IBaseService
     Task<BusinessResult> GetProjectsForMentor(ProjectGetListForMentorQuery query);
     Task<BusinessResult> GetProjectOfUserLogin();
     Task<BusinessResult> ExportExcelTeamsDefense(int defenseStage);
+    Task<BusinessResult> UpdateDefenStage(UpdateDefenseStage command);
     new Task<BusinessResult> DeleteById(Guid id, bool isPermanent = false);
 }

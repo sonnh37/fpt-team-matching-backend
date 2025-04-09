@@ -45,10 +45,10 @@ public class ProjectService : BaseService<Project>, IProjectService
         {
             var userId = GetUserIdFromClaims();
             if (userId == null) return HandlerFailAuth();
-            
+
             var (data, total) = await _projectRepository.GetProjectsForMentor(query, userId.Value);
 
-           var  results = _mapper.Map<List<ProjectResult>>(data);
+            var results = _mapper.Map<List<ProjectResult>>(data);
 
             if (results.Count == 0)
                 return new ResponseBuilder()
@@ -341,5 +341,40 @@ public class ProjectService : BaseService<Project>, IProjectService
             });
         }
         return dt;
+    }
+
+    public async Task<BusinessResult> UpdateDefenStage(UpdateDefenseStage command)
+    {
+        try
+        {
+            var project = await _projectRepository.GetById(command.Id);
+            if (project == null)
+            {
+                return new ResponseBuilder()
+                .WithStatus(Const.NOT_FOUND_CODE)
+                .WithMessage(Const.NOT_FOUND_MSG);
+            }
+            project.DefenseStage = command.DefenseStage;
+            await SetBaseEntityForUpdate(project);
+            _projectRepository.Update(project);
+            var isSuccess = await _unitOfWork.SaveChanges();
+            if (isSuccess)
+            {
+                return new ResponseBuilder()
+                .WithStatus(Const.SUCCESS_CODE)
+                .WithMessage(Const.SUCCESS_SAVE_MSG);
+            }
+            return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage(Const.FAIL_SAVE_MSG);
+        }
+
+        catch (Exception ex)
+        {
+            var errorMessage = $"An error {typeof(ProjectResult).Name}: {ex.Message}";
+            return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage(errorMessage);
+        }
     }
 }
