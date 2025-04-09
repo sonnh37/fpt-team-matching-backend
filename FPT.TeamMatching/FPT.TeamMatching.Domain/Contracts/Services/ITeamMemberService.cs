@@ -9,5 +9,5 @@ public interface ITeamMemberService : IBaseService
     Task<BusinessResult> LeaveByCurrentUser();
     Task<BusinessResult> GetTeamMemberByUserId();
     Task<BusinessResult> UpdateTeamMemberByMentor(List<MentorUpdate> requests);
-    Task<BusinessResult> UpdateTeamMemberByManager(List<ManagerUpdate> requests);
+    Task<BusinessResult> UpdateTeamMemberByManager(ManagerUpdate requests);
 }

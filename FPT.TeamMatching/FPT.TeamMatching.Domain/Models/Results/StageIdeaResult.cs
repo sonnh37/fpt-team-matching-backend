@@ -20,8 +20,8 @@ namespace FPT.TeamMatching.Domain.Models.Results
         
         public int StageNumber  { get; set; }
 
-        public virtual Semester? Semester { get; set; }
+        public virtual SemesterResult? Semester { get; set; }
 
-        public virtual ICollection<Idea> Ideas { get; set; } = new List<Idea>();
+        public virtual ICollection<IdeaResult> Ideas { get; set; } = new List<IdeaResult>();
     }
 }

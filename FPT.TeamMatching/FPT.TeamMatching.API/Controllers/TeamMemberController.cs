@@ -90,7 +90,7 @@ public class TeamMemberController : ControllerBase
     }
 
     [HttpPut("update-by-manager")]
-    public async Task<IActionResult> UpdateTeamMemberByManager([FromBody] List<ManagerUpdate> requests)
+    public async Task<IActionResult> UpdateTeamMemberByManager([FromBody] ManagerUpdate requests)
     {
         var businessResult = await _teammemberservice.UpdateTeamMemberByManager(requests);
 

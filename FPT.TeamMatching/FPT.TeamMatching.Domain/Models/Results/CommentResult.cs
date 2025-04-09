@@ -11,5 +11,5 @@ public class CommentResult : BaseResult
 
     public string? Content { get; set; }
 
-    public  User? User { get; set; }
+    public UserResult? User { get; set; }
 }

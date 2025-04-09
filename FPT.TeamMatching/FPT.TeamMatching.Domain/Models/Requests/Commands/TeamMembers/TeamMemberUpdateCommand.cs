@@ -20,4 +20,8 @@ public class TeamMemberUpdateCommand : UpdateCommand
     public MentorConclusionOptions? MentorConclusion { get; set; }
 
     public string? Attitude { get; set; }
+
+    public string? CommentDefense1 { get; set; }
+
+    public string? CommentDefense2 { get; set; }
 }
