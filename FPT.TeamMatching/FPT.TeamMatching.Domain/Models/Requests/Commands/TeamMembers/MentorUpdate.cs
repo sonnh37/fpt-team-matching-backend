@@ -13,5 +13,6 @@ namespace FPT.TeamMatching.Domain.Models.Requests.Commands.TeamMembers
         public MentorConclusionOptions MentorConclusion { get; set; }
 
         public string? Attitude { get; set; }
+        public string? Note {get;set;}
     }
 }

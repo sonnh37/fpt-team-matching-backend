@@ -121,7 +121,7 @@ public class ReviewService : BaseService<Review>, IReviewService
         try
         {
             var entities = await _reviewRepository.GetByProjectId(projectId);
-            var reviewResult = _mapper.Map<List<Review>>(entities);
+            var reviewResult = _mapper.Map<List<ReviewResult>>(entities);
 
             return new ResponseBuilder()
                 .WithData(reviewResult)
