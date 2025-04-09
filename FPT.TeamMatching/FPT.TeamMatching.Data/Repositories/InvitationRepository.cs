@@ -41,16 +41,17 @@ public class InvitationRepository : BaseRepository<Invitation>, IInvitationRepos
         return i;
     }
     
-    public async Task<List<Invitation>> GetPendingInvitationsForUserToProject(Guid senderId, Guid projectId, Guid excludeInvitationId)
+    public async Task<List<Invitation>> GetPendingInvitationsForProjectFromOtherSendersAsync(
+        Guid senderId, 
+        Guid projectId, 
+        Guid excludeInvitationId)
     {
         return await _dbContext.Invitations
             .Where(i => i.Status == InvitationStatus.Pending)
             .Where(i => i.Id != excludeInvitationId)
-            .Where(i => (i.ProjectId == projectId && i.SenderId != senderId) || // Cùng project nhưng khác sender
-                        (i.SenderId == senderId && i.ProjectId != projectId))   // Hoặc cùng sender nhưng khác project
+            .Where(i => i.ProjectId == projectId && i.SenderId != senderId)
             .ToListAsync();
     }
-
    
 
     public async Task<(List<Invitation>, int)> GetUserInvitationsByType(InvitationGetByTypeQuery query, Guid userId)
