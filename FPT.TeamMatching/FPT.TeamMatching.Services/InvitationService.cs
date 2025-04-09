@@ -477,22 +477,29 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
     {
         try
         {
-            _invitationRepository.DeletePermanently(invitation);
+            invitation.Status = InvitationStatus.Rejected;
+            _invitationRepository.Update(invitation);
 
-            // Gửi thông báo
-            var teamName = invitation.Project?.TeamName ?? "the team";
-            var noti = new NotificationCreateForIndividual
-            {
-                UserId = invitation.SenderId,
-                Description = $"Your invitation to join {teamName} has been rejected",
-            };
-            await _notificationService.CreateForUser(noti);
 
             var saveResult = await _unitOfWork.SaveChanges();
             if (!saveResult)
             {
                 return HandlerFail("Failed to save changes!");
             }
+
+            // Gửi thông báo
+            if (invitation.ProjectId == null) return HandlerFail("Not found project");
+            var project = await _projectRepository.GetById(invitation.ProjectId.Value);
+            if (project == null) return HandlerFail("Not found project");
+
+            var teamName = project.TeamName ?? "the team";
+
+            var noti = new NotificationCreateForIndividual
+            {
+                UserId = invitation.SenderId,
+                Description = $"Your invitation to join {teamName} has been rejected",
+            };
+            await _notificationService.CreateForUser(noti);
 
             return new ResponseBuilder()
                 .WithStatus(Const.SUCCESS_CODE)
