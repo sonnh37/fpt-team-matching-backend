@@ -358,17 +358,21 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
 
             var userId = userIdFromClaim.Value;
 
-            var invitation = await _invitationRepository.GetById(command.Id, true);
+            var invitation = await _invitationRepository.GetById(command.Id);
             if (invitation == null)
             {
                 return new ResponseBuilder()
                     .WithStatus(Const.FAIL_CODE)
                     .WithMessage("Team haven't sent invitation!");
             }
-
+            
+            var receiver = await _userRepository.GetById(invitation.ReceiverId.Value);
+            
             if (command.Status == InvitationStatus.Rejected)
             {
-                _invitationRepository.DeletePermanently(invitation);
+                invitation.Status = InvitationStatus.Rejected;
+                await SetBaseEntityForUpdate(invitation);
+                _invitationRepository.Update(invitation);
                 var saveChange_ = await _unitOfWork.SaveChanges();
                 if (!saveChange_)
                 {
@@ -379,7 +383,7 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
                 var noti = new NotificationCreateForIndividual
                 {
                     UserId = invitation.SenderId,
-                    Description = invitation.Receiver.Code + "đã từ chối lời mời tham gia nhóm của bạn",
+                    Description = receiver?.Code + "đã từ chối lời mời tham gia nhóm của bạn",
                 };
                 await _notificationService.CreateForUser(noti);
                 //
@@ -412,7 +416,7 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
                     var noti = new NotificationCreateForTeam
                     {
                         ProjectId = invitation.ProjectId,
-                        Description = invitation.Receiver.Code + "đã đồng ý lời mời tham gia nhóm của bạn",
+                        Description = receiver?.Code + "đã đồng ý lời mời tham gia nhóm của bạn",
                     };
                     await _notificationService.CreateForTeam(noti);
                     //
@@ -458,14 +462,14 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
             }
 
             //check sender id
-            if (command.SenderId == null)
+            if (invitation.SenderId == null)
             {
                 return new ResponseBuilder()
                     .WithStatus(Const.FAIL_CODE)
                     .WithMessage("Fill sender id");
             }
             //check xem user co team -> neu co team thi tra thong bao voi status cancel
-            var hasTeam = await _teamMemberRepository.UserHasTeamNow((Guid)command.SenderId);
+            var hasTeam = await _teamMemberRepository.UserHasTeamNow((Guid)invitation.SenderId);
             if (hasTeam)
             {
                 invitation.Status = InvitationStatus.Cancel;
@@ -474,7 +478,7 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
                 var isSuccess = await _unitOfWork.SaveChanges();
                 if (isSuccess)
                 {
-                    var user = await _userRepository.GetById((Guid)command.SenderId);
+                    var user = await _userRepository.GetById((Guid)invitation.SenderId);
                     return new ResponseBuilder()
                     .WithStatus(Const.FAIL_CODE)
                     .WithMessage(user.Code + " đã được nhóm khác chấp nhận trước đó và không còn trong trạng thái chờ duyệt.");
