@@ -12,9 +12,10 @@ public enum TeamMemberStatus
 {
     Pending,
     InProgress,  
-    Passed,     
-    Failed1,
-    Failed2
+    Pass1,     
+    Pass2,
+    Fail1,
+    Fail2,
 }
 
 public enum MentorConclusionOptions

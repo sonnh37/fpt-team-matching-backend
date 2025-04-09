@@ -19,6 +19,15 @@ namespace FPT.TeamMatching.Data.Repositories
             _context = dbContext;
         }
 
+        public async Task<List<CapstoneSchedule>> GetByProjectId(Guid projectId)
+        {
+            var capstoneSchedules = await _context.CapstoneSchedules.Where(e => e.IsDeleted == false &&
+                                                                     e.ProjectId == projectId)
+                                                                .Include(e => e.Project).ThenInclude(e => e.Idea)
+                                                                .ToListAsync();  
+            return capstoneSchedules;
+        }
+
         public Task<List<CapstoneSchedule>?> GetBySemesterIdAndStage(Guid semesterId, int stage)
         {
             var capstoneSchedules = _context.CapstoneSchedules.Where(e => e.IsDeleted == false &&
