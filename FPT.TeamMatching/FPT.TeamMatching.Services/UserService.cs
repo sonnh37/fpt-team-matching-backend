@@ -5,6 +5,7 @@ using FPT.TeamMatching.Domain.Contracts.UnitOfWorks;
 using FPT.TeamMatching.Domain.Entities;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Base;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Users;
+using FPT.TeamMatching.Domain.Models.Requests.Queries.Users;
 using FPT.TeamMatching.Domain.Models.Responses;
 using FPT.TeamMatching.Domain.Models.Results;
 using FPT.TeamMatching.Domain.Models.Results.Bases;
@@ -86,6 +87,47 @@ public class UserService : BaseService<User>, IUserService
         }
     }
 
+    public async Task<BusinessResult> GetAllByCouncilWithIdeaRequestPending(UserGetAllQuery query)
+    {
+        try
+        {
+            List<UserResult>? results;
+
+            var (data, total) = await _userRepository.GetAllByCouncilWithIdeaRequestPending(query);
+
+            results = _mapper.Map<List<UserResult>>(data);
+
+            if (results.Count == 0)
+                return new ResponseBuilder()
+                    .WithData(results)
+                    .WithStatus(Const.NOT_FOUND_CODE)
+                    .WithMessage(Const.NOT_FOUND_MSG);
+
+            // GetAll 
+            if (!query.IsPagination)
+                return new ResponseBuilder()
+                        .WithData(results)
+                        .WithStatus(Const.SUCCESS_CODE)
+                        .WithMessage(Const.SUCCESS_READ_MSG)
+                    ;
+
+            // GetAll with pagination
+            var tableResponse = new PaginatedResult(query, results, total);
+
+            return new ResponseBuilder()
+                .WithData(tableResponse)
+                .WithStatus(Const.SUCCESS_CODE)
+                .WithMessage(Const.SUCCESS_READ_MSG);
+        }
+        catch (Exception ex)
+        {
+            var errorMessage = $"An error occurred in {typeof(UserResult).Name}: {ex.Message}";
+            return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage(errorMessage);
+        }
+    }
+    
     public async Task<BusinessResult> Create(UserCreateCommand command)
     {
         try

@@ -1,6 +1,7 @@
 ﻿using FPT.TeamMatching.Domain.Contracts.Repositories.Bases;
 using FPT.TeamMatching.Domain.Entities;
 using FPT.TeamMatching.Domain.Models;
+using FPT.TeamMatching.Domain.Models.Requests.Queries.Users;
 using FPT.TeamMatching.Domain.Models.Results;
 
 namespace FPT.TeamMatching.Domain.Contracts.Repositories;
@@ -18,4 +19,6 @@ public interface IUserRepository : IBaseRepository<User>
     Task<User?> GetById(Guid id);
 
     Task<List<User>?> GetStudentDoNotHaveTeam();
+
+    Task<(List<User>, int)> GetAllByCouncilWithIdeaRequestPending(UserGetAllQuery query);
 }
