@@ -90,7 +90,7 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
 
     public async Task<List<Idea>> GetIdeaWithResultDateIsToday()
     {
-        var toDay = DateTime.Now.Date;
+        var toDay = DateTime.UtcNow.Date;
         var ideas = await _dbContext.Ideas
             .Include(e => e.Owner).ThenInclude(e => e.UserXRoles).ThenInclude(e => e.Role)
             .Include(e => e.StageIdea)
@@ -98,7 +98,9 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
                 e.IsDeleted == false &&
                 e.Status == IdeaStatus.Pending &&
                 e.StageIdea != null &&
-                e.StageIdea.ResultDate.LocalDateTime.Date == toDay)
+                (e.StageIdea.ResultDate.Year == toDay.Year &&
+                 e.StageIdea.ResultDate.Month == toDay.Month &&
+                 e.StageIdea.ResultDate.Day == toDay.Day))
             .ToListAsync();
 
         return ideas;
