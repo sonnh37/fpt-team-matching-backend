@@ -117,6 +117,9 @@ namespace FPT.TeamMatching.Services
                     Status = Domain.Enums.IdeaHistoryStatus.Pending,
                     FileUpdate = request.FileUpdate,
                     ReviewStage = request.ReviewStage,
+                    Note = request.Note,
+                    CreatedDate = DateTime.Now,
+                    UpdatedDate = DateTime.Now,
                 };
                 _ideaHistoryRepository.Add(ideaHistory);
                 var isSuccess = await _unitOfWork.SaveChanges();
