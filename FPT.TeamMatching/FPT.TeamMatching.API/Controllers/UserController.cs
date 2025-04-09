@@ -26,6 +26,14 @@ public class UserController : ControllerBase
         var msg = await _userService.GetAll<UserResult>(query);
         return Ok(msg);
     }
+    
+    [HttpGet("council/pending-ideas")]
+    public async Task<IActionResult> GetAllByCouncilWithIdeaRequestPending([FromQuery] UserGetAllQuery query)
+    {
+        var msg = await _userService.GetAllByCouncilWithIdeaRequestPending(query);
+        return Ok(msg);
+    }
+
 
     [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetById([FromRoute] Guid id)
