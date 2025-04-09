@@ -87,6 +87,7 @@ public class TeamMemberService : BaseService<TeamMember>, ITeamMemberService
                     .WithMessage(Const.NOT_FOUND_MSG);
                 }
                 teamMember.Status = request.Status;
+                teamMember.Note = request.Note;
                 await SetBaseEntityForUpdate(teamMember);
                 _teamMemberRepository.Update(teamMember);
             }
