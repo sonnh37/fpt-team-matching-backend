@@ -8,12 +8,10 @@ using System.Threading.Tasks;
 
 namespace FPT.TeamMatching.Domain.Models.Requests.Commands.TeamMembers
 {
-    public class MentorUpdate: UpdateCommand
+    public class UpdateForDefense: UpdateCommand
     {
-        public MentorConclusionOptions MentorConclusion { get; set; }
+        public TeamMemberStatus? Status { get; set; }
 
-        public string? Attitude { get; set; }
-
-        public string? Note {get;set;}
+        public string? CommentDefense { get; set; }
     }
 }

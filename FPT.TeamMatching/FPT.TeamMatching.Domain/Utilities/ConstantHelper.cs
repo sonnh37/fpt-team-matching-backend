@@ -14,16 +14,16 @@ public static class Const
 
     public const int SUCCESS_CODE = 1;
 
-    public const string SUCCESS_SAVE_MSG = "Saved successfully.";
-    public const string SUCCESS_DELETE_MSG = "Deleted successfully.";
-    public const string SUCCESS_READ_MSG = "Read successfully.";
+    public const string SUCCESS_SAVE_MSG = "Changes saved";
+    public const string SUCCESS_DELETE_MSG = "Deleted successfully";
+    public const string SUCCESS_READ_MSG = "Read successfully";
 
     #endregion
 
     #region Fail code
 
     public const int FAIL_CODE = -1;
-    public const string FAIL_SAVE_MSG = "Failed to save data.";
+    public const string FAIL_SAVE_MSG = "Failed to save changes.";
     public const string FAIL_READ_MSG = "Failed to read data.";
     public const string FAIL_DELETE_MSG = "Failed to delete data.";
 

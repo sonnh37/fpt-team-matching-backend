@@ -15,5 +15,6 @@ namespace FPT.TeamMatching.Domain.Models.Requests.Commands.IdeaHistories
         public string? FileUpdate { get; set; }
 
         public int ReviewStage { get; set; }
+        public string? Note { get; set; }
     }
 }

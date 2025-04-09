@@ -88,4 +88,12 @@ public class TeamMemberController : ControllerBase
 
         return Ok(businessResult);
     }
+
+    [HttpPut("update-by-manager")]
+    public async Task<IActionResult> UpdateTeamMemberByManager([FromBody] ManagerUpdate requests)
+    {
+        var businessResult = await _teammemberservice.UpdateTeamMemberByManager(requests);
+
+        return Ok(businessResult);
+    }
 }

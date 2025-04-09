@@ -51,4 +51,14 @@ public class TeamMemberRepository : BaseRepository<TeamMember>, ITeamMemberRepos
         return await _dbContext.TeamMembers
             .FirstOrDefaultAsync(tm => tm.UserId == userId && tm.ProjectId == projectId);
     }
+
+    public Task<bool> UserHasTeamNow(Guid userId)
+    {
+        var hasTeam = GetQueryable(m => m.UserId == userId &&
+                                    m.IsDeleted == false &&
+                                    (m.Status == Domain.Enums.TeamMemberStatus.InProgress ||
+                                    m.Status == Domain.Enums.TeamMemberStatus.Pending))
+                                    .AnyAsync();
+        return hasTeam;
+    }
 }

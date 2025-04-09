@@ -33,6 +33,30 @@ namespace FPT.TeamMatching.Services
             _capstoneScheduleRepository = _unitOfWork.CapstoneScheduleRepository;
         }
 
+        public async Task<BusinessResult> GetByProjectId(Guid projectId)
+        {
+            try
+            {
+                var capstoneSchedules = await _capstoneScheduleRepository.GetByProjectId(projectId);
+                if (capstoneSchedules.Count == 0)
+                {
+                    return new ResponseBuilder()
+                    .WithStatus(Const.NOT_FOUND_CODE)
+                    .WithMessage(Const.NOT_FOUND_MSG);
+                }
+                return new ResponseBuilder()
+                    .WithData(_mapper.Map<List<CapstoneScheduleResult>>(capstoneSchedules))
+                    .WithStatus(Const.SUCCESS_CODE)
+                    .WithMessage(Const.SUCCESS_READ_MSG);
+            }
+            catch (Exception e)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage(e.Message);
+            }
+        }
+
         public async Task<BusinessResult> GetBySemesterIdAndStage(CapstoneScheduleFilter command)
         {
             try

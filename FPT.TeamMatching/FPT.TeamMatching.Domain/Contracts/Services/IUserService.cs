@@ -1,5 +1,6 @@
 ﻿using FPT.TeamMatching.Domain.Contracts.Services.Bases;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Users;
+using FPT.TeamMatching.Domain.Models.Requests.Queries.Users;
 using FPT.TeamMatching.Domain.Models.Responses;
 
 namespace FPT.TeamMatching.Domain.Contracts.Services;
@@ -11,6 +12,9 @@ public interface IUserService : IBaseService
     Task<BusinessResult> UpdatePassword(UserPasswordCommand userPasswordCommand);
 
     Task<BusinessResult> UpdateUserCacheAsync(UserUpdateCacheCommand newCacheJson);
+
+    Task<BusinessResult> GetAllByCouncilWithIdeaRequestPending(UserGetAllQuery query);
+
     //
     // Task<BusinessResult> GetByUsername(string username);
     //

@@ -46,22 +46,22 @@ namespace FPT.TeamMatching.Services
                 await SetBaseEntityForUpdate(ideaHistory);
                 _ideaHistoryRepository.Update(ideaHistory);
                 var isSuccess = await _unitOfWork.SaveChanges();
-                if (isSuccess)
-                {
-                    //noti duyệt sửa đề tài
-                    var noti = new NotificationCreateForTeam
-                    {
-                        ProjectId = ideaHistory.Idea.Project.Id,
-                        Description = ideaHistory.Idea.Mentor.Code +
-                                        " đã duyệt yêu cầu chỉnh sửa đề tài sau review " + ideaHistory.ReviewStage +
-                                        " của nhóm bạn. Hãy kiểm tra!",
-                    };
-                    await _notificationService.CreateForTeam(noti);
-                    //
-                    return new ResponseBuilder()
-                        .WithStatus(Const.SUCCESS_CODE)
-                        .WithMessage(Const.SUCCESS_SAVE_MSG);
-                }
+                // if (isSuccess)
+                // {
+                //     //noti duyệt sửa đề tài
+                //     var noti = new NotificationCreateForTeam
+                //     {
+                //         ProjectId = ideaHistory.Idea.Project.Id,
+                //         Description = ideaHistory.Idea.Mentor.Code +
+                //                         " đã duyệt yêu cầu chỉnh sửa đề tài sau review " + ideaHistory.ReviewStage +
+                //                         " của nhóm bạn. Hãy kiểm tra!",
+                //     };
+                //     await _notificationService.CreateForTeam(noti);
+                //     //
+                //     return new ResponseBuilder()
+                //         .WithStatus(Const.SUCCESS_CODE)
+                //         .WithMessage(Const.SUCCESS_SAVE_MSG);
+                // }
                 return new ResponseBuilder()
                         .WithStatus(Const.FAIL_CODE)
                         .WithMessage(Const.FAIL_SAVE_MSG);
@@ -117,6 +117,9 @@ namespace FPT.TeamMatching.Services
                     Status = Domain.Enums.IdeaHistoryStatus.Pending,
                     FileUpdate = request.FileUpdate,
                     ReviewStage = request.ReviewStage,
+                    Note = request.Note,
+                    CreatedDate = DateTime.Now,
+                    UpdatedDate = DateTime.Now,
                 };
                 _ideaHistoryRepository.Add(ideaHistory);
                 var isSuccess = await _unitOfWork.SaveChanges();

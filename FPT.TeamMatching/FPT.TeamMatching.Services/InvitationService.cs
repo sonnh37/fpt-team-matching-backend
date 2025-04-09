@@ -20,6 +20,7 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
     private readonly IProjectRepository _projectRepository;
     private readonly IIdeaRepository _ideaRepository;
     private readonly ITeamMemberRepository _teamMemberRepository;
+    private readonly IUserRepository _userRepository;
     private readonly INotificationService _notificationService;
 
     public InvitationService(IMapper mapper, IUnitOfWork unitOfWork, INotificationService notificationService) : base(
@@ -29,6 +30,7 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
         _projectRepository = unitOfWork.ProjectRepository;
         _ideaRepository = unitOfWork.IdeaRepository;
         _teamMemberRepository = unitOfWork.TeamMemberRepository;
+        _userRepository = unitOfWork.UserRepository;
         _notificationService = notificationService;
     }
 
@@ -356,17 +358,21 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
 
             var userId = userIdFromClaim.Value;
 
-            var invitation = await _invitationRepository.GetById(command.Id, true);
+            var invitation = await _invitationRepository.GetById(command.Id);
             if (invitation == null)
             {
                 return new ResponseBuilder()
                     .WithStatus(Const.FAIL_CODE)
                     .WithMessage("Team haven't sent invitation!");
             }
-
+            
+            var receiver = await _userRepository.GetById(invitation.ReceiverId.Value);
+            
             if (command.Status == InvitationStatus.Rejected)
             {
-                _invitationRepository.DeletePermanently(invitation);
+                invitation.Status = InvitationStatus.Rejected;
+                await SetBaseEntityForUpdate(invitation);
+                _invitationRepository.Update(invitation);
                 var saveChange_ = await _unitOfWork.SaveChanges();
                 if (!saveChange_)
                 {
@@ -377,7 +383,7 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
                 var noti = new NotificationCreateForIndividual
                 {
                     UserId = invitation.SenderId,
-                    Description = invitation.Receiver.Code + "đã từ chối lời mời tham gia nhóm của bạn",
+                    Description = receiver?.Code + "đã từ chối lời mời tham gia nhóm của bạn",
                 };
                 await _notificationService.CreateForUser(noti);
                 //
@@ -410,7 +416,7 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
                     var noti = new NotificationCreateForTeam
                     {
                         ProjectId = invitation.ProjectId,
-                        Description = invitation.Receiver.Code + "đã đồng ý lời mời tham gia nhóm của bạn",
+                        Description = receiver?.Code + "đã đồng ý lời mời tham gia nhóm của bạn",
                     };
                     await _notificationService.CreateForTeam(noti);
                     //
@@ -455,6 +461,29 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
                     .WithMessage("Invitation is already processed!");
             }
 
+            //check sender id
+            if (invitation.SenderId == null)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("Fill sender id");
+            }
+            //check xem user co team -> neu co team thi tra thong bao voi status cancel
+            var hasTeam = await _teamMemberRepository.UserHasTeamNow((Guid)invitation.SenderId);
+            if (hasTeam)
+            {
+                invitation.Status = InvitationStatus.Cancel;
+                await SetBaseEntityForUpdate(invitation);
+                _invitationRepository.Update(invitation);
+                var isSuccess = await _unitOfWork.SaveChanges();
+                if (isSuccess)
+                {
+                    var user = await _userRepository.GetById((Guid)invitation.SenderId);
+                    return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage(user.Code + " đã được nhóm khác chấp nhận trước đó và không còn trong trạng thái chờ duyệt.");
+                }
+            }
             if (command.Status == InvitationStatus.Rejected)
             {
                 return await ProcessRejection(invitation);
@@ -477,22 +506,29 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
     {
         try
         {
-            _invitationRepository.DeletePermanently(invitation);
+            invitation.Status = InvitationStatus.Rejected;
+            _invitationRepository.Update(invitation);
 
-            // Gửi thông báo
-            var teamName = invitation.Project?.TeamName ?? "the team";
-            var noti = new NotificationCreateForIndividual
-            {
-                UserId = invitation.SenderId,
-                Description = $"Your invitation to join {teamName} has been rejected",
-            };
-            await _notificationService.CreateForUser(noti);
 
             var saveResult = await _unitOfWork.SaveChanges();
             if (!saveResult)
             {
                 return HandlerFail("Failed to save changes!");
             }
+
+            // Gửi thông báo
+            if (invitation.ProjectId == null) return HandlerFail("Not found project");
+            var project = await _projectRepository.GetById(invitation.ProjectId.Value);
+            if (project == null) return HandlerFail("Not found project");
+
+            var teamName = project.TeamName ?? "the team";
+
+            var noti = new NotificationCreateForIndividual
+            {
+                UserId = invitation.SenderId,
+                Description = $"Your invitation to join {teamName} has been rejected",
+            };
+            await _notificationService.CreateForUser(noti);
 
             return new ResponseBuilder()
                 .WithStatus(Const.SUCCESS_CODE)
@@ -514,14 +550,14 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
             }
 
             // Kiểm tra thành viên đã tồn tại
-            var existingMember =
-                await _teamMemberRepository.GetByUserAndProject(invitation.SenderId.Value, invitation.ProjectId.Value);
-            if (existingMember != null)
-            {
-                return new ResponseBuilder()
-                    .WithStatus(Const.FAIL_CODE)
-                    .WithMessage("User is already a member of this team!");
-            }
+            //var existingMember =
+            //    await _teamMemberRepository.GetByUserAndProject(invitation.SenderId.Value, invitation.ProjectId.Value);
+            //if (existingMember != null)
+            //{
+            //    return new ResponseBuilder()
+            //        .WithStatus(Const.FAIL_CODE)
+            //        .WithMessage("User is already a member of this team!");
+            //}
 
             // Lấy thông tin project để kiểm tra số slot
             var project = await _projectRepository.GetById(invitation.ProjectId.Value, true);
@@ -831,8 +867,9 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
 
         foreach (var teamMember in teamMembers)
         {
-            if (teamMember.Status != TeamMemberStatus.Failed)
-            {
+            //if (teamMember.Status != TeamMemberStatus.Failed)
+            if (teamMember.Status != TeamMemberStatus.Fail2 && teamMember.Status != TeamMemberStatus.Fail1)
+                {
                 haveTeamMember = true;
             }
         }

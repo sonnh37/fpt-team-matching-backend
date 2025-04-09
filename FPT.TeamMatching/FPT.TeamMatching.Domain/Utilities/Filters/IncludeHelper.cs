@@ -26,6 +26,7 @@ public static class IncludeHelper
             IQueryable<Invitation> invitations => Invitation(invitations) as IQueryable<TEntity>,
             IQueryable<Notification> notifications => Notification(notifications) as IQueryable<TEntity>,
             IQueryable<Review> reviews => Review(reviews) as IQueryable<TEntity>,
+            IQueryable<CapstoneSchedule> capstoneSchedules => CapstoneSchedule(capstoneSchedules) as IQueryable<TEntity>,
             _ => queryable
         })!;
     }
@@ -171,6 +172,20 @@ public static class IncludeHelper
             .ThenInclude(y => y.IdeaHistories)
             .Include(d => d.Reviewer1)
             .Include(d => d.Reviewer2);
+        return queryable;
+    }
+    
+    private static IQueryable<CapstoneSchedule> CapstoneSchedule(IQueryable<CapstoneSchedule> queryable)
+    {
+        // queryable = queryable
+        //     .Include(m => m.Tasks);
+
+        queryable = queryable
+            .Include(x => x.Project)
+            .ThenInclude(y => y.Idea)
+            .Include(x => x.Project)
+            .ThenInclude(x => x.TeamMembers)
+            .ThenInclude(y => y.User);
         return queryable;
     }
 }
