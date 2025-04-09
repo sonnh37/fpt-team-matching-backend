@@ -88,4 +88,11 @@ public class UserController : ControllerBase
         var msg = await _userService.GetStudentDoNotHaveTeam();
         return Ok(msg);
     }
+
+    [HttpGet("role/reviewer")]
+    public async Task<IActionResult> GetRoleReviewer()
+    {
+        var msg = await _userService.GetAllReviewer();
+        return Ok(msg);
+    }
 }

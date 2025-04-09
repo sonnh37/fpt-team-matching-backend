@@ -1,4 +1,8 @@
-﻿services:
+﻿networks:
+  default:
+    external: true
+    name: my-network
+services:
   fpt.teammatching.api:
     image: fpt.teammatching.api
     ports:
@@ -6,8 +10,6 @@
     build:
       context: .
       dockerfile: FPT.TeamMatching.API/Dockerfile
-    volumes:
-      - ./FPT.TeamMatching.API/UploadFiles:/app/UploadFiles
     env_file:
       - FPT.TeamMatching.API/.env
   redis:

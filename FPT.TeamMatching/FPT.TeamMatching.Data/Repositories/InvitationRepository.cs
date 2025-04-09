@@ -40,6 +40,19 @@ public class InvitationRepository : BaseRepository<Invitation>, IInvitationRepos
             .SingleOrDefaultAsync();
         return i;
     }
+    
+    public async Task<List<Invitation>> GetPendingInvitationsForProjectFromOtherSendersAsync(
+        Guid senderId, 
+        Guid projectId, 
+        Guid excludeInvitationId)
+    {
+        return await _dbContext.Invitations
+            .Where(i => i.Status == InvitationStatus.Pending)
+            .Where(i => i.Id != excludeInvitationId)
+            .Where(i => i.ProjectId == projectId && i.SenderId != senderId)
+            .ToListAsync();
+    }
+   
 
     public async Task<(List<Invitation>, int)> GetUserInvitationsByType(InvitationGetByTypeQuery query, Guid userId)
     {

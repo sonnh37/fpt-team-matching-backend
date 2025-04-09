@@ -24,4 +24,7 @@ public interface INotificationService : IBaseService
     Task<BusinessResult> CreateForSystemWide(NotificationCreateForSystemWide createCommand);
     //gửi noti cho role based
     Task<BusinessResult> CreateForRoleBased(NotificationCreateForRoleBased createCommand);
+    
+    Task<BusinessResult> MarkAsReadAsync(Guid id);
+    Task<BusinessResult> MarkAllAsReadAsync();
 }

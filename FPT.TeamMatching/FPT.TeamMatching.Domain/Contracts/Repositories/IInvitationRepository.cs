@@ -11,4 +11,8 @@ public interface IInvitationRepository : IBaseRepository<Invitation>
     Task<(List<Invitation>, int)> GetUserInvitationsByStatus(InvitationGetListForUserByStatus query, Guid userId);
     Task<(List<Invitation>, int)> GetLeaderInvitationsByType(InvitationGetByTypeQuery query, Guid userId);
     Task<Invitation?> GetInvitationOfTeamByProjectIdAndMe(Guid projectId, Guid userId);
+    
+    // Trong IInvitationRepository
+    Task<List<Invitation>> GetPendingInvitationsForProjectFromOtherSendersAsync(Guid userId, Guid projectId, Guid excludeInvitationId);
+
 }

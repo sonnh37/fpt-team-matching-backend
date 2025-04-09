@@ -193,4 +193,13 @@ public class UserService : BaseService<User>, IUserService
                 .WithMessage(errorMessage);
         }
     }
+
+    public async Task<BusinessResult> GetAllReviewer()
+    {
+        var result = await _userRepository.GetAllReviewerIdAndUsername();
+        return new ResponseBuilder()
+            .WithData(result)
+            .WithStatus(Const.SUCCESS_CODE)
+            .WithMessage(Const.SUCCESS_READ_MSG);
+    }
 }

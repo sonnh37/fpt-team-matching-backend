@@ -18,7 +18,7 @@ public class NotificationRepository : BaseRepository<Notification>, INotificatio
     {
         _dbContext = context;
     }
-
+    
     public async Task<List<Notification>> GetAllNotificationByUserId(Guid userId)
     {
         var result = await _dbContext.Notifications.Include(m => m.User)
@@ -29,18 +29,39 @@ public class NotificationRepository : BaseRepository<Notification>, INotificatio
         return result ?? [];
     }
     
-    public async Task<(List<Notification>, int)> GetDataByCurrentUser(NotificationGetAllByCurrentUserQuery query, Guid userId)
+    public async Task<(List<Notification>, int)> GetDataByCurrentUser(
+        NotificationGetAllByCurrentUserQuery query, 
+        Guid userId, 
+        Guid? projectId)
     {
         var queryable = GetQueryable();
-        
-        // Filter and include
         queryable = queryable.Include(m => m.User)
-            .Where(x => (x.UserId == null && x.Type == NotificationType.Individual) ||
-                        (x.UserId != null && x.UserId == userId));
-        // End
+            .Include(m => m.Project);
+            
+
+        // Điều kiện filter chính
+        queryable = queryable.Where(x => 
+                // Thông báo cá nhân (Individual)
+                (x.Type == NotificationType.Individual && x.UserId == userId) ||
+        
+                // Thông báo hệ thống (SystemWide) - cho tất cả user
+                (x.Type == NotificationType.SystemWide) ||
+        
+                // Thông báo nhóm (Team) - kiểm tra projectId
+                (x.Type == NotificationType.Team && x.ProjectId == projectId && x.UserId == userId) 
+        
+        );
+
+        // Filter theo trạng thái đọc
+        if (query.IsRead.HasValue)
+        {
+            queryable = queryable.Where(m => m.IsRead == query.IsRead.Value);
+        }
+
+        // Xử lý phân trang
         if (query.IsPagination)
         {
-            var totalOrigin = queryable.Count();
+            var totalOrigin = await queryable.CountAsync();
             queryable = Sort(queryable, query);
             var results = await GetQueryablePagination(queryable, query).ToListAsync();
             return (results, totalOrigin);
