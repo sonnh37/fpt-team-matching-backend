@@ -24,6 +24,7 @@ namespace FPT.TeamMatching.Data.Repositories
             var capstoneSchedules = await _context.CapstoneSchedules.Where(e => e.IsDeleted == false &&
                                                                      e.ProjectId == projectId)
                                                                 .Include(e => e.Project).ThenInclude(e => e.Idea)
+                                                                .Include(x => x.Project).ThenInclude(x => x.TeamMembers).ThenInclude(x => x.User)
                                                                 .ToListAsync();  
             return capstoneSchedules;
         }
