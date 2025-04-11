@@ -90,7 +90,7 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
 
     public async Task<List<Idea>> GetIdeaWithResultDateIsToday()
     {
-        var toDay = DateTime.UtcNow.Date;
+        var toDay = DateTime.UtcNow;
         var ideas = await _dbContext.Ideas
             .Include(e => e.Owner).ThenInclude(e => e.UserXRoles).ThenInclude(e => e.Role)
             .Include(e => e.StageIdea)

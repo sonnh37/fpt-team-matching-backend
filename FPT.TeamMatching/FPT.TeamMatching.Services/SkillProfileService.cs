@@ -109,29 +109,11 @@ public class SkillProfileService : ISkillProfileService
         try
         {
             var (data, total) = await _unitOfWork.SkillProfileRepository.GetData(query);
-
             var results = _mapper.Map<List<SkillProfile>>(data);
+            var response = new QueryResult(query, results, total);
 
-            if (results.Count == 0)
-                return new ResponseBuilder()
-                    .WithData(results)
-                    .WithStatus(Const.NOT_FOUND_CODE)
-                    .WithMessage(Const.NOT_FOUND_MSG)
-                    ;
-
-            // GetAll 
-            if (!query.IsPagination)
-                return new ResponseBuilder()
-                    .WithData(results)
-                    .WithStatus(Const.SUCCESS_CODE)
-                    .WithMessage(Const.SUCCESS_READ_MSG)
-                    ;
-            
-            // GetAll with pagination
-            var tableResponse = new PaginatedResult(query, results, total);
-            
             return new ResponseBuilder()
-                .WithData(tableResponse)
+                .WithData(response)
                 .WithStatus(Const.SUCCESS_CODE)
                 .WithMessage(Const.SUCCESS_READ_MSG);
         }

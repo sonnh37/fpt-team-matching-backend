@@ -2,6 +2,7 @@
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Users;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Users;
 using FPT.TeamMatching.Domain.Models.Responses;
+using FPT.TeamMatching.Domain.Models.Results.Bases;
 
 namespace FPT.TeamMatching.Domain.Contracts.Services;
 
@@ -14,6 +15,9 @@ public interface IUserService : IBaseService
     Task<BusinessResult> UpdateUserCacheAsync(UserUpdateCacheCommand newCacheJson);
 
     Task<BusinessResult> GetAllByCouncilWithIdeaRequestPending(UserGetAllQuery query);
+    
+    Task<BusinessResult> GetByEmail<TResult>(string email) where TResult : BaseResult;
+
 
     //
     // Task<BusinessResult> GetByUsername(string username);

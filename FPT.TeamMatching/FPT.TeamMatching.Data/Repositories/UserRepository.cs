@@ -19,7 +19,7 @@ public class UserRepository : BaseRepository<User>, IUserRepository
     public UserRepository(FPTMatchingDbContext dbContext) : base(dbContext)
     {
     }
-    
+
     public async Task<(List<User>, int)> GetAllByCouncilWithIdeaRequestPending(UserGetAllQuery query)
     {
         var queryable = GetQueryable();
@@ -32,13 +32,13 @@ public class UserRepository : BaseRepository<User>, IUserRepository
             .Where(m => m.IdeaRequestOfReviewers.Any(n => n.Status == IdeaRequestStatus.Pending))
             .Include(m => m.IdeaRequestOfReviewers
                 .Where(n => n.Status == IdeaRequestStatus.Pending));
-        
+
         if (query.Department.HasValue)
         {
             queryable = queryable.Where(m =>
                 m.Department == query.Department);
         }
-        
+
         if (!string.IsNullOrEmpty(query.EmailOrFullname))
         {
             queryable = queryable.Where(m =>
@@ -50,7 +50,7 @@ public class UserRepository : BaseRepository<User>, IUserRepository
         }
 
         queryable = BaseFilterHelper.Base(queryable, query);
-        
+
         if (query.IsPagination)
         {
             // Tổng số count sau khi  filter khi chưa lọc trang
@@ -131,7 +131,7 @@ public class UserRepository : BaseRepository<User>, IUserRepository
     {
         var queryable = GetQueryable();
 
-        var user = await queryable.Where(e => e.Email!.ToLower() == keyword.ToLower())
+        var user = await queryable.Where(e => e.Email != null && e.Email.ToLower().Trim() == keyword.ToLower().Trim())
             .SingleOrDefaultAsync();
 
         return user;
@@ -190,13 +190,14 @@ public class UserRepository : BaseRepository<User>, IUserRepository
     public async Task<List<User>?> GetStudentDoNotHaveTeam()
     {
         var students = await GetQueryable().Where(e => e.IsDeleted == false &&
-                                            e.UserXRoles.Any(e => e.Role.RoleName == "Student") &&
-                                            (// Chưa có nhóm (không có TeamMembers nào)
-                                            !e.TeamMembers.Any() ||
-                                            // Có nhóm nhưng tất cả status đều "Fail"
-                                            //e.TeamMembers.All(tm => tm.Status == TeamMemberStatus.Failed)))
-                                            e.TeamMembers.All(tm => tm.Status == TeamMemberStatus.Fail2)))
-                                            .ToListAsync();
+                                                       e.UserXRoles.Any(e => e.Role.RoleName == "Student") &&
+                                                       ( // Chưa có nhóm (không có TeamMembers nào)
+                                                           !e.TeamMembers.Any() ||
+                                                           // Có nhóm nhưng tất cả status đều "Fail"
+                                                           //e.TeamMembers.All(tm => tm.Status == TeamMemberStatus.Failed)))
+                                                           e.TeamMembers.All(tm =>
+                                                               tm.Status == TeamMemberStatus.Fail2)))
+            .ToListAsync();
         return students;
     }
 }

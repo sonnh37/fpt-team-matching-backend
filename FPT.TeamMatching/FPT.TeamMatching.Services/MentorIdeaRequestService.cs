@@ -110,32 +110,18 @@ namespace FPT.TeamMatching.Services
         {
             try
             {
-                List<MentorIdeaRequestResult>? results;
                 var userIdClaim = GetUserIdFromClaims();
 
                 if (userIdClaim == null)
-                    return new ResponseBuilder()
-                        .WithStatus(Const.FAIL_CODE)
-                        .WithMessage("You need to authenticate with TeamMatching.");
+                    return HandlerFailAuth();
 
                 var userId = userIdClaim.Value;
-                // get by type
                 var (data, total) = await _mentorIdeaRequestRepository.GetUserMentorIdeaRequests(query, userId);
-
-                results = _mapper.Map<List<MentorIdeaRequestResult>>(data);
-
-                // GetAll 
-                if (!query.IsPagination)
-                    return new ResponseBuilder()
-                        .WithData(results)
-                        .WithStatus(Const.SUCCESS_CODE)
-                        .WithMessage(Const.SUCCESS_READ_MSG);
-
-                // GetAll with pagination
-                var tableResponse = new PaginatedResult(query, results, total);
+                var results = _mapper.Map<List<MentorIdeaRequestResult>>(data);
+                var response = new QueryResult(query, results, total);
 
                 return new ResponseBuilder()
-                    .WithData(tableResponse)
+                    .WithData(response)
                     .WithStatus(Const.SUCCESS_CODE)
                     .WithMessage(Const.SUCCESS_READ_MSG);
             }
@@ -152,32 +138,17 @@ namespace FPT.TeamMatching.Services
         {
             try
             {
-                List<MentorIdeaRequestResult>? results;
                 var userIdClaim = GetUserIdFromClaims();
-
                 if (userIdClaim == null)
-                    return new ResponseBuilder()
-                        .WithStatus(Const.FAIL_CODE)
-                        .WithMessage("You need to authenticate with TeamMatching.");
-
+                    return HandlerFailAuth();
+                
                 var userId = userIdClaim.Value;
-                // get by type
                 var (data, total) = await _mentorIdeaRequestRepository.GetMentorMentorIdeaRequests(query, userId);
-
-                results = _mapper.Map<List<MentorIdeaRequestResult>>(data);
-
-                // GetAll 
-                if (!query.IsPagination)
-                    return new ResponseBuilder()
-                        .WithData(results)
-                        .WithStatus(Const.SUCCESS_CODE)
-                        .WithMessage(Const.SUCCESS_READ_MSG);
-
-                // GetAll with pagination
-                var tableResponse = new PaginatedResult(query, results, total);
+                var results = _mapper.Map<List<MentorIdeaRequestResult>>(data);
+                var response = new QueryResult(query, results, total);
 
                 return new ResponseBuilder()
-                    .WithData(tableResponse)
+                    .WithData(response)
                     .WithStatus(Const.SUCCESS_CODE)
                     .WithMessage(Const.SUCCESS_READ_MSG);
             }

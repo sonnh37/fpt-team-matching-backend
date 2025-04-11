@@ -32,6 +32,32 @@ public class UserService : BaseService<User>, IUserService
         _userXRoleRepository = _unitOfWork.UserXRoleRepository;
         _semesterRepository = _unitOfWork.SemesterRepository;
     }
+    
+    public async Task<BusinessResult> GetByEmail<TResult>(string email) where TResult : BaseResult
+    {
+        try
+        {
+            var entity = await _userRepository.GetByEmail(email);
+            var result = _mapper.Map<TResult>(entity);
+            if (result == null)
+                return new ResponseBuilder()
+                    .WithStatus(Const.NOT_FOUND_CODE)
+                    .WithMessage(Const.NOT_FOUND_MSG);
+
+            return new ResponseBuilder()
+                .WithData(result)
+                .WithStatus(Const.SUCCESS_CODE)
+                .WithMessage(Const.SUCCESS_READ_MSG);
+        }
+        catch (Exception ex)
+        {
+            var errorMessage = $"An error {typeof(TResult).Name}: {ex.Message}";
+            return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage(errorMessage);
+        }
+    }
+
 
     public async Task<BusinessResult> UpdateUserCacheAsync(UserUpdateCacheCommand newCacheJson)
     {
@@ -91,31 +117,12 @@ public class UserService : BaseService<User>, IUserService
     {
         try
         {
-            List<UserResult>? results;
-
             var (data, total) = await _userRepository.GetAllByCouncilWithIdeaRequestPending(query);
-
-            results = _mapper.Map<List<UserResult>>(data);
-
-            if (results.Count == 0)
-                return new ResponseBuilder()
-                    .WithData(results)
-                    .WithStatus(Const.NOT_FOUND_CODE)
-                    .WithMessage(Const.NOT_FOUND_MSG);
-
-            // GetAll 
-            if (!query.IsPagination)
-                return new ResponseBuilder()
-                        .WithData(results)
-                        .WithStatus(Const.SUCCESS_CODE)
-                        .WithMessage(Const.SUCCESS_READ_MSG)
-                    ;
-
-            // GetAll with pagination
-            var tableResponse = new PaginatedResult(query, results, total);
+            var results = _mapper.Map<List<UserResult>>(data);
+            var response = new QueryResult(query, results, total);
 
             return new ResponseBuilder()
-                .WithData(tableResponse)
+                .WithData(response)
                 .WithStatus(Const.SUCCESS_CODE)
                 .WithMessage(Const.SUCCESS_READ_MSG);
         }
