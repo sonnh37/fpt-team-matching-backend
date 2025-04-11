@@ -58,13 +58,13 @@ namespace FPT.TeamMatching.Services
                 //     };
                 //     await _notificationService.CreateForTeam(noti);
                 //     //
-                //     return new ResponseBuilder()
-                //         .WithStatus(Const.SUCCESS_CODE)
-                //         .WithMessage(Const.SUCCESS_SAVE_MSG);
+                    return new ResponseBuilder()
+                        .WithStatus(Const.SUCCESS_CODE)
+                        .WithMessage(Const.SUCCESS_SAVE_MSG);
                 // }
-                return new ResponseBuilder()
-                        .WithStatus(Const.FAIL_CODE)
-                        .WithMessage(Const.FAIL_SAVE_MSG);
+                // return new ResponseBuilder()
+                //         .WithStatus(Const.FAIL_CODE)
+                //         .WithMessage(Const.FAIL_SAVE_MSG);
             }
             catch (Exception ex)
             {
