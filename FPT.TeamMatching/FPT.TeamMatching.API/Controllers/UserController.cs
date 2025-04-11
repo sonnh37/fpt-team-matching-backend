@@ -42,6 +42,13 @@ public class UserController : ControllerBase
         return Ok(msg);
     }
 
+    [HttpGet("email/{email}")]
+    public async Task<IActionResult> GetByEmail([FromRoute] string email)
+    {
+        var msg = await _userService.GetByEmail<UserResult>(email);
+        return Ok(msg);
+    }
+    
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] UserCreateCommand request)
     {

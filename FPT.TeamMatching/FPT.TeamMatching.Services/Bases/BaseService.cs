@@ -100,25 +100,10 @@ public abstract class BaseService<TEntity> : BaseService, IBaseService
 
             results = _mapper.Map<List<TResult>>(data);
 
-            if (results.Count == 0)
-                return new ResponseBuilder()
-                    .WithData(results)
-                    .WithStatus(Const.NOT_FOUND_CODE)
-                    .WithMessage(Const.NOT_FOUND_MSG);
-
-            // GetAll 
-            if (!query.IsPagination)
-                return new ResponseBuilder()
-                        .WithData(results)
-                        .WithStatus(Const.SUCCESS_CODE)
-                        .WithMessage(Const.SUCCESS_READ_MSG)
-                    ;
-
-            // GetAll with pagination
-            var tableResponse = new PaginatedResult(query, results, total);
+            var response = new QueryResult(query, results, total);
 
             return new ResponseBuilder()
-                .WithData(tableResponse)
+                .WithData(response)
                 .WithStatus(Const.SUCCESS_CODE)
                 .WithMessage(Const.SUCCESS_READ_MSG);
         }

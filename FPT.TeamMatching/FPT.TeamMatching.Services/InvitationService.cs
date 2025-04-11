@@ -63,32 +63,17 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
     {
         try
         {
-            List<InvitationResult>? results;
             var userIdClaim = GetUserIdFromClaims();
-
-            if (userIdClaim == null)
-                return new ResponseBuilder()
-                    .WithStatus(Const.FAIL_CODE)
-                    .WithMessage("You need to authenticate with TeamMatching.");
-
+            if (userIdClaim == null) return HandlerFailAuth();
             var userId = userIdClaim.Value;
             // get by type
             var (data, total) = await _invitationRepository.GetUserInvitationsByStatus(query, userId);
+            var results = _mapper.Map<List<InvitationResult>>(data);
 
-            results = _mapper.Map<List<InvitationResult>>(data);
-
-            // GetAll 
-            if (!query.IsPagination)
-                return new ResponseBuilder()
-                    .WithData(results)
-                    .WithStatus(Const.SUCCESS_CODE)
-                    .WithMessage(Const.SUCCESS_READ_MSG);
-
-            // GetAll with pagination
-            var tableResponse = new PaginatedResult(query, results, total);
+            var response = new QueryResult(query, results, total);
 
             return new ResponseBuilder()
-                .WithData(tableResponse)
+                .WithData(response)
                 .WithStatus(Const.SUCCESS_CODE)
                 .WithMessage(Const.SUCCESS_READ_MSG);
         }
@@ -105,32 +90,18 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
     {
         try
         {
-            List<InvitationResult>? results;
             var userIdClaim = GetUserIdFromClaims();
-
             if (userIdClaim == null)
-                return new ResponseBuilder()
-                    .WithStatus(Const.FAIL_CODE)
-                    .WithMessage("You need to authenticate with TeamMatching.");
+                return HandlerFailAuth();
 
             var userId = userIdClaim.Value;
             // get by type
             var (data, total) = await _invitationRepository.GetUserInvitationsByType(query, userId);
-
-            results = _mapper.Map<List<InvitationResult>>(data);
-
-            // GetAll 
-            if (!query.IsPagination)
-                return new ResponseBuilder()
-                    .WithData(results)
-                    .WithStatus(Const.SUCCESS_CODE)
-                    .WithMessage(Const.SUCCESS_READ_MSG);
-
-            // GetAll with pagination
-            var tableResponse = new PaginatedResult(query, results, total);
+            var results = _mapper.Map<List<InvitationResult>>(data);
+            var response = new QueryResult(query, results, total);
 
             return new ResponseBuilder()
-                .WithData(tableResponse)
+                .WithData(response)
                 .WithStatus(Const.SUCCESS_CODE)
                 .WithMessage(Const.SUCCESS_READ_MSG);
         }
@@ -147,37 +118,23 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
     {
         try
         {
-            List<InvitationResult>? results;
             var userIdClaim = GetUserIdFromClaims();
-
             if (userIdClaim == null)
-                return new ResponseBuilder()
-                    .WithStatus(Const.FAIL_CODE)
-                    .WithMessage("You need to authenticate with TeamMatching.");
-
+                return HandlerFailAuth();            
+            
             var userId = userIdClaim.Value;
             var userInTeamMember = await _teamMemberRepository.GetTeamMemberActiveByUserId(userId);
             if (userInTeamMember == null) return HandlerFail("You not in team member");
+            
             var isLeader = userInTeamMember.Role == TeamMemberRole.Leader;
             if (!isLeader) return HandlerFail("You do not have role leader team member");
-
             // get by type
             var (data, total) = await _invitationRepository.GetLeaderInvitationsByType(query, userId);
-
-            results = _mapper.Map<List<InvitationResult>>(data);
-
-            // GetAll 
-            if (!query.IsPagination)
-                return new ResponseBuilder()
-                    .WithData(results)
-                    .WithStatus(Const.SUCCESS_CODE)
-                    .WithMessage(Const.SUCCESS_READ_MSG);
-
-            // GetAll with pagination
-            var tableResponse = new PaginatedResult(query, results, total);
+            var results = _mapper.Map<List<InvitationResult>>(data);
+            var response = new QueryResult(query, results, total);
 
             return new ResponseBuilder()
-                .WithData(tableResponse)
+                .WithData(response)
                 .WithStatus(Const.SUCCESS_CODE)
                 .WithMessage(Const.SUCCESS_READ_MSG);
         }
