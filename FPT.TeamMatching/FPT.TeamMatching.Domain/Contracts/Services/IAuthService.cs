@@ -8,11 +8,11 @@ namespace FPT.TeamMatching.Domain.Contracts.Services;
 
 public interface IAuthService
 {
-    BusinessResult Login(AuthQuery authQuery);
+    Task<BusinessResult> Login(AuthQuery authQuery);
 
     Task<RSA> GetRSAKeyFromTokenAsync(string token, string kid);
 
-    BusinessResult GetUserByCookie();
+    Task<BusinessResult> GetUserByCookie();
 
     Task<BusinessResult> RefreshToken(UserRefreshTokenCommand request);
 

@@ -346,6 +346,9 @@ public partial class FPTMatchingDbContext : BaseDbContext
 
             entity.HasOne(d => d.Role).WithMany(p => p.UserXRoles)
                 .HasForeignKey(d => d.RoleId);
+            
+            entity.HasOne(d => d.Semester).WithMany(p => p.UserXRoles)
+                .HasForeignKey(d => d.SemesterId);
         });
 
         modelBuilder.Entity<Semester>(entity =>

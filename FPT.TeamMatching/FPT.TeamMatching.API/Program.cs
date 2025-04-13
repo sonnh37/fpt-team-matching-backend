@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Security.Claims;
+using System.Text.Json.Serialization;
 using DotNetEnv;
 using FPT.TeamMatching.API.Collections;
 using FPT.TeamMatching.API.Hubs;
@@ -55,48 +56,114 @@ builder.Services.AddSingleton<ChatRoomDbContext>();
 #region Authentication & Authorization
 
 builder.Services.Configure<TokenSetting>(builder.Configuration.GetSection("TokenSetting"));
+// builder.Services.AddAuthentication(x =>
+//     {
+//         x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+//         x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+//     })
+//     .AddJwtBearer(options =>
+//     {
+//         options.SaveToken = true;
+//         options.RequireHttpsMetadata = true;
+//
+//         options.TokenValidationParameters = new TokenValidationParameters
+//         {
+//             ValidateIssuer = false,
+//             ValidateAudience = false,
+//             ValidateLifetime = true,
+//             ValidateIssuerSigningKey = true,
+//             ClockSkew = TimeSpan.Zero,
+//             RoleClaimType = "Role",
+//
+//             IssuerSigningKeyResolver = (token, securityToken, kid, validationParameters) =>
+//             {
+//                 var serviceProvider = builder.Services.BuildServiceProvider();
+//                 var authService = serviceProvider.GetRequiredService<IAuthService>();
+//
+//                 var rsa = authService.GetRSAKeyFromTokenAsync(token, kid).Result;
+//                 return new List<SecurityKey> { new RsaSecurityKey(rsa) };
+//             }
+//         };
+//
+//         options.Events = new JwtBearerEvents
+//         {
+//             OnMessageReceived = context =>
+//             {
+//                 var accessToken = context.Request.Cookies["accessToken"];
+//                 if (!string.IsNullOrEmpty(accessToken)) context.Token = accessToken;
+//
+//                 return Task.CompletedTask;
+//             }
+//         };
+//     });
+// builder.Services.AddAuthorization();
 builder.Services.AddAuthentication(x =>
+{
+    x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.SaveToken = true;
+    options.RequireHttpsMetadata = true;
+
+    options.TokenValidationParameters = new TokenValidationParameters
     {
-        x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-        x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-    })
-    .AddJwtBearer(options =>
+        ValidateIssuer = false,
+        ValidateAudience = false,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ClockSkew = TimeSpan.Zero,
+        // Bỏ hoặc giữ tùy vào cách bạn muốn xử lý role
+        // RoleClaimType = "Role", // Có thể bỏ nếu không dùng claim "Role" nữa
+        
+        IssuerSigningKeyResolver = (token, securityToken, kid, validationParameters) =>
+        {
+            var serviceProvider = builder.Services.BuildServiceProvider();
+            var authService = serviceProvider.GetRequiredService<IAuthService>();
+
+            var rsa = authService.GetRSAKeyFromTokenAsync(token, kid).Result;
+            return new List<SecurityKey> { new RsaSecurityKey(rsa) };
+        }
+    };
+
+    options.Events = new JwtBearerEvents
     {
-        options.SaveToken = true;
-        options.RequireHttpsMetadata = true;
-
-        options.TokenValidationParameters = new TokenValidationParameters
+        OnMessageReceived = context =>
         {
-            ValidateIssuer = false,
-            ValidateAudience = false,
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true,
-            ClockSkew = TimeSpan.Zero,
-            RoleClaimType = "Role",
+            var accessToken = context.Request.Cookies["accessToken"];
+            if (!string.IsNullOrEmpty(accessToken)) context.Token = accessToken;
 
-            IssuerSigningKeyResolver = (token, securityToken, kid, validationParameters) =>
-            {
-                var serviceProvider = builder.Services.BuildServiceProvider();
-                var authService = serviceProvider.GetRequiredService<IAuthService>();
-
-                var rsa = authService.GetRSAKeyFromTokenAsync(token, kid).Result;
-                return new List<SecurityKey> { new RsaSecurityKey(rsa) };
-            }
-        };
-
-        options.Events = new JwtBearerEvents
+            return Task.CompletedTask;
+        },
+        
+        // Thêm event để xử lý claims transformation nếu cần
+        OnTokenValidated = context =>
         {
-            OnMessageReceived = context =>
+            // Xử lý thêm claims nếu cần
+            var claimsIdentity = context.Principal.Identity as ClaimsIdentity;
+            
+            // Thêm role vào ClaimsIdentity nếu cần
+            var primaryRole = context.Principal.FindFirstValue("PrimaryRole");
+            if (!string.IsNullOrEmpty(primaryRole))
             {
-                var accessToken = context.Request.Cookies["accessToken"];
-                if (!string.IsNullOrEmpty(accessToken)) context.Token = accessToken;
-
-                return Task.CompletedTask;
+                claimsIdentity.AddClaim(new Claim(ClaimTypes.Role, primaryRole));
             }
-        };
-    });
+            
+            var semesterRoles = context.Principal.FindAll("CurrentSemesterRole").Select(c => c.Value).ToList();
+
+            // Thêm từng CurrentSemesterRole vào ClaimsIdentity
+            foreach (var role in semesterRoles)
+            {
+                claimsIdentity.AddClaim(new Claim("CurrentSemesterRole", role));
+            }
+
+            return Task.CompletedTask;
+        }
+    };
+});
+
 builder.Services.AddAuthorization();
-
 #endregion
 
 #region CORS
