@@ -86,9 +86,9 @@ public class AuthService : IAuthService
     }
 
 
-    public BusinessResult Login(AuthQuery query)
+    public async Task<BusinessResult> Login(AuthQuery query)
     {
-        var user = _userRepository.GetUserByUsernameOrEmail(query.Account).Result;
+        var user = await _userRepository.GetUserByUsernameOrEmail(query.Account);
 
         if (user == null)
             return new ResponseBuilder()
@@ -125,11 +125,12 @@ public class AuthService : IAuthService
                 // 🟢 Tạo kid từ publicKey (hash SHA256)
                 var kid = Convert.ToBase64String(SHA256.HashData(Encoding.UTF8.GetBytes(publicKey)));
 
+                var currentSemester = await _unitOfWork.SemesterRepository.GetCurrentSemester();
 // Tạo access token với private key
-                var accessToken = CreateToken(result, rsa, "AccessToken", kid);
+                var accessToken = CreateToken(result, rsa, "AccessToken", kid, currentSemester.Id);
 
 // Tạo refresh token với kid giống access token
-                var refreshTokenValue = CreateToken(result, rsa, "RefreshToken", kid);
+                var refreshTokenValue = CreateToken(result, rsa, "RefreshToken", kid, currentSemester.Id);
 
 // Lưu refresh token và public key vào database
                 var refreshTokenCreateCommand = new RefreshTokenCreateCommand
@@ -170,7 +171,7 @@ public class AuthService : IAuthService
         }
     }
 
-    public BusinessResult GetUserByCookie()
+    public async Task<BusinessResult> GetUserByCookie()
     {
         BusinessResult? businessResult = null;
 
@@ -187,7 +188,7 @@ public class AuthService : IAuthService
         var accessToken = _httpContextAccessor.HttpContext.Request.Cookies["accessToken"];
         if (accessToken != null)
         {
-            var br = GetUserByClaims().Result;
+            var br = await GetUserByClaims();
 
             return br;
         }
@@ -196,10 +197,10 @@ public class AuthService : IAuthService
 
         #region SaveRefreshToken
 
-        businessResult = RefreshToken(new UserRefreshTokenCommand
+        businessResult = await RefreshToken(new UserRefreshTokenCommand
         {
             RefreshToken = refreshToken
-        }).Result;
+        });
 
         if (businessResult.Status != 1) return businessResult;
 
@@ -208,7 +209,7 @@ public class AuthService : IAuthService
         #region CheckRefreshToken is valid => return user
 
         var tokenResult = businessResult.Data as TokenResult;
-        businessResult = GetUserByToken(tokenResult.AccessToken).Result;
+        businessResult = await GetUserByToken(tokenResult.AccessToken);
 
         return businessResult;
 
@@ -244,27 +245,20 @@ public class AuthService : IAuthService
                         .WithMessage("IP address mismatch.")
                     ;
 
-            // Bước 4: Tạo cặp khóa RSA mới
             using (var rsa = new RSACryptoServiceProvider(2048))
             {
                 try
                 {
-                    // Lấy public key mới (dạng XML) để lưu vào database
                     var newPublicKey = rsa.ToXmlString(false);
 
-                    // Bước 5: Tạo access token mới với private key mới
                     var user = await _userRepository.GetById(refreshTokenEntity.UserId!.Value);
                     var userResult = _mapper.Map<UserResult>(user);
-                    // 🟢 Tạo kid từ publicKey (hash SHA256)
                     var kid = Convert.ToBase64String(SHA256.HashData(Encoding.UTF8.GetBytes(newPublicKey)));
 
-// Tạo access token với private key
-                    var newAccessToken = CreateToken(userResult, rsa, "AccessToken", kid);
+                    var currentSemester = await _unitOfWork.SemesterRepository.GetCurrentSemester();
+                    var newAccessToken = CreateToken(userResult, rsa, "AccessToken", kid, currentSemester.Id);
+                    var newRefreshToken = CreateToken(userResult, rsa, "RefreshToken", kid, currentSemester.Id);
 
-// Tạo refresh token với kid giống access token
-                    var newRefreshToken = CreateToken(userResult, rsa, "RefreshToken", kid);
-
-                    // Bước 7: Cập nhật refresh token trong database
                     refreshTokenEntity.Token = newRefreshToken;
                     refreshTokenEntity.PublicKey = newPublicKey;
                     refreshTokenEntity.KeyId = kid;
@@ -277,10 +271,8 @@ public class AuthService : IAuthService
                                 .WithMessage("Refresh token validation failed when saving changes.")
                             ;
 
-                    // Bước 8: Lưu access token vào cookie (nếu cần)
                     SaveHttpOnlyCookie(newAccessToken, newRefreshToken);
 
-                    // Bước 9: Trả về access token và refresh token mới
                     var tokenResult = new TokenResult
                     {
                         AccessToken = newAccessToken,
@@ -294,7 +286,7 @@ public class AuthService : IAuthService
                 }
                 finally
                 {
-                    rsa.PersistKeyInCsp = false; // Đảm bảo xóa key từ container
+                    rsa.PersistKeyInCsp = false; 
                 }
             }
         }
@@ -422,9 +414,10 @@ public class AuthService : IAuthService
 
                 var kid = Convert.ToBase64String(SHA256.HashData(Encoding.UTF8.GetBytes(publicKey)));
 
-                var accessToken = CreateToken(result, rsa, "AccessToken", kid);
+                var currentSemester = await _unitOfWork.SemesterRepository.GetCurrentSemester();
+                var accessToken = CreateToken(result, rsa, "AccessToken", kid, currentSemester.Id);
 
-                var refreshTokenValue = CreateToken(result, rsa, "RefreshToken", kid);
+                var refreshTokenValue = CreateToken(result, rsa, "RefreshToken", kid, currentSemester.Id);
 
                 var refreshTokenCreateCommand = new RefreshTokenCreateCommand
                 {
@@ -713,7 +706,37 @@ public class AuthService : IAuthService
         return Guid.Parse(userIdClaim);
     }
 
-    private string CreateToken(UserResult user, RSACryptoServiceProvider rsa, string tokenType, string kid)
+    // private string CreateToken(UserResult user, RSACryptoServiceProvider rsa, string tokenType, string kid)
+    // {
+    //     var claims = new List<Claim>
+    //     {
+    //         new("Id", user.Id.ToString()),
+    //         new("TokenType", tokenType)
+    //     };
+    //
+    //     if (user.UserXRoles.Count != 0)
+    //         foreach (var role in user.UserXRoles)
+    //             if (role.Role?.RoleName != null)
+    //                 claims.Add(new Claim("Role", role.Role?.RoleName)); 
+    //
+    //     var key = new RsaSecurityKey(rsa)
+    //     {
+    //         KeyId = kid
+    //     };
+    //     var creds = new SigningCredentials(key, SecurityAlgorithms.RsaSha256);
+    //
+    //     var token = new JwtSecurityToken(
+    //         claims: claims,
+    //         expires: tokenType == "AccessToken"
+    //             ? DateTime.Now.AddMinutes(_tokenSetting.AccessTokenExpiryMinutes) // Access token ngắn hạn
+    //             : DateTime.Now.AddDays(_tokenSetting.RefreshTokenExpiryDays), // Refresh token dài hạn
+    //         signingCredentials: creds
+    //     );
+    //
+    //     return new JwtSecurityTokenHandler().WriteToken(token);
+    // }
+    //
+    private string CreateToken(UserResult user, RSACryptoServiceProvider rsa, string tokenType, string kid, Guid? currentSemesterId = null)
     {
         var claims = new List<Claim>
         {
@@ -721,10 +744,31 @@ public class AuthService : IAuthService
             new("TokenType", tokenType)
         };
 
-        // 🟢 Nếu UserXRoles chứa danh sách role, thêm tất cả role vào claims
-        if (user.UserXRoles != null && user.UserXRoles.Any())
-            foreach (var role in user.UserXRoles)
-                claims.Add(new Claim("Role", role.Role.RoleName)); // 🟢 Claim dạng danh sách
+        if (user.UserXRoles.Count != 0)
+        {
+            // Lấy role chính (isPrimary = true)
+            var primaryRole = user.UserXRoles.FirstOrDefault(x => x.IsPrimary);
+            if (primaryRole?.Role?.RoleName != null)
+            {
+                claims.Add(new Claim("PrimaryRole", primaryRole.Role.RoleName));
+            }
+
+            // Lấy TẤT CẢ role phụ theo kỳ học nếu có
+            if (currentSemesterId.HasValue)
+            {
+                var semesterRoles = user.UserXRoles
+                    .Where(x => x.SemesterId == currentSemesterId && !x.IsPrimary && x.Role?.RoleName != null)
+                    .ToList();
+
+                foreach (var role in semesterRoles)
+                {
+                    claims.Add(new Claim("CurrentSemesterRole", role.Role.RoleName));
+                }
+
+                // Thêm CurrentSemesterId vào claim (chỉ 1 lần)
+                claims.Add(new Claim("CurrentSemesterId", currentSemesterId.Value.ToString()));
+            }
+        }
 
         var key = new RsaSecurityKey(rsa)
         {
@@ -735,14 +779,14 @@ public class AuthService : IAuthService
         var token = new JwtSecurityToken(
             claims: claims,
             expires: tokenType == "AccessToken"
-                ? DateTime.Now.AddMinutes(_tokenSetting.AccessTokenExpiryMinutes) // Access token ngắn hạn
-                : DateTime.Now.AddDays(_tokenSetting.RefreshTokenExpiryDays), // Refresh token dài hạn
+                ? DateTime.Now.AddMinutes(_tokenSetting.AccessTokenExpiryMinutes)
+                : DateTime.Now.AddDays(_tokenSetting.RefreshTokenExpiryDays),
             signingCredentials: creds
         );
 
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
-
+    
     private void SaveHttpOnlyCookie(string accessToken, string refreshToken)
     {
         var httpContext = _httpContextAccessor.HttpContext;

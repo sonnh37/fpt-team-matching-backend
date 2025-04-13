@@ -22,18 +22,18 @@ public class AuthController : ControllerBase
 
     [AllowAnonymous]
     [HttpGet("info")]
-    public IActionResult GetUserInfo()
+    public async Task<IActionResult> GetUserInfo()
     {
-        var businessResult = _authService.GetUserByCookie();
+        var businessResult = await _authService.GetUserByCookie();
 
         return Ok(businessResult);
     }
 
     [AllowAnonymous]
     [HttpPost("login")]
-    public IActionResult Login([FromBody] AuthQuery request)
+    public async Task<IActionResult> Login([FromBody] AuthQuery request)
     {
-        var businessResult = _authService.Login(request);
+        var businessResult = await _authService.Login(request);
 
         return Ok(businessResult);
     }
