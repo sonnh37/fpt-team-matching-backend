@@ -59,9 +59,9 @@ public partial class FPTMatchingDbContext : BaseDbContext
 
     public virtual DbSet<Role> Roles { get; set; } //
     
-    public virtual DbSet<IdeaHistory> IdeaHistories { get; set; } //
+    public virtual DbSet<Topic> Topics { get; set; } //
 
-    public virtual DbSet<IdeaHistoryRequest> IdeaHistoryRequests { get; set; } //
+    public virtual DbSet<TopicVersion> TopicVersions { get; set; } //
 
     public virtual DbSet<CapstoneSchedule> CapstoneSchedules { get; set; } //
 
@@ -72,6 +72,15 @@ public partial class FPTMatchingDbContext : BaseDbContext
     public virtual DbSet<MentorFeedback> MentorFeedbacks { get; set; } //
 
     public virtual DbSet<Timeline> Timelines { get; set; } //
+
+    public virtual DbSet<Criteria> Criterias { get; set; } //
+
+    public virtual DbSet<CriteriaForm> CriteriaForms { get; set; } //
+
+    public virtual DbSet<CriteriaXCriteriaForm> CriteriaXCriteriaForms { get; set; } //
+
+    public virtual DbSet<AnswerCriteria> AnswerCriterias { get; set; } //
+
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -195,6 +204,20 @@ public partial class FPTMatchingDbContext : BaseDbContext
                 .HasForeignKey(d => d.SemesterId);
         });
 
+        modelBuilder.Entity<Topic>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            entity.ToTable("Topic");
+
+            entity.Property(e => e.Id).ValueGeneratedOnAdd()
+                .HasDefaultValueSql("gen_random_uuid()");
+
+            //entity.HasOne(d => d.Idea).WithOne(p => p.Topic)
+            //    .HasForeignKey<Topic>(d => d.IdeaId);
+
+        });
+
         modelBuilder.Entity<Project>(entity =>
         {
             entity.HasKey(e => e.Id);
@@ -207,8 +230,8 @@ public partial class FPTMatchingDbContext : BaseDbContext
             entity.HasOne(d => d.Leader).WithMany(p => p.Projects)
                 .HasForeignKey(d => d.LeaderId);
 
-            entity.HasOne(d => d.Idea).WithOne(p => p.Project)
-                .HasForeignKey<Project>(d => d.IdeaId);
+            entity.HasOne(d => d.Topic).WithOne(p => p.Project)
+                .HasForeignKey<Project>(d => d.TopicId);
             
             entity.HasMany(p => p.TeamMembers)
                 .WithOne(t => t.Project)
@@ -359,6 +382,10 @@ public partial class FPTMatchingDbContext : BaseDbContext
 
             entity.Property(e => e.Id).ValueGeneratedOnAdd()
                 .HasDefaultValueSql("gen_random_uuid()");
+
+            entity.HasOne(d => d.CriteriaForm).WithMany(p => p.Semesters)
+                .HasForeignKey(d => d.CriteriaFormId);
+
         });
 
         modelBuilder.Entity<Idea>(entity =>
@@ -386,17 +413,12 @@ public partial class FPTMatchingDbContext : BaseDbContext
                 .HasForeignKey(d => d.SpecialtyId);
             
             // Add these cascade configurations
-            entity.HasOne(d => d.Project)
+            entity.HasOne(d => d.Topic)
                 .WithOne(p => p.Idea)
-                .HasForeignKey<Project>(d => d.IdeaId)
+                .HasForeignKey<Topic>(d => d.IdeaId)
                 .OnDelete(DeleteBehavior.SetNull);
     
             entity.HasMany(d => d.IdeaRequests)
-                .WithOne(p => p.Idea)
-                .HasForeignKey(d => d.IdeaId)
-                .OnDelete(DeleteBehavior.Cascade);
-    
-            entity.HasMany(d => d.IdeaHistories)
                 .WithOne(p => p.Idea)
                 .HasForeignKey(d => d.IdeaId)
                 .OnDelete(DeleteBehavior.Cascade);
@@ -421,32 +443,37 @@ public partial class FPTMatchingDbContext : BaseDbContext
 
             entity.HasOne(d => d.Reviewer).WithMany(p => p.IdeaRequestOfReviewers)
                 .HasForeignKey(d => d.ReviewerId);
+
+            entity.HasOne(d => d.CriteriaForm).WithMany(p => p.IdeaRequests)
+                .HasForeignKey(d => d.CriteriaFormId);
         });
         
-        modelBuilder.Entity<IdeaHistory>(entity =>
+        modelBuilder.Entity<Topic>(entity =>
         {
             entity.HasKey(e => e.Id);
 
-            entity.ToTable("IdeaHistory");
+            entity.ToTable("Topic");
 
             entity.Property(e => e.Id).ValueGeneratedOnAdd()
                 .HasDefaultValueSql("gen_random_uuid()");
 
-            entity.HasOne(d => d.Idea).WithMany(p => p.IdeaHistories)
-                .HasForeignKey(d => d.IdeaId);
             
         });
 
-        modelBuilder.Entity<IdeaHistoryRequest>(entity =>
+        modelBuilder.Entity<TopicVersion>(entity =>
         {
             entity.HasKey(e => e.Id);
 
-            entity.ToTable("IdeaHistoryRequest");
+            entity.ToTable("TopicVersion");
 
             entity.Property(e => e.Id).ValueGeneratedOnAdd()
                 .HasDefaultValueSql("gen_random_uuid()");
+
+            entity.HasOne(d => d.Topic).WithMany(p => p.TopicVersions)
+                .HasForeignKey(d => d.TopicId);
+
         });
-        
+
         modelBuilder.Entity<Specialty>(entity =>
         {
             entity.HasKey(e => e.Id);
@@ -536,6 +563,73 @@ public partial class FPTMatchingDbContext : BaseDbContext
 
             entity.HasOne(d => d.Semester).WithMany(p => p.Timelines)
                 .HasForeignKey(d => d.SemesterId);
+        });
+
+        modelBuilder.Entity<TopicVersion>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            entity.ToTable("TopicVersion");
+
+            entity.Property(e => e.Id).ValueGeneratedOnAdd()
+                .HasDefaultValueSql("gen_random_uuid()");
+
+            entity.HasOne(d => d.Topic).WithMany(p => p.TopicVersions)
+                .HasForeignKey(d => d.TopicId);
+
+        });
+
+        modelBuilder.Entity<Criteria>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            entity.ToTable("Criteria");
+
+            entity.Property(e => e.Id).ValueGeneratedOnAdd()
+                .HasDefaultValueSql("gen_random_uuid()");
+
+        });
+
+        modelBuilder.Entity<CriteriaForm>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            entity.ToTable("CriteriaForm");
+
+            entity.Property(e => e.Id).ValueGeneratedOnAdd()
+                .HasDefaultValueSql("gen_random_uuid()");
+        });
+
+        modelBuilder.Entity<CriteriaXCriteriaForm>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            entity.ToTable("CriteriaXCriteriaForm");
+
+            entity.Property(e => e.Id).ValueGeneratedOnAdd()
+                .HasDefaultValueSql("gen_random_uuid()");
+
+            entity.HasOne(d => d.Criteria).WithMany(p => p.CriteriaXCriteriaForms)
+                .HasForeignKey(d => d.CriteriaId);
+
+            entity.HasOne(d => d.CriteriaForm).WithMany(p => p.CriteriaXCriteriaForms)
+                .HasForeignKey(d => d.CriteriaFormId);
+        });
+
+        modelBuilder.Entity<AnswerCriteria>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            entity.ToTable("AnswerCriteria");
+
+            entity.Property(e => e.Id).ValueGeneratedOnAdd()
+                .HasDefaultValueSql("gen_random_uuid()");
+
+            entity.HasOne(d => d.IdeaRequest).WithMany(p => p.AnswerCriterias)
+                .HasForeignKey(d => d.IdeaRequestId);
+
+            entity.HasOne(d => d.Criteria).WithMany(p => p.AnswerCriterias)
+                .HasForeignKey(d => d.CriteriaId);
         });
 
         OnModelCreatingPartial(modelBuilder);

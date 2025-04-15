@@ -25,8 +25,7 @@ public interface IUnitOfWork : IBaseUnitOfWork
     IProfessionRepository ProfessionRepository { get; }
     ISpecialtyRepository SpecialtyRepository { get; }
     ISemesterRepository SemesterRepository { get; }
-    IIdeaHistoryRepository IdeaHistoryRepository { get; }
-    IIdeaHistoryRequestRepository IdeaHistoryRequestRepository { get; }
+    ITopicVersionRepository TopicVersionRepository { get; }
     IStageIdeaRepositoty StageIdeaRepository { get; }
     IMentorIdeaRequestRepository MentorIdeaRequestRepository { get; }
     ICapstoneScheduleRepository CapstoneScheduleRepository { get; }

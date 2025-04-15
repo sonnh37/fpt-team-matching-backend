@@ -47,41 +47,46 @@ public static class FilterHelper
         };
     }
 
-    private static IQueryable<Project>? Project(IQueryable<Project> queryable, ProjectGetAllQuery query)
+    private static IQueryable<BaseEntity> Project(IQueryable<Project> projects, ProjectGetAllQuery projectQuery)
     {
-        if (query.IsHasTeam)
-        {
-            queryable = queryable.Where(m => m.TeamMembers.Count > 0);
-        }
-
-        if (query.SpecialtyId != null)
-        {
-            queryable = queryable.Where(m => m.Idea != null && m.Idea.SpecialtyId == query.SpecialtyId);
-        }
-
-        if (query.ProfessionId != null)
-        {
-            queryable = queryable.Where(m =>
-                m.Idea != null &&
-                m.Idea.Specialty != null && m.Idea.Specialty.Profession != null &&
-                m.Idea.Specialty.Profession.Id == query.ProfessionId);
-        }
-        
-        if (!string.IsNullOrEmpty(query.EnglishName))
-        {
-            queryable = queryable.Where(m =>
-                m.Idea != null && m.Idea.EnglishName != null && m.Idea.EnglishName.ToLower().Trim().Contains(query.EnglishName.ToLower().Trim()));
-        }
-
-        if (query.Status != null)
-        {
-            queryable = queryable.Where(m => m.Status == query.Status);
-        }
-
-        queryable = BaseFilterHelper.Base(queryable, query);
-
-        return queryable;
+        throw new NotImplementedException();
     }
+
+    //private static IQueryable<Project>? Project(IQueryable<Project> queryable, ProjectGetAllQuery query)
+    //{
+    //    if (query.IsHasTeam)
+    //    {
+    //        queryable = queryable.Where(m => m.TeamMembers.Count > 0);
+    //    }
+
+    //    if (query.SpecialtyId != null)
+    //    {
+    //        queryable = queryable.Where(m => m.Idea != null && m.Idea.SpecialtyId == query.SpecialtyId);
+    //    }
+
+    //    if (query.ProfessionId != null)
+    //    {
+    //        queryable = queryable.Where(m =>
+    //            m.Idea != null &&
+    //            m.Idea.Specialty != null && m.Idea.Specialty.Profession != null &&
+    //            m.Idea.Specialty.Profession.Id == query.ProfessionId);
+    //    }
+
+    //    if (!string.IsNullOrEmpty(query.EnglishName))
+    //    {
+    //        queryable = queryable.Where(m =>
+    //            m.Idea != null && m.Idea.EnglishName != null && m.Idea.EnglishName.ToLower().Trim().Contains(query.EnglishName.ToLower().Trim()));
+    //    }
+
+    //    if (query.Status != null)
+    //    {
+    //        queryable = queryable.Where(m => m.Status == query.Status);
+    //    }
+
+    //    queryable = BaseFilterHelper.Base(queryable, query);
+
+    //    return queryable;
+    //}
 
     private static IQueryable<StageIdea>? StageIdea(IQueryable<StageIdea> queryable, StageIdeaGetAllQuery query)
     {

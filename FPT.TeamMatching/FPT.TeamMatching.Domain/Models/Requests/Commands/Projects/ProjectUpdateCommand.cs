@@ -7,7 +7,7 @@ public class ProjectUpdateCommand : UpdateCommand
 {
     public Guid? LeaderId { get; set; }
 
-    public Guid? IdeaId { get; set; }
+    public Guid? TopicId { get; set; }
 
     public string? TeamCode { get; set; }
 

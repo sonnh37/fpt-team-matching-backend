@@ -8,7 +8,7 @@ public class ProjectResult : BaseResult
 {
     public Guid? LeaderId { get; set; }
 
-    public Guid? IdeaId { get; set; }
+    public Guid? TopicId { get; set; }
 
     public string? TeamCode { get; set; }
 
@@ -20,7 +20,7 @@ public class ProjectResult : BaseResult
 
     public int? DefenseStage { get; set; }
 
-    public IdeaResult? Idea { get; set; }
+    public TopicResult? Topic { get; set; }
 
     public MentorFeedbackResult? MentorFeedback { get; set; }
 

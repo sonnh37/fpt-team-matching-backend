@@ -622,11 +622,12 @@ public class ReviewService : BaseService<Review>, IReviewService
         int index = 1;
         projects.ForEach(item =>
         {
-            dt.Rows.Add(index++, item.Idea.IdeaCode, item.TeamCode,
-                item.Idea.EnglishName, item.Idea.VietNamName,
-                item.Idea.Mentor.LastName + " " + item.Idea.Mentor.FirstName,
-                item.Idea.Mentor.Code,
-                (item.Idea.SubMentorId == null ? null : item.Idea.SubMentor.Code));
+            //sua db
+            //dt.Rows.Add(index++, item.Idea.IdeaCode, item.TeamCode,
+            //    item.Idea.EnglishName, item.Idea.VietNamName,
+            //    item.Idea.Mentor.LastName + " " + item.Idea.Mentor.FirstName,
+            //    item.Idea.Mentor.Code,
+            //    (item.Idea.SubMentorId == null ? null : item.Idea.SubMentor.Code));
         });
         return dt;
     }

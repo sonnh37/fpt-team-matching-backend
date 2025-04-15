@@ -9,6 +9,8 @@ namespace FPT.TeamMatching.Domain.Models.Requests.Queries.Semester
 {
     public class SemesterGetAllQuery: GetQueryableQuery
     {
+        public Guid? CriteriaFormId { get; set; }
+
         public string? SemesterCode { get; set; }
 
         public string? SemesterName { get; set; }
@@ -20,5 +22,8 @@ namespace FPT.TeamMatching.Domain.Models.Requests.Queries.Semester
         public DateTimeOffset? StartDate { get; set; }
 
         public DateTimeOffset? EndDate { get; set; }
+
+        public int? NumberReviewer { get; set; }
+
     }
 }

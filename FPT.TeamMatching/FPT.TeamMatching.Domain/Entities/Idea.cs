@@ -17,8 +17,6 @@ public class Idea : BaseEntity
 
     public IdeaType? Type { get; set; }
 
-    public string? IdeaCode { get; set; }
-    
     public string? Description { get; set; }
     
     public string? Abbreviations { get; set; }
@@ -47,13 +45,13 @@ public class Idea : BaseEntity
     
     public virtual Specialty? Specialty { get; set; }
 
-    public virtual Project? Project { get; set; }
-
     public virtual StageIdea? StageIdea { get; set; }
+
+    public virtual Topic? Topic { get; set; }
 
     public virtual ICollection<IdeaRequest> IdeaRequests { get; set; } = new List<IdeaRequest>();
     
-    public virtual ICollection<IdeaHistory> IdeaHistories { get; set; } = new List<IdeaHistory>();
+    public virtual ICollection<TopicVersion> TopicVersions { get; set; } = new List<TopicVersion>();
 
     public virtual ICollection<MentorIdeaRequest> MentorIdeaRequests { get; set; } = new List<MentorIdeaRequest>();
 }

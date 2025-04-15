@@ -386,20 +386,22 @@ public class IdeaService : BaseService<Idea>, IIdeaService
         {
             var userId = GetUserIdFromClaims();
             var project = await _projectRepository.GetProjectByUserIdLogin(userId.Value);
-            if (project == null || project.Idea == null) return HandlerFail("Not found project");
+            //sua db
+            //if (project == null || project.Idea == null) return HandlerFail("Not found project");
 
-            ideaUpdateCommand.OwnerId = project.Idea.OwnerId;
-            ideaUpdateCommand.MentorId = project.Idea.MentorId;
-            ideaUpdateCommand.SubMentorId = project.Idea.SubMentorId;
-            ideaUpdateCommand.IdeaCode = project.Idea.IdeaCode;
-            ideaUpdateCommand.SpecialtyId = project.Idea.SpecialtyId;
-            ideaUpdateCommand.IsExistedTeam = project.Idea.IsExistedTeam;
-            ideaUpdateCommand.IsEnterpriseTopic = project.Idea.IsEnterpriseTopic;
-            ideaUpdateCommand.EnterpriseName = project.Idea.EnterpriseName;
-            ideaUpdateCommand.MaxTeamSize = project.Idea.MaxTeamSize;
+            //ideaUpdateCommand.OwnerId = project.Idea.OwnerId;
+            //ideaUpdateCommand.MentorId = project.Idea.MentorId;
+            //ideaUpdateCommand.SubMentorId = project.Idea.SubMentorId;
+            //ideaUpdateCommand.IdeaCode = project.Idea.IdeaCode;
+            //ideaUpdateCommand.SpecialtyId = project.Idea.SpecialtyId;
+            //ideaUpdateCommand.IsExistedTeam = project.Idea.IsExistedTeam;
+            //ideaUpdateCommand.IsEnterpriseTopic = project.Idea.IsEnterpriseTopic;
+            //ideaUpdateCommand.EnterpriseName = project.Idea.EnterpriseName;
+            //ideaUpdateCommand.MaxTeamSize = project.Idea.MaxTeamSize;
 
             var command = _mapper.Map<Idea>(ideaUpdateCommand);
-            command.Id = project.Idea.Id;
+            //sua db
+            //command.Id = project.Idea.Id;
             _ideaRepository.Update(command);
             var check = await _unitOfWork.SaveChanges();
 
@@ -527,7 +529,9 @@ public class IdeaService : BaseService<Idea>, IIdeaService
                     // Tạo mã Idea mới theo định dạng: semesterPrefix + semesterCode + "SE" + số thứ tự (2 chữ số)
                     string newIdeaCode = $"{semesterPrefix}{semesterCode}SE{nextNumberIdea:D2}";
 
-                    idea.IdeaCode = newIdeaCode;
+                    //sua db
+                    //idea.IdeaCode = newIdeaCode;
+                    idea.Topic.TopicCode = newIdeaCode;
                     //Check neu owner la student thi tao project
                     var isStudent = idea.Owner.UserXRoles.Any(e => e.Role.RoleName == "Student");
                     if (isStudent)
@@ -540,7 +544,8 @@ public class IdeaService : BaseService<Idea>, IIdeaService
                             var project = new Project
                             {
                                 LeaderId = isStudent ? idea.OwnerId : null,
-                                IdeaId = idea.Id,
+                                //sua db
+                                //IdeaId = idea.Id,
                                 //TeamCode = newTeamCode,
                                 Status = ProjectStatus.Pending,
                                 TeamSize = idea.MaxTeamSize
@@ -572,7 +577,9 @@ public class IdeaService : BaseService<Idea>, IIdeaService
                         }
                         else
                         {
-                            existedProject.IdeaId = idea.Id;
+                            //sua db
+                            //existedProject.IdeaId = idea.Id;
+                            existedProject.Topic.IdeaId = idea.Id;
                             await SetBaseEntityForUpdate(existedProject);
                             _projectRepository.Update(existedProject);
                             var isSuccess = await _unitOfWork.SaveChanges();
@@ -613,7 +620,9 @@ public class IdeaService : BaseService<Idea>, IIdeaService
             //update project
             foreach (var project in projects)
             {
-                var semester = project.Idea.StageIdea.Semester;
+                //sua db
+                //var semester = project.Idea.StageIdea.Semester;
+                var semester = project.Topic.Idea.StageIdea.Semester;
                 //update status
                 project.Status = ProjectStatus.InProgress;
                 //update teamCode
@@ -624,7 +633,9 @@ public class IdeaService : BaseService<Idea>, IIdeaService
                 string semesterCode = semester.SemesterCode;
                 //Tạo mã nhóm
                 string newTeamCode = $"{semesterCode}SE{nextNumber:D3}";
-                project.Idea = null;
+                //sua db
+                //project.Idea = null;
+                project.Topic.Idea = null;
                 await SetBaseEntityForUpdate(project);
                 _projectRepository.Update(project);
                 var isSuccess = await _unitOfWork.SaveChanges();

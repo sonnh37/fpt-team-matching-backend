@@ -37,15 +37,13 @@ public class User : BaseEntity
 
     public virtual ICollection<IdeaRequest> IdeaRequestOfReviewers { get; set; } = new List<IdeaRequest>();
 
-    public virtual ICollection<IdeaHistoryRequest> IdeaHistoryRequestOfReviewers { get; set; } = new List<IdeaHistoryRequest>();
-
     public virtual ICollection<Idea> IdeaOfOwners { get; set; } = new List<Idea>();
 
     public virtual ICollection<Idea> IdeaOfMentors { get; set; } = new List<Idea>();
 
     public virtual ICollection<Idea> IdeaOfSubMentors { get; set; } = new List<Idea>();
 
-    public virtual ICollection<IdeaHistory> IdeaHistoryOfCouncils { get; set; } = new List<IdeaHistory>();
+    public virtual ICollection<TopicVersion> TopicVersionOfCouncils { get; set; } = new List<TopicVersion>();
 
     public virtual ICollection<UserXRole> UserXRoles { get; set; } = new List<UserXRole>();
 

@@ -272,7 +272,9 @@ namespace FPT.TeamMatching.Services
                     if (!iSaveChanges) return HandlerFail("Failed to save changes for update idea");
 
                     //gan ideaId vao project
-                    project.IdeaId = idea.Id;
+                    //sua db
+                    //project.IdeaId = idea.Id;
+                    project.Topic.IdeaId = idea.Id;
                     await SetBaseEntityForUpdate(project);
                     _projectRepository.Update(project);
                     iSaveChanges = await _unitOfWork.SaveChanges();
