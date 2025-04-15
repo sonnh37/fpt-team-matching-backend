@@ -4,6 +4,8 @@ namespace FPT.TeamMatching.Domain.Entities;
 
 public class Semester : BaseEntity
 {
+    public Guid? CriteriaFormId { get; set; }
+
     public string? SemesterCode { get; set; }
 
     public string? SemesterName { get; set; }
@@ -16,6 +18,10 @@ public class Semester : BaseEntity
 
     public DateTimeOffset? EndDate { get; set; }
     
+    public int? NumberReviewer {  get; set; }
+
+    public CriteriaForm? CriteriaForm { get; set; }
+
     public virtual ICollection<ProfileStudent> ProfileStudents { get; set; } = new List<ProfileStudent>();
     
     public virtual ICollection<StageIdea> StageIdeas { get; set; } = new List<StageIdea>();

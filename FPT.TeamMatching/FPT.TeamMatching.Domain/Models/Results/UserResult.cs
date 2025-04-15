@@ -32,16 +32,13 @@ public class UserResult : BaseResult
 
     public ICollection<IdeaRequestResult> IdeaRequestOfReviewers { get; set; } = new List<IdeaRequestResult>();
 
-    public ICollection<IdeaHistoryRequestResult> IdeaHistoryRequestOfReviewers { get; set; } =
-        new List<IdeaHistoryRequestResult>();
-
     public ICollection<IdeaResult> IdeaOfOwners { get; set; } = new List<IdeaResult>();
 
     public ICollection<IdeaResult> IdeaOfMentors { get; set; } = new List<IdeaResult>();
 
     public ICollection<IdeaResult> IdeaOfSubMentors { get; set; } = new List<IdeaResult>();
 
-    public ICollection<IdeaHistoryResult> IdeaHistoryOfCouncils { get; set; } = new List<IdeaHistoryResult>();
+    public ICollection<TopicVersionResult> TopicVersionOfCouncils { get; set; } = new List<TopicVersionResult>();
 
     public ICollection<UserXRoleResult> UserXRoles { get; set; } = new List<UserXRoleResult>();
 

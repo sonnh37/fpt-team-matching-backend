@@ -10,13 +10,12 @@ public class IdeaGetListOfSupervisorsQuery : GetQueryableQuery
     public Guid? SemesterId { get; set; }
 
     public Guid? MentorId { get; set; }
+
     public Guid? SubMentorId { get; set; }
 
     public List<IdeaType> Types { get; set; } = new List<IdeaType>();
 
     public Guid? SpecialtyId { get; set; }
-
-    public string? IdeaCode { get; set; }
 
     public string? Description { get; set; }
 

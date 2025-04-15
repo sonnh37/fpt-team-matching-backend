@@ -58,7 +58,8 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
             .Include(m => m.Mentor)
             .Include(m => m.SubMentor)
             .Include(m => m.Specialty)
-            .Include(m => m.Project)
+            //sua db
+            //.Include(m => m.Project)
             .Include(e => e.IdeaRequests).ThenInclude(e => e.Reviewer)
             .ToListAsync();
 
@@ -141,32 +142,37 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
         // Use async query execution and optimize the LINQ query
         return await GetQueryable()
             .Where(x => x.StageIdea.SemesterId == semesterId)
-            .Where(x => x.Project.Reviews.Any(review => review.Number == reviewNumber))
+            //sua db
+            //.Where(x => x.Project.Reviews.Any(review => review.Number == reviewNumber))
+            .Where(x => x.Topic.Project.Reviews.Any(review => review.Number == reviewNumber))
             .Select(y => new CustomIdeaResultModel
             {
                 IdeaId = y.Id,
-                TeamCode = y.Project.TeamCode,
-                IdeaCode = y.IdeaCode,
-                Review = y.Project.Reviews
-                    .Where(review => review.Number == reviewNumber)
-                    .Select(review => new ReviewUpdateCommand
-                    {
-                        Id = review.Id,
-                        Number = review.Number,
-                        Description = review.Description,
-                        Reviewer1Id = review.Reviewer1Id,
-                        Reviewer2Id = review.Reviewer2Id,
-                        FileUpload = review.FileUpload,
-                        ProjectId = review.ProjectId,
-                    })
-                    .FirstOrDefault()
+                //sua db
+                //TeamCode = y.Project.TeamCode,
+                //IdeaCode = y.IdeaCode,
+                //Review = y.Project.Reviews
+                //    .Where(review => review.Number == reviewNumber)
+                //    .Select(review => new ReviewUpdateCommand
+                //    {
+                //        Id = review.Id,
+                //        Number = review.Number,
+                //        Description = review.Description,
+                //        Reviewer1Id = review.Reviewer1Id,
+                //        Reviewer2Id = review.Reviewer2Id,
+                //        FileUpload = review.FileUpload,
+                //        ProjectId = review.ProjectId,
+                //    })
+                //    .FirstOrDefault()
             })
             .ToListAsync();
     }
 
     public async Task<List<Idea>> GetIdeasByIdeaCodes(string[] ideaCode)
     {
-        return await _dbContext.Ideas.Include(x => x.Project).Where(x => ideaCode.Contains(x.IdeaCode)).ToListAsync();
+        //sua db
+        //return await _dbContext.Ideas.Include(x => x.Project).Where(x => ideaCode.Contains(x.IdeaCode)).ToListAsync();
+        return await _dbContext.Ideas.Include(x => x.Topic.Project).Where(x => ideaCode.Contains(x.Topic.TopicCode)).ToListAsync();
     }
 
     public async Task<(List<Idea>, int)> GetIdeasOfSupervisors(IdeaGetListOfSupervisorsQuery query)
@@ -177,7 +183,8 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
             .Include(m => m.Owner)
             .ThenInclude(u => u.UserXRoles)
             .ThenInclude(ur => ur.Role)
-            .Include(m => m.Project)
+            //sua db
+            //.Include(m => m.Project)
             .Include(m => m.Mentor)
             .Include(m => m.SubMentor)
             .Include(m => m.StageIdea)

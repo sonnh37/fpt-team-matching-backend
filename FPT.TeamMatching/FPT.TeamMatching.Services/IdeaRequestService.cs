@@ -174,7 +174,8 @@ public class IdeaRequestService : BaseService<IdeaRequest>, IIdeaRequestService
             if (ideaRequest == null) return HandlerFail("Not found ideaRequest");
 
             ideaRequest.Status = command.Status;
-            ideaRequest.Content = command.Content;
+            //sua db
+            //ideaRequest.Content = command.Content;
             ideaRequest.ProcessDate = DateTime.UtcNow;
             _ideaRequestRepository.Update(ideaRequest);
             var check = await _unitOfWork.SaveChanges();
@@ -317,7 +318,7 @@ public class IdeaRequestService : BaseService<IdeaRequest>, IIdeaRequestService
             if (ideaRequestOld != null)
             {
                 ideaRequestOld.Status = ideaRequest.Status;
-                ideaRequestOld.Content = ideaRequest.Content;
+                //ideaRequestOld.Content = ideaRequest.Content;
                 ideaRequestOld.ProcessDate = DateTime.UtcNow;
                 await SetBaseEntityForUpdate(ideaRequestOld);
                 _ideaRequestRepository.Update(ideaRequestOld);

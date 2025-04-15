@@ -1,9 +1,12 @@
+using FPT.TeamMatching.Domain.Entities;
 using FPT.TeamMatching.Domain.Models.Results.Bases;
 
 namespace FPT.TeamMatching.Domain.Models.Results;
 
 public class SemesterResult : BaseResult
 {
+    public Guid? CriteriaFormId { get; set; }
+
     public string? SemesterCode { get; set; }
 
     public string? SemesterName { get; set; }
@@ -16,8 +19,16 @@ public class SemesterResult : BaseResult
 
     public DateTimeOffset? EndDate { get; set; }
 
-    public ICollection<ProfileStudentResult> ProfileStudents { get; set; } = new List<ProfileStudentResult>();
+    public int? NumberReviewer { get; set; }
 
-    public ICollection<StageIdeaResult> StageIdeas { get; set; } = new List<StageIdeaResult>();
-    
+    public CriteriaFormResult? CriteriaForm { get; set; }
+
+    public virtual ICollection<ProfileStudentResult> ProfileStudents { get; set; } = new List<ProfileStudentResult>();
+
+    public virtual ICollection<StageIdeaResult> StageIdeas { get; set; } = new List<StageIdeaResult>();
+
+    public virtual ICollection<TimelineResult> Timelines { get; set; } = new List<TimelineResult>();
+
+    public virtual ICollection<UserXRoleResult> UserXRoles { get; set; } = new List<UserXRoleResult>();
+
 }

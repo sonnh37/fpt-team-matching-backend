@@ -9,6 +9,7 @@ public class UserXRole : BaseEntity
     public Guid? RoleId { get; set; }
     
     public Guid? SemesterId { get; set; }  
+
     public bool IsPrimary { get; set; }   
 
     public virtual Role? Role { get; set; }

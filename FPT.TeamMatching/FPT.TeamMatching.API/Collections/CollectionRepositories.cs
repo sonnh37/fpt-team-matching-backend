@@ -35,12 +35,16 @@ public static class CollectionRepositories
         services.AddScoped<IProfessionRepository, ProfessionRepository>();
         services.AddScoped<ISpecialtyRepository, SpecialtyRepository>();
         services.AddScoped<ISemesterRepository, SemesterRepository>();
-        services.AddScoped<IIdeaHistoryRepository, IdeaHistoryRepository>();
-        services.AddScoped<IIdeaHistoryRequestRepository, IdeaHistoryRequestRepository>();
+        services.AddScoped<ITopicVersionRepository, TopicVersionRepository>();
+        services.AddScoped<ITopicRepository, TopicRepository>();
         services.AddScoped<IStageIdeaRepositoty, StageIdeaRepository>();
         services.AddScoped<ICapstoneScheduleRepository, CapstoneScheduleRepository>();
         services.AddScoped<IMentorIdeaRequestRepository, MentorIdeaRequestRepository>();
         services.AddScoped<IMentorFeedbackRepository, MentorFeedbackRepository>();
         services.AddScoped<ITimelineRepository, TimelineRepository>();
+        services.AddScoped<ICriteriaRepository, CriteriaRepository>();
+        services.AddScoped<ICriteriaFormRepository, CriteriaFormRepository>();
+        services.AddScoped<ICriteriaXCriteriaFormRepository, CriteriaXCriteriaFormRepository>();
+        services.AddScoped<IAnswerCriteriaRepository, AnswerCriteriaRepository>();
     }
 }

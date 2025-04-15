@@ -524,13 +524,14 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
             }
 
             // Tính toán available slots
-            int availableSlots = project.Idea == null
-                ? 6 - project.TeamMembers.Count
-                : (project.Idea.MaxTeamSize) - project.TeamMembers.Count;
+            //sua db
+            //int availableSlots = project.Idea == null
+            //    ? 6 - project.TeamMembers.Count
+            //    : (project.Idea.MaxTeamSize) - project.TeamMembers.Count;
 
-            bool isLastSlot = availableSlots == 1;
-            bool isEndSlot = availableSlots <= 0;
-            if (isEndSlot) return HandlerFail("Project has no slot.");
+            //bool isLastSlot = availableSlots == 1;
+            //bool isEndSlot = availableSlots <= 0;
+            //if (isEndSlot) return HandlerFail("Project has no slot.");
 
             // Thêm thành viên mới
             var teamMember = new TeamMember

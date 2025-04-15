@@ -50,6 +50,10 @@ public static class Const
 
     public const string API_USERS = $"{BaseApi}/users";
 
+    public const string API_ROLES = $"{BaseApi}/roles";
+
+    public const string API_USER_X_ROLES = $"{BaseApi}/user-x-roles";
+
     public const string API_REFRESH_TOKENS = $"{BaseApi}/refresh-tokens";
 
     public const string API_PROJECTS = $"{BaseApi}/projects";
@@ -102,13 +106,21 @@ public static class Const
 
     public const string API_MENTOR_IDEA_REQUESTS = $"{BaseApi}/mentor-idea-requests";
 
-    public const string API_IDEA_HISTORIES = $"{BaseApi}/idea-histories";
+    public const string API_TOPICS = $"{BaseApi}/topics";
 
-    public const string API_IDEA_HISTORY_REQUESTS = $"{BaseApi}/idea-history-requests";
+    public const string API_TOPIC_VERSIONS = $"{BaseApi}/topic-versions";
 
     public const string API_MENTOR_FEEDBACKS = $"{BaseApi}/mentor-feedbacks";
 
     public const string API_TIMELINES = $"{BaseApi}/timelines";
+
+    public const string API_CRITERIAS = $"{BaseApi}/criterias";
+
+    public const string API_CRITERIA_FORMS = $"{BaseApi}/criteria-forms";
+
+    public const string API_CRITERIA_X_CRITERIA_FORMS = $"{BaseApi}/criteria-x-criteria-forms";
+
+    public const string API_ANSWER_CRITERIAS = $"{BaseApi}/answer-criterias";
 
     public const string SortFieldDefault = "CreatedDate";
 

@@ -9,6 +9,8 @@ namespace FPT.TeamMatching.Domain.Models.Requests.Commands.Semester
 {
     public class SemesterUpdateCommand: UpdateCommand
     {
+        public Guid? CriteriaFormId { get; set; }
+
         public string? SemesterCode { get; set; }
 
         public string? SemesterName { get; set; }
@@ -20,5 +22,7 @@ namespace FPT.TeamMatching.Domain.Models.Requests.Commands.Semester
         public DateTimeOffset? StartDate { get; set; }
 
         public DateTimeOffset? EndDate { get; set; }
+
+        public int? NumberReviewer { get; set; }
     }
 }
