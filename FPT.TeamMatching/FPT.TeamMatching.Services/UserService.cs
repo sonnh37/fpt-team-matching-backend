@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
+using ExcelDataReader;
 using FPT.TeamMatching.Domain.Contracts.Repositories;
 using FPT.TeamMatching.Domain.Contracts.Services;
 using FPT.TeamMatching.Domain.Contracts.UnitOfWorks;
 using FPT.TeamMatching.Domain.Entities;
+using FPT.TeamMatching.Domain.Enums;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Base;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Users;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Users;
@@ -11,6 +13,8 @@ using FPT.TeamMatching.Domain.Models.Results;
 using FPT.TeamMatching.Domain.Models.Results.Bases;
 using FPT.TeamMatching.Domain.Utilities;
 using FPT.TeamMatching.Services.Bases;
+using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -250,5 +254,200 @@ public class UserService : BaseService<User>, IUserService
             .WithData(result)
             .WithStatus(Const.SUCCESS_CODE)
             .WithMessage(Const.SUCCESS_READ_MSG);
+    }
+
+    public async Task<BusinessResult> ImportStudents(IFormFile file)
+    {
+        try
+        {
+            List<User> users = new List<User>();
+            List<User> existingUsers = new List<User>();
+            Dictionary<string, User> userDictionary = new Dictionary<string, User>();
+            var usersQueryable = await _userRepository.GetQueryable().ToListAsync();
+            
+            foreach (var user in usersQueryable)
+            {
+                userDictionary.Add(user.Email, user);
+            }
+            var upComingSemester = await _unitOfWork.SemesterRepository.GetUpComingSemester();
+            if (upComingSemester == null)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("No upcoming semester!");
+            }
+            
+            var roleStudent = await _unitOfWork.RoleRepository.GetByRoleName("Student");
+            if (roleStudent == null)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("No role student!");
+            }
+            System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
+            if (file == null || file.Length == 0)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("No file uploaded!");
+            }
+
+            var uploadsFolder = $"{Directory.GetCurrentDirectory()}/UploadFiles";
+
+            if (!Directory.Exists(uploadsFolder))
+            {
+                Directory.CreateDirectory(uploadsFolder);
+            }
+
+            var filePath = Path.Combine(uploadsFolder, file.Name);
+            
+            
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                file.CopyTo(stream);
+                using (var reader = ExcelReaderFactory.CreateReader(stream))
+                {
+                    reader.Read();
+                    reader.Read();
+                    do
+                    {
+                        while (reader.Read())
+                        {
+                            var emailRaw = reader.GetValue(1);
+                            if (emailRaw == null || string.IsNullOrWhiteSpace(emailRaw.ToString()))
+                                break;
+                            var email = reader.GetValue(1).ToString();
+                            if (userDictionary[email] != null)
+                            {
+                                existingUsers.Add(userDictionary[email]);
+                                continue;
+                            }
+                            var code = reader.GetValue(2).ToString();
+                            if (code == null || code.ToString() == "")
+                            {
+                                throw new Exception("User with with email: "+ email + " is not invalid code") ;
+                            }
+                            var firstname = reader.GetValue(3).ToString();
+                            var lastname = reader.GetValue(4).ToString();
+
+                            var user = new User
+                            {
+                                Email = email,
+                                Code = code,
+                                FirstName = firstname,
+                                LastName = lastname,
+                                Department = Department.HoChiMinh,
+                                Username = code.ToLower(),
+                                ProfileStudent = new ProfileStudent
+                                {
+                                    UserId = null,
+                                    SemesterId = upComingSemester.Id,
+                                },
+                                UserXRoles = new List<UserXRole>()
+                                {
+                                    new UserXRole
+                                    {
+                                        UserId = null,
+                                        RoleId = roleStudent.Id,
+                                    }
+                                }
+                            };
+                            users.Add(user);
+                        }
+                    } while (reader.NextResult());
+                }
+            }
+            _userRepository.AddRange(users);
+            var saveChange = await _unitOfWork.SaveChanges();
+            if (!saveChange)
+            {
+                return new ResponseBuilder()
+                    .WithData(existingUsers)
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage(Const.FAIL_SAVE_MSG);
+            }
+            return new ResponseBuilder()
+                .WithData(existingUsers)
+                .WithStatus(Const.SUCCESS_CODE)
+                .WithMessage(Const.SUCCESS_READ_MSG);
+        }
+        catch (Exception e)
+        {
+            return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage(e.Message);
+        }
+    }
+
+    public async Task<BusinessResult> ImportStudent(CreateByManagerCommand command)
+    {
+        try
+        {
+            var foundUser = await _userRepository.GetByEmail(command.Email);
+            if (foundUser != null)
+            {
+                var userModel = _mapper.Map<UserResult>(foundUser);
+                return new ResponseBuilder()
+                    .WithStatus(2)
+                    .WithData(userModel)
+                    .WithMessage("Tài khoản này đã tồn tại. Bạn có muốn cập nhật lại tài khoản này không ?");
+            }
+            var upComingSemester = await _unitOfWork.SemesterRepository.GetUpComingSemester();
+            if (upComingSemester == null)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("No upcoming semester!");
+            }
+            
+            var roleStudent = await _unitOfWork.RoleRepository.GetByRoleName("Student");
+            if (roleStudent == null)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("No role student!");
+            }
+            var user = new User
+            {
+                Email = command.Email,
+                Code = command.Code,
+                FirstName = command.FirstName,
+                LastName = command.LastName,
+                Department = Department.HoChiMinh,
+                Username = command.Username,
+                ProfileStudent = new ProfileStudent
+                {
+                    UserId = null,
+                    SemesterId = upComingSemester.Id,
+                },
+                UserXRoles = new List<UserXRole>()
+                {
+                    new UserXRole
+                    {
+                        UserId = null,
+                        RoleId = roleStudent.Id,
+                    }
+                }
+            };
+            _userRepository.Add(user);
+            var saveChange = await _unitOfWork.SaveChanges();
+
+            if (!saveChange)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage(Const.FAIL_SAVE_MSG);
+            }
+            
+            return new ResponseBuilder()
+                .WithStatus(Const.SUCCESS_CODE)
+                .WithMessage(Const.SUCCESS_READ_MSG);
+        }
+        catch (Exception e)
+        {
+            return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage(e.Message);
+        }
     }
 }
