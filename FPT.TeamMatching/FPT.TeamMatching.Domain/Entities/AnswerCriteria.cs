@@ -15,7 +15,7 @@ namespace FPT.TeamMatching.Domain.Entities
 
         public string? Value { get; set; }
 
-        public virtual IdeaRequest? IdeaRequest { get; set; }
+        public virtual IdeaVersionRequest? IdeaRequest { get; set; }
 
         public virtual Criteria? Criteria { get; set; }
     }

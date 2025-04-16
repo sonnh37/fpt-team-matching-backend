@@ -29,9 +29,9 @@ public class UserRepository : BaseRepository<User>, IUserRepository
             m.UserXRoles.Any(uxr => uxr.Role != null && uxr.Role.RoleName == "Council"));
 
         queryable = queryable
-            .Where(m => m.IdeaRequestOfReviewers.Any(n => n.Status == IdeaRequestStatus.Pending))
+            .Where(m => m.IdeaRequestOfReviewers.Any(n => n.Status == IdeaVersionRequestStatus.Pending))
             .Include(m => m.IdeaRequestOfReviewers
-                .Where(n => n.Status == IdeaRequestStatus.Pending));
+                .Where(n => n.Status == IdeaVersionRequestStatus.Pending));
 
         if (query.Department.HasValue)
         {
@@ -113,9 +113,9 @@ public class UserRepository : BaseRepository<User>, IUserRepository
             .Select(u => new
             {
                 Council = u,
-                ApprovedCount = GetQueryable<IdeaRequest>()
+                ApprovedCount = GetQueryable<IdeaVersionRequest>()
                     .Count(ir =>
-                        ir.ReviewerId == u.Id && ir.Status == IdeaRequestStatus.Approved && ir.Role == "Council")
+                        ir.ReviewerId == u.Id && ir.Status == IdeaVersionRequestStatus.Approved && ir.Role == "Council")
             })
             .OrderBy(x => x.ApprovedCount)
             .Select(x => x.Council)

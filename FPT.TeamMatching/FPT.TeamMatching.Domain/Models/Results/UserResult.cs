@@ -30,7 +30,7 @@ public class UserResult : BaseResult
 
     public ICollection<BlogResult> Blogs { get; set; } = new List<BlogResult>();
 
-    public ICollection<IdeaRequestResult> IdeaRequestOfReviewers { get; set; } = new List<IdeaRequestResult>();
+    public ICollection<IdeaVersionRequestResult> IdeaRequestOfReviewers { get; set; } = new List<IdeaVersionRequestResult>();
 
     public ICollection<IdeaResult> IdeaOfOwners { get; set; } = new List<IdeaResult>();
 

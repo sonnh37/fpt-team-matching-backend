@@ -19,11 +19,10 @@ using FPT.TeamMatching.Domain.Models.Requests.Commands.Ideas;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Professions;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Specialties;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Semester;
-using FPT.TeamMatching.Domain.Models.Requests.Commands.IdeaRequests;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.StageIdeas;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.CapstoneSchedules;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.MentorFeedbacks;
-using FPT.TeamMatching.Domain.Models.Requests.Commands.MentorIdeaRequests;
+using FPT.TeamMatching.Domain.Models.Requests.Commands.MentorTopicRequests;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Timelines;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.TopicVersions;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Roles;
@@ -33,6 +32,9 @@ using FPT.TeamMatching.Domain.Models.Requests.Commands.Criterias;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.CriteriaForms;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.CriteriaXCriteriaForms;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.AnswerCriterias;
+using FPT.TeamMatching.Domain.Models.Requests.Commands.IdeaVersionRequests;
+using FPT.TeamMatching.Domain.Models.Requests.Commands.IdeaVersions;
+using FPT.TeamMatching.Domain.Models.Requests.Commands.TopicVersionRequests;
 
 namespace FPT.TeamMatching.Domain.Configs.Mapping;
 
@@ -123,20 +125,28 @@ public class MappingProfile : Profile
 
         #endregion
 
+        #region IdeaVersion
+
+        CreateMap<IdeaVersion, IdeaVersionResult>().ReverseMap();
+        CreateMap<IdeaVersion, IdeaVersionCreateCommand>().ReverseMap();
+        CreateMap<IdeaVersion, IdeaVersionUpdateCommand>().ReverseMap();
+
+        #endregion
+
+        #region IdeaVersionRequest
+
+        CreateMap<IdeaVersionRequest, IdeaVersionRequestResult>().ReverseMap();
+        CreateMap<IdeaVersionRequest, IdeaVersionRequestCreateCommand>().ReverseMap();
+        CreateMap<IdeaVersionRequest, IdeaVersionRequestUpdateCommand>().ReverseMap();
+        CreateMap<IdeaVersionRequest, IdeaVersionRequestLecturerOrCouncilResponseCommand>().ReverseMap();
+
+        #endregion
+
         #region BlogCv
 
         CreateMap<BlogCv, BlogCvResult>().ReverseMap();
         CreateMap<BlogCv, BlogCvCreateCommand>().ReverseMap();
         CreateMap<BlogCv, BlogCvUpdateCommand>().ReverseMap();
-
-        #endregion
-
-        #region IdeaRequest
-
-        CreateMap<IdeaRequest, IdeaRequestResult>().ReverseMap();
-        CreateMap<IdeaRequest, IdeaRequestCreateCommand>().ReverseMap();
-        CreateMap<IdeaRequest, IdeaRequestUpdateCommand>().ReverseMap();
-        CreateMap<IdeaRequest, IdeaRequestLecturerOrCouncilResponseCommand>().ReverseMap();
 
         #endregion
 
@@ -227,6 +237,14 @@ public class MappingProfile : Profile
 
         #endregion
 
+        #region Topic
+
+        CreateMap<Topic, TopicResult>().ReverseMap();
+        CreateMap<Topic, TopicCreateCommand>().ReverseMap();
+        CreateMap<Topic, TopicUpdateCommand>().ReverseMap();
+
+        #endregion
+
         #region TopicVersion
 
         CreateMap<TopicVersion, TopicVersionResult>().ReverseMap();
@@ -235,11 +253,11 @@ public class MappingProfile : Profile
 
         #endregion
 
-        #region Topic
+        #region TopicVersionRequest
 
-        CreateMap<Topic, TopicResult>().ReverseMap();
-        CreateMap<Topic, TopicCreateCommand>().ReverseMap();
-        CreateMap<Topic, TopicUpdateCommand>().ReverseMap();
+        CreateMap<TopicVersionRequest, TopicVersionRequestResult>().ReverseMap();
+        CreateMap<TopicVersionRequest, TopicVersionRequestCreateCommand>().ReverseMap();
+        CreateMap<TopicVersionRequest, TopicVersionRequestUpdateCommand>().ReverseMap();
 
         #endregion
 
@@ -257,11 +275,11 @@ public class MappingProfile : Profile
 
         #endregion
 
-        #region MentorIdeaRequest
-        CreateMap<MentorIdeaRequest, MentorIdeaRequestResult>().ReverseMap();
-        CreateMap<MentorIdeaRequest, MentorIdeaRequestCreateCommand>().ReverseMap();
-        CreateMap<MentorIdeaRequest, MentorIdeaRequestUpdateCommand>().ReverseMap();
-        CreateMap<MentorIdeaRequest, StudentRequest>().ReverseMap();
+        #region MentorTopicRequest
+        CreateMap<MentorTopicRequest, MentorTopicRequestResult>().ReverseMap();
+        CreateMap<MentorTopicRequest, MentorTopicRequestCreateCommand>().ReverseMap();
+        CreateMap<MentorTopicRequest, MentorTopicRequestUpdateCommand>().ReverseMap();
+        CreateMap<MentorTopicRequest, StudentRequest>().ReverseMap();
 
         #endregion
 

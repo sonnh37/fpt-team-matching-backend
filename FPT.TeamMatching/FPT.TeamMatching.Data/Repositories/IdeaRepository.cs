@@ -26,8 +26,9 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
     public async Task<IList<Idea>> GetIdeasByUserId(Guid userId)
     {
         var ideas = await _dbContext.Ideas.Where(e => e.OwnerId == userId)
-            .Include(e => e.IdeaRequests).ThenInclude(e => e.Reviewer)
-            .Include(e => e.StageIdea)
+            //sua db
+            //.Include(e => e.IdeaRequests).ThenInclude(e => e.Reviewer)
+            //.Include(e => e.StageIdea)
             .ToListAsync();
         return ideas;
     }
@@ -35,8 +36,9 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
     public async Task<IList<Idea>> GetIdeasByTypeMentorAndEnterprise()
     {
         var ideas = await _dbContext.Ideas.Where(e => e.Type == IdeaType.Enterprise || e.Type == IdeaType.Lecturer)
-            .Include(e => e.IdeaRequests).ThenInclude(e => e.Reviewer)
-            .Include(e => e.StageIdea)
+            //sua db
+            //.Include(e => e.IdeaRequests).ThenInclude(e => e.Reviewer)
+            //.Include(e => e.StageIdea)
             .ToListAsync();
         return ideas;
     }
@@ -53,14 +55,15 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
         var ideas = await _dbContext.Ideas.Where(e => e.OwnerId == userId
                                                       && e.Status == status)
             .OrderByDescending(m => m.CreatedDate)
-            .Include(m => m.StageIdea)
+            //sua db
+            //.Include(m => m.StageIdea)
             .Include(m => m.Owner)
             .Include(m => m.Mentor)
             .Include(m => m.SubMentor)
             .Include(m => m.Specialty)
             //sua db
             //.Include(m => m.Project)
-            .Include(e => e.IdeaRequests).ThenInclude(e => e.Reviewer)
+            //.Include(e => e.IdeaRequests).ThenInclude(e => e.Reviewer)
             .ToListAsync();
 
         return ideas;
@@ -70,11 +73,12 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
     {
         var ideas = await _dbContext.Ideas.Where(e => e.OwnerId == userId
                                                       && e.Status == status
-                                                      && e.StageIdeaId == stageIdeaId
+                                                      //sua db
+                                                      //&& e.StageIdeaId == stageIdeaId
                                                       )
             .OrderByDescending(m => m.CreatedDate)
-            .Include(m => m.StageIdea)
-            .Include(e => e.IdeaRequests).ThenInclude(e => e.Reviewer)
+            //.Include(m => m.StageIdea)
+            //.Include(e => e.IdeaRequests).ThenInclude(e => e.Reviewer)
             .ToListAsync();
 
         return ideas;
@@ -83,9 +87,12 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
     public async Task<int> NumberApprovedIdeasOfSemester(Guid? semesterId)
     {
         var number = await _dbContext.Ideas.Where(e => e.Status == IdeaStatus.Approved &&
-                                                       e.IsDeleted == false &&
-                                                       e.StageIdea != null &&
-                                                       e.StageIdea.SemesterId == semesterId).CountAsync();
+                                                       e.IsDeleted == false)
+                                                       //sua db
+                                                       //&&
+                                                       //e.StageIdea != null &&
+                                                       //e.StageIdea.SemesterId == semesterId)
+                                            .CountAsync();
         return number;
     }
 
@@ -94,14 +101,15 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
         var toDay = DateTime.UtcNow;
         var ideas = await _dbContext.Ideas
             .Include(e => e.Owner).ThenInclude(e => e.UserXRoles).ThenInclude(e => e.Role)
-            .Include(e => e.StageIdea)
-            .Where(e =>
-                e.IsDeleted == false &&
-                e.Status == IdeaStatus.Pending &&
-                e.StageIdea != null &&
-                (e.StageIdea.ResultDate.Year == toDay.Year &&
-                 e.StageIdea.ResultDate.Month == toDay.Month &&
-                 e.StageIdea.ResultDate.Day == toDay.Day))
+            //sua db
+            //.Include(e => e.StageIdea)
+            //.Where(e =>
+            //    e.IsDeleted == false &&
+            //    e.Status == IdeaStatus.Pending &&
+            //    e.StageIdea != null &&
+            //    (e.StageIdea.ResultDate.Year == toDay.Year &&
+            //     e.StageIdea.ResultDate.Month == toDay.Month &&
+            //     e.StageIdea.ResultDate.Day == toDay.Day))
             .ToListAsync();
 
         return ideas;
@@ -110,7 +118,8 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
     public async Task<Idea?> GetIdeaPendingInStageIdeaOfUser(Guid userId, Guid stageIdeaId)
     {
         var i = await _dbContext.Ideas.Where(e => e.IsDeleted == false &&
-                                                  e.StageIdeaId == stageIdeaId &&
+                                                    //sua db
+                                                  //e.StageIdeaId == stageIdeaId &&
                                                   e.OwnerId == userId &&
                                                   e.Status == IdeaStatus.Pending)
             .FirstOrDefaultAsync();
@@ -120,9 +129,10 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
     public async Task<Idea?> GetIdeaApproveInSemesterOfUser(Guid userId, Guid semesterId)
     {
         var i = await _dbContext.Ideas.Where(e => e.IsDeleted == false &&
-                                                  e.StageIdea != null &&
-                                                  e.StageIdea.Semester != null &&
-                                                  e.StageIdea.Semester.Id == semesterId &&
+                                                    //sua db
+                                                  //e.StageIdea != null &&
+                                                  //e.StageIdea.Semester != null &&
+                                                  //e.StageIdea.Semester.Id == semesterId &&
                                                   e.OwnerId == userId &&
                                                   e.Status == IdeaStatus.Approved)
             .FirstOrDefaultAsync();
@@ -141,10 +151,10 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
     {
         // Use async query execution and optimize the LINQ query
         return await GetQueryable()
-            .Where(x => x.StageIdea.SemesterId == semesterId)
             //sua db
+            //.Where(x => x.StageIdea.SemesterId == semesterId)
             //.Where(x => x.Project.Reviews.Any(review => review.Number == reviewNumber))
-            .Where(x => x.Topic.Project.Reviews.Any(review => review.Number == reviewNumber))
+            //.Where(x => x.Topic.Project.Reviews.Any(review => review.Number == reviewNumber))
             .Select(y => new CustomIdeaResultModel
             {
                 IdeaId = y.Id,
@@ -172,14 +182,15 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
     {
         //sua db
         //return await _dbContext.Ideas.Include(x => x.Project).Where(x => ideaCode.Contains(x.IdeaCode)).ToListAsync();
-        return await _dbContext.Ideas.Include(x => x.Topic.Project).Where(x => ideaCode.Contains(x.Topic.TopicCode)).ToListAsync();
+        return await _dbContext.Ideas.Include(x => x.IdeaVersions).ToListAsync();
     }
 
     public async Task<(List<Idea>, int)> GetIdeasOfSupervisors(IdeaGetListOfSupervisorsQuery query)
     {
         var queryable = GetQueryable();
         queryable = queryable
-            .Include(m => m.IdeaRequests)
+            //sua db
+            //.Include(m => m.IdeaRequests)
             .Include(m => m.Owner)
             .ThenInclude(u => u.UserXRoles)
             .ThenInclude(ur => ur.Role)
@@ -187,11 +198,11 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
             //.Include(m => m.Project)
             .Include(m => m.Mentor)
             .Include(m => m.SubMentor)
-            .Include(m => m.StageIdea)
-            .Include(m => m.MentorIdeaRequests)
+            //.Include(m => m.StageIdea)
+            //.Include(m => m.MentorTopicRequests)
             .Include(m => m.Specialty).ThenInclude(m => m.Profession);
         // 
-        // queryable = queryable.Where(m => m.MentorIdeaRequests.All(x => x.Status != MentorIdeaRequestStatus.Approved));
+        // queryable = queryable.Where(m => m.MentorTopicRequests.All(x => x.Status != MentorTopicRequestStatus.Approved));
 
         if (!string.IsNullOrEmpty(query.EnglishName))
         {

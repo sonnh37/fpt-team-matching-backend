@@ -145,19 +145,19 @@ namespace FPT.TeamMatching.Services
                     .ToDictionary(x => x.IdeaCode, x => x);
                 foreach (var idea in ideas)
                 {
-                    //if (readerDict.TryGetValue(idea.IdeaCode, out CapStoneReader reader))
-                    if (readerDict.TryGetValue(idea.Topic.TopicCode, out CapStoneReader reader))
-                        {
-                        capstones.Add(new CapstoneSchedule
-                        {
-                            //ProjectId = idea.Project.Id,
-                            ProjectId = idea.Topic.Project.Id,
-                            Date = DateTime.Parse(reader.Date).ToUniversalTime(),
-                            Time = reader.Time,
-                            HallName = reader.HallName,
-                            Stage = stage,
-                        });
-                    }
+                    //sua db
+                    //if (readerDict.TryGetValue(idea.Topic.TopicCode, out CapStoneReader reader))
+                    //    {
+                    //    capstones.Add(new CapstoneSchedule
+                    //    {
+                    //        //ProjectId = idea.Project.Id,
+                    //        ProjectId = idea.Topic.Project.Id,
+                    //        Date = DateTime.Parse(reader.Date).ToUniversalTime(),
+                    //        Time = reader.Time,
+                    //        HallName = reader.HallName,
+                    //        Stage = stage,
+                    //    });
+                    //}
                 }
 
                 _unitOfWork.CapstoneScheduleRepository.AddRange(capstones);

@@ -33,7 +33,7 @@ public class Project : BaseEntity
     
     public virtual ICollection<Blog> Blogs { get; set; } = new List<Blog>();
 
-    public virtual ICollection<MentorIdeaRequest> MentorIdeaRequests { get; set; } = new List<MentorIdeaRequest>();
+    public virtual ICollection<MentorTopicRequest> MentorTopicRequests { get; set; } = new List<MentorTopicRequest>();
 
     public virtual ICollection<CapstoneSchedule> CapstoneSchedules { get; set; } = new List<CapstoneSchedule>();
 
