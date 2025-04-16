@@ -29,7 +29,6 @@ public class ProjectController : ControllerBase
     }
     
     [HttpGet("me/mentor-projects")]
-    [Authorize(Roles = "Lecturer")]
     public async Task<IActionResult> GetProjectsForMentor([FromQuery] ProjectGetListForMentorQuery query)
     {
         var businessResult = await _service.GetProjectsForMentor(query);
