@@ -52,7 +52,7 @@ namespace FPT.TeamMatching.Services
             }
         }
         
-        public async Task<BusinessResult> GetLatestStageIdea<TResult>() where TResult : BaseResult
+        public async Task<BusinessResult> GetCurrentStageIdea<TResult>() where TResult : BaseResult
         {
             try
             {

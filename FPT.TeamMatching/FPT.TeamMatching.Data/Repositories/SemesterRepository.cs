@@ -17,16 +17,13 @@ namespace FPT.TeamMatching.Data.Repositories
         public SemesterRepository(FPTMatchingDbContext dbContext) : base(dbContext)
         {
         }
-
-        // #fix dùng GetQueryable dễ query khỏi phải khai báo FpTContext _context, _context.entity.where...
-        // GetQueryable() cho entity hiện tại ở repository này
-        // hoặc GetQueryable<Entity>() cho entity khác mà ko phải trong repo này
-        public async Task<Semester?> GetPresentSemester()
-        {
-            var s = await GetQueryable().Where(e => e.StartDate != null && e.StartDate.Value.LocalDateTime.Date <= DateTime.Now.Date && DateTime.Now.Date <= e.EndDate.Value.LocalDateTime.Date)
-                                        .FirstOrDefaultAsync();
-            return s;
-        }
+        
+        // public async Task<Semester?> GetPresentSemester()
+        // {
+        //     var s = await GetQueryable().Where(e => e.StartDate != null && e.StartDate.Value.LocalDateTime.Date <= DateTime.Now.Date && DateTime.Now.Date <= e.EndDate.Value.LocalDateTime.Date)
+        //                                 .FirstOrDefaultAsync();
+        //     return s;
+        // }
 
         public async Task<Semester?> GetSemesterByStageIdeaId(Guid stageIdeaId)
         {

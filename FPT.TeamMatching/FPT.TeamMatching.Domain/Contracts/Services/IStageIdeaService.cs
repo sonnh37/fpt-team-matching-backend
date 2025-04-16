@@ -13,6 +13,6 @@ namespace FPT.TeamMatching.Domain.Contracts.Services
     {
         Task<BusinessResult> GetByStageNumber<TResult>(int number) where TResult : BaseResult;
 
-        Task<BusinessResult> GetLatestStageIdea<TResult>() where TResult : BaseResult;
+        Task<BusinessResult> GetCurrentStageIdea<TResult>() where TResult : BaseResult;
     }
 }

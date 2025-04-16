@@ -18,8 +18,6 @@ public interface IIdeaRepository : IBaseRepository<Idea>
     Task<List<Idea>> GetUserIdeasByStatusWithCurrentStageIdea(Guid? userId, IdeaStatus? status,
         Guid? currentStageIdeaId);
 
-    Task<Idea?> GetLatestIdeaByUserAndStatus(Guid userId, IdeaStatus status);
-
     Task<List<CustomIdeaResultModel>> GetCustomIdea(Guid semesterId, int reviewNumber);
 
     Task<List<Idea>> GetIdeaWithResultDateIsToday();

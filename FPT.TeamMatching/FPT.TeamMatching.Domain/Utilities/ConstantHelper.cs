@@ -39,11 +39,10 @@ public static class Const
     #region Authorization Codes
 
     public const int FAIL_UNAUTHORIZED_CODE = -5;
-    public const string FAIL_UNAUTHORIZED_MSG = "Unauthorized access.";
-    public const string FAIL_FORBIDDEN_MSG = "Access denied. You don't have permission.";
-
+    public const string FAIL_UNAUTHORIZED_MSG = "Truy cập không được phép.";
+    public const string FAIL_FORBIDDEN_MSG = "Từ chối truy cập. Bạn không có quyền thực hiện thao tác này.";
     #endregion
-
+    
     #region Url api
 
     private const string BaseApi = "api";
