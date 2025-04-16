@@ -13,7 +13,7 @@ namespace FPT.TeamMatching.Domain.Contracts.Services
 {
     public interface ISemesterService: IBaseService
     {
-        Task<BusinessResult> GetPresentSemester();
-        Task<BusinessResult> GetCurrentSemester<TResult>() where TResult : BaseResult;
+        // Task<BusinessResult> GetPresentSemester();
+        Task<BusinessResult> GetCurrentSemester();
     }
 }

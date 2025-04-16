@@ -58,7 +58,7 @@ public class BlogService : BaseService<Blog>, IBlogService
         try
         {
             //ki hien tai
-            var semester = await _semesterRepository.GetPresentSemester();
+            var semester = await _semesterRepository.GetCurrentSemester();
             if (semester == null)
             {
                 return new ResponseBuilder()

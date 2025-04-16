@@ -40,10 +40,10 @@ namespace FPT.TeamMatching.API.Controllers
             return Ok(msg);
         }
         
-        [HttpGet("latest")]
-        public async Task<IActionResult> GetLatestStageIdea()
+        [HttpGet("current")]
+        public async Task<IActionResult> GetCurrentStageIdea()
         {
-            var msg = await _service.GetLatestStageIdea<StageIdeaResult>();
+            var msg = await _service.GetCurrentStageIdea<StageIdeaResult>();
             return Ok(msg);
         }
 

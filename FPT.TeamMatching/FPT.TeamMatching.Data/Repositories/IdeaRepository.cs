@@ -42,14 +42,7 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
             .ToListAsync();
         return ideas;
     }
-
-    public async Task<Idea?> GetLatestIdeaByUserAndStatus(Guid userId, IdeaStatus status)
-    {
-        return await GetQueryable<Idea>()
-            .OrderByDescending(m => m.CreatedDate)
-            .FirstOrDefaultAsync(e => e.OwnerId == userId && e.Status == status);
-    }
-
+    
     public async Task<List<Idea>> GetCurrentIdeaByUserIdAndStatus(Guid userId, IdeaStatus status)
     {
         var ideas = await _dbContext.Ideas.Where(e => e.OwnerId == userId

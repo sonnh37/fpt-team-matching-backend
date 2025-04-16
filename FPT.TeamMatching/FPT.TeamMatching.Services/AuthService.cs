@@ -667,8 +667,8 @@ public class AuthService : IAuthService
     {
         if (refreshToken == null)
             return new ResponseBuilder()
-                .WithStatus(Const.NOT_FOUND_CODE)
-                .WithMessage("You are not logged in, please log in to continue.");
+                .WithStatus(Const.FAIL_UNAUTHORIZED_CODE)
+                .WithMessage(Const.FAIL_UNAUTHORIZED_MSG);
 
         var businessResult = _refreshTokenService.ValidateRefreshTokenIpMatch();
         return businessResult;

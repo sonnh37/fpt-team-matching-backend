@@ -34,10 +34,10 @@ namespace FPT.TeamMatching.API.Controllers
             return Ok(msg);
         }
         
-        [HttpGet("latest")]
+        [HttpGet("current")]
         public async Task<IActionResult> GetCurrentSemester()
         {
-            var msg = await _service.GetCurrentSemester<SemesterResult>();
+            var msg = await _service.GetCurrentSemester();
             return Ok(msg);
         }
 
@@ -72,11 +72,11 @@ namespace FPT.TeamMatching.API.Controllers
             return Ok(businessResult);
         }
 
-        [HttpGet("get-present-semester")]
-        public async Task<IActionResult> GetPresentSemester()
-        {
-            var msg = await _service.GetPresentSemester();
-            return Ok(msg);
-        }
+        // [HttpGet("get-present-semester")]
+        // public async Task<IActionResult> GetPresentSemester()
+        // {
+        //     var msg = await _service.GetPresentSemester();
+        //     return Ok(msg);
+        // }
     }
 }

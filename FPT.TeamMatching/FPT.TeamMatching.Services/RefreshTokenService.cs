@@ -66,20 +66,16 @@ public class RefreshTokenService : BaseService<RefreshToken>, IRefreshTokenServi
         var ipAddress = _httpContextAccessor.HttpContext?.Request.Headers["X-Forwarded-For"].FirstOrDefault()
                         ?? _httpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.ToString() ?? "0.0.0.0";
         var refreshToken = _httpContextAccessor.HttpContext?.Request.Cookies["refreshToken"];
+        if (string.IsNullOrEmpty(refreshToken)) return HandlerFail(Const.FAIL_UNAUTHORIZED_MSG);
 
         ipAddress = NormalizeIpAddress(ipAddress);
         // Kiểm tra refreshToken và IP address
         var storedRefreshToken = _refreshTokenRepository.GetByRefreshTokenAsync(refreshToken).Result;
 
-        if (storedRefreshToken == null || storedRefreshToken.Expiry < DateTime.UtcNow)
-            return new ResponseBuilder()
-                .WithStatus(Const.FAIL_CODE)
-                .WithMessage("Your session has expired. Please log in again.");
+        if (storedRefreshToken == null || storedRefreshToken.Expiry < DateTime.UtcNow) return HandlerFail("Hết phiên đăng nhập!");
 
         if (storedRefreshToken.IpAddress != ipAddress)
-            return new ResponseBuilder()
-                .WithStatus(Const.FAIL_CODE)
-                .WithMessage("Warning!! someone trying to get token.");
+            return HandlerFail("Có ai đó đang cố gắng truy cập nick bạn!");
 
         var refreshTokenResult = _mapper.Map<RefreshTokenResult>(storedRefreshToken);
         return new ResponseBuilder()
