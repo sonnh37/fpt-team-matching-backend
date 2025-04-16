@@ -125,4 +125,11 @@ public class UserController : ControllerBase
         var msg = await _userService.ImportStudent(command);
         return Ok(msg);
     }
+
+    [HttpPut("import/students/update-existed")]
+    public async Task<IActionResult> UpdateStudentExistedRange([FromBody] UserResult[] userResults)
+    {
+        var msg = await _userService.UpdateStudentExistedRange(userResults);
+        return Ok(msg);
+    }
 }
