@@ -14,7 +14,7 @@ namespace FPT.TeamMatching.Domain.Models.Results
 
         public virtual ICollection<CriteriaXCriteriaFormResult> CriteriaXCriteriaForms { get; set; } = new List<CriteriaXCriteriaFormResult>();
 
-        public virtual ICollection<IdeaRequestResult> IdeaRequests { get; set; } = new List<IdeaRequestResult>();
+        public virtual ICollection<IdeaVersionRequestResult> IdeaRequests { get; set; } = new List<IdeaVersionRequestResult>();
 
         public virtual ICollection<SemesterResult> Semesters { get; set; } = new List<SemesterResult>();
 

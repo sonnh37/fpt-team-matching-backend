@@ -12,12 +12,14 @@ public static class CollectionServices
         services.AddTransient<IUserService, UserService>();
         services.AddTransient<IRoleService, RoleService>();
         services.AddTransient<IUserXRoleService, UserXRoleService>();
+
         services.AddTransient<IBlogService, BlogService>();
         services.AddTransient<ILikeService, LikeService>();
         services.AddTransient<ICommentService, CommentService>();
         services.AddTransient<IRateService, RateService>();
         services.AddTransient<IBlogCvService, BlogCvService>();
         services.AddTransient<ITeamMemberService, TeamMemberService>();
+
         services.AddTransient<IAuthService, AuthService>();
         services.AddTransient<IReviewService, ReviewService>();
         services.AddTransient<IProjectService, ProjectService>();
@@ -31,17 +33,23 @@ public static class CollectionServices
         services.AddTransient<IProfessionService, ProfessionService>();
         services.AddTransient<ISpecialtyService, SpecialtyService>();
         services.AddTransient<ISemesterService, SemesterService>();
-        services.AddTransient<IIdeaRequestService, IdeaRequestService>();
+
         services.AddTransient<IIdeaService, IdeaService>();
-        services.AddTransient<ITopicVersionService, TopicVersionService>();
+        services.AddTransient<IIdeaVersionService, IdeaVersionService>();
+        services.AddTransient<IIdeaVersionRequestService, IdeaVersionRequestService>();
+
         services.AddTransient<ITopicService, TopicService>();
+        services.AddTransient<ITopicVersionService, TopicVersionService>();
+        services.AddTransient<ITopicVersionRequestService, TopicVersionRequestService>();
+
         services.AddTransient<IStageIdeaService, StageIdeaService>();
         services.AddTransient<ICapstoneScheduleService, CapstoneScheduleService>();
-        services.AddTransient<IMentorIdeaRequestService, MentorIdeaRequestService>();
+        services.AddTransient<IMentorTopicRequestService, MentorTopicRequestService>();
         services.AddSingleton<IUserIdProvider, CustomUserIdProvider>();
         services.AddSingleton<IFileUploadService, FileUploadService>();
         services.AddTransient<IMentorFeedbackService, MentorFeedbackService>();
         services.AddTransient<ITimelineService, TimelineService>();
+
         services.AddTransient<ICriteriaService, CriteriaService>();
         services.AddTransient<ICriteriaFormService, CriteriaFormService>();
         services.AddTransient<ICriteriaXCriteriaFormService, CriteriaXCriteriaFormService>();

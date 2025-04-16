@@ -18,7 +18,7 @@ namespace FPT.TeamMatching.Services;
 public class IdeaService : BaseService<Idea>, IIdeaService
 {
     private readonly IIdeaRepository _ideaRepository;
-    private readonly IIdeaRequestRepository _ideaRequestRepository;
+    private readonly IIdeaVersionRequestRepository _ideaRequestRepository;
     private readonly ISemesterRepository _semesterRepository;
     private readonly IProjectRepository _projectRepository;
     private readonly IUserRepository _userRepository;
@@ -126,7 +126,8 @@ public class IdeaService : BaseService<Idea>, IIdeaService
                     .WithMessage(Const.FAIL_SAVE_MSG);
             }
 
-            ideaEntity.StageIdeaId = stageIdea.Id;
+            //sua db
+            //ideaEntity.StageIdeaId = stageIdea.Id;
             ideaEntity.Status = IdeaStatus.Pending;
             ideaEntity.OwnerId = userId;
             ideaEntity.Type = IdeaType.Student;
@@ -143,13 +144,14 @@ public class IdeaService : BaseService<Idea>, IIdeaService
                     .WithMessage(Const.FAIL_SAVE_MSG);
             }
 
-            var ideaRequest = new IdeaRequest
+            var ideaRequest = new IdeaVersionRequest
             {
-                IdeaId = ideaEntity.Id,
-                ReviewerId = ideaEntity.MentorId,
-                ProcessDate = DateTime.UtcNow,
-                Status = IdeaRequestStatus.Pending,
-                Role = "Mentor",
+                //sua db
+                //IdeaId = ideaEntity.Id,
+                //ReviewerId = ideaEntity.MentorId,
+                //ProcessDate = DateTime.UtcNow,
+                //Status = IdeaRequestStatus.Pending,
+                //Role = "Mentor",
             };
             await SetBaseEntityForCreation(ideaRequest);
             _ideaRequestRepository.Add(ideaRequest);
@@ -249,7 +251,8 @@ public class IdeaService : BaseService<Idea>, IIdeaService
             }
 
             ideaEntity.Status = IdeaStatus.Pending;
-            ideaEntity.StageIdeaId = stageIdea.Id;
+            //sua db
+            //ideaEntity.StageIdeaId = stageIdea.Id;
             ideaEntity.OwnerId = userId;
             ideaEntity.MentorId = userId;
             ideaEntity.IsExistedTeam = false;
@@ -274,13 +277,14 @@ public class IdeaService : BaseService<Idea>, IIdeaService
                     .WithMessage(Const.FAIL_SAVE_MSG);
             }
 
-            var ideaRequest = new IdeaRequest
+            var ideaRequest = new IdeaVersionRequest
             {
-                IdeaId = ideaEntity.Id,
-                ReviewerId = ideaEntity.MentorId,
-                Status = IdeaRequestStatus.Approved,
-                ProcessDate = DateTime.UtcNow,
-                Role = "Mentor",
+                //sua db
+                //IdeaId = ideaEntity.Id,
+                //ReviewerId = ideaEntity.MentorId,
+                //Status = IdeaRequestStatus.Approved,
+                //ProcessDate = DateTime.UtcNow,
+                //Role = "Mentor",
             };
             await SetBaseEntityForCreation(ideaRequest);
             _ideaRequestRepository.Add(ideaRequest);
@@ -510,100 +514,102 @@ public class IdeaService : BaseService<Idea>, IIdeaService
     {
         try
         {
-            if (idea.StageIdeaId != null)
-            {
-                if (status == IdeaStatus.Approved)
-                {
-                    //Gen idea code 
-                    var stageIdea = await _stageIdeaRepositoty.GetById((Guid)idea.StageIdeaId);
-                    var semester = await _semesterRepository.GetById((Guid)stageIdea.SemesterId);
-                    if (semester == null) return;
-                    var semesterCode = semester.SemesterCode;
-                    var semesterPrefix = semester.SemesterPrefixName;
-                    //get so luong idea dc duyet approve cua ki
-                    var numberOfIdeas = await _ideaRepository.NumberApprovedIdeasOfSemester(semester.Id);
+            //sua db
+            //if (idea.StageIdeaId != null)
+            //{
+            //    if (status == IdeaStatus.Approved)
+            //    {
+            //        //Gen idea code 
+            //        var stageIdea = await _stageIdeaRepositoty.GetById((Guid)idea.StageIdeaId);
+            //        var semester = await _semesterRepository.GetById((Guid)stageIdea.SemesterId);
+            //        if (semester == null) return;
+            //        var semesterCode = semester.SemesterCode;
+            //        var semesterPrefix = semester.SemesterPrefixName;
+            //        //get so luong idea dc duyet approve cua ki
+            //        var numberOfIdeas = await _ideaRepository.NumberApprovedIdeasOfSemester(semester.Id);
 
-                    // Tạo số thứ tự tiếp theo
-                    int nextNumberIdea = numberOfIdeas + 1;
+            //        // Tạo số thứ tự tiếp theo
+            //        int nextNumberIdea = numberOfIdeas + 1;
 
-                    // Tạo mã Idea mới theo định dạng: semesterPrefix + semesterCode + "SE" + số thứ tự (2 chữ số)
-                    string newIdeaCode = $"{semesterPrefix}{semesterCode}SE{nextNumberIdea:D2}";
+            //        // Tạo mã Idea mới theo định dạng: semesterPrefix + semesterCode + "SE" + số thứ tự (2 chữ số)
+            //        string newIdeaCode = $"{semesterPrefix}{semesterCode}SE{nextNumberIdea:D2}";
 
-                    //sua db
-                    //idea.IdeaCode = newIdeaCode;
-                    idea.Topic.TopicCode = newIdeaCode;
-                    //Check neu owner la student thi tao project
-                    var isStudent = idea.Owner.UserXRoles.Any(e => e.Role.RoleName == "Student");
-                    if (isStudent)
-                    {
-                        //check xem co team chua - co project chua
-                        var existedProject = await _projectRepository.GetProjectByLeaderId((Guid)idea.OwnerId);
-                        if (existedProject == null)
-                        {
-                            //Tao project
-                            var project = new Project
-                            {
-                                LeaderId = isStudent ? idea.OwnerId : null,
-                                //sua db
-                                //IdeaId = idea.Id,
-                                //TeamCode = newTeamCode,
-                                Status = ProjectStatus.Pending,
-                                TeamSize = idea.MaxTeamSize
-                            };
-                            await SetBaseEntityForCreation(project);
-                            _projectRepository.Add(project);
-                            var isSuccess = await _unitOfWork.SaveChanges();
-                            if (!isSuccess)
-                            {
-                                return;
-                            }
+            //        //sua db
+            //        //idea.IdeaCode = newIdeaCode;
+            //        //idea.Topic.TopicCode = newIdeaCode;
+            //        //Check neu owner la student thi tao project
+            //        var isStudent = idea.Owner.UserXRoles.Any(e => e.Role.RoleName == "Student");
+            //        if (isStudent)
+            //        {
+            //            //check xem co team chua - co project chua
+            //            var existedProject = await _projectRepository.GetProjectByLeaderId((Guid)idea.OwnerId);
+            //            if (existedProject == null)
+            //            {
+            //                //Tao project
+            //                var project = new Project
+            //                {
+            //                    LeaderId = isStudent ? idea.OwnerId : null,
+            //                    //sua db
+            //                    //IdeaId = idea.Id,
+            //                    //TeamCode = newTeamCode,
+            //                    Status = ProjectStatus.Pending,
+            //                    TeamSize = idea.MaxTeamSize
+            //                };
+            //                await SetBaseEntityForCreation(project);
+            //                _projectRepository.Add(project);
+            //                var isSuccess = await _unitOfWork.SaveChanges();
+            //                if (!isSuccess)
+            //                {
+            //                    return;
+            //                }
 
-                            //Tao teamMember
-                            var teamMember = new TeamMember
-                            {
-                                UserId = idea.OwnerId,
-                                ProjectId = project.Id,
-                                Role = TeamMemberRole.Leader,
-                                JoinDate = DateTime.UtcNow,
-                                Status = TeamMemberStatus.Pending,
-                            };
-                            await SetBaseEntityForCreation(teamMember);
-                            _teamMemberRepository.Add(teamMember);
-                            isSuccess = await _unitOfWork.SaveChanges();
-                            if (!isSuccess)
-                            {
-                                return;
-                            }
-                        }
-                        else
-                        {
-                            //sua db
-                            //existedProject.IdeaId = idea.Id;
-                            existedProject.Topic.IdeaId = idea.Id;
-                            await SetBaseEntityForUpdate(existedProject);
-                            _projectRepository.Update(existedProject);
-                            var isSuccess = await _unitOfWork.SaveChanges();
-                            if (!isSuccess)
-                            {
-                                return;
-                            }
-                        }
+            //                //Tao teamMember
+            //                var teamMember = new TeamMember
+            //                {
+            //                    UserId = idea.OwnerId,
+            //                    ProjectId = project.Id,
+            //                    Role = TeamMemberRole.Leader,
+            //                    JoinDate = DateTime.UtcNow,
+            //                    Status = TeamMemberStatus.Pending,
+            //                };
+            //                await SetBaseEntityForCreation(teamMember);
+            //                _teamMemberRepository.Add(teamMember);
+            //                isSuccess = await _unitOfWork.SaveChanges();
+            //                if (!isSuccess)
+            //                {
+            //                    return;
+            //                }
+            //            }
+            //            else
+            //            {
+            //                //sua db
+            //                //existedProject.IdeaId = idea.Id;
+            //                //existedProject.Topic.IdeaId = idea.Id;
+            //                await SetBaseEntityForUpdate(existedProject);
+            //                _projectRepository.Update(existedProject);
+            //                var isSuccess = await _unitOfWork.SaveChanges();
+            //                if (!isSuccess)
+            //                {
+            //                    return;
+            //                }
+            //            }
 
-                    }
-                }
+            //        }
+            //    }
 
-                //update idea
-                idea.Owner = null;
-                idea.StageIdea = null;
-                idea.Status = status;
-                await SetBaseEntityForUpdate(idea);
-                _ideaRepository.Update(idea);
-                var isSucess = await _unitOfWork.SaveChanges();
-                if (!isSucess)
-                {
-                    return;
-                }
-            }
+            //    //update idea
+            //    idea.Owner = null;
+            //    //sua db
+            //    //idea.StageIdea = null;
+            //    idea.Status = status;
+            //    await SetBaseEntityForUpdate(idea);
+            //    _ideaRepository.Update(idea);
+            //    var isSucess = await _unitOfWork.SaveChanges();
+            //    if (!isSucess)
+            //    {
+            //        return;
+            //    }
+            //}
         }
         catch (Exception ex)
         {
@@ -622,7 +628,8 @@ public class IdeaService : BaseService<Idea>, IIdeaService
             {
                 //sua db
                 //var semester = project.Idea.StageIdea.Semester;
-                var semester = project.Topic.Idea.StageIdea.Semester;
+                //var semester = project.Topic.Idea.StageIdea.Semester;
+                var semester = project.Topic.IdeaVersion.StageIdea.Semester;
                 //update status
                 project.Status = ProjectStatus.InProgress;
                 //update teamCode
@@ -635,7 +642,7 @@ public class IdeaService : BaseService<Idea>, IIdeaService
                 string newTeamCode = $"{semesterCode}SE{nextNumber:D3}";
                 //sua db
                 //project.Idea = null;
-                project.Topic.Idea = null;
+                project.Topic.IdeaVersion = null;
                 await SetBaseEntityForUpdate(project);
                 _projectRepository.Update(project);
                 var isSuccess = await _unitOfWork.SaveChanges();

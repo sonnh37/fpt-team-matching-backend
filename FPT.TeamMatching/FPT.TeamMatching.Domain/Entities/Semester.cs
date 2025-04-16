@@ -17,8 +17,6 @@ public class Semester : BaseEntity
     public DateTimeOffset? StartDate { get; set; }
 
     public DateTimeOffset? EndDate { get; set; }
-    
-    public int? NumberReviewer {  get; set; }
 
     public CriteriaForm? CriteriaForm { get; set; }
 

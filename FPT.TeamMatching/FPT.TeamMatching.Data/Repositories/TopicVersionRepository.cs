@@ -23,7 +23,7 @@ namespace FPT.TeamMatching.Data.Repositories
         {
             //sua db
            //return await GetQueryable().Where(h => h.IdeaId == ideaId).ToListAsync();
-           return await GetQueryable().Where(h => h.Topic.IdeaId == ideaId).ToListAsync();
+           return await GetQueryable().Where(h => h.Topic.IdeaVersionId == ideaId).ToListAsync();
         }
     }
 }

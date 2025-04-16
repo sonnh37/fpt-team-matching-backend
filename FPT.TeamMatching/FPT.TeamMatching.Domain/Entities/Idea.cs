@@ -7,8 +7,6 @@ public class Idea : BaseEntity
 {
     public Guid? OwnerId { get; set; }
 
-    public Guid? StageIdeaId { get; set; }
-
     public Guid? MentorId { get; set; }
 
     public Guid? SubMentorId { get; set; }
@@ -45,13 +43,5 @@ public class Idea : BaseEntity
     
     public virtual Specialty? Specialty { get; set; }
 
-    public virtual StageIdea? StageIdea { get; set; }
-
-    public virtual Topic? Topic { get; set; }
-
-    public virtual ICollection<IdeaRequest> IdeaRequests { get; set; } = new List<IdeaRequest>();
-    
-    public virtual ICollection<TopicVersion> TopicVersions { get; set; } = new List<TopicVersion>();
-
-    public virtual ICollection<MentorIdeaRequest> MentorIdeaRequests { get; set; } = new List<MentorIdeaRequest>();
+    public virtual ICollection<IdeaVersion> IdeaVersions { get; set; } = new List<IdeaVersion>();
 }

@@ -178,7 +178,7 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
 
         //sua db
         //queryable = queryable.Where(m => m.Idea != null && m.Idea.MentorId == userId);
-        queryable = queryable.Where(m => m.Topic.Idea != null && m.Topic.Idea.MentorId == userId);
+        queryable = queryable.Where(m => m.Topic.IdeaVersionId != null && m.Topic.IdeaVersionId == userId);
 
         queryable = BaseFilterHelper.Base(queryable, query);
         if (query.IsPagination)

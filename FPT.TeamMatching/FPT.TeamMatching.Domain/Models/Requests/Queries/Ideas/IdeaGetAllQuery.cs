@@ -41,7 +41,6 @@ namespace FPT.TeamMatching.Domain.Models.Requests.Queries.Ideas
         public string? EnterpriseName { get; set; }
 
         public int? MaxTeamSize { get; set; }
-
         
         // add more to get query
         

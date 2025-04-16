@@ -19,8 +19,6 @@ public class SemesterResult : BaseResult
 
     public DateTimeOffset? EndDate { get; set; }
 
-    public int? NumberReviewer { get; set; }
-
     public CriteriaFormResult? CriteriaForm { get; set; }
 
     public virtual ICollection<ProfileStudentResult> ProfileStudents { get; set; } = new List<ProfileStudentResult>();

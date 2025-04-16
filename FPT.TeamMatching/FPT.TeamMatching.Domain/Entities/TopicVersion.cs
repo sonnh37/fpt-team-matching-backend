@@ -16,4 +16,7 @@ public class TopicVersion : BaseEntity
     public int ReviewStage  { get; set; }
 
     public virtual Topic? Topic { get; set; }
+
+    public virtual ICollection<TopicVersionRequest> TopicVersionRequests { get; set; } = new List<TopicVersionRequest>();
+
 }

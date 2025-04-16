@@ -322,7 +322,7 @@ public class ProjectService : BaseService<Project>, IProjectService
             {
                 //sua db
                 //dt.Rows.Add(index++, item.Idea.IdeaCode, item.Idea.EnglishName);
-                dt.Rows.Add(index++, item.Topic.TopicCode, item.Topic.Idea.EnglishName);
+                dt.Rows.Add(index++, item.Topic.TopicCode, item.Topic.IdeaVersion.Idea.EnglishName);
             });
         }
         return dt;
