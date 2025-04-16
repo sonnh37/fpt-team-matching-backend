@@ -5,8 +5,8 @@ using FPT.TeamMatching.Domain.Models.Requests.Queries.Base;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.BlogCvs;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Blogs;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Comments;
-using FPT.TeamMatching.Domain.Models.Requests.Queries.IdeaRequests;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Ideas;
+using FPT.TeamMatching.Domain.Models.Requests.Queries.IdeaVersionRequest;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Invitations;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Likes;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Notifications;
@@ -31,8 +31,8 @@ public static class FilterHelper
                 Project((queryable as IQueryable<Project>)!, ProjectQuery) as IQueryable<TEntity>,
             CommentGetAllQuery commentQuery =>
                 Comment((queryable as IQueryable<Comment>)!, commentQuery) as IQueryable<TEntity>,
-            IdeaRequestGetAllQuery ideaRequestQuery =>
-                IdeaRequest((queryable as IQueryable<IdeaRequest>)!, ideaRequestQuery) as IQueryable<TEntity>,
+            IdeaVersionRequestGetAllQuery ideaRequestQuery =>
+                IdeaRequest((queryable as IQueryable<IdeaVersionRequest>)!, ideaRequestQuery) as IQueryable<TEntity>,
             IdeaGetAllQuery ideaQuery =>
                 Idea((queryable as IQueryable<Idea>)!, ideaQuery) as IQueryable<TEntity>,
             InvitationGetAllQuery invitationQuery =>
@@ -47,41 +47,46 @@ public static class FilterHelper
         };
     }
 
-    private static IQueryable<Project>? Project(IQueryable<Project> queryable, ProjectGetAllQuery query)
+    private static IQueryable<BaseEntity> Project(IQueryable<Project> projects, ProjectGetAllQuery projectQuery)
     {
-        if (query.IsHasTeam)
-        {
-            queryable = queryable.Where(m => m.TeamMembers.Count > 0);
-        }
-
-        if (query.SpecialtyId != null)
-        {
-            queryable = queryable.Where(m => m.Idea != null && m.Idea.SpecialtyId == query.SpecialtyId);
-        }
-
-        if (query.ProfessionId != null)
-        {
-            queryable = queryable.Where(m =>
-                m.Idea != null &&
-                m.Idea.Specialty != null && m.Idea.Specialty.Profession != null &&
-                m.Idea.Specialty.Profession.Id == query.ProfessionId);
-        }
-        
-        if (!string.IsNullOrEmpty(query.EnglishName))
-        {
-            queryable = queryable.Where(m =>
-                m.Idea != null && m.Idea.EnglishName != null && m.Idea.EnglishName.ToLower().Trim().Contains(query.EnglishName.ToLower().Trim()));
-        }
-
-        if (query.Status != null)
-        {
-            queryable = queryable.Where(m => m.Status == query.Status);
-        }
-
-        queryable = BaseFilterHelper.Base(queryable, query);
-
-        return queryable;
+        throw new NotImplementedException();
     }
+
+    //private static IQueryable<Project>? Project(IQueryable<Project> queryable, ProjectGetAllQuery query)
+    //{
+    //    if (query.IsHasTeam)
+    //    {
+    //        queryable = queryable.Where(m => m.TeamMembers.Count > 0);
+    //    }
+
+    //    if (query.SpecialtyId != null)
+    //    {
+    //        queryable = queryable.Where(m => m.Idea != null && m.Idea.SpecialtyId == query.SpecialtyId);
+    //    }
+
+    //    if (query.ProfessionId != null)
+    //    {
+    //        queryable = queryable.Where(m =>
+    //            m.Idea != null &&
+    //            m.Idea.Specialty != null && m.Idea.Specialty.Profession != null &&
+    //            m.Idea.Specialty.Profession.Id == query.ProfessionId);
+    //    }
+
+    //    if (!string.IsNullOrEmpty(query.EnglishName))
+    //    {
+    //        queryable = queryable.Where(m =>
+    //            m.Idea != null && m.Idea.EnglishName != null && m.Idea.EnglishName.ToLower().Trim().Contains(query.EnglishName.ToLower().Trim()));
+    //    }
+
+    //    if (query.Status != null)
+    //    {
+    //        queryable = queryable.Where(m => m.Status == query.Status);
+    //    }
+
+    //    queryable = BaseFilterHelper.Base(queryable, query);
+
+    //    return queryable;
+    //}
 
     private static IQueryable<StageIdea>? StageIdea(IQueryable<StageIdea> queryable, StageIdeaGetAllQuery query)
     {
@@ -262,7 +267,7 @@ public static class FilterHelper
         return queryable;
     }
 
-    private static IQueryable<IdeaRequest>? IdeaRequest(IQueryable<IdeaRequest> queryable, IdeaRequestGetAllQuery query)
+    private static IQueryable<IdeaVersionRequest>? IdeaRequest(IQueryable<IdeaVersionRequest> queryable, IdeaVersionRequestGetAllQuery query)
     {
         if (query.Status.HasValue)
         {

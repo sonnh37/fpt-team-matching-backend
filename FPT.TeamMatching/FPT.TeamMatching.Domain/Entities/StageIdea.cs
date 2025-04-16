@@ -21,6 +21,8 @@ namespace FPT.TeamMatching.Domain.Entities
         
         public int StageNumber  { get; set; }
 
-        public virtual ICollection<Idea> Ideas { get; set; } = new List<Idea>();
+        public int? NumberReviewer { get; set; }
+
+        public virtual ICollection<IdeaVersion> IdeaVersions { get; set; } = new List<IdeaVersion>();
     }
 }

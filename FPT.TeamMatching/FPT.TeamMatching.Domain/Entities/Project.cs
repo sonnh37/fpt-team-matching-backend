@@ -7,7 +7,7 @@ public class Project : BaseEntity
 {
     public Guid? LeaderId { get; set; }
 
-    public Guid? IdeaId { get; set; }
+    public Guid? TopicId { get; set; }
 
     public string? TeamCode { get; set; }
 
@@ -21,7 +21,7 @@ public class Project : BaseEntity
 
     public virtual User? Leader { get; set; }
 
-    public virtual Idea? Idea { get; set; }
+    public virtual Topic? Topic { get; set; }
 
     public virtual MentorFeedback? MentorFeedback { get; set; }
 
@@ -33,7 +33,7 @@ public class Project : BaseEntity
     
     public virtual ICollection<Blog> Blogs { get; set; } = new List<Blog>();
 
-    public virtual ICollection<MentorIdeaRequest> MentorIdeaRequests { get; set; } = new List<MentorIdeaRequest>();
+    public virtual ICollection<MentorTopicRequest> MentorTopicRequests { get; set; } = new List<MentorTopicRequest>();
 
     public virtual ICollection<CapstoneSchedule> CapstoneSchedules { get; set; } = new List<CapstoneSchedule>();
 

@@ -18,15 +18,23 @@ using Profile = AutoMapper.Profile;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Ideas;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Professions;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Specialties;
-using FPT.TeamMatching.Domain.Models.Requests.Commands.IdeaHistories;
-using FPT.TeamMatching.Domain.Models.Requests.Commands.IdeaHistoryRequests;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Semester;
-using FPT.TeamMatching.Domain.Models.Requests.Commands.IdeaRequests;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.StageIdeas;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.CapstoneSchedules;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.MentorFeedbacks;
-using FPT.TeamMatching.Domain.Models.Requests.Commands.MentorIdeaRequests;
+using FPT.TeamMatching.Domain.Models.Requests.Commands.MentorTopicRequests;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Timelines;
+using FPT.TeamMatching.Domain.Models.Requests.Commands.TopicVersions;
+using FPT.TeamMatching.Domain.Models.Requests.Commands.Roles;
+using FPT.TeamMatching.Domain.Models.Requests.Commands.UserXRoles;
+using FPT.TeamMatching.Domain.Models.Requests.Commands.Topics;
+using FPT.TeamMatching.Domain.Models.Requests.Commands.Criterias;
+using FPT.TeamMatching.Domain.Models.Requests.Commands.CriteriaForms;
+using FPT.TeamMatching.Domain.Models.Requests.Commands.CriteriaXCriteriaForms;
+using FPT.TeamMatching.Domain.Models.Requests.Commands.AnswerCriterias;
+using FPT.TeamMatching.Domain.Models.Requests.Commands.IdeaVersionRequests;
+using FPT.TeamMatching.Domain.Models.Requests.Commands.IdeaVersions;
+using FPT.TeamMatching.Domain.Models.Requests.Commands.TopicVersionRequests;
 
 namespace FPT.TeamMatching.Domain.Configs.Mapping;
 
@@ -46,12 +54,16 @@ public class MappingProfile : Profile
         #region Role
 
         CreateMap<Role, RoleResult>().ReverseMap();
+        CreateMap<Role, RoleCreateCommand>().ReverseMap();
+        CreateMap<Role, RoleUpdateCommand>().ReverseMap();
 
         #endregion
 
         #region UserXRole
 
         CreateMap<UserXRole, UserXRoleResult>().ReverseMap();
+        CreateMap<UserXRole, UserXRoleCreateCommand>().ReverseMap();
+        CreateMap<UserXRole, UserXRoleUpdateCommand>().ReverseMap();
 
         #endregion
 
@@ -113,20 +125,28 @@ public class MappingProfile : Profile
 
         #endregion
 
+        #region IdeaVersion
+
+        CreateMap<IdeaVersion, IdeaVersionResult>().ReverseMap();
+        CreateMap<IdeaVersion, IdeaVersionCreateCommand>().ReverseMap();
+        CreateMap<IdeaVersion, IdeaVersionUpdateCommand>().ReverseMap();
+
+        #endregion
+
+        #region IdeaVersionRequest
+
+        CreateMap<IdeaVersionRequest, IdeaVersionRequestResult>().ReverseMap();
+        CreateMap<IdeaVersionRequest, IdeaVersionRequestCreateCommand>().ReverseMap();
+        CreateMap<IdeaVersionRequest, IdeaVersionRequestUpdateCommand>().ReverseMap();
+        CreateMap<IdeaVersionRequest, IdeaVersionRequestLecturerOrCouncilResponseCommand>().ReverseMap();
+
+        #endregion
+
         #region BlogCv
 
         CreateMap<BlogCv, BlogCvResult>().ReverseMap();
         CreateMap<BlogCv, BlogCvCreateCommand>().ReverseMap();
         CreateMap<BlogCv, BlogCvUpdateCommand>().ReverseMap();
-
-        #endregion
-
-        #region IdeaRequest
-
-        CreateMap<IdeaRequest, IdeaRequestResult>().ReverseMap();
-        CreateMap<IdeaRequest, IdeaRequestCreateCommand>().ReverseMap();
-        CreateMap<IdeaRequest, IdeaRequestUpdateCommand>().ReverseMap();
-        CreateMap<IdeaRequest, IdeaRequestLecturerOrCouncilResponseCommand>().ReverseMap();
 
         #endregion
 
@@ -217,19 +237,27 @@ public class MappingProfile : Profile
 
         #endregion
 
-        #region IdeaHistory
+        #region Topic
 
-        CreateMap<IdeaHistory, IdeaHistoryResult>().ReverseMap();
-        CreateMap<IdeaHistory, IdeaHistoryCreateCommand>().ReverseMap();
-        CreateMap<IdeaHistory, IdeaHistoryUpdateCommand>().ReverseMap();
+        CreateMap<Topic, TopicResult>().ReverseMap();
+        CreateMap<Topic, TopicCreateCommand>().ReverseMap();
+        CreateMap<Topic, TopicUpdateCommand>().ReverseMap();
 
         #endregion
 
-        #region IdeaHistoryRequest
+        #region TopicVersion
 
-        CreateMap<IdeaHistoryRequest, IdeaHistoryRequestResult>().ReverseMap();
-        CreateMap<IdeaHistoryRequest, IdeaHistoryRequestCreateCommand>().ReverseMap();
-        CreateMap<IdeaHistoryRequest, IdeaHistoryRequestUpdateCommand>().ReverseMap();
+        CreateMap<TopicVersion, TopicVersionResult>().ReverseMap();
+        CreateMap<TopicVersion, TopicVersionCreateCommand>().ReverseMap();
+        CreateMap<TopicVersion, TopicVersionUpdateCommand>().ReverseMap();
+
+        #endregion
+
+        #region TopicVersionRequest
+
+        CreateMap<TopicVersionRequest, TopicVersionRequestResult>().ReverseMap();
+        CreateMap<TopicVersionRequest, TopicVersionRequestCreateCommand>().ReverseMap();
+        CreateMap<TopicVersionRequest, TopicVersionRequestUpdateCommand>().ReverseMap();
 
         #endregion
 
@@ -247,11 +275,11 @@ public class MappingProfile : Profile
 
         #endregion
 
-        #region MentorIdeaRequest
-        CreateMap<MentorIdeaRequest, MentorIdeaRequestResult>().ReverseMap();
-        CreateMap<MentorIdeaRequest, MentorIdeaRequestCreateCommand>().ReverseMap();
-        CreateMap<MentorIdeaRequest, MentorIdeaRequestUpdateCommand>().ReverseMap();
-        CreateMap<MentorIdeaRequest, StudentRequest>().ReverseMap();
+        #region MentorTopicRequest
+        CreateMap<MentorTopicRequest, MentorTopicRequestResult>().ReverseMap();
+        CreateMap<MentorTopicRequest, MentorTopicRequestCreateCommand>().ReverseMap();
+        CreateMap<MentorTopicRequest, MentorTopicRequestUpdateCommand>().ReverseMap();
+        CreateMap<MentorTopicRequest, StudentRequest>().ReverseMap();
 
         #endregion
 
@@ -268,6 +296,35 @@ public class MappingProfile : Profile
         CreateMap<Timeline, TimelineUpdateCommand>().ReverseMap();
 
         #endregion
+
+        #region Criteria
+        CreateMap<Criteria, CriteriaResult>().ReverseMap();
+        CreateMap<Criteria, CriteriaCreateCommand>().ReverseMap();
+        CreateMap<Criteria, CriteriaUpdateCommand>().ReverseMap();
+
+        #endregion
+
+        #region CriteriaForm
+        CreateMap<CriteriaForm, CriteriaFormResult>().ReverseMap();
+        CreateMap<CriteriaForm, CriteriaFormCreateCommand>().ReverseMap();
+        CreateMap<CriteriaForm, CriteriaFormUpdateCommand>().ReverseMap();
+
+        #endregion
+
+        #region CriteriaXCriteriaForm
+        CreateMap<CriteriaXCriteriaForm, CriteriaXCriteriaFormResult>().ReverseMap();
+        CreateMap<CriteriaXCriteriaForm, CriteriaXCriteriaFormCreateCommand>().ReverseMap();
+        CreateMap<CriteriaXCriteriaForm, CriteriaXCriteriaFormUpdateCommand>().ReverseMap();
+
+        #endregion
+
+        #region AnswerCriteria
+        CreateMap<AnswerCriteria, AnswerCriteriaResult>().ReverseMap();
+        CreateMap<AnswerCriteria, AnswerCriteriaCreateCommand>().ReverseMap();
+        CreateMap<AnswerCriteria, AnswerCriteriaUpdateCommand>().ReverseMap();
+
+        #endregion
+
 
     }
 }

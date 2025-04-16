@@ -91,6 +91,7 @@ public class ReviewService : BaseService<Review>, IReviewService
     {
         //Tim project den thgian bat dau
         var projects = await _projectRepository.GetProjectsStartingNow();
+        var reviews = await _reviewRepository.GetAll();
         if (projects == null)
         {
             return;
@@ -99,16 +100,19 @@ public class ReviewService : BaseService<Review>, IReviewService
         {
             for (int i = 1; i <= 3; i++)
             {
-                var review = new Review
+                if (reviews.FirstOrDefault(x => x.ProjectId == project.Id && x.Number == i) == null)
                 {
-                    ProjectId = project.Id,
-                    Number = i
-                };
+                    var review = new Review
+                    {
+                        ProjectId = project.Id,
+                        Number = i
+                    };
 
-                await SetBaseEntityForCreation(review);
+                    await SetBaseEntityForCreation(review);
 
-                // Thêm vào repository
-                _reviewRepository.Add(review);
+                    // Thêm vào repository
+                    _reviewRepository.Add(review);
+                }
             }
         }
 
@@ -409,7 +413,7 @@ public class ReviewService : BaseService<Review>, IReviewService
                 // Nếu reviews có ít dòng hơn, thêm các dòng trống vào cuối
                 if (reviewRowCount < projectRowCount)
                 {
-                    int missingRows = projectRowCount - reviewRowCount;
+                    int missingRows = projectRowCount - reviewRowCount - 1;
                     for (int i = 0; i < missingRows; i++)
                     {
                         DataRow newRow = reviews.NewRow();
@@ -622,11 +626,12 @@ public class ReviewService : BaseService<Review>, IReviewService
         int index = 1;
         projects.ForEach(item =>
         {
-            dt.Rows.Add(index++, item.Idea.IdeaCode, item.TeamCode,
-                item.Idea.EnglishName, item.Idea.VietNamName,
-                item.Idea.Mentor.LastName + " " + item.Idea.Mentor.FirstName,
-                item.Idea.Mentor.Code,
-                (item.Idea.SubMentorId == null ? null : item.Idea.SubMentor.Code));
+            //sua db
+            //dt.Rows.Add(index++, item.Idea.IdeaCode, item.TeamCode,
+            //    item.Idea.EnglishName, item.Idea.VietNamName,
+            //    item.Idea.Mentor.LastName + " " + item.Idea.Mentor.FirstName,
+            //    item.Idea.Mentor.Code,
+            //    (item.Idea.SubMentorId == null ? null : item.Idea.SubMentor.Code));
         });
         return dt;
     }

@@ -35,7 +35,6 @@ public class ProfileStudentService : BaseService<ProfileStudent>, IProfileStuden
             var profile = _mapper.Map<ProfileStudentCreateCommand, ProfileStudent>(profileStudent);
             profile.UserId = userId;
             profile.SemesterId = semesterCurrent?.Id;
-            profile.IsQualifiedForAcademicProject = true;
             await SetBaseEntityForUpdate(profile);
             _unitOfWork.ProfileStudentRepository.Add(profile);
 

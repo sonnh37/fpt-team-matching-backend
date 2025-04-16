@@ -35,9 +35,7 @@ public class User : BaseEntity
 
     public virtual ICollection<Blog> Blogs { get; set; } = new List<Blog>();
 
-    public virtual ICollection<IdeaRequest> IdeaRequestOfReviewers { get; set; } = new List<IdeaRequest>();
-
-    public virtual ICollection<IdeaHistoryRequest> IdeaHistoryRequestOfReviewers { get; set; } = new List<IdeaHistoryRequest>();
+    public virtual ICollection<IdeaVersionRequest> IdeaRequestOfReviewers { get; set; } = new List<IdeaVersionRequest>();
 
     public virtual ICollection<Idea> IdeaOfOwners { get; set; } = new List<Idea>();
 
@@ -45,7 +43,7 @@ public class User : BaseEntity
 
     public virtual ICollection<Idea> IdeaOfSubMentors { get; set; } = new List<Idea>();
 
-    public virtual ICollection<IdeaHistory> IdeaHistoryOfCouncils { get; set; } = new List<IdeaHistory>();
+    public virtual ICollection<TopicVersionRequest> TopicVersionReviewers { get; set; } = new List<TopicVersionRequest>();
 
     public virtual ICollection<UserXRole> UserXRoles { get; set; } = new List<UserXRole>();
 

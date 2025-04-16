@@ -8,8 +8,6 @@ namespace FPT.TeamMatching.Domain.Models.Results
     {
         public Guid? OwnerId { get; set; }
 
-        public Guid? StageIdeaId { get; set; }
-
         public Guid? MentorId { get; set; }
 
         public Guid? SubMentorId { get; set; }
@@ -17,8 +15,6 @@ namespace FPT.TeamMatching.Domain.Models.Results
         public IdeaType? Type { get; set; }
 
         public Guid? SpecialtyId { get; set; }
-
-        public string? IdeaCode { get; set; }
 
         public string? Description { get; set; }
 
@@ -48,16 +44,6 @@ namespace FPT.TeamMatching.Domain.Models.Results
 
         public SpecialtyResult? Specialty { get; set; }
 
-        public ProjectResult? Project { get; set; }
-
-        public StageIdeaResult? StageIdea { get; set; }
-
-        public ICollection<IdeaRequestResult> IdeaRequests { get; set; } = new List<IdeaRequestResult>();
-        
-        public ICollection<IdeaHistoryResult> IdeaHistories { get; set; } = new List<IdeaHistoryResult>();
-        
-        public ICollection<MentorIdeaRequestResult> MentorIdeaRequests { get; set; } = new List<MentorIdeaRequestResult>();
-
-
+        public ICollection<IdeaVersionResult> IdeaRequests { get; set; } = new List<IdeaVersionResult>();
     }
 }

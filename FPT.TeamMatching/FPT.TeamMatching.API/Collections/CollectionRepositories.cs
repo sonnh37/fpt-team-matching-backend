@@ -14,8 +14,7 @@ public static class CollectionRepositories
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IReviewRepository, ReviewRepository>();
         services.AddScoped<IProjectRepository, ProjectRepository>();
-        services.AddScoped<IIdeaRepository, IdeaRepository>();
-        services.AddScoped<IIdeaRequestRepository, IdeaRequestRepository>();
+        
         services.AddScoped<IInvitationRepository, InvitationRepository>();
         services.AddScoped<IBlogRepository, BlogRepository>();
         services.AddScoped<ILikeRepository, LikeRepository>();
@@ -32,15 +31,28 @@ public static class CollectionRepositories
         services.AddScoped<IConversationMemberRepository, ConversationMemberRepository>();
         services.AddScoped<IRoleRepository, RoleRepository>();
         services.AddScoped<IUserXRoleRepository, UserXRoleRepository>();
+
         services.AddScoped<IProfessionRepository, ProfessionRepository>();
         services.AddScoped<ISpecialtyRepository, SpecialtyRepository>();
+
         services.AddScoped<ISemesterRepository, SemesterRepository>();
-        services.AddScoped<IIdeaHistoryRepository, IdeaHistoryRepository>();
-        services.AddScoped<IIdeaHistoryRequestRepository, IdeaHistoryRequestRepository>();
+        services.AddScoped<ITimelineRepository, TimelineRepository>();
         services.AddScoped<IStageIdeaRepositoty, StageIdeaRepository>();
         services.AddScoped<ICapstoneScheduleRepository, CapstoneScheduleRepository>();
-        services.AddScoped<IMentorIdeaRequestRepository, MentorIdeaRequestRepository>();
+        services.AddScoped<IMentorTopicRequestRepository, MentorTopicRequestRepository>();
         services.AddScoped<IMentorFeedbackRepository, MentorFeedbackRepository>();
-        services.AddScoped<ITimelineRepository, TimelineRepository>();
+
+        services.AddScoped<IIdeaRepository, IdeaRepository>();
+        services.AddScoped<IIdeaVersionRepository, IdeaVersionRepository>();
+        services.AddScoped<IIdeaVersionRequestRepository, IdeaVersionRequestRepository>();
+
+        services.AddScoped<ITopicRepository, TopicRepository>();
+        services.AddScoped<ITopicVersionRepository, TopicVersionRepository>();
+        services.AddScoped<ITopicVersionRequestRepository, TopicVersionRequestRepository>();
+
+        services.AddScoped<ICriteriaRepository, CriteriaRepository>();
+        services.AddScoped<ICriteriaFormRepository, CriteriaFormRepository>();
+        services.AddScoped<ICriteriaXCriteriaFormRepository, CriteriaXCriteriaFormRepository>();
+        services.AddScoped<IAnswerCriteriaRepository, AnswerCriteriaRepository>();
     }
 }

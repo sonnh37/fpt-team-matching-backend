@@ -41,11 +41,14 @@ public class ReviewRepository : BaseRepository<Review>, IReviewRepository
         var query = await _dbContext.Reviews.Where(e =>
                                     e.IsDeleted == false &&
                                     e.Number == number &&
-                                    e.Project != null &&
-                                    e.Project.Idea != null &&
-                                    e.Project.Idea.StageIdea != null &&
-                                    e.Project.Idea.StageIdea.SemesterId == semesterId)
-                                    .Include(e => e.Project).ThenInclude(e => e.Idea)
+                                    e.Project != null 
+                                    //sua db
+                                    //&&
+                                    //e.Project.Idea != null &&
+                                    //e.Project.Idea.StageIdea != null &&
+                                    //e.Project.Idea.StageIdea.SemesterId == semesterId
+                                    )
+                                    //.Include(e => e.Project).ThenInclude(e => e.Idea)
                                     .ToListAsync();
 
         return query;

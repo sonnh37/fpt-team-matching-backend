@@ -34,9 +34,10 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
         {
             var project = await _context.Projects.Where(e => e.Id == teamMember.ProjectId)
                 .Include(e => e.TeamMembers)
-                .ThenInclude(e => e.User).Include(e => e.Idea)
-                .ThenInclude(e => e.Specialty)
-                .ThenInclude(e => e.Profession)
+                //sua db
+                //.ThenInclude(e => e.User).Include(e => e.Idea)
+                //.ThenInclude(e => e.Specialty)
+                //.ThenInclude(e => e.Profession)
                 .Include(e => e.Invitations)
                 .FirstOrDefaultAsync();
             if (project != null)
@@ -58,13 +59,16 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
     {
         var today = DateTime.UtcNow.Date;
         var project = await _context.Projects
-            .Where(p => p.IsDeleted == false &&
-                        p.Idea != null &&
-                        p.Idea.StageIdea != null &&
-                        p.Idea.StageIdea.Semester != null &&
-                        p.Idea.StageIdea.Semester != null &&
-                        p.Idea.StageIdea.Semester.StartDate != null &&
-                        p.Idea.StageIdea.Semester.StartDate.Value.UtcDateTime.Date == today)
+            .Where(p => p.IsDeleted == false 
+                        //sua db
+                        //&&
+                        //p.Idea != null &&
+                        //p.Idea.StageIdea != null &&
+                        //p.Idea.StageIdea.Semester != null &&
+                        //p.Idea.StageIdea.Semester != null &&
+                        //p.Idea.StageIdea.Semester.StartDate != null &&
+                        //p.Idea.StageIdea.Semester.StartDate.Value.UtcDateTime.Date == today
+                        )
             .ToListAsync();
         return project;
     }
@@ -95,10 +99,13 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
     public async Task<int> NumberOfInProgressProjectInSemester(Guid semesterId)
     {
         var number = await _context.Projects.Where(e => e.Status == ProjectStatus.InProgress &&
-                                                        e.IsDeleted == false &&
-                                                        e.Idea != null &&
-                                                        e.Idea.StageIdea != null &&
-                                                        e.Idea.StageIdea.SemesterId == semesterId)
+                                                        e.IsDeleted == false
+                                                        //sua db
+                                                        //&&
+                                                        //e.Idea != null &&
+                                                        //e.Idea.StageIdea != null &&
+                                                        //e.Idea.StageIdea.SemesterId == semesterId
+                                                        )
             .CountAsync();
         return number;
     }
@@ -115,12 +122,16 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
     public async Task<List<Project>> GetProjectBySemesterIdAndDefenseStage(Guid semesterId, int defenseStage)
     {
         var project = await _context.Projects.Where(e => e.IsDeleted == false &&
-                                                         e.DefenseStage == defenseStage &&
-                                                         e.Idea != null &&
-                                                         e.Idea.StageIdea != null &&
-                                                         e.Idea.StageIdea.Semester != null &&
-                                                         e.Idea.StageIdea.Semester.Id == semesterId)
-            .Include(e => e.Idea)
+                                                         e.DefenseStage == defenseStage
+                                                         //sua db
+                                                         //&&
+                                                         //e.Idea != null &&
+                                                         //e.Idea.StageIdea != null &&
+                                                         //e.Idea.StageIdea.Semester != null &&
+                                                         //e.Idea.StageIdea.Semester.Id == semesterId
+                                                         )
+            //sua db
+            //.Include(e => e.Idea)
             .ToListAsync();
         return project;
     }
@@ -128,12 +139,16 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
     public async Task<List<Project>?> GetInProgressProjectBySemesterId(Guid semesterId)
     {
         var projects = await _context.Projects.Where(e => e.Status == ProjectStatus.InProgress &&
-                                                          e.IsDeleted == false &&
-                                                          e.Idea != null &&
-                                                          e.Idea.StageIdea != null &&
-                                                          e.Idea.StageIdea.SemesterId == semesterId)
-            .Include(e => e.Idea).ThenInclude(e => e.Mentor)
-            .Include(e => e.Idea).ThenInclude(e => e.SubMentor)
+                                                          e.IsDeleted == false 
+                                                          //sua db
+                                                          //&&
+                                                          //e.Idea != null &&
+                                                          //e.Idea.StageIdea != null &&
+                                                          //e.Idea.StageIdea.SemesterId == semesterId
+                                                          )
+            //sua db
+            //.Include(e => e.Idea).ThenInclude(e => e.Mentor)
+            //.Include(e => e.Idea).ThenInclude(e => e.SubMentor)
             .ToListAsync();
         return projects;
     }
@@ -156,11 +171,14 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
     {
         var queryable = GetQueryable();
         queryable = queryable
-            .Include(m => m.Idea)
+            //sua db
+            //.Include(m => m.Idea)
             .Include(m => m.Leader)
             .Include(m => m.MentorFeedback);
 
-        queryable = queryable.Where(m => m.Idea != null && m.Idea.MentorId == userId);
+        //sua db
+        //queryable = queryable.Where(m => m.Idea != null && m.Idea.MentorId == userId);
+        queryable = queryable.Where(m => m.Topic.IdeaVersionId != null && m.Topic.IdeaVersionId == userId);
 
         queryable = BaseFilterHelper.Base(queryable, query);
         if (query.IsPagination)

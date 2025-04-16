@@ -23,7 +23,8 @@ namespace FPT.TeamMatching.Data.Repositories
         {
             var capstoneSchedules = await _context.CapstoneSchedules.Where(e => e.IsDeleted == false &&
                                                                      e.ProjectId == projectId)
-                                                                .Include(e => e.Project).ThenInclude(e => e.Idea)
+                                                                //sua db
+                                                                //.Include(e => e.Project).ThenInclude(e => e.Idea)
                                                                 .Include(x => x.Project).ThenInclude(x => x.TeamMembers).ThenInclude(x => x.User)
                                                                 .ToListAsync();  
             return capstoneSchedules;
@@ -32,14 +33,19 @@ namespace FPT.TeamMatching.Data.Repositories
         public Task<List<CapstoneSchedule>?> GetBySemesterIdAndStage(Guid semesterId, int stage)
         {
             var capstoneSchedules = _context.CapstoneSchedules.Where(e => e.IsDeleted == false &&
-                                                                    e.Stage == stage &&
-                                                                    e.Project.Idea.StageIdea.Semester.Id == semesterId)
+                                                                    e.Stage == stage 
+                                                                    //sua db
+                                                                    //&&
+                                                                    //e.Project.Idea.StageIdea.Semester.Id == semesterId
+                                                                    )
                                                                 .Include(e => e.Project)
-                                                                .ThenInclude(e => e.Idea)
-                                                                .ThenInclude(e => e.Mentor)
+                                                                //sua db
+                                                                //.ThenInclude(e => e.Idea)
+                                                                //.ThenInclude(e => e.Mentor)
                                                                 .Include(e => e.Project)
-                                                                .ThenInclude(e => e.Idea)
-                                                                .ThenInclude(e => e.SubMentor)
+                                                                //sua db
+                                                                //.ThenInclude(e => e.Idea)
+                                                                //.ThenInclude(e => e.SubMentor)
                                                                 .ToListAsync();
             return capstoneSchedules;
         }
