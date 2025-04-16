@@ -357,17 +357,18 @@ public class UserService : BaseService<User>, IUserService
                     } while (reader.NextResult());
                 }
             }
+            var mapExistingUser = _mapper.Map<List<UserResult>>(users);
             _userRepository.AddRange(users);
             var saveChange = await _unitOfWork.SaveChanges();
             if (!saveChange)
             {
                 return new ResponseBuilder()
-                    .WithData(existingUsers)
+                    .WithData(mapExistingUser)
                     .WithStatus(Const.FAIL_CODE)
                     .WithMessage(Const.FAIL_SAVE_MSG);
             }
             return new ResponseBuilder()
-                .WithData(existingUsers)
+                .WithData(mapExistingUser)
                 .WithStatus(Const.SUCCESS_CODE)
                 .WithMessage(Const.SUCCESS_READ_MSG);
         }
@@ -415,6 +416,7 @@ public class UserService : BaseService<User>, IUserService
                 LastName = command.LastName,
                 Department = Department.HoChiMinh,
                 Username = command.Username,
+                Phone = command.Phone,
                 ProfileStudent = new ProfileStudent
                 {
                     UserId = null,
@@ -442,6 +444,48 @@ public class UserService : BaseService<User>, IUserService
             return new ResponseBuilder()
                 .WithStatus(Const.SUCCESS_CODE)
                 .WithMessage(Const.SUCCESS_READ_MSG);
+        }
+        catch (Exception e)
+        {
+            return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage(e.Message);
+        }
+    }
+
+    public async Task<BusinessResult> UpdateStudentExistedRange(UserResult[] users)
+    {
+        try
+        {
+            var upComingSemester = await _unitOfWork.SemesterRepository.GetUpComingSemester();
+            if (upComingSemester == null)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("No upcoming semester!");
+            }
+            var listEntity = _mapper.Map<List<User>>(users);
+            var userIds = listEntity.Select(x => x.Id).ToList();
+            var profileStudents = await _unitOfWork.ProfileStudentRepository.GetProfileByUserIds(userIds);
+            foreach (var user in listEntity)
+            {
+                user.ProfileStudent = profileStudents.FirstOrDefault(x => x.UserId == user.Id);
+                user.ProfileStudent ??= new ProfileStudent();
+                user.ProfileStudent.SemesterId = upComingSemester.Id;
+            }
+            _userRepository.UpdateRange(listEntity);
+            var saveChange = await _unitOfWork.SaveChanges();
+            if (!saveChange)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage(Const.FAIL_SAVE_MSG);
+            }
+            
+            return new ResponseBuilder()
+                .WithStatus(Const.SUCCESS_CODE)
+                .WithMessage(Const.SUCCESS_READ_MSG);
+            
         }
         catch (Exception e)
         {
