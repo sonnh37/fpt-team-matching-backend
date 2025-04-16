@@ -12,8 +12,6 @@ public class ProfileStudent : BaseEntity
 
     public string? Bio { get; set; }
 
-    public bool IsQualifiedForAcademicProject { get; set; }
-
     public string? Achievement { get; set; }
     
     public string? ExperienceProject { get; set; }

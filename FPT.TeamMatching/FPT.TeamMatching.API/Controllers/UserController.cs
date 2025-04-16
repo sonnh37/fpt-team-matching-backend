@@ -1,4 +1,5 @@
 ﻿using FPT.TeamMatching.Domain.Contracts.Services;
+using FPT.TeamMatching.Domain.Models;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Users;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Users;
 using FPT.TeamMatching.Domain.Models.Results;
@@ -108,6 +109,20 @@ public class UserController : ControllerBase
     public async Task<IActionResult> GetRoleReviewer()
     {
         var msg = await _userService.GetAllReviewer();
+        return Ok(msg);
+    }
+
+    [HttpPost("import/students/many")]
+    public async Task<IActionResult> ImportStudents([FromForm] ImportUserModel file)
+    {
+        var msg = await _userService.ImportStudents(file.file);
+        return Ok(msg);
+    }
+
+    [HttpPost("import/students/one")]
+    public async Task<IActionResult> ImportStudent([FromBody] CreateByManagerCommand command)
+    {
+        var msg = await _userService.ImportStudent(command);
         return Ok(msg);
     }
 }
