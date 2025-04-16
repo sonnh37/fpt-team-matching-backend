@@ -2,8 +2,9 @@
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Users;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Users;
 using FPT.TeamMatching.Domain.Models.Responses;
-using FPT.TeamMatching.Domain.Models.Results.Bases;
+using FPT.TeamMatching.Domain.Models.Results;
 using Microsoft.AspNetCore.Http;
+using BaseResult = FPT.TeamMatching.Domain.Models.Results.Bases.BaseResult;
 
 namespace FPT.TeamMatching.Domain.Contracts.Services;
 
@@ -41,4 +42,5 @@ public interface IUserService : IBaseService
     Task<BusinessResult> GetAllReviewer();
     Task<BusinessResult> ImportStudents(IFormFile file);
     Task<BusinessResult> ImportStudent(CreateByManagerCommand command);
+    Task<BusinessResult> UpdateStudentExistedRange(UserResult[] users);
 }
