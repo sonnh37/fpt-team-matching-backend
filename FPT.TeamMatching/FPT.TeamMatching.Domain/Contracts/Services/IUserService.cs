@@ -42,5 +42,7 @@ public interface IUserService : IBaseService
     Task<BusinessResult> GetAllReviewer();
     Task<BusinessResult> ImportStudents(IFormFile file);
     Task<BusinessResult> ImportStudent(CreateByManagerCommand command);
+    Task<BusinessResult> ImportLecturers(IFormFile file);
+    Task<BusinessResult> ImportLecturer(CreateByManagerCommand command);
     Task<BusinessResult> UpdateStudentExistedRange(UserResult[] users);
 }

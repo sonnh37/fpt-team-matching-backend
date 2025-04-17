@@ -125,6 +125,20 @@ public class UserController : ControllerBase
         var msg = await _userService.ImportStudent(command);
         return Ok(msg);
     }
+    
+    [HttpPost("import/lecturers/many")]
+    public async Task<IActionResult> ImportLecturers([FromForm] ImportUserModel file)
+    {
+        var msg = await _userService.ImportLecturers(file.file);
+        return Ok(msg);
+    }
+
+    [HttpPost("import/lecturers/one")]
+    public async Task<IActionResult> ImportLecturer([FromBody] CreateByManagerCommand command)
+    {
+        var msg = await _userService.ImportLecturer(command);
+        return Ok(msg);
+    }
 
     [HttpPut("import/students/update-existed")]
     public async Task<IActionResult> UpdateStudentExistedRange([FromBody] UserResult[] userResults)
