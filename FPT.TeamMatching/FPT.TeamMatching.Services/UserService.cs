@@ -317,7 +317,7 @@ public class UserService : BaseService<User>, IUserService
                             if (emailRaw == null || string.IsNullOrWhiteSpace(emailRaw.ToString()))
                                 break;
                             var email = reader.GetValue(1).ToString();
-                            if (userDictionary[email] != null)
+                            if (userDictionary.ContainsKey(email))
                             {
                                 existingUsers.Add(userDictionary[email]);
                                 continue;
@@ -357,7 +357,14 @@ public class UserService : BaseService<User>, IUserService
                     } while (reader.NextResult());
                 }
             }
-            var mapExistingUser = _mapper.Map<List<UserResult>>(users);
+            var mapExistingUser = _mapper.Map<List<UserResult>>(existingUsers);
+            if (users.Count == 0 && mapExistingUser.Count > 0)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(3)
+                    .WithData(mapExistingUser)
+                    .WithMessage("Danh sách cập nhật đang bị trùng hoặc không tồn tại.");
+            }
             _userRepository.AddRange(users);
             var saveChange = await _unitOfWork.SaveChanges();
             if (!saveChange)
@@ -369,8 +376,8 @@ public class UserService : BaseService<User>, IUserService
             }
             return new ResponseBuilder()
                 .WithData(mapExistingUser)
-                .WithStatus(Const.SUCCESS_CODE)
-                .WithMessage(Const.SUCCESS_READ_MSG);
+                .WithStatus(mapExistingUser.Any() ? 2 : Const.SUCCESS_CODE)
+                .WithMessage(mapExistingUser.Any() ? "Cập nhật thành công. Nhưng vẫn còn những tài khoản đang bị trùng." : Const.SUCCESS_SAVE_MSG);
         }
         catch (Exception e)
         {
@@ -486,6 +493,186 @@ public class UserService : BaseService<User>, IUserService
                 .WithStatus(Const.SUCCESS_CODE)
                 .WithMessage(Const.SUCCESS_READ_MSG);
             
+        }
+        catch (Exception e)
+        {
+            return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage(e.Message);
+        }
+    }
+    public async Task<BusinessResult> ImportLecturers(IFormFile file)
+    {
+       try
+        {
+            List<User> users = new List<User>();
+            List<User> existingUsers = new List<User>();
+            Dictionary<string, User> userDictionary = new Dictionary<string, User>();
+            var usersQueryable = await _userRepository.GetQueryable().ToListAsync();
+            
+            foreach (var user in usersQueryable)
+            {
+                userDictionary.Add(user.Email, user);
+            }
+            
+            var roleLecture = await _unitOfWork.RoleRepository.GetByRoleName("Lecturer");
+            if (roleLecture == null)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("No role lecturer!");
+            }
+            System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
+            if (file == null || file.Length == 0)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("No file uploaded!");
+            }
+
+            var uploadsFolder = $"{Directory.GetCurrentDirectory()}/UploadFiles";
+
+            if (!Directory.Exists(uploadsFolder))
+            {
+                Directory.CreateDirectory(uploadsFolder);
+            }
+
+            var filePath = Path.Combine(uploadsFolder, file.Name);
+            
+            
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                file.CopyTo(stream);
+                using (var reader = ExcelReaderFactory.CreateReader(stream))
+                {
+                    reader.Read();
+                    reader.Read();
+                    do
+                    {
+                        while (reader.Read())
+                        {
+                            var emailRaw = reader.GetValue(1);
+                            if (emailRaw == null || string.IsNullOrWhiteSpace(emailRaw.ToString()))
+                                break;
+                            var email = reader.GetValue(1).ToString();
+                            if (userDictionary.ContainsKey(email))
+                            {
+                                existingUsers.Add(userDictionary[email]);
+                                continue;
+                            }
+                            var code = reader.GetValue(2).ToString();
+                            if (code == null || code.ToString() == "")
+                            {
+                                throw new Exception("User with with email: "+ email + " is not invalid code") ;
+                            }
+                            var firstname = reader.GetValue(3).ToString();
+                            var lastname = reader.GetValue(4).ToString();
+
+                            var user = new User
+                            {
+                                Email = email,
+                                Code = code,
+                                FirstName = firstname,
+                                LastName = lastname,
+                                Department = Department.HoChiMinh,
+                                Username = code.ToLower(),
+                                UserXRoles = new List<UserXRole>()
+                                {
+                                    new UserXRole
+                                    {
+                                        UserId = null,
+                                        RoleId = roleLecture.Id,
+                                    }
+                                }
+                            };
+                            users.Add(user);
+                        }
+                    } while (reader.NextResult());
+                }
+            }
+            var mapExistingUser = _mapper.Map<List<UserResult>>(existingUsers);
+            if (users.Count == 0 && mapExistingUser.Count > 0)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(3)
+                    .WithData(mapExistingUser)
+                    .WithMessage("Danh sách cập nhật đang bị trùng hoặc không tồn tại.");
+            }
+            _userRepository.AddRange(users);
+            var saveChange = await _unitOfWork.SaveChanges();
+            if (!saveChange)
+            {
+                return new ResponseBuilder()
+                    .WithData(mapExistingUser)
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage(Const.FAIL_SAVE_MSG);
+            }
+            return new ResponseBuilder()
+                .WithData(mapExistingUser)
+                .WithStatus(mapExistingUser.Any() ? 2 : Const.SUCCESS_CODE)
+                .WithMessage(mapExistingUser.Any() ? "Cập nhật thành công. Nhưng vẫn còn những tài khoản đang bị trùng." : Const.SUCCESS_SAVE_MSG);
+        }
+        catch (Exception e)
+        {
+            return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage(e.Message);
+        }
+    }
+
+    public async Task<BusinessResult> ImportLecturer(CreateByManagerCommand command)
+    {
+         try
+        {
+            var foundUser = await _userRepository.GetByEmail(command.Email);
+            if (foundUser != null)
+            {
+                var userModel = _mapper.Map<UserResult>(foundUser);
+                return new ResponseBuilder()
+                    .WithStatus(2)
+                    .WithData(userModel)
+                    .WithMessage("Tài khoản này đã tồn tại. Bạn có muốn cập nhật lại tài khoản này không ?");
+            }
+          
+            
+            var roleLecture = await _unitOfWork.RoleRepository.GetByRoleName("Lecturer");
+            if (roleLecture == null)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("No role lecturer!");
+            }
+            var user = new User
+            {
+                Email = command.Email,
+                Code = command.Code,
+                FirstName = command.FirstName,
+                LastName = command.LastName,
+                Department = Department.HoChiMinh,
+                Username = command.Username,
+                Phone = command.Phone,
+                UserXRoles = new List<UserXRole>()
+                {
+                    new UserXRole
+                    {
+                        UserId = null,
+                        RoleId = roleLecture.Id,
+                    }
+                }
+            };
+            _userRepository.Add(user);
+            var saveChange = await _unitOfWork.SaveChanges();
+
+            if (!saveChange)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage(Const.FAIL_SAVE_MSG);
+            }
+            
+            return new ResponseBuilder()
+                .WithStatus(Const.SUCCESS_CODE)
+                .WithMessage(Const.SUCCESS_READ_MSG);
         }
         catch (Exception e)
         {
