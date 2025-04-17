@@ -12,7 +12,7 @@ public class Semester : BaseEntity
 
     public string? SemesterPrefixName { get; set; }
 
-    public DateTimeOffset? PublicIdeaDate { get; set; }
+    public DateTimeOffset? PublicTopicDate { get; set; }
 
     public DateTimeOffset? StartDate { get; set; }
 
