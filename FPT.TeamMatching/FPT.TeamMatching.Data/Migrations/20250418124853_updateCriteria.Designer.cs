@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace FPT.TeamMatching.Data.Migrations
 {
     [DbContext(typeof(FPTMatchingDbContext))]
-    [Migration("20250417132600_updateSemesterfield")]
-    partial class updateSemesterfield
+    [Migration("20250418124853_updateCriteria")]
+    partial class updateCriteria
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -300,16 +300,13 @@ namespace FPT.TeamMatching.Data.Migrations
                     b.Property<DateTimeOffset?>("CreatedDate")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("Description")
-                        .HasColumnType("text");
-
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
 
-                    b.Property<string>("Name")
+                    b.Property<string>("Note")
                         .HasColumnType("text");
 
-                    b.Property<string>("Note")
+                    b.Property<string>("Question")
                         .HasColumnType("text");
 
                     b.Property<string>("UpdatedBy")
