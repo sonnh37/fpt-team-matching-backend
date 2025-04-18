@@ -170,10 +170,19 @@ public class NotificationService : BaseService<Notification>, INotificationServi
             var userIdClaim = GetUserIdFromClaims();
             if (userIdClaim == null)
                 return HandlerFailAuth();
-            
-            var userId = userIdClaim.Value;
-            var project = await _unitOfWork.ProjectRepository.GetProjectByUserIdLogin(userId);
-            var (data, total) = await _notificationRepository.GetDataByCurrentUser(query, userId, project?.Id);
+            var user = await GetUserAsync();
+            // var userId = userIdClaim.Value;
+            var project = await _unitOfWork.ProjectRepository.GetProjectByUserIdLogin(user.Id);
+            var (data, total) = await _notificationRepository.GetDataByCurrentUser(query, user.Id, project?.Id);
+            // var teamNotification = await _notificationRepository.GetTeamNotificationByProjectId(project?.Id);
+            // if (systemNotification.Count > 0)
+            // {
+            //     foreach (var notification in systemNotification)
+            //     {
+            //         data.Add(notification);
+            //         total++;
+            //     }
+            // }
             var results = _mapper.Map<List<NotificationResult>>(data);
             var response = new QueryResult(query, results, total);
 
@@ -426,6 +435,7 @@ public class NotificationService : BaseService<Notification>, INotificationServi
             var noti = _mapper.Map<Notification>(createCommand);
             noti.Id = Guid.NewGuid();
             noti.IsRead = false;
+            noti.ProjectId = createCommand.ProjectId;
             noti.Type = NotificationType.Team;
             await SetBaseEntityForCreation(noti);
             _notificationRepository.Add(noti);
@@ -436,15 +446,19 @@ public class NotificationService : BaseService<Notification>, INotificationServi
                 if (rs == null) return HandlerFail("No found notification");
 
                 //2. Push notification
-                foreach (var teamMember in teamMembers)
+                // foreach (var teamMember in teamMembers)
+                // {
+                //     if (teamMember.User == null) continue;
+                //     await SendNotification(teamMember.User.Id.ToString(), rs);
+                // }
+                if (createCommand.ProjectId.HasValue)
                 {
-                    if (teamMember.User == null) continue;
-                    await SendNotification(teamMember.User.Id.ToString(), rs);
+                    SendNotificationTeamBased(rs, createCommand.ProjectId.Value);
                 }
-
+                
                 return new ResponseBuilder()
                     .WithStatus(Const.SUCCESS_CODE)
-                    .WithMessage(Const.FAIL_SAVE_MSG);
+                    .WithMessage(Const.SUCCESS_SAVE_MSG);
             }
 
             return new ResponseBuilder()
@@ -479,16 +493,24 @@ public class NotificationService : BaseService<Notification>, INotificationServi
             await SetBaseEntityForCreation(noti);
             _notificationRepository.Add(noti);
             var isSuccess = await _unitOfWork.SaveChanges();
-            if (isSuccess)
+            if (!isSuccess)
             {
                 return new ResponseBuilder()
-                    .WithStatus(Const.SUCCESS_CODE)
-                    .WithMessage(Const.SUCCESS_SAVE_MSG);
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage(Const.FAIL_SAVE_MSG);
             }
-
+            var rs = await _notificationRepository.GetById(noti.Id);
+            if (rs != null)
+            {
+                //2. Push notification
+                await SendNotificationSystemWide(rs);
+            }
+            
+            
             return new ResponseBuilder()
-                .WithStatus(Const.FAIL_CODE)
-                .WithMessage(Const.FAIL_SAVE_MSG);
+                .WithStatus(Const.SUCCESS_CODE)
+                .WithMessage(Const.SUCCESS_SAVE_MSG);
+           
             //if (isSuccess)
             //{
             //    var rs = await _notificationRepository.GetById(noti.Id);
@@ -547,6 +569,10 @@ public class NotificationService : BaseService<Notification>, INotificationServi
                 {
                     //3. Push notification
                     //await SendNotification(noti.UserId.ToString(), rs);
+                    await SendNotificationRoleBased(rs, createCommand.Role);
+                    return new ResponseBuilder()
+                        .WithStatus(Const.SUCCESS_CODE)
+                        .WithMessage(Const.SUCCESS_SAVE_MSG);
                 }
 
                 return new ResponseBuilder()
@@ -565,5 +591,20 @@ public class NotificationService : BaseService<Notification>, INotificationServi
                 .WithStatus(Const.FAIL_CODE)
                 .WithMessage(errorMessage);
         }
+    }
+    
+    public async Task SendNotificationSystemWide(object data)
+    {
+        await _hubContext.Clients.Group("System").SendAsync("ReceiveSystemNotification", data);
+    }
+
+    public async Task SendNotificationRoleBased(object data, string role)
+    {
+        await _hubContext.Clients.Group("Noti-"+role).SendAsync("ReviewRoleNotification", data);
+    }
+
+    public async Task SendNotificationTeamBased(object data, Guid team)
+    {
+        await _hubContext.Clients.Group("Noti-team-"+ team.ToString()).SendAsync("ReviewTeamNotification", data);
     }
 }

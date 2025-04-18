@@ -115,4 +115,25 @@ public class NotificationController : ControllerBase
 
         return Ok(businessResult);
     }
+
+    [HttpPost("system")]
+    public async Task<IActionResult> CreateSystemWideNotification(NotificationCreateForSystemWide command)
+    {
+        var msg = await _notificationService.CreateForSystemWide(command);
+        return Ok(msg);
+    }
+
+    [HttpPost("role-based")]
+    public async Task<IActionResult> CreateRoleBasedNotification(NotificationCreateForRoleBased command)
+    {
+        var msg = await _notificationService.CreateForRoleBased(command);
+        return Ok(msg);
+    }
+
+    [HttpPost("team-based")]
+    public async Task<IActionResult> CreateTeamBasedNotification(NotificationCreateForTeam command)
+    {
+        var msg = await _notificationService.CreateForTeam(command);
+        return Ok(msg);
+    }
 }
