@@ -5,6 +5,7 @@ using FPT.TeamMatching.Domain.Models.Requests.Queries.Base;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.BlogCvs;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Blogs;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Comments;
+using FPT.TeamMatching.Domain.Models.Requests.Queries.CriteriaXCriteriaForms;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Ideas;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.IdeaVersionRequest;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Invitations;
@@ -41,6 +42,8 @@ public static class FilterHelper
                 Blog((queryable as IQueryable<Blog>)!, blogQuery) as IQueryable<TEntity>,
             BlogCvGetAllQuery blogCvQuery =>
                 BlogCv((queryable as IQueryable<BlogCv>)!, blogCvQuery) as IQueryable<TEntity>,
+            CriteriaXCriteriaFormGetAllQuery criteriaXCriteriaFormQuery =>
+                CriteriaXCriteriaForm((queryable as IQueryable<CriteriaXCriteriaForm>)!, criteriaXCriteriaFormQuery) as IQueryable<TEntity>,
             LikeGetAllQuery likeQuery =>
                 Like((queryable as IQueryable<Like>)!, likeQuery) as IQueryable<TEntity>,
             _ => BaseFilterHelper.Base(queryable, query),
@@ -101,6 +104,23 @@ public static class FilterHelper
         return queryable;
     }
 
+    private static IQueryable<CriteriaXCriteriaForm>? CriteriaXCriteriaForm(IQueryable<CriteriaXCriteriaForm> queryable, CriteriaXCriteriaFormGetAllQuery query)
+    {
+        if (query.CriteriaId != null)
+        {
+            queryable = queryable.Where(m =>
+                m.CriteriaId != null && m.CriteriaId == query.CriteriaId);
+        }
+        if (query.CriteriaFormId != null)
+        {
+            queryable = queryable.Where(m =>
+                m.CriteriaFormId != null && m.CriteriaFormId == query.CriteriaFormId);
+        }
+
+        queryable = BaseFilterHelper.Base(queryable, query);
+
+        return queryable;
+    }
     private static IQueryable<Invitation>? Invitation(IQueryable<Invitation> queryable, InvitationGetAllQuery query)
     {
         if (query.Type != null)
