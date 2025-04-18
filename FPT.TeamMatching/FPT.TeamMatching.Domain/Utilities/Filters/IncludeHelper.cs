@@ -24,6 +24,7 @@ public static class IncludeHelper
             IQueryable<BlogCv> blogcvs => BlogCvs(blogcvs) as IQueryable<TEntity>,
             IQueryable<Comment> comments => Comments(comments) as IQueryable<TEntity>,
             IQueryable<Invitation> invitations => Invitation(invitations) as IQueryable<TEntity>,
+            IQueryable<CriteriaForm> criteriaForms => CriteriaForms(criteriaForms) as IQueryable<TEntity>,
             IQueryable<Notification> notifications => Notification(notifications) as IQueryable<TEntity>,
             IQueryable<Review> reviews => Review(reviews) as IQueryable<TEntity>,
             IQueryable<CapstoneSchedule> capstoneSchedules => CapstoneSchedule(capstoneSchedules) as IQueryable<TEntity>,
@@ -63,6 +64,12 @@ public static class IncludeHelper
         queryable = queryable.Include(m => m.Comments);
         queryable = queryable.Include(m => m.Likes);
         queryable = queryable.Include(m => m.BlogCvs);
+        return queryable;
+    }
+
+    private static IQueryable<CriteriaForm> CriteriaForms(IQueryable<CriteriaForm> queryable)
+    {
+        queryable = queryable.Include(m => m.CriteriaXCriteriaForms).ThenInclude(x=>x.Criteria);
         return queryable;
     }
 
