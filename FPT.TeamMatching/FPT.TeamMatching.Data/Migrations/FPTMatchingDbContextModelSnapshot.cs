@@ -297,16 +297,13 @@ namespace FPT.TeamMatching.Data.Migrations
                     b.Property<DateTimeOffset?>("CreatedDate")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("Description")
-                        .HasColumnType("text");
-
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
 
-                    b.Property<string>("Name")
+                    b.Property<string>("Note")
                         .HasColumnType("text");
 
-                    b.Property<string>("Note")
+                    b.Property<string>("Question")
                         .HasColumnType("text");
 
                     b.Property<string>("UpdatedBy")
@@ -1212,7 +1209,7 @@ namespace FPT.TeamMatching.Data.Migrations
                     b.Property<string>("Note")
                         .HasColumnType("text");
 
-                    b.Property<DateTimeOffset?>("PublicTopicDate")
+                    b.Property<DateTimeOffset?>("PublicIdeaDate")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("SemesterCode")

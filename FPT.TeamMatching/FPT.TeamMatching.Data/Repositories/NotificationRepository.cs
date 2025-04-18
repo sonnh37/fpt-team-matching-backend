@@ -48,7 +48,7 @@ public class NotificationRepository : BaseRepository<Notification>, INotificatio
                 (x.Type == NotificationType.SystemWide) ||
         
                 // Thông báo nhóm (Team) - kiểm tra projectId
-                (x.Type == NotificationType.Team && x.ProjectId == projectId && x.UserId == userId) 
+                (x.Type == NotificationType.Team && x.ProjectId == projectId) 
         
         );
 
@@ -72,5 +72,20 @@ public class NotificationRepository : BaseRepository<Notification>, INotificatio
             var results = await queryable.ToListAsync();
             return (results, results.Count);
         }
+    }
+
+    public async Task<List<Notification>> GetSystemNotification()
+    {
+        var result = await _dbContext.Notifications.Include(m => m.User)
+            .Where(x => x.Type == NotificationType.SystemWide)
+            .ToListAsync();
+        return result;
+    }
+
+    public async Task<List<Notification>> GetTeamNotificationByProjectId(Guid projectId)
+    {
+        var result = await _dbContext.Notifications.Include(m => m.User)
+            .Where(x => x.Type == NotificationType.Team && x.ProjectId == projectId).ToListAsync();
+        return result;
     }
 }

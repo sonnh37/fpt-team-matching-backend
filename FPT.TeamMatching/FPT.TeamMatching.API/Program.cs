@@ -186,7 +186,6 @@ builder.Services.AddCors(options =>
 #region SignalR
 
 builder.Services.AddSignalR();
-
 #endregion
 
 #region Kafka

@@ -16,12 +16,12 @@ namespace FPT.TeamMatching.Domain.Models.Results
 
         public int? Version { get; set; }
 
-        public virtual IdeaResult? Idea { get; set; }
+        public IdeaResult? Idea { get; set; }
 
-        public virtual StageIdeaResult? StageIdea { get; set; }
+        public StageIdeaResult? StageIdea { get; set; }
 
-        public virtual TopicResult? Topic { get; set; }
+        public TopicResult? Topic { get; set; }
 
-        public virtual ICollection<IdeaVersionRequestResult> IdeaVersionRequests { get; set; } = new List<IdeaVersionRequestResult>();
+        public ICollection<IdeaVersionRequestResult> IdeaVersionRequests { get; set; } = new List<IdeaVersionRequestResult>();
     }
 }

@@ -1,4 +1,5 @@
-﻿using FPT.TeamMatching.Domain.Models.Requests.Commands.Base;
+﻿using FPT.TeamMatching.Domain.Enums;
+using FPT.TeamMatching.Domain.Models.Requests.Commands.Base;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,10 +10,8 @@ namespace FPT.TeamMatching.Domain.Models.Requests.Commands.Criterias
 {
     public class CriteriaCreateCommand: CreateCommand
     {
-        public string? Name { get; set; }
+        public string? Question { get; set; }
 
-        public string? Description { get; set; }
-
-        public string? ValueType { get; set; }
+        public CriteriaValueType? ValueType { get; set; }
     }
 }

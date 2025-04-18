@@ -16,8 +16,8 @@ namespace FPT.TeamMatching.Domain.Models.Results
 
         public string? Value { get; set; }
 
-        public virtual IdeaVersionRequestResult? IdeaRequest { get; set; }
+        public IdeaVersionRequestResult? IdeaRequest { get; set; }
 
-        public virtual CriteriaResult? Criteria { get; set; }
+        public CriteriaResult? Criteria { get; set; }
     }
 }

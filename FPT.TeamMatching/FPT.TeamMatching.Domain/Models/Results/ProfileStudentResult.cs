@@ -29,7 +29,7 @@ public class ProfileStudentResult : BaseResult
 
     public UserResult? User { get; set; }
     
-    public virtual SemesterResult? Semester { get; set; }
+    public SemesterResult? Semester { get; set; }
 
     public ICollection<SkillProfileResult> SkillProfiles { get; set; } = new List<SkillProfileResult>();
 }
