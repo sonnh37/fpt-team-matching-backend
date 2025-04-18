@@ -9,4 +9,6 @@ public interface INotificationRepository : IBaseRepository<Notification>
     Task<List<Notification>> GetAllNotificationByUserId(Guid userId);
 
     Task<(List<Notification>, int)> GetDataByCurrentUser(NotificationGetAllByCurrentUserQuery query, Guid userId, Guid? projectId);
+    Task<List<Notification>> GetSystemNotification();
+    Task<List<Notification>> GetTeamNotificationByProjectId(Guid projectId);
 }
