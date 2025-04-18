@@ -1,4 +1,5 @@
 ﻿using FPT.TeamMatching.Domain.Entities;
+using FPT.TeamMatching.Domain.Enums;
 using FPT.TeamMatching.Domain.Models.Results.Bases;
 using System;
 using System.Collections.Generic;
@@ -10,11 +11,9 @@ namespace FPT.TeamMatching.Domain.Models.Results
 {
     public class CriteriaResult: BaseResult
     {
-        public string? Name { get; set; }
+        public string? Question { get; set; }
 
-        public string? Description { get; set; }
-
-        public string? ValueType { get; set; }
+        public CriteriaValueType? ValueType { get; set; }
 
         public ICollection<CriteriaXCriteriaFormResult> CriteriaXCriteriaForms { get; set; } = new List<CriteriaXCriteriaFormResult>();
 
