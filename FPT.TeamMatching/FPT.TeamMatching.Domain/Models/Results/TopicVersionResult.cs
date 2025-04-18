@@ -22,6 +22,6 @@ namespace FPT.TeamMatching.Domain.Models.Results
 
         public int ReviewStage { get; set; }
 
-        public virtual TopicResult? Topic { get; set; }
+        public TopicResult? Topic { get; set; }
     }
 }

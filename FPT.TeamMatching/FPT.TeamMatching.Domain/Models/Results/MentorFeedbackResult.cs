@@ -21,6 +21,6 @@ namespace FPT.TeamMatching.Domain.Models.Results
 
         public string? Limitation { get; set; }
 
-        public virtual ProjectResult? Project { get; set; }
+        public ProjectResult? Project { get; set; }
     }
 }

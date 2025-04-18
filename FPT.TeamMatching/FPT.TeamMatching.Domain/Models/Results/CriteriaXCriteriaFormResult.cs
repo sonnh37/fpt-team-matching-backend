@@ -15,8 +15,8 @@ namespace FPT.TeamMatching.Domain.Models.Results
 
         public Guid? CriteriaId { get; set; }
 
-        public virtual CriteriaFormResult? CriteriaForm { get; set; }
+        public CriteriaFormResult? CriteriaForm { get; set; }
 
-        public virtual CriteriaResult? Criteria { get; set; }
+        public CriteriaResult? Criteria { get; set; }
     }
 }
