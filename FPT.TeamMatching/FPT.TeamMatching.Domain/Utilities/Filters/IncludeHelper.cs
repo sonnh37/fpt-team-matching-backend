@@ -91,8 +91,8 @@ public static class IncludeHelper
     private static IQueryable<Invitation> Invitation(IQueryable<Invitation> queryable)
     {
         //sua db
-        //queryable = queryable.Include(m => m.Project).ThenInclude(e => e.Topic).ThenInclude(e => e.Idea).ThenInclude(e => e.SubMentor)
-                            //.Include(m => m.Project).ThenInclude(e => e.Topic).ThenInclude(e => e.Idea).ThenInclude(e => e.Mentor);
+        // queryable = queryable.Include(m => m.Project).ThenInclude(e => e.Topic).ThenInclude(e => e.Idea).ThenInclude(e => e.SubMentor)
+                            // .Include(m => m.Project).ThenInclude(e => e.Topic).ThenInclude(e => e.Idea).ThenInclude(e => e.Mentor);
         queryable = queryable.Include(m => m.Sender);
         queryable = queryable.Include(m => m.Receiver);
 
@@ -103,7 +103,7 @@ public static class IncludeHelper
     {
         queryable = queryable
             //sua db het nha
-                //.Include(m => m.IdeaRequests)
+                .Include(m => m.IdeaVersions)
                 .Include(m => m.Owner)
                 .ThenInclude(u => u.UserXRoles)
                 .ThenInclude(ur => ur.Role)
