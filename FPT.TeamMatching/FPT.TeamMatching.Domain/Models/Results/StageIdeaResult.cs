@@ -22,8 +22,8 @@ namespace FPT.TeamMatching.Domain.Models.Results
 
         public int? NumberReviewer { get; set; }
 
-        public virtual SemesterResult? Semester { get; set; }
+        public SemesterResult? Semester { get; set; }
 
-        public virtual ICollection<IdeaVersionResult> IdeaVersions { get; set; } = new List<IdeaVersionResult>();
+        public ICollection<IdeaVersionResult> IdeaVersions { get; set; } = new List<IdeaVersionResult>();
     }
 }

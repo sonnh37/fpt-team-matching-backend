@@ -30,7 +30,7 @@ public class TeamMemberResult : BaseResult
     
     public ProjectResult? Project { get; set; }
     
-    public virtual ICollection<RateResult> RateBys { get; set; } = new List<RateResult>();
+    public ICollection<RateResult> RateBys { get; set; } = new List<RateResult>();
     
-    public virtual ICollection<RateResult> RateFors { get; set; } = new List<RateResult>();
+    public ICollection<RateResult> RateFors { get; set; } = new List<RateResult>();
 }

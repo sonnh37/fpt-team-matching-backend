@@ -21,12 +21,12 @@ public class SemesterResult : BaseResult
 
     public CriteriaFormResult? CriteriaForm { get; set; }
 
-    public virtual ICollection<ProfileStudentResult> ProfileStudents { get; set; } = new List<ProfileStudentResult>();
+    public ICollection<ProfileStudentResult> ProfileStudents { get; set; } = new List<ProfileStudentResult>();
 
-    public virtual ICollection<StageIdeaResult> StageIdeas { get; set; } = new List<StageIdeaResult>();
+    public ICollection<StageIdeaResult> StageIdeas { get; set; } = new List<StageIdeaResult>();
 
-    public virtual ICollection<TimelineResult> Timelines { get; set; } = new List<TimelineResult>();
+    public ICollection<TimelineResult> Timelines { get; set; } = new List<TimelineResult>();
 
-    public virtual ICollection<UserXRoleResult> UserXRoles { get; set; } = new List<UserXRoleResult>();
+    public ICollection<UserXRoleResult> UserXRoles { get; set; } = new List<UserXRoleResult>();
 
 }

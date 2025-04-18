@@ -15,8 +15,8 @@ namespace FPT.TeamMatching.Domain.Models.Results
 
         public CriteriaValueType? ValueType { get; set; }
 
-        public virtual ICollection<CriteriaXCriteriaFormResult> CriteriaXCriteriaForms { get; set; } = new List<CriteriaXCriteriaFormResult>();
+        public ICollection<CriteriaXCriteriaFormResult> CriteriaXCriteriaForms { get; set; } = new List<CriteriaXCriteriaFormResult>();
 
-        public virtual ICollection<AnswerCriteriaResult> AnswerCriterias { get; set; } = new List<AnswerCriteriaResult>();
+        public ICollection<AnswerCriteriaResult> AnswerCriterias { get; set; } = new List<AnswerCriteriaResult>();
     }
 }
