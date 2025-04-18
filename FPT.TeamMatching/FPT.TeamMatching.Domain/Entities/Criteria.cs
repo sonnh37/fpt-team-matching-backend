@@ -1,4 +1,5 @@
 ﻿using FPT.TeamMatching.Domain.Entities.Base;
+using FPT.TeamMatching.Domain.Enums;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,11 +10,9 @@ namespace FPT.TeamMatching.Domain.Entities
 {
     public class Criteria : BaseEntity
     {
-        public string? Name { get; set; }
+        public string? Question { get; set; }
 
-        public string? Description { get; set; }
-
-        public string? ValueType { get; set; }
+        public CriteriaValueType? ValueType { get; set; }
 
         public virtual ICollection<CriteriaXCriteriaForm> CriteriaXCriteriaForms { get; set; } = new List<CriteriaXCriteriaForm>();
 
