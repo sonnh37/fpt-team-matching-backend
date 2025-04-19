@@ -55,9 +55,10 @@ namespace FPT.TeamMatching.Data.Repositories
             var userProjectIds = user.Projects.Select(p => p.Id).ToList();
             queryable = queryable.Where(m =>
                     m.ProjectId != null && userProjectIds.Contains(m.ProjectId.Value))
-                .Include(m => m.Project);
-                //sua db
-                //.Include(m => m.Idea);
+                .Include(m => m.Project)
+                .Include(m => m.Topic)
+                    .ThenInclude(m => m.IdeaVersion)
+                    .ThenInclude(m => m.Idea);
 
             if (query.IsPagination)
             {

@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace FPT.TeamMatching.Data.Migrations
 {
     [DbContext(typeof(FPTMatchingDbContext))]
-    [Migration("20250418124853_updateCriteria")]
-    partial class updateCriteria
+    [Migration("20250419135539_updateIdeaIdeaVersion")]
+    partial class updateIdeaIdeaVersion
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -403,26 +403,11 @@ namespace FPT.TeamMatching.Data.Migrations
                         .HasColumnType("uuid")
                         .HasDefaultValueSql("gen_random_uuid()");
 
-                    b.Property<string>("Abbreviations")
-                        .HasColumnType("text");
-
                     b.Property<string>("CreatedBy")
                         .HasColumnType("text");
 
                     b.Property<DateTimeOffset?>("CreatedDate")
                         .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("text");
-
-                    b.Property<string>("EnglishName")
-                        .HasColumnType("text");
-
-                    b.Property<string>("EnterpriseName")
-                        .HasColumnType("text");
-
-                    b.Property<string>("File")
-                        .HasColumnType("text");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
@@ -432,9 +417,6 @@ namespace FPT.TeamMatching.Data.Migrations
 
                     b.Property<bool>("IsExistedTeam")
                         .HasColumnType("boolean");
-
-                    b.Property<int>("MaxTeamSize")
-                        .HasColumnType("integer");
 
                     b.Property<Guid?>("MentorId")
                         .HasColumnType("uuid");
@@ -463,9 +445,6 @@ namespace FPT.TeamMatching.Data.Migrations
                     b.Property<DateTimeOffset?>("UpdatedDate")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("VietNamName")
-                        .HasColumnType("text");
-
                     b.HasKey("Id");
 
                     b.HasIndex("MentorId");
@@ -486,11 +465,26 @@ namespace FPT.TeamMatching.Data.Migrations
                         .HasColumnType("uuid")
                         .HasDefaultValueSql("gen_random_uuid()");
 
+                    b.Property<string>("Abbreviations")
+                        .HasColumnType("text");
+
                     b.Property<string>("CreatedBy")
                         .HasColumnType("text");
 
                     b.Property<DateTimeOffset?>("CreatedDate")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text");
+
+                    b.Property<string>("EnglishName")
+                        .HasColumnType("text");
+
+                    b.Property<string>("EnterpriseName")
+                        .HasColumnType("text");
+
+                    b.Property<string>("File")
+                        .HasColumnType("text");
 
                     b.Property<Guid?>("IdeaId")
                         .HasColumnType("uuid");
@@ -504,6 +498,9 @@ namespace FPT.TeamMatching.Data.Migrations
                     b.Property<Guid?>("StageIdeaId")
                         .HasColumnType("uuid");
 
+                    b.Property<int?>("TeamSize")
+                        .HasColumnType("integer");
+
                     b.Property<string>("UpdatedBy")
                         .HasColumnType("text");
 
@@ -512,6 +509,9 @@ namespace FPT.TeamMatching.Data.Migrations
 
                     b.Property<int?>("Version")
                         .HasColumnType("integer");
+
+                    b.Property<string>("VietNamName")
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 

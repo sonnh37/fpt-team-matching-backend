@@ -66,7 +66,9 @@ namespace FPT.TeamMatching.Services
                 {
                     return new ResponseBuilder()
                     .WithStatus(Const.FAIL_CODE)
-                    .WithMessage("Đề tài " + idea.Abbreviations + " yêu cầu nhóm có " + idea.MaxTeamSize + " thành viên. Nhóm hiện tại chưa đáp ứng điều kiện này.");
+                    //sua db
+                    //.WithMessage("Đề tài " + idea.Abbreviations + " yêu cầu nhóm có " + idea.MaxTeamSize + " thành viên. Nhóm hiện tại chưa đáp ứng điều kiện này.");
+                    .WithMessage("Đề tài "  + " yêu cầu nhóm có "  + " thành viên. Nhóm hiện tại chưa đáp ứng điều kiện này.");
                 }
 
                 var entity = new MentorTopicRequest
@@ -225,23 +227,25 @@ namespace FPT.TeamMatching.Services
                     if (!iSaveChanges) return HandlerFail("Failed to save changes for approved request");
 
                     //noti cho nhom -> noti cho tung thanh vien
-                    var teamMembers = await _teamMemberRepository.GetMembersOfTeamByProjectId(project.Id);
-                    if (teamMembers == null)
-                    {
-                        return new ResponseBuilder()
-                        .WithStatus(Const.FAIL_CODE)
-                        .WithMessage("Không tìm thấy thành viên của nhóm");
-                    }
-                    var noti = new NotificationCreateForIndividual
+                    //var teamMembers = await _teamMemberRepository.GetMembersOfTeamByProjectId(project.Id);
+                    //if (teamMembers == null)
+                    //{
+                    //    return new ResponseBuilder()
+                    //    .WithStatus(Const.FAIL_CODE)
+                    //    .WithMessage("Không tìm thấy thành viên của nhóm");
+                    //}
+                    var noti = new NotificationCreateForTeam
                     {
                         Description = "Mentor " + mentor.Code +
-                                      "  đã duyệt yêu cầu sử dụng đề tài của nhóm bạn. Hãy kiểm tra!"
+                                      "  đã duyệt yêu cầu sử dụng đề tài của nhóm bạn. Hãy kiểm tra!",
+                        ProjectId = project.Id
                     };
-                    foreach (var member in teamMembers)
-                    {
-                        noti.UserId = member.Id;
-                        await _notificationService.CreateForUser(noti);
-                    }
+                    //foreach (var member in teamMembers)
+                    //{
+                    //    noti.UserId = member.Id;
+                    //    await _notificationService.CreateForUser(noti);
+                    //}
+                    await _notificationService.CreateForTeam(noti);
                     return new ResponseBuilder()
                         .WithStatus(Const.SUCCESS_CODE)
                         .WithMessage(Const.SUCCESS_SAVE_MSG);
@@ -284,23 +288,25 @@ namespace FPT.TeamMatching.Services
                     if (!iSaveChanges) return HandlerFail("Failed to save changes for update project");
 
                     //noti cho nhom -> noti cho tung thanh vien
-                    var teamMembers = await _teamMemberRepository.GetMembersOfTeamByProjectId(project.Id);
-                    if (teamMembers == null)
-                    {
-                        return new ResponseBuilder()
-                        .WithStatus(Const.FAIL_CODE)
-                        .WithMessage("Không tìm thấy thành viên của nhóm");
-                    }
-                    var noti = new NotificationCreateForIndividual
+                    //var teamMembers = await _teamMemberRepository.GetMembersOfTeamByProjectId(project.Id);
+                    //if (teamMembers == null)
+                    //{
+                    //    return new ResponseBuilder()
+                    //    .WithStatus(Const.FAIL_CODE)
+                    //    .WithMessage("Không tìm thấy thành viên của nhóm");
+                    //}
+                    var noti = new NotificationCreateForTeam
                     {
                         Description = "Mentor " + mentor.Code +
-                                      "  đã duyệt yêu cầu sử dụng đề tài của nhóm bạn. Hãy kiểm tra!"
+                                      "  đã duyệt yêu cầu sử dụng đề tài của nhóm bạn. Hãy kiểm tra!",
+                        ProjectId = project.Id,
                     };
-                    foreach (var member in teamMembers)
-                    {
-                        noti.UserId = member.Id;
-                        await _notificationService.CreateForUser(noti);
-                    }
+                    //foreach (var member in teamMembers)
+                    //{
+                    //    noti.UserId = member.Id;
+                    //    await _notificationService.CreateForUser(noti);
+                    //}
+                    await _notificationService.CreateForTeam(noti);
 
                     return new ResponseBuilder()
                         .WithStatus(Const.SUCCESS_CODE)

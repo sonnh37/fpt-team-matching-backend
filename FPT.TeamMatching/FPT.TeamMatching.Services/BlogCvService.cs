@@ -56,7 +56,7 @@ public class BlogCvService : BaseService<BlogCv>, IBlogCvService
                 var noti = new NotificationCreateForIndividual
                 {
                     UserId = blog.UserId,
-                    Description = user.Code + " gửi hồ sơ ứng tuyển qua bài viết của bạn",
+                    Description = user.Code + " đã gửi hồ sơ ứng tuyển qua bài viết của bạn",
                 };
                 await _notificationService.CreateForUser(noti);
                 //

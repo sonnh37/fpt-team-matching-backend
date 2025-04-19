@@ -153,7 +153,9 @@ public class IdeaVersionRequestService : BaseService<IdeaVersionRequest>, IIdeaV
                 //send noti cho 3 nguoi council
                 var request = new NotificationCreateForGroupUser
                 {
-                    Description = "Đề tài " + idea.Abbreviations + " đang chờ bạn duyệt với vai trò Council",
+                    //sua db
+                    //Description = "Đề tài " + idea.Abbreviations + " đang chờ bạn duyệt với vai trò Council",
+                    Description = "Đề tài " + " đang chờ bạn duyệt với vai trò Council",
                 };
                 await _notificationService.CreateForGroupUsers(request, councils.Select(e => e.Id).ToList());
                 //
@@ -356,7 +358,9 @@ public class IdeaVersionRequestService : BaseService<IdeaVersionRequest>, IIdeaV
                     var noti = new NotificationCreateForIndividual
                     {
                         UserId = idea.OwnerId,
-                        Description = "Đề tài " + idea.Abbreviations + " đã được " + mentor.Code + "(Mentor) duyệt. Hãy kiểm tra kết quả!",
+                        //sua db
+                        //Description = "Đề tài " + idea.Abbreviations + " đã được " + mentor.Code + " (Mentor) duyệt. Hãy kiểm tra kết quả!",
+                        Description = "Đề tài " + " đã được " + mentor.Code + " (Mentor) duyệt. Hãy kiểm tra kết quả!",
                     };
                     await _notificationService.CreateForUser(noti);
                     //

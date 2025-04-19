@@ -18,13 +18,12 @@ public class BlogRepository : BaseRepository<Blog>, IBlogRepository
     {
         var blogs = await _context.Blogs.Where(e => e.IsDeleted == false &&
                                                 e.Type == Domain.Enums.BlogType.Recruit &&
-                                                e.Project != null 
-                                                //sua db
-                                                //&&
-                                                //e.Project.Idea != null &&
-                                                //e.Project.Idea.StageIdea != null &&
-                                                //e.Project.Idea.StageIdea.Semester != null &&
-                                                //e.Project.Idea.StageIdea.Semester.Id == id
+                                                e.Project != null &&
+                                                e.Project.Topic != null &&
+                                                e.Project.Topic.IdeaVersion != null &&
+                                                e.Project.Topic.IdeaVersion.StageIdea != null &&
+                                                e.Project.Topic.IdeaVersion.StageIdea.Semester != null &&
+                                                e.Project.Topic.IdeaVersion.StageIdea.Semester.Id == id
                                                 )
                                                 .ToListAsync();
         return blogs;
