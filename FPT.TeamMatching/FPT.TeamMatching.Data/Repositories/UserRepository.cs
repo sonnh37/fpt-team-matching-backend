@@ -70,7 +70,6 @@ public class UserRepository : BaseRepository<User>, IUserRepository
         }
     }
 
-
     public async Task<User?> GetUserByUsernameOrEmail(string key)
     {
         key = key.Trim().ToLower();
@@ -199,5 +198,19 @@ public class UserRepository : BaseRepository<User>, IUserRepository
                                                                tm.Status == TeamMemberStatus.Fail2)))
             .ToListAsync();
         return students;
+    }
+    
+    public async Task<List<EmailSuggestionModels>> GetAllEmailSuggestions(string email)
+    {
+       var result = await GetQueryable()
+           .Where(e => e.IsDeleted == false && e.Email.Contains(email))
+           .Select(x => new EmailSuggestionModels
+           {
+               Email = x.Email,
+               UserId = x.Id,
+           })
+           .Take(5)
+           .ToListAsync();
+       return result;
     }
 }
