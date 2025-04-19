@@ -18,24 +18,26 @@ namespace FPT.TeamMatching.Services;
 public class IdeaService : BaseService<Idea>, IIdeaService
 {
     private readonly IIdeaRepository _ideaRepository;
-    private readonly IIdeaVersionRequestRepository _ideaRequestRepository;
     private readonly ISemesterRepository _semesterRepository;
     private readonly IProjectRepository _projectRepository;
     private readonly IUserRepository _userRepository;
     private readonly IStageIdeaRepositoty _stageIdeaRepositoty;
     private readonly ITeamMemberRepository _teamMemberRepository;
     private readonly INotificationService _notificationService;
+    private readonly IIdeaVersionRepository _ideaVersionRepository;
+    private readonly IIdeaVersionRequestRepository _ideaVersionRequestRepository;
 
     public IdeaService(IMapper mapper, IUnitOfWork unitOfWork, INotificationService notificationService) : base(mapper,
         unitOfWork)
     {
         _ideaRepository = unitOfWork.IdeaRepository;
-        _ideaRequestRepository = unitOfWork.IdeaRequestRepository;
+        _ideaVersionRequestRepository = unitOfWork.IdeaVersionRequestRepository;
         _semesterRepository = unitOfWork.SemesterRepository;
         _projectRepository = unitOfWork.ProjectRepository;
         _userRepository = unitOfWork.UserRepository;
         _stageIdeaRepositoty = unitOfWork.StageIdeaRepository;
         _teamMemberRepository = unitOfWork.TeamMemberRepository;
+        _ideaVersionRepository = unitOfWork.IdeaVersionRepository;
         _notificationService = notificationService;
     }
 
@@ -144,20 +146,25 @@ public class IdeaService : BaseService<Idea>, IIdeaService
                     .WithMessage(Const.FAIL_SAVE_MSG);
             }
 
-            var ideaRequest = new IdeaVersionRequest
-            {
-                //sua db
-                //IdeaId = ideaEntity.Id,
-                //ReviewerId = ideaEntity.MentorId,
-                //ProcessDate = DateTime.UtcNow,
-                //Status = IdeaRequestStatus.Pending,
-                //Role = "Mentor",
-            };
-            await SetBaseEntityForCreation(ideaRequest);
-            _ideaRequestRepository.Add(ideaRequest);
+            var ideaVersion = await CreateIdeaVersion(ideaEntity.Id, stageIdea.Id);
+        
+            // Tạo IdeaVersionRequest cho mentor
+            var mentorRequest = await CreateIdeaVersionRequest(
+                ideaVersion.Id, 
+                ideaEntity.MentorId, 
+                "Mentor");
 
-            var _saveChange = await _unitOfWork.SaveChanges();
-            if (!_saveChange)
+            // Nếu có submentor thì tạo request cho submentor
+            if (ideaEntity.SubMentorId != null)
+            {
+                var subMentorRequest = await CreateIdeaVersionRequest(
+                    ideaVersion.Id, 
+                    ideaEntity.SubMentorId, 
+                    "SubMentor");
+            }
+
+            saveChange = await _unitOfWork.SaveChanges();
+            if (!saveChange)
             {
                 return new ResponseBuilder()
                     .WithStatus(Const.FAIL_CODE)
@@ -185,6 +192,42 @@ public class IdeaService : BaseService<Idea>, IIdeaService
                 .WithMessage(errorMessage);
         }
     }
+    
+    private async Task<IdeaVersion> CreateIdeaVersion(Guid ideaId, Guid stageIdeaId)
+    {
+        var ideaVersion = new IdeaVersion
+        {
+            IdeaId = ideaId,
+            StageIdeaId = stageIdeaId,
+            Version = 1 
+        };
+    
+        await SetBaseEntityForCreation(ideaVersion); 
+        _ideaVersionRepository.Add(ideaVersion);
+    
+        return ideaVersion;
+    }
+    
+    private async Task<IdeaVersionRequest> CreateIdeaVersionRequest(
+        Guid ideaVersionId, 
+        Guid? reviewerId, 
+        string role)
+    {
+        var ideaVersionRequest = new IdeaVersionRequest
+        {
+            IdeaVersionId = ideaVersionId,
+            ReviewerId = reviewerId,
+            Status = IdeaVersionRequestStatus.Pending,
+            Role = role,
+            ProcessDate = DateTime.UtcNow
+        };
+    
+        await SetBaseEntityForCreation(ideaVersionRequest);
+        _ideaVersionRequestRepository.Add(ideaVersionRequest);
+    
+        return ideaVersionRequest;
+    }
+
 
     public async Task<BusinessResult> LecturerCreatePending(IdeaLecturerCreatePendingCommand idea)
     {
@@ -287,7 +330,7 @@ public class IdeaService : BaseService<Idea>, IIdeaService
                 //Role = "Mentor",
             };
             await SetBaseEntityForCreation(ideaRequest);
-            _ideaRequestRepository.Add(ideaRequest);
+            _ideaVersionRequestRepository.Add(ideaRequest);
 
             var saveChange = await _unitOfWork.SaveChanges();
             if (!saveChange)
@@ -490,9 +533,9 @@ public class IdeaService : BaseService<Idea>, IIdeaService
             {
                 foreach (var idea in ideas)
                 {
-                    var totalCouncils = await _ideaRequestRepository.CountCouncilsForIdea(idea.Id);
-                    var totalApproved = await _ideaRequestRepository.CountApprovedCouncilsForIdea(idea.Id);
-                    var totalRejected = await _ideaRequestRepository.CountRejectedCouncilsForIdea(idea.Id);
+                    var totalCouncils = await _ideaVersionRequestRepository.CountCouncilsForIdea(idea.Id);
+                    var totalApproved = await _ideaVersionRequestRepository.CountApprovedCouncilsForIdea(idea.Id);
+                    var totalRejected = await _ideaVersionRequestRepository.CountRejectedCouncilsForIdea(idea.Id);
 
                     if (totalCouncils == 3)
                     {

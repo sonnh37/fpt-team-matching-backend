@@ -20,7 +20,7 @@ namespace FPT.TeamMatching.Services;
 
 public class IdeaVersionRequestService : BaseService<IdeaVersionRequest>, IIdeaVersionRequestService
 {
-    private readonly IIdeaVersionRequestRepository _ideaRequestRepository;
+    private readonly IIdeaVersionRequestRepository _ideaVersionRequestRepository;
     private readonly IIdeaRepository _ideaRepository;
     private readonly ISemesterRepository _semesterRepository;
     private readonly IUserRepository _userRepository;
@@ -30,7 +30,7 @@ public class IdeaVersionRequestService : BaseService<IdeaVersionRequest>, IIdeaV
     public IdeaVersionRequestService(IMapper mapper, IUnitOfWork unitOfWork, IIdeaService ideaService, INotificationService notificationService) : base(mapper,
         unitOfWork)
     {
-        _ideaRequestRepository = unitOfWork.IdeaRequestRepository;
+        _ideaVersionRequestRepository = unitOfWork.IdeaVersionRequestRepository;
         _ideaRepository = unitOfWork.IdeaRepository;
         _semesterRepository = unitOfWork.SemesterRepository;
         _userRepository = unitOfWork.UserRepository;
@@ -43,7 +43,7 @@ public class IdeaVersionRequestService : BaseService<IdeaVersionRequest>, IIdeaV
     {
         try
         {
-            var (data, total) = await _ideaRequestRepository.GetData(query);
+            var (data, total) = await _ideaVersionRequestRepository.GetData(query);
 
             var results = _mapper.Map<List<TResult>>(data);
 
@@ -70,7 +70,7 @@ public class IdeaVersionRequestService : BaseService<IdeaVersionRequest>, IIdeaV
         {
             var userIdClaims = GetUserIdFromClaims();
             var userId = userIdClaims.Value;
-            var (data, total) = await _ideaRequestRepository.GetIdeaRequestsForCurrentReviewerByRolesAndStatus(query, userId);
+            var (data, total) = await _ideaVersionRequestRepository.GetIdeaRequestsForCurrentReviewerByRolesAndStatus(query, userId);
 
             var results = _mapper.Map<List<TResult>>(data);
 
@@ -95,7 +95,7 @@ public class IdeaVersionRequestService : BaseService<IdeaVersionRequest>, IIdeaV
     {
         try
         {
-            var (data, total) = await _ideaRequestRepository.GetDataUnassignedReviewer(query);
+            var (data, total) = await _ideaVersionRequestRepository.GetDataUnassignedReviewer(query);
 
             var results = _mapper.Map<List<TResult>>(data);
 
@@ -143,7 +143,7 @@ public class IdeaVersionRequestService : BaseService<IdeaVersionRequest>, IIdeaV
 
             if (!newIdeaRequests.Any()) return HandlerNotFound("No available councils");
 
-            _ideaRequestRepository.AddRange(newIdeaRequests);
+            _ideaVersionRequestRepository.AddRange(newIdeaRequests);
             var check = await _unitOfWork.SaveChanges();
             if (check)
             {
@@ -175,14 +175,14 @@ public class IdeaVersionRequestService : BaseService<IdeaVersionRequest>, IIdeaV
     {
         try
         {
-            var ideaRequest = await _ideaRequestRepository.GetById(command.Id);
+            var ideaRequest = await _ideaVersionRequestRepository.GetById(command.Id);
             if (ideaRequest == null) return HandlerFail("Not found ideaRequest");
 
             ideaRequest.Status = command.Status;
             //sua db
             //ideaRequest.Content = command.Content;
             ideaRequest.ProcessDate = DateTime.UtcNow;
-            _ideaRequestRepository.Update(ideaRequest);
+            _ideaVersionRequestRepository.Update(ideaRequest);
             var check = await _unitOfWork.SaveChanges();
 
             if (!check)
@@ -212,9 +212,9 @@ public class IdeaVersionRequestService : BaseService<IdeaVersionRequest>, IIdeaV
 
     public async Task<BusinessResult> ProcessCouncilDecision(Guid ideaId)
     {
-        var totalCouncils = await _ideaRequestRepository.CountCouncilsForIdea(ideaId);
-        var totalApproved = await _ideaRequestRepository.CountApprovedCouncilsForIdea(ideaId);
-        var totalRejected = await _ideaRequestRepository.CountRejectedCouncilsForIdea(ideaId);
+        var totalCouncils = await _ideaVersionRequestRepository.CountCouncilsForIdea(ideaId);
+        var totalApproved = await _ideaVersionRequestRepository.CountApprovedCouncilsForIdea(ideaId);
+        var totalRejected = await _ideaVersionRequestRepository.CountRejectedCouncilsForIdea(ideaId);
 
         if (totalCouncils == 1)
         {
@@ -256,7 +256,7 @@ public class IdeaVersionRequestService : BaseService<IdeaVersionRequest>, IIdeaV
     //    {
     //        var user = await GetUserAsync();
     //        var ideaRequest = _mapper.Map<IdeaRequest>(command);
-    //        var ideaRequestOld = await _ideaRequestRepository.GetById(ideaRequest.Id);
+    //        var ideaRequestOld = await _ideaVersionRequestRepository.GetById(ideaRequest.Id);
     //        if (ideaRequestOld != null)
     //        {
     //            ideaRequestOld.Status = ideaRequest.Status;
@@ -264,7 +264,7 @@ public class IdeaVersionRequestService : BaseService<IdeaVersionRequest>, IIdeaV
     //            ideaRequestOld.ProcessDate = DateTime.UtcNow;
     //            ideaRequestOld.ReviewerId = user.Id;
     //            await SetBaseEntityForUpdate(ideaRequestOld);
-    //            _ideaRequestRepository.Update(ideaRequestOld);
+    //            _ideaVersionRequestRepository.Update(ideaRequestOld);
 
     //            var idea = await _ideaRepository.GetById(ideaRequestOld.IdeaId.Value);
 
@@ -319,14 +319,14 @@ public class IdeaVersionRequestService : BaseService<IdeaVersionRequest>, IIdeaV
         try
         {
             var ideaRequest = _mapper.Map<IdeaVersionRequest>(command);
-            var ideaRequestOld = await _ideaRequestRepository.GetById(ideaRequest.Id);
+            var ideaRequestOld = await _ideaVersionRequestRepository.GetById(ideaRequest.Id);
             if (ideaRequestOld != null)
             {
                 ideaRequestOld.Status = ideaRequest.Status;
                 //ideaRequestOld.Content = ideaRequest.Content;
                 ideaRequestOld.ProcessDate = DateTime.UtcNow;
                 await SetBaseEntityForUpdate(ideaRequestOld);
-                _ideaRequestRepository.Update(ideaRequestOld);
+                _ideaVersionRequestRepository.Update(ideaRequestOld);
 
                 //sua db
                 //var idea = await _ideaRepository.GetById(ideaRequestOld.IdeaId.Value);
