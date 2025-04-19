@@ -50,9 +50,11 @@ public static class FilterHelper
         };
     }
 
-    private static IQueryable<BaseEntity> Project(IQueryable<Project> projects, ProjectGetAllQuery projectQuery)
+    private static IQueryable<BaseEntity> Project(IQueryable<Project> queryable, ProjectGetAllQuery query)
     {
-        throw new NotImplementedException();
+        queryable = BaseFilterHelper.Base(queryable, query);
+
+        return queryable;
     }
 
     //private static IQueryable<Project>? Project(IQueryable<Project> queryable, ProjectGetAllQuery query)

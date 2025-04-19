@@ -38,7 +38,7 @@ public interface IUnitOfWork : IBaseUnitOfWork
 
     IIdeaRepository IdeaRepository { get; }
     IIdeaVersionRepository IdeaVersionRepository { get; }
-    IIdeaVersionRequestRepository IdeaRequestRepository { get; }
+    IIdeaVersionRequestRepository IdeaVersionRequestRepository { get; }
 
     IMentorTopicRequestRepository MentorTopicRequestRepository { get; }
 

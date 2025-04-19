@@ -112,28 +112,32 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
 
     public async Task<Idea?> GetIdeaPendingInStageIdeaOfUser(Guid userId, Guid stageIdeaId)
     {
-        var i = await _dbContext.Ideas.Where(e => e.IsDeleted == false &&
-                                                    //sua db
-                                                  //e.StageIdeaId == stageIdeaId &&
-                                                  e.OwnerId == userId &&
-                                                  e.Status == IdeaStatus.Pending)
+        var idea = await _dbContext.Ideas
+            .Include(i => i.IdeaVersions)
+            .Where(e => e.IsDeleted == false &&
+                        e.OwnerId == userId &&
+                        e.Status == IdeaStatus.Pending &&
+                        e.IdeaVersions.Any(iv => iv.StageIdeaId == stageIdeaId))
             .FirstOrDefaultAsync();
-        return i;
+    
+        return idea;
     }
 
     public async Task<Idea?> GetIdeaApproveInSemesterOfUser(Guid userId, Guid semesterId)
     {
-        var i = await _dbContext.Ideas.Where(e => e.IsDeleted == false &&
-                                                    //sua db
-                                                  //e.StageIdea != null &&
-                                                  //e.StageIdea.Semester != null &&
-                                                  //e.StageIdea.Semester.Id == semesterId &&
-                                                  e.OwnerId == userId &&
-                                                  e.Status == IdeaStatus.Approved)
+        var idea = await _dbContext.Ideas
+            .Include(i => i.IdeaVersions)
+            .ThenInclude(iv => iv.StageIdea)
+            .Where(e => e.IsDeleted == false &&
+                        e.OwnerId == userId &&
+                        e.Status == IdeaStatus.Approved &&
+                        e.IdeaVersions.Any(iv => 
+                            iv.StageIdea != null && 
+                            iv.StageIdea.SemesterId == semesterId))
             .FirstOrDefaultAsync();
-        return i;
+    
+        return idea;
     }
-
     public async Task<int> NumberOfIdeaMentorOrOwner(Guid userId)
     {
         var number = await _dbContext.Ideas.Where(e => e.IsDeleted == false &&
