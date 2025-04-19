@@ -146,4 +146,11 @@ public class UserController : ControllerBase
         var msg = await _userService.UpdateStudentExistedRange(userResults);
         return Ok(msg);
     }
+
+    [HttpGet("get-suggestions-emails")]
+    public async Task<IActionResult> GetTeamMembers([FromQuery]string email)
+    {
+        var msg = await _userService.GetSuggestionByEmail(email);
+        return Ok(msg);
+    }
 }
