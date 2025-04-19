@@ -136,4 +136,11 @@ public class NotificationController : ControllerBase
         var msg = await _notificationService.CreateForTeam(command);
         return Ok(msg);
     }
+
+    [HttpPost("individual")]
+    public async Task<IActionResult> CreateIndividualNotification(NotificationCreateForIndividual command)
+    {
+        var msg = await _notificationService.CreateForIndividual(command);
+        return Ok(msg);
+    }
 }

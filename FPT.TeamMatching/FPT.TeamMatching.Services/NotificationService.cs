@@ -602,16 +602,24 @@ public class NotificationService : BaseService<Notification>, INotificationServi
             {
                 return new ResponseBuilder()
                     .WithStatus(Const.FAIL_CODE)
-                    .WithMessage("Miêu tả của thông báo không thể bỏ trống");
+                    .WithMessage("Nội dung của thông báo không thể bỏ trống");
             }
 
             if (createCommand.UserId == null)
             {
                 return new ResponseBuilder()
                     .WithStatus(Const.FAIL_CODE)
-                    .WithMessage("User không thể là giá trị null");
+                    .WithMessage("Người dùng không tồn tại");
             }
 
+            var user = await _unitOfWork.UserRepository.GetById(createCommand.UserId.Value);
+            if (user == null)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE).
+                    WithMessage("Người dùng không tồn tại");
+            }
+            
             //1. Tạo thông báo
             var noti = _mapper.Map<Notification>(createCommand);
             noti.Id = Guid.NewGuid();
