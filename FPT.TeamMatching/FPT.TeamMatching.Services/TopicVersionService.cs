@@ -20,12 +20,12 @@ namespace FPT.TeamMatching.Services
 {
     public class TopicVersionService : BaseService<TopicVersion>, ITopicVersionService
     {
-        private readonly ITopicVersionRepository _ideaHistoryRepository;
+        private readonly ITopicVersionRepository _topicVersionRepository;
         private readonly IIdeaRepository _ideaRepository;
         private readonly INotificationService _notificationService;
         public TopicVersionService(IMapper mapper, IUnitOfWork unitOfWork, INotificationService notificationService) : base(mapper, unitOfWork)
         {
-            _ideaHistoryRepository = unitOfWork.TopicVersionRepository;
+            _topicVersionRepository = unitOfWork.TopicVersionRepository;
             _ideaRepository = unitOfWork.IdeaRepository;
             _notificationService = notificationService;
         }
@@ -34,17 +34,17 @@ namespace FPT.TeamMatching.Services
         {
             try
             {
-                var ideaHistory = await _ideaHistoryRepository.GetById((Guid)request.Id, true);
-                if (ideaHistory == null)
+                var topicVersion = await _topicVersionRepository.GetById((Guid)request.Id, true);
+                if (topicVersion == null)
                 {
                     return new ResponseBuilder()
                         .WithStatus(Const.NOT_FOUND_CODE)
                         .WithMessage(Const.NOT_FOUND_MSG);
                 }
-                ideaHistory.Status = request.Status;
-                ideaHistory.Comment = request.Comment;
-                await SetBaseEntityForUpdate(ideaHistory);
-                _ideaHistoryRepository.Update(ideaHistory);
+                topicVersion.Status = request.Status;
+                topicVersion.Comment = request.Comment;
+                await SetBaseEntityForUpdate(topicVersion);
+                _topicVersionRepository.Update(topicVersion);
                 var isSuccess = await _unitOfWork.SaveChanges();
                 // if (isSuccess)
                 // {
@@ -79,7 +79,7 @@ namespace FPT.TeamMatching.Services
         {
             try
             {
-                var result = await _ideaHistoryRepository.GetAllByIdeaId(ideaId);
+                var result = await _topicVersionRepository.GetAllByIdeaId(ideaId);
                 return new ResponseBuilder()
                     .WithStatus(Const.SUCCESS_CODE)
                     .WithData(result)
@@ -111,7 +111,7 @@ namespace FPT.TeamMatching.Services
                     .WithStatus(Const.FAIL_CODE)
                     .WithMessage("Đề tài không tồn tại");
                 }
-                var ideaHistory = new TopicVersion
+                var topicVersion = new TopicVersion
                 {
                     //sua db
                     //IdeaId = request.IdeaId,
@@ -122,7 +122,7 @@ namespace FPT.TeamMatching.Services
                     CreatedDate = DateTime.Now,
                     UpdatedDate = DateTime.Now,
                 };
-                _ideaHistoryRepository.Add(ideaHistory);
+                _topicVersionRepository.Add(topicVersion);
                 var isSuccess = await _unitOfWork.SaveChanges();
                 if (isSuccess)
                 {
@@ -130,7 +130,9 @@ namespace FPT.TeamMatching.Services
                     var noti = new NotificationCreateForIndividual
                     {
                         UserId = idea.MentorId,
-                        Description = "Đề tài " + idea.Abbreviations + " gửi yêu cầu chỉnh sửa sau review " + ideaHistory.ReviewStage,
+                        //sua db
+                        //Description = "Đề tài " + idea.Abbreviations + " gửi yêu cầu chỉnh sửa sau review " + topicVersion.ReviewStage,
+                        Description = "Đề tài " + " gửi yêu cầu chỉnh sửa sau review " + topicVersion.ReviewStage,
                     };
                     await _notificationService.CreateForUser(noti);
                     //

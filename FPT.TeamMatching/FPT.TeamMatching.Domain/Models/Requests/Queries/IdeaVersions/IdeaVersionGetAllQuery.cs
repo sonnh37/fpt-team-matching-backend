@@ -14,5 +14,19 @@ namespace FPT.TeamMatching.Domain.Models.Requests.Queries.IdeaVersions
         public Guid? StageIdeaId { get; set; }
 
         public int? Version { get; set; }
+
+        public string? VietNamName { get; set; }
+
+        public string? EnglishName { get; set; }
+
+        public string? Description { get; set; }
+
+        public string? Abbreviations { get; set; }
+
+        public string? EnterpriseName { get; set; }
+
+        public int? TeamSize { get; set; }
+
+        public string? File { get; set; }
     }
 }

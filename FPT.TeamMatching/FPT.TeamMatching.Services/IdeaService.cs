@@ -128,7 +128,11 @@ public class IdeaService : BaseService<Idea>, IIdeaService
                     .WithMessage(Const.FAIL_SAVE_MSG);
             }
 
-            //sua db
+            //
+            //
+
+
+
             //ideaEntity.StageIdeaId = stageIdea.Id;
             ideaEntity.Status = IdeaStatus.Pending;
             ideaEntity.OwnerId = userId;
@@ -306,7 +310,8 @@ public class IdeaService : BaseService<Idea>, IIdeaService
             else
             {
                 ideaEntity.Type = IdeaType.Lecturer;
-                ideaEntity.EnterpriseName = null;
+                //sua db
+                //ideaEntity.EnterpriseName = null;
             }
 
             await SetBaseEntityForCreation(ideaEntity);

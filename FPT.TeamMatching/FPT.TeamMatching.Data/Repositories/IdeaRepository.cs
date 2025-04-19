@@ -26,7 +26,8 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
     public async Task<IList<Idea>> GetIdeasByUserId(Guid userId)
     {
         var ideas = await _dbContext.Ideas.Where(e => e.OwnerId == userId)
-            //sua db
+            .Include(e => e.IdeaVersions).ThenInclude(e => e.IdeaVersionRequests).ThenInclude(e => e.Reviewer)
+            .Include(e => e.IdeaVersions).ThenInclude(e => e.StageIdea)
             //.Include(e => e.IdeaRequests).ThenInclude(e => e.Reviewer)
             //.Include(e => e.StageIdea)
             .ToListAsync();
@@ -36,7 +37,8 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
     public async Task<IList<Idea>> GetIdeasByTypeMentorAndEnterprise()
     {
         var ideas = await _dbContext.Ideas.Where(e => e.Type == IdeaType.Enterprise || e.Type == IdeaType.Lecturer)
-            //sua db
+            .Include(e => e.IdeaVersions).ThenInclude(e => e.IdeaVersionRequests).ThenInclude(e => e.Reviewer)
+            .Include(e => e.IdeaVersions).ThenInclude(e => e.StageIdea)
             //.Include(e => e.IdeaRequests).ThenInclude(e => e.Reviewer)
             //.Include(e => e.StageIdea)
             .ToListAsync();
@@ -81,7 +83,7 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
     {
         var number = await _dbContext.Ideas.Where(e => e.Status == IdeaStatus.Approved &&
                                                        e.IsDeleted == false)
-                                                       //sua db
+            //sua db
                                                        //&&
                                                        //e.StageIdea != null &&
                                                        //e.StageIdea.SemesterId == semesterId)
@@ -201,11 +203,12 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
         // 
         // queryable = queryable.Where(m => m.MentorTopicRequests.All(x => x.Status != MentorTopicRequestStatus.Approved));
 
-        if (!string.IsNullOrEmpty(query.EnglishName))
-        {
-            queryable = queryable.Where(m =>
-                m.EnglishName != null && m.EnglishName.ToLower().Trim().Contains(query.EnglishName.ToLower().Trim()));
-        }
+        //sua db
+        //if (!string.IsNullOrEmpty(query.EnglishName))
+        //{
+        //    queryable = queryable.Where(m =>
+        //        m.EnglishName != null && m.EnglishName.ToLower().Trim().Contains(query.EnglishName.ToLower().Trim()));
+        //}
         
         if (query.IsExistedTeam != null) queryable = queryable.Where(m => query.IsExistedTeam.Value == m.IsExistedTeam);
 

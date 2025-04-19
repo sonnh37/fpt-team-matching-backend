@@ -211,43 +211,44 @@ public static class FilterHelper
         }
         return queryable;
     }
-        private static IQueryable<Idea>? Idea(IQueryable<Idea> queryable, IdeaGetAllQuery query)
+    private static IQueryable<Idea>? Idea(IQueryable<Idea> queryable, IdeaGetAllQuery query)
     {
-        if (query.IsExistedTeam != null) queryable = queryable.Where(m => query.IsExistedTeam.Value == m.IsExistedTeam);
+        //sua db
+        //if (query.IsExistedTeam != null) queryable = queryable.Where(m => query.IsExistedTeam.Value == m.IsExistedTeam);
 
-        if (!string.IsNullOrEmpty(query.EnglishName))
-        {
-            queryable = queryable.Where(m =>
-                m.EnglishName != null && m.EnglishName.ToLower().Trim().Contains(query.EnglishName.ToLower().Trim()));
-        }
+        //if (!string.IsNullOrEmpty(query.EnglishName))
+        //{
+        //    queryable = queryable.Where(m =>
+        //        m.EnglishName != null && m.EnglishName.ToLower().Trim().Contains(query.EnglishName.ToLower().Trim()));
+        //}
 
-        if (query.SpecialtyId != null)
-        {
-            queryable = queryable.Where(m => m.SpecialtyId == query.SpecialtyId);
-        }
+        //if (query.SpecialtyId != null)
+        //{
+        //    queryable = queryable.Where(m => m.SpecialtyId == query.SpecialtyId);
+        //}
 
-        if (query.ProfessionId != null)
-        {
-            queryable = queryable.Where(m =>
-                m.Specialty != null && m.Specialty.Profession != null &&
-                m.Specialty.Profession.Id == query.ProfessionId);
-        }
+        //if (query.ProfessionId != null)
+        //{
+        //    queryable = queryable.Where(m =>
+        //        m.Specialty != null && m.Specialty.Profession != null &&
+        //        m.Specialty.Profession.Id == query.ProfessionId);
+        //}
 
-        if (query.Types.Count > 0)
-        {
-            queryable = queryable.Where(m =>
-                m.Type != null && query.Types.Contains(m.Type.Value));
-        }
+        //if (query.Types.Count > 0)
+        //{
+        //    queryable = queryable.Where(m =>
+        //        m.Type != null && query.Types.Contains(m.Type.Value));
+        //}
 
         if (query.Status != null)
         {
             queryable = queryable.Where(m => m.Status == query.Status);
         }
-
-        if (query.IsExistedTeam != null)
-        {
-            queryable = queryable.Where(m => m.IsExistedTeam == query.IsExistedTeam.Value);
-        }
+        //sua db
+        //if (query.IsExistedTeam != null)
+        //{
+        //    queryable = queryable.Where(m => m.IsExistedTeam == query.IsExistedTeam.Value);
+        //}
 
         queryable = BaseFilterHelper.Base(queryable, query);
 
