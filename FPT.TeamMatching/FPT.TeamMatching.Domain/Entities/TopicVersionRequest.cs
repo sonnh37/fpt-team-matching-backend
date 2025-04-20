@@ -18,7 +18,9 @@ namespace FPT.TeamMatching.Domain.Entities
 
         public TopicVersionRequestStatus? Status { get; set; }
 
-        public string? Role {  get; set; }
+        public string? Role { get; set; }
+
+        public string? Feedback { get; set; }
 
         public virtual TopicVersion? TopicVersion { get; set; }
 
