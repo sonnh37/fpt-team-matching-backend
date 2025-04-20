@@ -13,8 +13,8 @@ public static class IncludeHelper
         return (queryable switch
         {
             IQueryable<Idea> ideas => Idea(ideas) as IQueryable<TEntity>,
-            IQueryable<TopicVersion> ideaHistories => (ideaHistories) as IQueryable<TEntity>,
-            IQueryable<IdeaVersionRequest> ideaRequests => IdeaVersionRequest(ideaRequests) as IQueryable<TEntity>,
+            IQueryable<TopicVersion> topicVersions => TopicVersion(topicVersions) as IQueryable<TEntity>,
+            IQueryable<IdeaVersionRequest> ideaVersionRequests => IdeaVersionRequest(ideaVersionRequests) as IQueryable<TEntity>,
             IQueryable<Semester> semesters => Semester(semesters) as IQueryable<TEntity>,
             IQueryable<Project> projects => Project(projects) as IQueryable<TEntity>,
             IQueryable<Profession> professions => Profession(professions) as IQueryable<TEntity>,
@@ -38,7 +38,7 @@ public static class IncludeHelper
         return queryable;
     }
 
-    private static IQueryable<TopicVersion> TopicVersions(IQueryable<TopicVersion> queryable)
+    private static IQueryable<TopicVersion> TopicVersion(IQueryable<TopicVersion> queryable)
     {
         queryable = queryable
                             //sua db
@@ -51,8 +51,8 @@ public static class IncludeHelper
     private static IQueryable<IdeaVersionRequest> IdeaVersionRequest(IQueryable<IdeaVersionRequest> queryable)
     {
         queryable = queryable
-            //sua db
-            //.Include(m => m.Idea)
+            .Include(m => m.IdeaVersion).ThenInclude(e => e.Idea).ThenInclude(e => e.Mentor)
+            .Include(m => m.IdeaVersion).ThenInclude(e => e.Idea).ThenInclude(e => e.SubMentor)
             .Include(m => m.Reviewer);
         return queryable;
     }

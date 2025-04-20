@@ -318,11 +318,11 @@ public class IdeaVersionRequestService : BaseService<IdeaVersionRequest>, IIdeaV
     //    }
     //}
 
-    public async Task<BusinessResult> LecturerResponse(IdeaVersionRequestLecturerOrCouncilResponseCommand command)
+    public async Task<BusinessResult> RespondByMentorOrCouncil(IdeaVersionRequestLecturerOrCouncilResponseCommand command)
     {
         try
         {
-            var ideaVersionRequest = await _ideaVersionRequestRepository.GetById(command.Id);
+            var ideaVersionRequest = await _ideaVersionRequestRepository.GetById(command.Id, true);
             if (ideaVersionRequest == null)
             {
                 return new ResponseBuilder()
@@ -367,8 +367,8 @@ public class IdeaVersionRequestService : BaseService<IdeaVersionRequest>, IIdeaV
                 await _notificationService.CreateForUser(noti);
             }
             return new ResponseBuilder()
-                .WithStatus(Const.NOT_FOUND_CODE)
-                .WithMessage("Not found idea");
+                .WithStatus(Const.SUCCESS_CODE)
+                .WithMessage(Const.SUCCESS_SAVE_MSG);
         }
         catch (Exception ex)
         {
