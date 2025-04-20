@@ -633,8 +633,8 @@ public partial class FPTMatchingDbContext : BaseDbContext
             entity.Property(e => e.Id).ValueGeneratedOnAdd()
                 .HasDefaultValueSql("gen_random_uuid()");
 
-            entity.HasOne(d => d.IdeaRequest).WithMany(p => p.AnswerCriterias)
-                .HasForeignKey(d => d.IdeaRequestId);
+            entity.HasOne(d => d.IdeaVersionRequest).WithMany(p => p.AnswerCriterias)
+                .HasForeignKey(d => d.IdeaVersionRequestId);
 
             entity.HasOne(d => d.Criteria).WithMany(p => p.AnswerCriterias)
                 .HasForeignKey(d => d.CriteriaId);
