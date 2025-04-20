@@ -138,7 +138,9 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
 
     public async Task<List<Project>?> GetInProgressProjectBySemesterId(Guid semesterId)
     {
-        var projects = await _context.Projects.Where(e => e.Status == ProjectStatus.InProgress &&
+        var projects = await GetQueryable().Where(
+                e => 
+                    e.Status == ProjectStatus.InProgress &&
                                                           e.IsDeleted == false 
                                                           //sua db
                                                           //&&
@@ -149,6 +151,14 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
             //sua db
             //.Include(e => e.Idea).ThenInclude(e => e.Mentor)
             //.Include(e => e.Idea).ThenInclude(e => e.SubMentor)
+            .Include(x => x.Topic)
+            .ThenInclude(x => x.IdeaVersion)
+            .ThenInclude(x => x.Idea)
+            .ThenInclude(x => x.Mentor)
+            .Include(x => x.Topic)
+            .ThenInclude(x => x.IdeaVersion)
+            .ThenInclude(x => x.Idea)
+            .ThenInclude(x => x.SubMentor)
             .ToListAsync();
         return projects;
     }

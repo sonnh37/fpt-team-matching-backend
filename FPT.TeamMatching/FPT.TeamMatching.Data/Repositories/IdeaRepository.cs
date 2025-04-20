@@ -151,10 +151,13 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
     {
         // Use async query execution and optimize the LINQ query
         return await GetQueryable()
+            .Include(x => x.IdeaVersions)
+            .ThenInclude(x => x.StageIdea)
+            .ThenInclude(x => x.SemesterId)
             //sua db
-            //.Where(x => x.StageIdea.SemesterId == semesterId)
-            //.Where(x => x.Project.Reviews.Any(review => review.Number == reviewNumber))
-            //.Where(x => x.Topic.Project.Reviews.Any(review => review.Number == reviewNumber))
+            .Where(x => x.IdeaVersions.Select(x => x.StageIdea.SemesterId).FirstOrDefault() == semesterId)
+            .Where(x => x.Topic.Project.Reviews.Any(review => review.Number == reviewNumber))
+            .Where(x => x.Topic.Project.Reviews.Any(review => review.Number == reviewNumber))
             .Select(y => new CustomIdeaResultModel
             {
                 IdeaId = y.Id,

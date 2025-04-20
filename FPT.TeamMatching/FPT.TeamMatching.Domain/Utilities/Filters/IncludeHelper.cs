@@ -170,9 +170,9 @@ public static class IncludeHelper
     {
         queryable = queryable
             .Include(x => x.Project)
-            //sua db
-            //.ThenInclude(y => y.Topic).ThenInclude(e => e.Idea)
-            //.ThenInclude(y => y.IdeaHistories)
+            .ThenInclude(y => y.Topic)
+            .ThenInclude(e => e.IdeaVersion)
+            .ThenInclude(y => y.Idea)
             .Include(d => d.Reviewer1)
             .Include(d => d.Reviewer2);
         return queryable;
