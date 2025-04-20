@@ -600,6 +600,25 @@ public class ReviewService : BaseService<Review>, IReviewService
         }
     }
 
+    public async Task<BusinessResult> GetReviewByReviewerId(Guid reviewerId)
+    {
+        try
+        {
+            var result = await _reviewRepository.GetReviewByReviewerId(reviewerId);
+            // var resultMapper = _mapper.Map<List<ReviewResult>>(result);
+            return new ResponseBuilder()
+                .WithStatus(Const.SUCCESS_CODE)
+                .WithMessage(Const.SUCCESS_READ_MSG)
+                .WithData(result);
+        }
+        catch (Exception e)
+        {
+            return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage(e.Message);
+        }
+    }
+
     private async Task<DataTable> GetProjectInProgress()
     {
         DataTable dt = new DataTable();
@@ -623,16 +642,25 @@ public class ReviewService : BaseService<Review>, IReviewService
         {
             return dt;
         }
-        int index = 1;
-        projects.ForEach(item =>
+
+        var index = 1;
+        foreach (var item in projects)
         {
-            //sua db
-            //dt.Rows.Add(index++, item.Idea.IdeaCode, item.TeamCode,
-            //    item.Idea.EnglishName, item.Idea.VietNamName,
-            //    item.Idea.Mentor.LastName + " " + item.Idea.Mentor.FirstName,
-            //    item.Idea.Mentor.Code,
-            //    (item.Idea.SubMentorId == null ? null : item.Idea.SubMentor.Code));
-        });
+            dt.Rows.Add(index++, item.Topic.TopicCode, item.TeamCode,
+            item.Topic.IdeaVersion.EnglishName, item.Topic.IdeaVersion.VietNamName,
+            item.Topic.IdeaVersion.Idea.Mentor.LastName + " " + item.Topic.IdeaVersion.Idea.Mentor.FirstName,
+            item.Topic.IdeaVersion.Idea.Mentor.Code,
+            (item.Topic.IdeaVersion.Idea.SubMentor == null ? null : item.Topic.IdeaVersion.Idea.SubMentor.Code));
+        }
+        // projects.ForEach(item =>
+        // {
+        //     //sua db
+        //     dt.Rows.Add(index++, item.Topic.TopicCode, item.TeamCode,
+        //         item.Topic.IdeaVersion.EnglishName, item.Topic.IdeaVersion.VietNamName,
+        //         item.Topic.IdeaVersion.Idea.Mentor.LastName + " " + item.Topic.IdeaVersion.Idea.Mentor.FirstName,
+        //         item.Topic.IdeaVersion.Idea.Mentor.Code,
+        //         (item.Topic.IdeaVersion.Idea.SubMentor == null ? null : item.Topic.IdeaVersion.Idea.SubMentor.Code));
+        // });
         return dt;
     }
     private DataTable GetReview()

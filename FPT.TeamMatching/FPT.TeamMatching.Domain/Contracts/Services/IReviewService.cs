@@ -17,4 +17,5 @@ public interface IReviewService : IBaseService
     Task<BusinessResult> GetReviewByReviewNumberAndSemesterIdPaging(int number, Guid semesterId);
     Task<BusinessResult> UpdateFilerReview(UploadFileUrl request);
     Task<BusinessResult> ExportExcelForReviews();
+    Task<BusinessResult> GetReviewByReviewerId(Guid reviewerId);
 }

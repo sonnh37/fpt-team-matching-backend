@@ -38,7 +38,7 @@ public class ReviewRepository : BaseRepository<Review>, IReviewRepository
 
     public async Task<List<Review>?> GetReviewByReviewNumberAndSemesterIdPaging(int number, Guid semesterId)
     {
-        var query = await _dbContext.Reviews.Where(e =>
+        var query = await GetQueryable().Where(e =>
                                     e.IsDeleted == false &&
                                     e.Number == number &&
                                     e.Project != null 
@@ -48,9 +48,26 @@ public class ReviewRepository : BaseRepository<Review>, IReviewRepository
                                     //e.Project.Idea.StageIdea != null &&
                                     //e.Project.Idea.StageIdea.SemesterId == semesterId
                                     )
-                                    //.Include(e => e.Project).ThenInclude(e => e.Idea)
+                                    .Include(x => x.Reviewer1)
+                                    .Include(x => x.Reviewer2)
+                                    .Include(x => x.Project)
+                                    .ThenInclude(x => x.Topic)
+                                    .ThenInclude(x => x.IdeaVersion)
+                                    .ThenInclude(x => x.Idea)
                                     .ToListAsync();
 
         return query;
+    }
+
+    public async Task<List<Review>> GetReviewByReviewerId(Guid reviewerId)
+    {
+        var queryable = GetQueryable()
+            .Include(x => x.Project)
+            .ThenInclude(x => x.Topic)
+            .ThenInclude(x => x.IdeaVersion)
+            .ThenInclude(x => x.Idea)
+            .Where(x => (x.Reviewer1Id == reviewerId || x.Reviewer2Id == reviewerId) && x.ReviewDate.HasValue);
+
+        return await queryable.ToListAsync();
     }
 }
