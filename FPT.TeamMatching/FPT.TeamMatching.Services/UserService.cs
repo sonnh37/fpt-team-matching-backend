@@ -501,6 +501,9 @@ public class UserService : BaseService<User>, IUserService
                 .WithMessage(e.Message);
         }
     }
+
+ 
+
     public async Task<BusinessResult> ImportLecturers(IFormFile file)
     {
        try
@@ -673,6 +676,20 @@ public class UserService : BaseService<User>, IUserService
             return new ResponseBuilder()
                 .WithStatus(Const.SUCCESS_CODE)
                 .WithMessage(Const.SUCCESS_READ_MSG);
+        }
+        catch (Exception e)
+        {
+            return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage(e.Message);
+        }
+    }
+    public async Task<BusinessResult> GetSuggestionByEmail(string email)
+    {
+        try
+        {
+            var result = await _userRepository.GetAllEmailSuggestions(email);
+            return new ResponseBuilder().WithStatus(Const.SUCCESS_CODE).WithData(result);
         }
         catch (Exception e)
         {
