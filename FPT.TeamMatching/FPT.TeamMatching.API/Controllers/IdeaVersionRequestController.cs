@@ -94,8 +94,8 @@ public class IdeaVersionRequestController : ControllerBase
         return Ok(businessResult);
     }
 
-    [HttpPut("lecturer-response")]
-    public async Task<IActionResult> LecturerResponse([FromBody] IdeaVersionRequestLecturerOrCouncilResponseCommand request)
+    [HttpPut("respond-by-mentor-or-council")]
+    public async Task<IActionResult> RespondByMentorOrCouncil([FromBody] IdeaVersionRequestLecturerOrCouncilResponseCommand request)
     {
         var businessResult = await _service.LecturerResponse(request);
 

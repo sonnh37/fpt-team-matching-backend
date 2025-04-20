@@ -13,8 +13,27 @@ namespace FPT.TeamMatching.Data.Repositories
 {
     public class TopicRepository : BaseRepository<Topic>, ITopicRepository
     {
+        private readonly FPTMatchingDbContext _context;
         public TopicRepository(FPTMatchingDbContext dbContext) : base(dbContext)
         {
+            _context = dbContext;
+        }
+
+        public bool IsExistedTopicCode(string topicCode)
+        {
+            var isExist = _context.Topics.Where(e => e.TopicCode == topicCode).Any();
+            return isExist;
+        }
+
+        public int NumberOfTopicBySemesterId(Guid semesterId)
+        {
+            var numberOfTopic = _context.Topics.Where(e => e.IsDeleted == false &&
+                                                    e.IdeaVersion != null &&
+                                                    e.IdeaVersion.StageIdea != null &&
+                                                    e.IdeaVersion.StageIdea.Semester != null &&
+                                                    e.IdeaVersion.StageIdea.Semester.Id == semesterId)
+                                                .Count();
+            return numberOfTopic;
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using FPT.TeamMatching.Domain.Enums;
+using FPT.TeamMatching.Domain.Models.Requests.Commands.AnswerCriterias;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Base;
 using System;
 using System.Collections.Generic;
@@ -10,8 +11,8 @@ namespace FPT.TeamMatching.Domain.Models.Requests.Commands.IdeaVersionRequests
 {
     public class IdeaVersionRequestLecturerOrCouncilResponseCommand : UpdateCommand
     {
-        public string? Content { get; set; }
-
         public IdeaVersionRequestStatus? Status { get; set; }
+
+        public List<AnswerCriteriaForLecturerRespond> answerCriteriaList { get; set; }
     }
 }

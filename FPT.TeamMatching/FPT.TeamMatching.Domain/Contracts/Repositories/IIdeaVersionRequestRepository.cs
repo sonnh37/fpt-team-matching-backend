@@ -23,6 +23,5 @@ namespace FPT.TeamMatching.Domain.Contracts.Repositories
         Task<int> CountRejectedCouncilsForIdea(Guid ideaId);
 
         Task<int> CountCouncilsForIdea(Guid ideaId);
-
     }
 }

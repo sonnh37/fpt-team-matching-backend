@@ -24,12 +24,10 @@ namespace FPT.TeamMatching.Domain.Models.Requests.Commands.Ideas
 
         public string? File { get; set; }
 
-        public bool IsExistedTeam { get; set; }
-
         public bool IsEnterpriseTopic { get; set; }
 
         public string? EnterpriseName { get; set; }
 
-        public int? MaxTeamSize { get; set; }
+        public int? TeamSize { get; set; }
     }
 }
