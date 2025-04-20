@@ -116,7 +116,7 @@ public static class IncludeHelper
     {
         queryable = queryable
             //sua db het nha
-                .Include(m => m.IdeaVersions)
+                .Include(m => m.IdeaVersions).ThenInclude(m => m.IdeaVersionRequests)
                 .Include(m => m.Owner)
                 .ThenInclude(u => u.UserXRoles)
                 .ThenInclude(ur => ur.Role)

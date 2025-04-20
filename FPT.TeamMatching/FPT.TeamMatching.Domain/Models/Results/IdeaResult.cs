@@ -30,6 +30,6 @@ namespace FPT.TeamMatching.Domain.Models.Results
 
         public SpecialtyResult? Specialty { get; set; }
 
-        public ICollection<IdeaVersionResult> IdeaRequests { get; set; } = new List<IdeaVersionResult>();
+        public ICollection<IdeaVersionResult> IdeaVersions { get; set; } = new List<IdeaVersionResult>();
     }
 }

@@ -52,6 +52,9 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
             .OrderByDescending(m => m.CreatedDate)
             //sua db
             //.Include(m => m.StageIdea)
+            .Include(e => e.IdeaVersions).ThenInclude(e => e.IdeaVersionRequests).ThenInclude(e => e.Reviewer)
+            .Include(e => e.IdeaVersions).ThenInclude(e => e.StageIdea)
+
             .Include(m => m.Owner)
             .Include(m => m.Mentor)
             .Include(m => m.SubMentor)
