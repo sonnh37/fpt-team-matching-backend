@@ -8,13 +8,14 @@ using System.Threading.Tasks;
 
 namespace FPT.TeamMatching.Domain.Models.Requests.Commands.TopicVersions
 {
-    public class StudentUpdateIdeaCommand : CreateCommand
+    public class UpdateTopicByStudentCommand : CreateCommand
     {
-        public Guid? IdeaId { get; set; }
+        public Guid? TopicId { get; set; }
 
         public string? FileUpdate { get; set; }
 
         public int ReviewStage { get; set; }
+
         public string? Note { get; set; }
     }
 }

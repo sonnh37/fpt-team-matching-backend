@@ -8,19 +8,10 @@ using System.Threading.Tasks;
 
 namespace FPT.TeamMatching.Domain.Models.Requests.Commands.TopicVersionRequests
 {
-    public class TopicVersionRequestUpdateCommand: UpdateCommand
+    public class RespondByMentorOrManager : UpdateCommand
     {
-        public Guid? TopicVersionId { get; set; }
-
-        public Guid? ReviewerId { get; set; }
-
-        public DateTimeOffset? ProcessDate { get; set; }
-
         public TopicVersionRequestStatus? Status { get; set; }
 
-        public string? Role { get; set; }
-
         public string? Feedback { get; set; }
-
     }
 }

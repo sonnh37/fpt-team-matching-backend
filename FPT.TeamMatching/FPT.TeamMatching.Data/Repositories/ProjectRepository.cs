@@ -206,4 +206,16 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
             return (results, results.Count);
         }
     }
+
+    public async Task<Project?> GetProjectByTopicId(Guid topicId)
+    {
+        var project = await _context.Projects.Where(e => e.IsDeleted == false &&
+                                                e.TopicId == topicId)
+                                        .Include(e => e.Topic)
+                                            .ThenInclude(e => e.IdeaVersion)
+                                            .ThenInclude(e => e.Idea)
+                                            .ThenInclude(e => e.Mentor)
+                                        .FirstOrDefaultAsync();
+        return project;
+    }
 }
