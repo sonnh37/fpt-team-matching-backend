@@ -138,6 +138,7 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
     
         return idea;
     }
+
     public async Task<int> NumberOfIdeaMentorOrOwner(Guid userId)
     {
         var number = await _dbContext.Ideas.Where(e => e.IsDeleted == false &&

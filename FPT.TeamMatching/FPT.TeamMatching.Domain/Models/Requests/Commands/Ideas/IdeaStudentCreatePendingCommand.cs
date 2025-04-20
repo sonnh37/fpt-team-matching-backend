@@ -12,6 +12,8 @@ namespace FPT.TeamMatching.Domain.Models.Requests.Commands.Ideas
     {
         public Guid? MentorId { get; set; }
 
+        public Guid? SubMentorId { get; set; }
+
         public Guid? SpecialtyId { get; set; }
 
         public string? Description { get; set; }
@@ -24,6 +26,6 @@ namespace FPT.TeamMatching.Domain.Models.Requests.Commands.Ideas
 
         public string? File { get; set; }
 
-        public int? MaxTeamSize { get; set; }
+        public int? TeamSize { get; set; }
     }
 }

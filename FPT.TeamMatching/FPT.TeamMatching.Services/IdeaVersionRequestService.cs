@@ -25,6 +25,7 @@ public class IdeaVersionRequestService : BaseService<IdeaVersionRequest>, IIdeaV
     private readonly ISemesterRepository _semesterRepository;
     private readonly IUserRepository _userRepository;
     private readonly IIdeaService _ideaService;
+    private readonly IAnswerCriteriaRepository _answerCriteriaRepository;
     private readonly INotificationService _notificationService;
 
     public IdeaVersionRequestService(IMapper mapper, IUnitOfWork unitOfWork, IIdeaService ideaService, INotificationService notificationService) : base(mapper,
@@ -34,6 +35,7 @@ public class IdeaVersionRequestService : BaseService<IdeaVersionRequest>, IIdeaV
         _ideaRepository = unitOfWork.IdeaRepository;
         _semesterRepository = unitOfWork.SemesterRepository;
         _userRepository = unitOfWork.UserRepository;
+        _answerCriteriaRepository = unitOfWork.AnswerCriteriaRepository;
         _ideaService = ideaService;
         _notificationService = notificationService;
     }
@@ -118,7 +120,7 @@ public class IdeaVersionRequestService : BaseService<IdeaVersionRequest>, IIdeaV
     public async Task<BusinessResult> CreateCouncilRequestsForIdea(IdeaVersionRequestCreateForCouncilsCommand command)
     {
         try
-        {   
+        {
             //sua db
             //if (command.IdeaId == Guid.Empty || command.IdeaId == null) return HandlerFail("No Idea Id provided");
             //var councils = await _userRepository.GetThreeCouncilsForIdeaRequest(command.IdeaId.Value);
@@ -320,60 +322,50 @@ public class IdeaVersionRequestService : BaseService<IdeaVersionRequest>, IIdeaV
     {
         try
         {
-            var ideaRequest = _mapper.Map<IdeaVersionRequest>(command);
-            var ideaRequestOld = await _ideaVersionRequestRepository.GetById(ideaRequest.Id);
-            if (ideaRequestOld != null)
+            var ideaVersionRequest = await _ideaVersionRequestRepository.GetById(command.Id);
+            if (ideaVersionRequest == null)
             {
-                ideaRequestOld.Status = ideaRequest.Status;
-                //ideaRequestOld.Content = ideaRequest.Content;
-                ideaRequestOld.ProcessDate = DateTime.UtcNow;
-                await SetBaseEntityForUpdate(ideaRequestOld);
-                _ideaVersionRequestRepository.Update(ideaRequestOld);
-
-                //sua db
-                //var idea = await _ideaRepository.GetById(ideaRequestOld.IdeaId.Value);
-                var idea = await _ideaRepository.GetById(ideaRequestOld.IdeaVersionId.Value);
-                if (idea == null) return HandlerFail("Idea not found");
-
-                await SetBaseEntityForUpdate(idea);
-                _ideaRepository.Update(idea);
-
-                bool saveChange = await _unitOfWork.SaveChanges();
-                if (saveChange)
-                {
-                    if (idea.MentorId == null)
-                    {
-                        return new ResponseBuilder()
-                        .WithStatus(Const.NOT_FOUND_CODE)
-                        .WithMessage("De tai khong co mentor id");
-                    }
-                    var mentor = await _userRepository.GetById((Guid)idea.MentorId);
-                    if (mentor == null)
-                    {
-                        return new ResponseBuilder()
-                        .WithStatus(Const.NOT_FOUND_CODE)
-                        .WithMessage("De tai khong co mentor");
-                    }
-                    //noti cho owner
-                    var noti = new NotificationCreateForIndividual
-                    {
-                        UserId = idea.OwnerId,
-                        //sua db
-                        //Description = "Đề tài " + idea.Abbreviations + " đã được " + mentor.Code + " (Mentor) duyệt. Hãy kiểm tra kết quả!",
-                        Description = "Đề tài " + " đã được " + mentor.Code + " (Mentor) duyệt. Hãy kiểm tra kết quả!",
-                    };
-                    await _notificationService.CreateForUser(noti);
-                    //
-                    return new ResponseBuilder()
-                        .WithStatus(Const.SUCCESS_CODE)
-                        .WithMessage(Const.SUCCESS_SAVE_MSG);
-                }
-
                 return new ResponseBuilder()
-                    .WithStatus(Const.FAIL_CODE)
-                    .WithMessage(Const.FAIL_SAVE_MSG);
+                        .WithStatus(Const.NOT_FOUND_CODE)
+                        .WithMessage("Không tìm thấy idea version request");
             }
+            ideaVersionRequest.Status = command.Status;
+            ideaVersionRequest.ProcessDate = DateTime.UtcNow;
 
+            await SetBaseEntityForUpdate(ideaVersionRequest);
+            _ideaVersionRequestRepository.Update(ideaVersionRequest);
+            var saveChange = await _unitOfWork.SaveChanges();
+            if (!saveChange)
+            {
+                return new ResponseBuilder()
+                        .WithStatus(Const.FAIL_CODE)
+                        .WithMessage(Const.FAIL_SAVE_MSG);
+            }
+            var answerCriteriaList = _mapper.Map<List<AnswerCriteria>>(command.answerCriteriaList);
+            foreach (var answerCriteria in answerCriteriaList)
+            {
+                answerCriteria.IdeaVersionRequestId = ideaVersionRequest.Id;
+                await SetBaseEntityForCreation(answerCriteria);
+            }
+            _answerCriteriaRepository.AddRange(answerCriteriaList);
+            saveChange = await _unitOfWork.SaveChanges();
+            if (!saveChange)
+            {
+                return new ResponseBuilder()
+                        .WithStatus(Const.FAIL_CODE)
+                        .WithMessage(Const.FAIL_SAVE_MSG);
+            }
+            //neu mentor response thi gui noti cho student 
+            if (ideaVersionRequest.Role == "Mentor")
+            {
+                //noti cho owner
+                var noti = new NotificationCreateForIndividual
+                {
+                    UserId = ideaVersionRequest.IdeaVersion.Idea.OwnerId,
+                    Description = "Đề tài " + ideaVersionRequest.IdeaVersion.Abbreviations + " đã được " + ideaVersionRequest.IdeaVersion.Idea.Mentor.Code + " (Mentor) duyệt. Hãy kiểm tra kết quả!",
+                };
+                await _notificationService.CreateForUser(noti);
+            }
             return new ResponseBuilder()
                 .WithStatus(Const.NOT_FOUND_CODE)
                 .WithMessage("Not found idea");

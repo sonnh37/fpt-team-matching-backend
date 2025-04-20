@@ -143,4 +143,5 @@ public class IdeaVersionRequestRepository : BaseRepository<IdeaVersionRequest>, 
             return (results, results.Count);
         }
     }
+
 }

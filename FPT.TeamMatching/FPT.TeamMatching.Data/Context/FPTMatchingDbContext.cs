@@ -49,7 +49,7 @@ public partial class FPTMatchingDbContext : BaseDbContext
 
     public virtual DbSet<IdeaVersion> IdeaVersions { get; set; } //
 
-    public virtual DbSet<IdeaVersionRequest> IdeaRequests { get; set; } //
+    public virtual DbSet<IdeaVersionRequest> IdeaVersionRequests { get; set; } //
 
     public virtual DbSet<Conversation> Conversations { get; set; } //
 

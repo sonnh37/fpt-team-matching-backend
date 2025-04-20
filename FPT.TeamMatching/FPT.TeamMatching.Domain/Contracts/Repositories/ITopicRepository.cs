@@ -10,5 +10,7 @@ namespace FPT.TeamMatching.Domain.Contracts.Repositories
 {
     public interface ITopicRepository: IBaseRepository<Topic>
     {
+        int NumberOfTopicBySemesterId(Guid semesterId);
+        bool IsExistedTopicCode(string topicCode);
     }
 }

@@ -26,6 +26,7 @@ public class IdeaService : BaseService<Idea>, IIdeaService
     private readonly INotificationService _notificationService;
     private readonly IIdeaVersionRepository _ideaVersionRepository;
     private readonly IIdeaVersionRequestRepository _ideaVersionRequestRepository;
+    private readonly ITopicRepository _topicRepository;
 
     public IdeaService(IMapper mapper, IUnitOfWork unitOfWork, INotificationService notificationService) : base(mapper,
         unitOfWork)
@@ -38,6 +39,7 @@ public class IdeaService : BaseService<Idea>, IIdeaService
         _stageIdeaRepositoty = unitOfWork.StageIdeaRepository;
         _teamMemberRepository = unitOfWork.TeamMemberRepository;
         _ideaVersionRepository = unitOfWork.IdeaVersionRepository;
+        _topicRepository = unitOfWork.TopicRepository;
         _notificationService = notificationService;
     }
 
@@ -77,7 +79,7 @@ public class IdeaService : BaseService<Idea>, IIdeaService
     }
 
 
-    public async Task<BusinessResult> StudentCreatePending(IdeaStudentCreatePendingCommand idea)
+    public async Task<BusinessResult> CreatePendingByStudent(IdeaStudentCreatePendingCommand ideaCreateModel)
     {
         try
         {
@@ -120,28 +122,29 @@ public class IdeaService : BaseService<Idea>, IIdeaService
                     .WithMessage("Sinh viên có đề tài đang trong quá trình duyệt ở kì này");
             }
 
-            var ideaEntity = _mapper.Map<Idea>(idea);
-            if (ideaEntity == null)
+            //var ideaEntity = _mapper.Map<Idea>(idea);
+            //if (ideaEntity == null)
+            //{
+            //    return new ResponseBuilder()
+            //        .WithStatus(Const.FAIL_CODE)
+            //        .WithMessage(Const.FAIL_SAVE_MSG);
+            //}
+
+            //tao Idea
+            var idea = new Idea
             {
-                return new ResponseBuilder()
-                    .WithStatus(Const.FAIL_CODE)
-                    .WithMessage(Const.FAIL_SAVE_MSG);
-            }
+                Id = Guid.NewGuid(),
+                MentorId = ideaCreateModel.MentorId,
+                SpecialtyId = ideaCreateModel.SpecialtyId,
 
-            //
-            //
-
-
-
-            //ideaEntity.StageIdeaId = stageIdea.Id;
-            ideaEntity.Status = IdeaStatus.Pending;
-            ideaEntity.OwnerId = userId;
-            ideaEntity.Type = IdeaType.Student;
-            ideaEntity.IsExistedTeam = true;
-            ideaEntity.IsEnterpriseTopic = false;
-            await SetBaseEntityForCreation(ideaEntity);
-            _ideaRepository.Add(ideaEntity);
-
+                Status = IdeaStatus.Pending,
+                OwnerId = userId,
+                Type = IdeaType.Student,
+                IsExistedTeam = true,
+                IsEnterpriseTopic = false
+            };
+            await SetBaseEntityForCreation(idea);
+            _ideaRepository.Add(idea);
             var saveChange = await _unitOfWork.SaveChanges();
             if (!saveChange)
             {
@@ -149,24 +152,23 @@ public class IdeaService : BaseService<Idea>, IIdeaService
                     .WithStatus(Const.FAIL_CODE)
                     .WithMessage(Const.FAIL_SAVE_MSG);
             }
-
-            var ideaVersion = await CreateIdeaVersion(ideaEntity.Id, stageIdea.Id);
-        
-            // Tạo IdeaVersionRequest cho mentor
-            var mentorRequest = await CreateIdeaVersionRequest(
-                ideaVersion.Id, 
-                ideaEntity.MentorId, 
-                "Mentor");
-
-            // Nếu có submentor thì tạo request cho submentor
-            if (ideaEntity.SubMentorId != null)
+            //tao IdeaVersion
+            var ideaVersion = new IdeaVersion
             {
-                var subMentorRequest = await CreateIdeaVersionRequest(
-                    ideaVersion.Id, 
-                    ideaEntity.SubMentorId, 
-                    "SubMentor");
-            }
+                Id = Guid.NewGuid(),
+                IdeaId = idea.Id,
+                StageIdeaId = stageIdea.Id,
+                Version = 1,
+                VietNamName = ideaCreateModel.VietNamName,
+                EnglishName = ideaCreateModel.EnglishName,
+                Description = ideaCreateModel.Description,
+                Abbreviations = ideaCreateModel.Abbreviations,
+                File = ideaCreateModel.File,
+                TeamSize = ideaCreateModel.TeamSize,
+            };
 
+            await SetBaseEntityForCreation(ideaVersion);
+            _ideaVersionRepository.Add(ideaVersion);
             saveChange = await _unitOfWork.SaveChanges();
             if (!saveChange)
             {
@@ -174,15 +176,79 @@ public class IdeaService : BaseService<Idea>, IIdeaService
                     .WithStatus(Const.FAIL_CODE)
                     .WithMessage(Const.FAIL_SAVE_MSG);
             }
+            //tao IdeaVersionRequest cho mentor
+            var ideaVersionRequest = new IdeaVersionRequest
+            {
+                IdeaVersionId = ideaVersion.Id,
+                ReviewerId = idea.MentorId,
+                CriteriaFormId = semester.CriteriaFormId,
+                Status = IdeaVersionRequestStatus.Pending,
+                Role = "Mentor",
+            };
+            await SetBaseEntityForCreation(ideaVersionRequest);
+            _ideaVersionRequestRepository.Add(ideaVersionRequest);
+            saveChange = await _unitOfWork.SaveChanges();
+            if (!saveChange)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage(Const.FAIL_SAVE_MSG);
+            }
+            //tao IdeaVersionRequest cho submentor (neu co)
+            //var ideaVersionRequest = new IdeaVersionRequest
+            //{
+            //    IdeaVersionId = ideaVersion.Id,
+            //    ReviewerId = idea.SubMentorId,
+            //    CriteriaFormId = semester.CriteriaFormId,
+            //    Status = IdeaVersionRequestStatus.Pending,
+            //    Role = "SubMentor",
+            //};
+
+            #region cmt
+
+            //ideaEntity.StageIdeaId = stageIdea.Id;
+            //ideaEntity.Status = IdeaStatus.Pending;
+            //ideaEntity.OwnerId = userId;
+            //ideaEntity.Type = IdeaType.Student;
+            //ideaEntity.IsExistedTeam = true;
+            //ideaEntity.IsEnterpriseTopic = false;
+            //await SetBaseEntityForCreation(ideaEntity);
+            //_ideaRepository.Add(ideaEntity);
+
+            //var saveChange = await _unitOfWork.SaveChanges();
+            //if (!saveChange)
+            //{
+            //    return new ResponseBuilder()
+            //        .WithStatus(Const.FAIL_CODE)
+            //        .WithMessage(Const.FAIL_SAVE_MSG);
+            //}
+
+            //var ideaVersion = await CreateIdeaVersion(ideaEntity.Id, stageIdea.Id);
+
+            // Tạo IdeaVersionRequest cho mentor
+            //var mentorRequest = await CreateIdeaVersionRequest(
+            //    ideaVersion.Id, 
+            //    ideaEntity.MentorId, 
+            //    "Mentor");
+
+            // Nếu có submentor thì tạo request cho submentor
+            //if (ideaEntity.SubMentorId != null)
+            //{
+            //    var subMentorRequest = await CreateIdeaVersionRequest(
+            //        ideaVersion.Id, 
+            //        ideaEntity.SubMentorId, 
+            //        "SubMentor");
+            //}
+            #endregion
+
             //gửi noti cho mentor
             var command = new NotificationCreateForIndividual
             {
                 UserId = idea.MentorId,
-                Description = "Đề tài " + idea.Abbreviations + "đang chờ bạn duyệt với vai trò Mentor",
+                Description = "Đề tài " + ideaVersion.Abbreviations + " đang chờ bạn duyệt với vai trò Mentor",
             };
             await _notificationService.CreateForUser(command);
-
-            //check có submentor thì gửi noti 
+            //gửi noti cho submentor (nếu có)
 
             return new ResponseBuilder()
                 .WithStatus(Const.SUCCESS_CODE)
@@ -196,25 +262,25 @@ public class IdeaService : BaseService<Idea>, IIdeaService
                 .WithMessage(errorMessage);
         }
     }
-    
+
     private async Task<IdeaVersion> CreateIdeaVersion(Guid ideaId, Guid stageIdeaId)
     {
         var ideaVersion = new IdeaVersion
         {
             IdeaId = ideaId,
             StageIdeaId = stageIdeaId,
-            Version = 1 
+            Version = 1
         };
-    
-        await SetBaseEntityForCreation(ideaVersion); 
+
+        await SetBaseEntityForCreation(ideaVersion);
         _ideaVersionRepository.Add(ideaVersion);
-    
+
         return ideaVersion;
     }
-    
+
     private async Task<IdeaVersionRequest> CreateIdeaVersionRequest(
-        Guid ideaVersionId, 
-        Guid? reviewerId, 
+        Guid ideaVersionId,
+        Guid? reviewerId,
         string role)
     {
         var ideaVersionRequest = new IdeaVersionRequest
@@ -225,15 +291,15 @@ public class IdeaService : BaseService<Idea>, IIdeaService
             Role = role,
             ProcessDate = DateTime.UtcNow
         };
-    
+
         await SetBaseEntityForCreation(ideaVersionRequest);
         _ideaVersionRequestRepository.Add(ideaVersionRequest);
-    
+
         return ideaVersionRequest;
     }
 
 
-    public async Task<BusinessResult> LecturerCreatePending(IdeaLecturerCreatePendingCommand idea)
+    public async Task<BusinessResult> CreatePendingByLecturer(IdeaLecturerCreatePendingCommand ideaCreateModel)
     {
         try
         {
@@ -261,82 +327,55 @@ public class IdeaService : BaseService<Idea>, IIdeaService
             if (numberOfIdeaMentorOrOwner > 4)
             {
                 //k co submentor
-                if (idea.SubMentorId == null)
+                if (ideaCreateModel.SubMentorId == null)
                 {
                     return new ResponseBuilder()
                         .WithStatus(Const.FAIL_CODE)
-                        .WithMessage("Lecturer is mentor or owner in 4 ideas, the 5th idea needs submentor");
+                        .WithMessage("Đề tài thứ 5 trở lên cần có submentor");
                 }
 
                 //k tim thay submentor
-                var submentor = await _userRepository.GetById((Guid)idea.SubMentorId);
+                var submentor = await _userRepository.GetById((Guid)ideaCreateModel.SubMentorId);
                 if (submentor == null)
                 {
                     return new ResponseBuilder()
                         .WithStatus(Const.FAIL_CODE)
-                        .WithMessage("Don't exist submentor with given id");
+                        .WithMessage("Không tồn tại submentor");
                 }
             }
 
             //check đề tài doanh nghiệp thì phải nhập tên doanh nghiệp
-            if (idea.IsEnterpriseTopic)
+            if (ideaCreateModel.IsEnterpriseTopic)
             {
-                if (idea.EnterpriseName == null)
+                if (ideaCreateModel.EnterpriseName == null)
                 {
                     return new ResponseBuilder()
                         .WithStatus(Const.FAIL_CODE)
-                        .WithMessage("Enterprise idea need enterprise name");
+                        .WithMessage("Đề tài doanh nghiệp cần nhập tên doanh nghiệp");
                 }
             }
-
-            var ideaEntity = _mapper.Map<Idea>(idea);
-            if (ideaEntity == null)
+            //tao Idea
+            var idea = new Idea
             {
-                return new ResponseBuilder()
-                    .WithStatus(Const.FAIL_CODE)
-                    .WithMessage(Const.FAIL_SAVE_MSG);
-            }
+                Id = Guid.NewGuid(),
+                MentorId = userId,
+                SpecialtyId = ideaCreateModel.SpecialtyId,
 
-            ideaEntity.Status = IdeaStatus.Pending;
-            //sua db
-            //ideaEntity.StageIdeaId = stageIdea.Id;
-            ideaEntity.OwnerId = userId;
-            ideaEntity.MentorId = userId;
-            ideaEntity.IsExistedTeam = false;
+                Status = IdeaStatus.Pending,
+                OwnerId = userId,
+                IsExistedTeam = false,
+                IsEnterpriseTopic = ideaCreateModel.IsEnterpriseTopic,
+            };
             if (idea.IsEnterpriseTopic)
             {
-                ideaEntity.Type = IdeaType.Enterprise;
+                idea.Type = IdeaType.Enterprise;
             }
             else
             {
-                ideaEntity.Type = IdeaType.Lecturer;
-                //sua db
-                //ideaEntity.EnterpriseName = null;
+                idea.Type = IdeaType.Lecturer;
             }
-
-            await SetBaseEntityForCreation(ideaEntity);
-            _ideaRepository.Add(ideaEntity);
-
-            var saveChange_ = await _unitOfWork.SaveChanges();
-            if (!saveChange_)
-            {
-                return new ResponseBuilder()
-                    .WithStatus(Const.FAIL_CODE)
-                    .WithMessage(Const.FAIL_SAVE_MSG);
-            }
-
-            var ideaRequest = new IdeaVersionRequest
-            {
-                //sua db
-                //IdeaId = ideaEntity.Id,
-                //ReviewerId = ideaEntity.MentorId,
-                //Status = IdeaRequestStatus.Approved,
-                //ProcessDate = DateTime.UtcNow,
-                //Role = "Mentor",
-            };
-            await SetBaseEntityForCreation(ideaRequest);
-            _ideaVersionRequestRepository.Add(ideaRequest);
-
+            await SetBaseEntityForCreation(idea);
+            _ideaRepository.Add(idea);
             var saveChange = await _unitOfWork.SaveChanges();
             if (!saveChange)
             {
@@ -344,8 +383,98 @@ public class IdeaService : BaseService<Idea>, IIdeaService
                     .WithStatus(Const.FAIL_CODE)
                     .WithMessage(Const.FAIL_SAVE_MSG);
             }
-            //check có submentor thì gửi noti 
+            //tao IdeaVersion
+            var ideaVersion = new IdeaVersion
+            {
+                Id = Guid.NewGuid(),
+                IdeaId = idea.Id,
+                StageIdeaId = stageIdea.Id,
+                Version = 1,
+                VietNamName = ideaCreateModel.VietNamName,
+                EnglishName = ideaCreateModel.EnglishName,
+                Description = ideaCreateModel.Description,
+                Abbreviations = ideaCreateModel.Abbreviations,
+                File = ideaCreateModel.File,
+                TeamSize = ideaCreateModel.TeamSize,
+            };
+            if (idea.IsEnterpriseTopic)
+            {
+                ideaVersion.EnterpriseName = ideaCreateModel.EnterpriseName;
+            }
+            await SetBaseEntityForCreation(ideaVersion);
+            _ideaVersionRepository.Add(ideaVersion);
+            saveChange = await _unitOfWork.SaveChanges();
+            if (!saveChange)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage(Const.FAIL_SAVE_MSG);
+            }
+            //tao IdeaVersionRequest cho mentor
+            var ideaVersionRequest = new IdeaVersionRequest
+            {
+                IdeaVersionId = ideaVersion.Id,
+                ReviewerId = idea.MentorId,
+                CriteriaFormId = semester.CriteriaFormId,
+                Status = IdeaVersionRequestStatus.Approved,
+                Role = "Mentor",
+            };
+            await SetBaseEntityForCreation(ideaVersionRequest);
+            _ideaVersionRequestRepository.Add(ideaVersionRequest);
 
+            saveChange = await _unitOfWork.SaveChanges();
+            if (!saveChange)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage(Const.FAIL_SAVE_MSG);
+            }
+            //tao IdeaVersionRequest cho submentor (neu co)
+            //var ideaVersionRequest = new IdeaVersionRequest
+            //{
+            //    IdeaVersionId = ideaVersion.Id,
+            //    ReviewerId = idea.SubMentorId,
+            //    CriteriaFormId = semester.CriteriaFormId,
+            //    Status = IdeaVersionRequestStatus.Pending,
+            //    Role = "SubMentor",
+            //};
+
+            //mentor nop idea -> topic 
+            //tao topic
+            //Gen topic code
+            var semesterCode = semester.SemesterCode;
+            var semesterPrefix = semester.SemesterPrefixName;
+            //get so luong topic cua ki
+            var numberOfTopic = _topicRepository.NumberOfTopicBySemesterId(semester.Id);
+
+            // Tạo số thứ tự tiếp theo
+            int nextNumberTopic = numberOfTopic + 1;
+
+            // Tạo topic code mới theo định dạng: semesterPrefix + semesterCode + "SE" + số thứ tự (3 chữ số)
+            string newTopicCode = $"{semesterPrefix}{semesterCode}SE{nextNumberTopic:D3}";
+
+            var topic = new Topic
+            {
+                IdeaVersionId = ideaVersion.Id,
+            };
+            //check k trùng topic code
+            var codeExist = _topicRepository.IsExistedTopicCode(newTopicCode);
+            if (!codeExist)
+            {
+                topic.TopicCode = newTopicCode;
+            }
+            await SetBaseEntityForCreation(topic);
+            _topicRepository.Add(topic);
+
+            saveChange = await _unitOfWork.SaveChanges();
+            if (!saveChange)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage(Const.FAIL_SAVE_MSG);
+            }
+
+            //gửi noti cho submentor (nếu có)
             //var command = new NotificationCreateCommand
             //{
             //    UserId = userId,
@@ -354,8 +483,6 @@ public class IdeaService : BaseService<Idea>, IIdeaService
             //    IsRead = false,
             //};
             //await _notificationService.CreateOrUpdate<NotificationResult>(command);
-            
-
             return new ResponseBuilder()
                 .WithStatus(Const.SUCCESS_CODE)
                 .WithMessage(Const.SUCCESS_SAVE_MSG);
@@ -512,7 +639,7 @@ public class IdeaService : BaseService<Idea>, IIdeaService
             var (data, total) = await _ideaRepository.GetIdeasOfSupervisors(query);
 
             results = _mapper.Map<List<TResult>>(data);
-            
+
             var response = new QueryResult(query, results, total);
 
             return new ResponseBuilder()
