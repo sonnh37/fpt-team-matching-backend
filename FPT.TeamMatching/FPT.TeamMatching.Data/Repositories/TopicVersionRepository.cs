@@ -21,7 +21,6 @@ namespace FPT.TeamMatching.Data.Repositories
 
         public async Task<List<TopicVersion>> GetAllByIdeaId(Guid ideaId)
         {
-            //sua db
            //return await GetQueryable().Where(h => h.IdeaId == ideaId).ToListAsync();
            return await GetQueryable().Where(h => h.Topic.IdeaVersionId == ideaId).ToListAsync();
         }

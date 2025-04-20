@@ -652,15 +652,6 @@ public class ReviewService : BaseService<Review>, IReviewService
             item.Topic.IdeaVersion.Idea.Mentor.Code,
             (item.Topic.IdeaVersion.Idea.SubMentor == null ? null : item.Topic.IdeaVersion.Idea.SubMentor.Code));
         }
-        // projects.ForEach(item =>
-        // {
-        //     //sua db
-        //     dt.Rows.Add(index++, item.Topic.TopicCode, item.TeamCode,
-        //         item.Topic.IdeaVersion.EnglishName, item.Topic.IdeaVersion.VietNamName,
-        //         item.Topic.IdeaVersion.Idea.Mentor.LastName + " " + item.Topic.IdeaVersion.Idea.Mentor.FirstName,
-        //         item.Topic.IdeaVersion.Idea.Mentor.Code,
-        //         (item.Topic.IdeaVersion.Idea.SubMentor == null ? null : item.Topic.IdeaVersion.Idea.SubMentor.Code));
-        // });
         return dt;
     }
     private DataTable GetReview()

@@ -320,9 +320,8 @@ public class ProjectService : BaseService<Project>, IProjectService
             int index = 1;
             teamDefenses.ForEach(item =>
             {
-                //sua db
                 //dt.Rows.Add(index++, item.Idea.IdeaCode, item.Idea.EnglishName);
-                //dt.Rows.Add(index++, item.Topic.TopicCode, item.Topic.IdeaVersion.Idea.EnglishName);
+                dt.Rows.Add(index++, item.Topic.TopicCode, item.Topic.IdeaVersion.EnglishName);
             });
         }
         return dt;
