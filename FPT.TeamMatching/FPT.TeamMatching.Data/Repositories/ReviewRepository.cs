@@ -29,8 +29,7 @@ public class ReviewRepository : BaseRepository<Review>, IReviewRepository
     public async Task<Review?> GetReviewByProjectIdAndNumber(Guid projectId, int number)
     {
         var review = await _dbContext.Reviews.Where(e => e.ProjectId == projectId
-                                                        //sua db
-                                                        //&& e.Number == number
+                                                        && e.Number == number
                                                         && e.IsDeleted == false)
                                                 .SingleOrDefaultAsync();
         return review;
@@ -42,11 +41,8 @@ public class ReviewRepository : BaseRepository<Review>, IReviewRepository
                                     e.IsDeleted == false &&
                                     e.Number == number &&
                                     e.Project != null 
-                                    //sua db
-                                    //&&
-                                    //e.Project.Idea != null &&
-                                    //e.Project.Idea.StageIdea != null &&
-                                    //e.Project.Idea.StageIdea.SemesterId == semesterId
+                                    &&
+                                    e.Project.Topic.IdeaVersion.StageIdea.SemesterId == semesterId
                                     )
                                     .Include(x => x.Reviewer1)
                                     .Include(x => x.Reviewer2)
