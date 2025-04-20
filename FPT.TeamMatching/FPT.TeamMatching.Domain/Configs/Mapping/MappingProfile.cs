@@ -322,6 +322,7 @@ public class MappingProfile : Profile
         CreateMap<AnswerCriteria, AnswerCriteriaResult>().ReverseMap();
         CreateMap<AnswerCriteria, AnswerCriteriaCreateCommand>().ReverseMap();
         CreateMap<AnswerCriteria, AnswerCriteriaUpdateCommand>().ReverseMap();
+        CreateMap<AnswerCriteria, AnswerCriteriaForLecturerRespond>().ReverseMap();
 
         #endregion
 
