@@ -61,5 +61,12 @@ namespace FPT.TeamMatching.API.Controllers
 
             return Ok(businessResult);
         }
+
+        [HttpPut("respond-by-mentor-or-manager")]
+        public async Task<IActionResult> RespondByMentorOrManager([FromBody] RespondByMentorOrManager request)
+        {
+            var businessResult = await _service.RespondByLecturerOrManager(request);
+            return Ok(businessResult);
+        }
     }
 }

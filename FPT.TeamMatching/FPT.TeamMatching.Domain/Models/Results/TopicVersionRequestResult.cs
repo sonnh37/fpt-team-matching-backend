@@ -21,6 +21,8 @@ namespace FPT.TeamMatching.Domain.Models.Results
 
         public string? Role { get; set; }
 
+        public string? Feedback { get; set; }
+
         public TopicVersionResult? TopicVersion { get; set; }
 
         public UserResult? Reviewer { get; set; }
