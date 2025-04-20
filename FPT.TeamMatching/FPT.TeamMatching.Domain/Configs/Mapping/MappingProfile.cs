@@ -153,6 +153,7 @@ public class MappingProfile : Profile
         #region Review
 
         CreateMap<Review, ReviewResult>().ReverseMap();
+        // CreateMap<List<Review>, List<ReviewResult>>().ReverseMap();
         CreateMap<Review, ReviewCreateCommand>().ReverseMap();
         CreateMap<Review, ReviewUpdateCommand>().ReverseMap();
 

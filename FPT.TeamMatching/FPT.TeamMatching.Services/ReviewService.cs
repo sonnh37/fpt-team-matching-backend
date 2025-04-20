@@ -605,11 +605,11 @@ public class ReviewService : BaseService<Review>, IReviewService
         try
         {
             var result = await _reviewRepository.GetReviewByReviewerId(reviewerId);
-            var resultMapper = _mapper.Map<ReviewResult>(result);
+            // var resultMapper = _mapper.Map<List<ReviewResult>>(result);
             return new ResponseBuilder()
                 .WithStatus(Const.SUCCESS_CODE)
                 .WithMessage(Const.SUCCESS_READ_MSG)
-                .WithData(resultMapper);
+                .WithData(result);
         }
         catch (Exception e)
         {

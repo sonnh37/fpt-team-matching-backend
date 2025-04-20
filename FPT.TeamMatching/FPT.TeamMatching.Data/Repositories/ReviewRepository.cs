@@ -61,7 +61,12 @@ public class ReviewRepository : BaseRepository<Review>, IReviewRepository
 
     public async Task<List<Review>> GetReviewByReviewerId(Guid reviewerId)
     {
-        var queryable = GetQueryable().Where(x => x.Reviewer1Id == reviewerId && x.Reviewer2Id == reviewerId && x.ReviewDate.HasValue);
+        var queryable = GetQueryable()
+            .Include(x => x.Project)
+            .ThenInclude(x => x.Topic)
+            .ThenInclude(x => x.IdeaVersion)
+            .ThenInclude(x => x.Idea)
+            .Where(x => (x.Reviewer1Id == reviewerId || x.Reviewer2Id == reviewerId) && x.ReviewDate.HasValue);
 
         return await queryable.ToListAsync();
     }
