@@ -68,5 +68,12 @@ namespace FPT.TeamMatching.API.Controllers
             var businessResult = await _service.RespondByLecturerOrManager(request);
             return Ok(businessResult);
         }
+
+        [HttpGet("get-by-role")]
+        public async Task<IActionResult> GetByRole([FromQuery] string role)
+        {
+            var msg = await _service.GetByRole(role);
+            return Ok(msg);
+        }
     }
 }

@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MongoDB.Driver.Linq;
 
 namespace FPT.TeamMatching.Data.Repositories
 {
@@ -15,6 +16,17 @@ namespace FPT.TeamMatching.Data.Repositories
     {
         public TopicVersionRequestRepository(FPTMatchingDbContext dbContext) : base(dbContext)
         {
+        }
+
+        public async Task<List<TopicVersionRequest>> GetByRole(string role)
+        {
+            var queryable = await GetQueryable()
+                .Include(x => x.TopicVersion)
+                .ThenInclude(x => x.Topic)
+                .ThenInclude(x => x.IdeaVersion)
+                .ThenInclude(x => x.Idea)
+                .Where(x => x.Role == role).ToListAsync();
+            return queryable;
         }
     }
 }

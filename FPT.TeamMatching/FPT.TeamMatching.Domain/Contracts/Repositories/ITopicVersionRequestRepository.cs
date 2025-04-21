@@ -10,5 +10,6 @@ namespace FPT.TeamMatching.Domain.Contracts.Repositories
 {
     public interface ITopicVersionRequestRepository: IBaseRepository<TopicVersionRequest>
     {
+        Task<List<TopicVersionRequest>> GetByRole(string role);
     }
 }
