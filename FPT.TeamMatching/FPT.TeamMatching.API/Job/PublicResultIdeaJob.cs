@@ -7,7 +7,7 @@ namespace FPT.TeamMatching.API.Job
     {
         private readonly IIdeaService _ideaService;
 
-        public PublicResultIdeaJob(IIdeaService ideaService, IIdeaVersionRequestService ideaRequestService, IProjectService projectService)
+        public PublicResultIdeaJob(IIdeaService ideaService, IIdeaVersionRequestService ideaVersionRequestService, IProjectService projectService)
         {
             _ideaService = ideaService;
         }

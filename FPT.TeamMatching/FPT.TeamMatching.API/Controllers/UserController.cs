@@ -29,9 +29,9 @@ public class UserController : ControllerBase
     }
     
     [HttpGet("council/pending-ideas")]
-    public async Task<IActionResult> GetAllByCouncilWithIdeaRequestPending([FromQuery] UserGetAllQuery query)
+    public async Task<IActionResult> GetAllByCouncilWithIdeaVersionRequestPending([FromQuery] UserGetAllQuery query)
     {
-        var msg = await _userService.GetAllByCouncilWithIdeaRequestPending(query);
+        var msg = await _userService.GetAllByCouncilWithIdeaVersionRequestPending(query);
         return Ok(msg);
     }
 

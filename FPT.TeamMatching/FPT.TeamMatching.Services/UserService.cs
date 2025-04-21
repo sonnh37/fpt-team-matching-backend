@@ -117,11 +117,11 @@ public class UserService : BaseService<User>, IUserService
         }
     }
 
-    public async Task<BusinessResult> GetAllByCouncilWithIdeaRequestPending(UserGetAllQuery query)
+    public async Task<BusinessResult> GetAllByCouncilWithIdeaVersionRequestPending(UserGetAllQuery query)
     {
         try
         {
-            var (data, total) = await _userRepository.GetAllByCouncilWithIdeaRequestPending(query);
+            var (data, total) = await _userRepository.GetAllByCouncilWithIdeaVersionRequestPending(query);
             var results = _mapper.Map<List<UserResult>>(data);
             var response = new QueryResult(query, results, total);
 

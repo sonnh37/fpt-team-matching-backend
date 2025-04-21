@@ -20,7 +20,7 @@ public class UserRepository : BaseRepository<User>, IUserRepository
     {
     }
 
-    public async Task<(List<User>, int)> GetAllByCouncilWithIdeaRequestPending(UserGetAllQuery query)
+    public async Task<(List<User>, int)> GetAllByCouncilWithIdeaVersionRequestPending(UserGetAllQuery query)
     {
         var queryable = GetQueryable();
         queryable = queryable.Include(m => m.UserXRoles).ThenInclude(m => m.Role);
@@ -29,8 +29,8 @@ public class UserRepository : BaseRepository<User>, IUserRepository
             m.UserXRoles.Any(uxr => uxr.Role != null && uxr.Role.RoleName == "Council"));
 
         queryable = queryable
-            .Where(m => m.IdeaRequestOfReviewers.Any(n => n.Status == IdeaVersionRequestStatus.Pending))
-            .Include(m => m.IdeaRequestOfReviewers
+            .Where(m => m.IdeaVersionRequestOfReviewers.Any(n => n.Status == IdeaVersionRequestStatus.Pending))
+            .Include(m => m.IdeaVersionRequestOfReviewers
                 .Where(n => n.Status == IdeaVersionRequestStatus.Pending));
 
         if (query.Department.HasValue)
@@ -91,7 +91,7 @@ public class UserRepository : BaseRepository<User>, IUserRepository
         return entity;
     }
 
-    public async Task<List<User>> GetThreeCouncilsForIdeaRequest(Guid ideaId)
+    public async Task<List<User>> GetThreeCouncilsForIdeaVersionRequest(Guid ideaId)
     {
         var queryable = GetQueryable();
         queryable = queryable.Include(m => m.UserXRoles).ThenInclude(m => m.Role);

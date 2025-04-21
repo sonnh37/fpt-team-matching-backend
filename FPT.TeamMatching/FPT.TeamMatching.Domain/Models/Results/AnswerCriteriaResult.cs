@@ -10,13 +10,13 @@ namespace FPT.TeamMatching.Domain.Models.Results
 {
     public class AnswerCriteriaResult: BaseResult
     {
-        public Guid? IdeaRequestId { get; set; }
+        public Guid? IdeaVersionRequestId { get; set; }
 
         public Guid? CriteriaId { get; set; }
 
         public string? Value { get; set; }
 
-        public IdeaVersionRequestResult? IdeaRequest { get; set; }
+        public IdeaVersionRequestResult? IdeaVersionRequest { get; set; }
 
         public CriteriaResult? Criteria { get; set; }
     }

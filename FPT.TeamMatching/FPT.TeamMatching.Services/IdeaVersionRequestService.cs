@@ -65,14 +65,14 @@ public class IdeaVersionRequestService : BaseService<IdeaVersionRequest>, IIdeaV
         }
     }
 
-    public async Task<BusinessResult> GetIdeaRequestsForCurrentReviewerByRolesAndStatus<TResult>(
+    public async Task<BusinessResult> GetIdeaVersionRequestsForCurrentReviewerByRolesAndStatus<TResult>(
         IdeaVersionRequestGetListByStatusAndRoleQuery query) where TResult : BaseResult
     {
         try
         {
             var userIdClaims = GetUserIdFromClaims();
             var userId = userIdClaims.Value;
-            var (data, total) = await _ideaVersionRequestRepository.GetIdeaRequestsForCurrentReviewerByRolesAndStatus(query, userId);
+            var (data, total) = await _ideaVersionRequestRepository.GetIdeaVersionRequestsForCurrentReviewerByRolesAndStatus(query, userId);
 
             var results = _mapper.Map<List<TResult>>(data);
 
@@ -123,29 +123,29 @@ public class IdeaVersionRequestService : BaseService<IdeaVersionRequest>, IIdeaV
         {
             //sua db
             //if (command.IdeaId == Guid.Empty || command.IdeaId == null) return HandlerFail("No Idea Id provided");
-            //var councils = await _userRepository.GetThreeCouncilsForIdeaRequest(command.IdeaId.Value);
+            //var councils = await _userRepository.GetThreeCouncilsForIdeaVersionRequest(command.IdeaId.Value);
             //if (!councils.Any()) return HandlerFail("No available councils");
-            var councils = await _userRepository.GetThreeCouncilsForIdeaRequest(command.IdeaVersionId.Value);
+            var councils = await _userRepository.GetThreeCouncilsForIdeaVersionRequest(command.IdeaVersionId.Value);
             if (!councils.Any()) return HandlerFail("No available councils");
 
-            var newIdeaRequests = new List<IdeaVersionRequest>();
+            var newIdeaVersionRequests = new List<IdeaVersionRequest>();
 
             foreach (var council in councils)
             {
-                var ideaRequest = new IdeaVersionRequest
+                var ideaVersionRequest = new IdeaVersionRequest
                 {
                     //IdeaId = command.IdeaId,
                     //ReviewerId = council.Id,
-                    //Status = IdeaRequestStatus.Pending,
+                    //Status = IdeaVersionRequestStatus.Pending,
                     //Role = "Council",
                 };
-                await SetBaseEntityForCreation(ideaRequest);
-                newIdeaRequests.Add(ideaRequest);
+                await SetBaseEntityForCreation(ideaVersionRequest);
+                newIdeaVersionRequests.Add(ideaVersionRequest);
             }
 
-            if (!newIdeaRequests.Any()) return HandlerNotFound("No available councils");
+            if (!newIdeaVersionRequests.Any()) return HandlerNotFound("No available councils");
 
-            _ideaVersionRequestRepository.AddRange(newIdeaRequests);
+            _ideaVersionRequestRepository.AddRange(newIdeaVersionRequests);
             var check = await _unitOfWork.SaveChanges();
             if (check)
             {
@@ -179,14 +179,14 @@ public class IdeaVersionRequestService : BaseService<IdeaVersionRequest>, IIdeaV
     {
         try
         {
-            var ideaRequest = await _ideaVersionRequestRepository.GetById(command.Id);
-            if (ideaRequest == null) return HandlerFail("Not found ideaRequest");
+            var ideaVersionRequest = await _ideaVersionRequestRepository.GetById(command.Id);
+            if (ideaVersionRequest == null) return HandlerFail("Not found ideaVersionRequest");
 
-            ideaRequest.Status = command.Status;
+            ideaVersionRequest.Status = command.Status;
             //sua db
-            //ideaRequest.Content = command.Content;
-            ideaRequest.ProcessDate = DateTime.UtcNow;
-            _ideaVersionRequestRepository.Update(ideaRequest);
+            //ideaVersionRequest.Content = command.Content;
+            ideaVersionRequest.ProcessDate = DateTime.UtcNow;
+            _ideaVersionRequestRepository.Update(ideaVersionRequest);
             var check = await _unitOfWork.SaveChanges();
 
             if (!check)
@@ -195,11 +195,11 @@ public class IdeaVersionRequestService : BaseService<IdeaVersionRequest>, IIdeaV
                     .WithMessage(Const.FAIL_SAVE_MSG);
 
             // Nếu Mentor từ chối -> Idea bị từ chối ngay lập tức
-            if (command.Status == IdeaVersionRequestStatus.Rejected && ideaRequest.Role == "Mentor")
+            if (command.Status == IdeaVersionRequestStatus.Rejected && ideaVersionRequest.Role == "Mentor")
             {
                 return await _ideaService.UpdateStatusIdea(new IdeaUpdateStatusCommand
                 {
-                    Id = ideaRequest.IdeaVersionId.Value,
+                    Id = ideaVersionRequest.IdeaVersionId.Value,
                     Status = IdeaStatus.Rejected
                 });
             }
@@ -254,23 +254,23 @@ public class IdeaVersionRequestService : BaseService<IdeaVersionRequest>, IIdeaV
         return new ResponseBuilder().WithStatus(Const.SUCCESS_CODE).WithMessage(Const.SUCCESS_SAVE_MSG);
     }
 
-    //public async Task<BusinessResult> CouncilResponse(IdeaRequestLecturerOrCouncilResponseCommand command)
+    //public async Task<BusinessResult> CouncilResponse(IdeaVersionRequestLecturerOrCouncilResponseCommand command)
     //{
     //    try
     //    {
     //        var user = await GetUserAsync();
-    //        var ideaRequest = _mapper.Map<IdeaRequest>(command);
-    //        var ideaRequestOld = await _ideaVersionRequestRepository.GetById(ideaRequest.Id);
-    //        if (ideaRequestOld != null)
+    //        var ideaVersionRequest = _mapper.Map<IdeaVersionRequest>(command);
+    //        var ideaVersionRequestOld = await _ideaVersionRequestRepository.GetById(ideaVersionRequest.Id);
+    //        if (ideaVersionRequestOld != null)
     //        {
-    //            ideaRequestOld.Status = ideaRequest.Status;
-    //            ideaRequestOld.Content = ideaRequest.Content;
-    //            ideaRequestOld.ProcessDate = DateTime.UtcNow;
-    //            ideaRequestOld.ReviewerId = user.Id;
-    //            await SetBaseEntityForUpdate(ideaRequestOld);
-    //            _ideaVersionRequestRepository.Update(ideaRequestOld);
+    //            ideaVersionRequestOld.Status = ideaVersionRequest.Status;
+    //            ideaVersionRequestOld.Content = ideaVersionRequest.Content;
+    //            ideaVersionRequestOld.ProcessDate = DateTime.UtcNow;
+    //            ideaVersionRequestOld.ReviewerId = user.Id;
+    //            await SetBaseEntityForUpdate(ideaVersionRequestOld);
+    //            _ideaVersionRequestRepository.Update(ideaVersionRequestOld);
 
-    //            var idea = await _ideaRepository.GetById(ideaRequestOld.IdeaId.Value);
+    //            var idea = await _ideaRepository.GetById(ideaVersionRequestOld.IdeaId.Value);
 
 
     //                 ////Gen idea code 
@@ -311,7 +311,7 @@ public class IdeaVersionRequestService : BaseService<IdeaVersionRequest>, IIdeaV
     //    }
     //    catch (Exception ex)
     //    {
-    //        var errorMessage = $"An error {typeof(IdeaRequestResult).Name}: {ex.Message}";
+    //        var errorMessage = $"An error {typeof(IdeaVersionRequestResult).Name}: {ex.Message}";
     //        return new ResponseBuilder()
     //            .WithStatus(Const.FAIL_CODE)
     //            .WithMessage(errorMessage);

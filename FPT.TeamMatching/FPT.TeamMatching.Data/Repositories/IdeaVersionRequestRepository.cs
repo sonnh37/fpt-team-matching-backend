@@ -54,13 +54,13 @@ public class IdeaVersionRequestRepository : BaseRepository<IdeaVersionRequest>, 
     }
 
 
-    public async Task<(List<IdeaVersionRequest>, int)> GetIdeaRequestsForCurrentReviewerByRolesAndStatus(
+    public async Task<(List<IdeaVersionRequest>, int)> GetIdeaVersionRequestsForCurrentReviewerByRolesAndStatus(
         IdeaVersionRequestGetListByStatusAndRoleQuery query, Guid userId)
     {
         var queryable = GetQueryable();
         queryable = queryable
             //sua db
-            //.Include(m => m.Idea).ThenInclude(m => m.StageIdea)
+            .Include(m => m.IdeaVersion).ThenInclude(m => m.StageIdea)
             .Include(m => m.Reviewer);
 
         queryable = queryable.Where(m =>
