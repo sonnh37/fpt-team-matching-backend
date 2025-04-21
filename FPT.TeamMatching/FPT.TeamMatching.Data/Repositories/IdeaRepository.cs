@@ -52,13 +52,15 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
             .OrderByDescending(m => m.CreatedDate)
             //sua db
             //.Include(m => m.StageIdea)
+            .Include(e => e.IdeaVersions).ThenInclude(e => e.IdeaVersionRequests).ThenInclude(e => e.Reviewer)
+            .Include(e => e.IdeaVersions).ThenInclude(e => e.StageIdea)
+            .Include(e => e.IdeaVersions).ThenInclude(e => e.StageIdea).ThenInclude(m => m.Semester)
+
             .Include(m => m.Owner)
             .Include(m => m.Mentor)
             .Include(m => m.SubMentor)
-            .Include(m => m.Specialty)
+            .Include(m => m.Specialty).ThenInclude(m => m.Profession)
             //sua db
-            //.Include(m => m.Project)
-            //.Include(e => e.IdeaRequests).ThenInclude(e => e.Reviewer)
             .ToListAsync();
 
         return ideas;
