@@ -60,7 +60,7 @@ public class IdeaVersionRequestRepository : BaseRepository<IdeaVersionRequest>, 
         var queryable = GetQueryable();
         queryable = queryable
             //sua db
-            //.Include(m => m.Idea).ThenInclude(m => m.StageIdea)
+            .Include(m => m.IdeaVersion).ThenInclude(m => m.StageIdea)
             .Include(m => m.Reviewer);
 
         queryable = queryable.Where(m =>
