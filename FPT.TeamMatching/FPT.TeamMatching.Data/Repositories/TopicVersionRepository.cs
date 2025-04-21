@@ -22,7 +22,10 @@ namespace FPT.TeamMatching.Data.Repositories
         public async Task<List<TopicVersion>> GetAllByIdeaId(Guid ideaId)
         {
            //return await GetQueryable().Where(h => h.IdeaId == ideaId).ToListAsync();
-           return await GetQueryable().Where(h => h.Topic.IdeaVersionId == ideaId).ToListAsync();
+           return await GetQueryable()
+               .Include(x => x.TopicVersionRequests)
+               .Include(x => x.Topic)
+               .Where(h => h.Topic.IdeaVersionId == ideaId).ToListAsync();
         }
     }
 }
