@@ -109,6 +109,13 @@ public class ReviewController : ControllerBase
         // Trả về kết quả lỗi nếu không có dữ liệu
         return Ok(businessResult);
     }
+
+    [HttpGet("reviewer")]
+    public async Task<IActionResult> GetByReviewerId([FromQuery] Guid reviewerId)
+    {
+        var result = await _service.GetReviewByReviewerId(reviewerId);
+        return Ok(result);
+    }
     //[HttpPut("council-assign-reviewers")]
     //public async Task<IActionResult> CouncilAssignReviewers([FromBody] CouncilAssignReviewers request)
     //{

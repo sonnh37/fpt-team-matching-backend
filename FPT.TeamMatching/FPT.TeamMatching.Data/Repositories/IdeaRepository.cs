@@ -153,29 +153,34 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
     {
         // Use async query execution and optimize the LINQ query
         return await GetQueryable()
-            //sua db
-            //.Where(x => x.StageIdea.SemesterId == semesterId)
-            //.Where(x => x.Project.Reviews.Any(review => review.Number == reviewNumber))
-            //.Where(x => x.Topic.Project.Reviews.Any(review => review.Number == reviewNumber))
+                .Include(x => x.IdeaVersions)
+                .ThenInclude(x => x.StageIdea)
+                .Include(x => x.IdeaVersions)
+                .ThenInclude(x => x.Topic)
+                .ThenInclude(x => x.Project)
+                .ThenInclude(p => p.Reviews)
+                .Where(x => x.IdeaVersions.Any(iv =>
+                    iv.StageIdea.SemesterId == semesterId &&
+                    iv.Topic.Project.Reviews.Any(r => r.Number == reviewNumber) 
+                ))
             .Select(y => new CustomIdeaResultModel
             {
                 IdeaId = y.Id,
-                //sua db
-                //TeamCode = y.Project.TeamCode,
-                //IdeaCode = y.IdeaCode,
-                //Review = y.Project.Reviews
-                //    .Where(review => review.Number == reviewNumber)
-                //    .Select(review => new ReviewUpdateCommand
-                //    {
-                //        Id = review.Id,
-                //        Number = review.Number,
-                //        Description = review.Description,
-                //        Reviewer1Id = review.Reviewer1Id,
-                //        Reviewer2Id = review.Reviewer2Id,
-                //        FileUpload = review.FileUpload,
-                //        ProjectId = review.ProjectId,
-                //    })
-                //    .FirstOrDefault()
+                TeamCode = y.IdeaVersions.FirstOrDefault().Topic.Project.TeamCode,
+                IdeaCode = y.IdeaVersions.FirstOrDefault().Topic.TopicCode,
+                Review = y.IdeaVersions.FirstOrDefault().Topic.Project.Reviews
+                .Where(review => review.Number == reviewNumber)
+                .Select(review => new ReviewUpdateCommand
+                {
+                    Id = review.Id,
+                    Number = review.Number,
+                    Description = review.Description,
+                    Reviewer1Id = review.Reviewer1Id,
+                    Reviewer2Id = review.Reviewer2Id,
+                    FileUpload = review.FileUpload,
+                    ProjectId = review.ProjectId,
+                })
+                .FirstOrDefault()
             })
             .ToListAsync();
     }

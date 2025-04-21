@@ -34,10 +34,10 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
         {
             var project = await _context.Projects.Where(e => e.Id == teamMember.ProjectId)
                 .Include(e => e.TeamMembers)
-                //sua db
-                //.ThenInclude(e => e.User).Include(e => e.Idea)
-                //.ThenInclude(e => e.Specialty)
-                //.ThenInclude(e => e.Profession)
+                .ThenInclude(e => e.User)
+                .Include(e => e.Topic.IdeaVersion.Idea)
+                .ThenInclude(e => e.Specialty)
+                .ThenInclude(e => e.Profession)
                 .Include(e => e.Invitations)
                 .FirstOrDefaultAsync();
             if (project != null)
@@ -60,14 +60,13 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
         var today = DateTime.UtcNow.Date;
         var project = await _context.Projects
             .Where(p => p.IsDeleted == false 
-                        //sua db
-                        //&&
-                        //p.Idea != null &&
-                        //p.Idea.StageIdea != null &&
-                        //p.Idea.StageIdea.Semester != null &&
-                        //p.Idea.StageIdea.Semester != null &&
-                        //p.Idea.StageIdea.Semester.StartDate != null &&
-                        //p.Idea.StageIdea.Semester.StartDate.Value.UtcDateTime.Date == today
+                        &&
+                        p.Topic.IdeaVersion.Idea != null &&
+                        p.Topic.IdeaVersion.StageIdea != null &&
+                        p.Topic.IdeaVersion.StageIdea.Semester != null &&
+                        p.Topic.IdeaVersion.StageIdea.Semester != null &&
+                        p.Topic.IdeaVersion.StageIdea.Semester.StartDate != null &&
+                        p.Topic.IdeaVersion.StageIdea.Semester.StartDate.Value.UtcDateTime.Date == today
                         )
             .ToListAsync();
         return project;
@@ -121,8 +120,13 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
 
     public async Task<List<Project>> GetProjectBySemesterIdAndDefenseStage(Guid semesterId, int defenseStage)
     {
-        var project = await _context.Projects.Where(e => e.IsDeleted == false &&
-                                                         e.DefenseStage == defenseStage
+        var project = await _context.Projects
+            .Include(x => x.Topic)
+            .ThenInclude(x => x.IdeaVersion)
+            .ThenInclude(x => x.Idea)
+            .Where(e => e.IsDeleted == false &&
+                                                         e.DefenseStage == defenseStage &&
+                                                         e.Topic.IdeaVersion.StageIdea.SemesterId == semesterId
                                                          //sua db
                                                          //&&
                                                          //e.Idea != null &&
@@ -138,7 +142,9 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
 
     public async Task<List<Project>?> GetInProgressProjectBySemesterId(Guid semesterId)
     {
-        var projects = await _context.Projects.Where(e => e.Status == ProjectStatus.InProgress &&
+        var projects = await GetQueryable().Where(
+                e => 
+                    e.Status == ProjectStatus.InProgress &&
                                                           e.IsDeleted == false 
                                                           //sua db
                                                           //&&
@@ -149,6 +155,14 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
             //sua db
             //.Include(e => e.Idea).ThenInclude(e => e.Mentor)
             //.Include(e => e.Idea).ThenInclude(e => e.SubMentor)
+            .Include(x => x.Topic)
+            .ThenInclude(x => x.IdeaVersion)
+            .ThenInclude(x => x.Idea)
+            .ThenInclude(x => x.Mentor)
+            .Include(x => x.Topic)
+            .ThenInclude(x => x.IdeaVersion)
+            .ThenInclude(x => x.Idea)
+            .ThenInclude(x => x.SubMentor)
             .ToListAsync();
         return projects;
     }
