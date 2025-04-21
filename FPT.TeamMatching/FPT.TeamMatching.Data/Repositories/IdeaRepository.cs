@@ -28,7 +28,7 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
         var ideas = await _dbContext.Ideas.Where(e => e.OwnerId == userId)
             .Include(e => e.IdeaVersions).ThenInclude(e => e.IdeaVersionRequests).ThenInclude(e => e.Reviewer)
             .Include(e => e.IdeaVersions).ThenInclude(e => e.StageIdea)
-            //.Include(e => e.IdeaRequests).ThenInclude(e => e.Reviewer)
+            //.Include(e => e.IdeaVersionRequests).ThenInclude(e => e.Reviewer)
             //.Include(e => e.StageIdea)
             .ToListAsync();
         return ideas;
@@ -39,7 +39,7 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
         var ideas = await _dbContext.Ideas.Where(e => e.Type == IdeaType.Enterprise || e.Type == IdeaType.Lecturer)
             .Include(e => e.IdeaVersions).ThenInclude(e => e.IdeaVersionRequests).ThenInclude(e => e.Reviewer)
             .Include(e => e.IdeaVersions).ThenInclude(e => e.StageIdea)
-            //.Include(e => e.IdeaRequests).ThenInclude(e => e.Reviewer)
+            //.Include(e => e.IdeaVersionRequests).ThenInclude(e => e.Reviewer)
             //.Include(e => e.StageIdea)
             .ToListAsync();
         return ideas;
@@ -75,7 +75,7 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
                                                       )
             .OrderByDescending(m => m.CreatedDate)
             //.Include(m => m.StageIdea)
-            //.Include(e => e.IdeaRequests).ThenInclude(e => e.Reviewer)
+            //.Include(e => e.IdeaVersionRequests).ThenInclude(e => e.Reviewer)
             .ToListAsync();
 
         return ideas;
@@ -197,7 +197,7 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
         var queryable = GetQueryable();
         queryable = queryable
             //sua db
-            //.Include(m => m.IdeaRequests)
+            //.Include(m => m.IdeaVersionRequests)
             .Include(m => m.Owner)
             .ThenInclude(u => u.UserXRoles)
             .ThenInclude(ur => ur.Role)

@@ -28,9 +28,9 @@ public class IdeaVersionRequestController : ControllerBase
     }
     
     [HttpGet("me/by-status-and-roles")]
-    public async Task<IActionResult> GetIdeaRequestsCurrentByStatusAndRoles([FromQuery] IdeaVersionRequestGetListByStatusAndRoleQuery query)
+    public async Task<IActionResult> GetIdeaVersionRequestsCurrentByStatusAndRoles([FromQuery] IdeaVersionRequestGetListByStatusAndRoleQuery query)
     {
-        var msg = await _service.GetIdeaRequestsForCurrentReviewerByRolesAndStatus<IdeaVersionRequestResult>(query);
+        var msg = await _service.GetIdeaVersionRequestsForCurrentReviewerByRolesAndStatus<IdeaVersionRequestResult>(query);
         return Ok(msg);
     }
     
@@ -103,7 +103,7 @@ public class IdeaVersionRequestController : ControllerBase
     }
 
     //[HttpPut("council-response")]
-    //public async Task<IActionResult> CouncilResponse([FromBody] IdeaRequestLecturerOrCouncilResponseCommand request)
+    //public async Task<IActionResult> CouncilResponse([FromBody] IdeaVersionRequestLecturerOrCouncilResponseCommand request)
     //{
     //    var businessResult = await _service.CouncilResponse(request);
 

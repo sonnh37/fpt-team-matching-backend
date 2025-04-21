@@ -16,7 +16,7 @@ public interface IUserService : IBaseService
 
     Task<BusinessResult> UpdateUserCacheAsync(UserUpdateCacheCommand newCacheJson);
 
-    Task<BusinessResult> GetAllByCouncilWithIdeaRequestPending(UserGetAllQuery query);
+    Task<BusinessResult> GetAllByCouncilWithIdeaVersionRequestPending(UserGetAllQuery query);
     
     Task<BusinessResult> GetByEmail<TResult>(string email) where TResult : BaseResult;
     

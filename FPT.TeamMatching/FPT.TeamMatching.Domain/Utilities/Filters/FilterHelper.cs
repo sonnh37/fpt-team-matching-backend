@@ -32,8 +32,8 @@ public static class FilterHelper
                 Project((queryable as IQueryable<Project>)!, ProjectQuery) as IQueryable<TEntity>,
             CommentGetAllQuery commentQuery =>
                 Comment((queryable as IQueryable<Comment>)!, commentQuery) as IQueryable<TEntity>,
-            IdeaVersionRequestGetAllQuery ideaRequestQuery =>
-                IdeaRequest((queryable as IQueryable<IdeaVersionRequest>)!, ideaRequestQuery) as IQueryable<TEntity>,
+            IdeaVersionRequestGetAllQuery ideaVersionRequestQuery =>
+                IdeaVersionRequest((queryable as IQueryable<IdeaVersionRequest>)!, ideaVersionRequestQuery) as IQueryable<TEntity>,
             IdeaGetAllQuery ideaQuery =>
                 Idea((queryable as IQueryable<Idea>)!, ideaQuery) as IQueryable<TEntity>,
             InvitationGetAllQuery invitationQuery =>
@@ -290,7 +290,7 @@ public static class FilterHelper
         return queryable;
     }
 
-    private static IQueryable<IdeaVersionRequest>? IdeaRequest(IQueryable<IdeaVersionRequest> queryable, IdeaVersionRequestGetAllQuery query)
+    private static IQueryable<IdeaVersionRequest>? IdeaVersionRequest(IQueryable<IdeaVersionRequest> queryable, IdeaVersionRequestGetAllQuery query)
     {
         if (query.Status.HasValue)
         {
