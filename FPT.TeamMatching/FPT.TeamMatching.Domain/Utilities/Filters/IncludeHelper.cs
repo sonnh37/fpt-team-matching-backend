@@ -190,7 +190,11 @@ public static class IncludeHelper
             .Include(x => x.Project)
             .ThenInclude(y => y.Topic)
             .ThenInclude(e => e.IdeaVersion)
-            .ThenInclude(y => y.Idea);
+            .ThenInclude(y => y.Idea)
+            .Include(x => x.Project)
+            .ThenInclude(y => y.Topic)
+            .ThenInclude(e => e.TopicVersions);
+            
             
         return queryable;
     }
