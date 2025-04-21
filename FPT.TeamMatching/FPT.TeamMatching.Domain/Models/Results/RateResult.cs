@@ -8,7 +8,7 @@ public class RateResult : BaseResult
 
     public Guid? RateById { get; set; }
 
-    public float NumbOfStar { get; set; }
+    public double PercentContribution { get; set; }
 
     public string? Content { get; set; }
 
