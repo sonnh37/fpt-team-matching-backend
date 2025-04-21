@@ -187,9 +187,14 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
 
     public async Task<List<Idea>> GetIdeasByIdeaCodes(string[] ideaCode)
     {
-        //sua db
         //return await _dbContext.Ideas.Include(x => x.Project).Where(x => ideaCode.Contains(x.IdeaCode)).ToListAsync();
-        return await _dbContext.Ideas.Include(x => x.IdeaVersions).ToListAsync();
+        return await _dbContext.Ideas
+            .Include(x => x.IdeaVersions)
+            .ThenInclude(x => x.Topic)
+            .ThenInclude(x => x.Project)
+            .Where(x => x.IdeaVersions
+                .Any(iv => ideaCode.Contains(iv.Topic.TopicCode)))
+            .ToListAsync();
     }
 
     public async Task<(List<Idea>, int)> GetIdeasOfSupervisors(IdeaGetListOfSupervisorsQuery query)
