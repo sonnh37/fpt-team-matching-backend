@@ -405,7 +405,7 @@ public partial class FPTMatchingDbContext : BaseDbContext
             //    .HasForeignKey<Topic>(d => d.IdeaId)
             //    .OnDelete(DeleteBehavior.SetNull);
     
-            //entity.HasMany(d => d.IdeaRequests)
+            //entity.HasMany(d => d.IdeaVersionRequests)
             //    .WithOne(p => p.Idea)
             //    .HasForeignKey(d => d.IdeaId)
             //    .OnDelete(DeleteBehavior.Cascade);
@@ -444,10 +444,10 @@ public partial class FPTMatchingDbContext : BaseDbContext
             entity.HasOne(d => d.IdeaVersion).WithMany(p => p.IdeaVersionRequests)
                 .HasForeignKey(d => d.IdeaVersionId);
 
-            entity.HasOne(d => d.Reviewer).WithMany(p => p.IdeaRequestOfReviewers)
+            entity.HasOne(d => d.Reviewer).WithMany(p => p.IdeaVersionRequestOfReviewers)
                 .HasForeignKey(d => d.ReviewerId);
 
-            entity.HasOne(d => d.CriteriaForm).WithMany(p => p.IdeaRequests)
+            entity.HasOne(d => d.CriteriaForm).WithMany(p => p.IdeaVersionRequests)
                 .HasForeignKey(d => d.CriteriaFormId);
         });
 
