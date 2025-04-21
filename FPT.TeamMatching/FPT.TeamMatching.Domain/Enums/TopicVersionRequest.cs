@@ -11,6 +11,5 @@ namespace FPT.TeamMatching.Domain.Enums
         Pending,
         Approved,
         Rejected,
-        Consider
     }
 }
