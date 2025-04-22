@@ -67,9 +67,9 @@ public static class IncludeHelper
     {
         queryable = queryable
             .Include(m => m.IdeaVersion)
-            //.ThenInclude(e => e.Idea).ThenInclude(e => e.Mentor)
-            .Include(m => m.IdeaVersion)
-            //.ThenInclude(e => e.Idea).ThenInclude(e => e.SubMentor)
+            .ThenInclude(e => e.Idea).ThenInclude(e => e.Mentor)
+            .Include(e => e.AnswerCriterias)
+            .Include(e => e.CriteriaForm)
             .Include(m => m.Reviewer);
         return queryable;
     }
