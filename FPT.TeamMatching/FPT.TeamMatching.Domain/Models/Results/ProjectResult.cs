@@ -19,7 +19,7 @@ public class ProjectResult : BaseResult
     public int? TeamSize { get; set; }
 
     public int? DefenseStage { get; set; }
-
+    public UserResult? Leader { get; set; }
     public TopicResult? Topic { get; set; }
 
     public MentorFeedbackResult? MentorFeedback { get; set; }
