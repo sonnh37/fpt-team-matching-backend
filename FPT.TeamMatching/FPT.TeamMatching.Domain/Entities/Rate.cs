@@ -9,7 +9,7 @@ public class Rate : BaseEntity
 
     public Guid? RateById { get; set; }
 
-    public double NumbOfStar { get; set; }
+    public double PercentContribution { get; set; }
 
     public string? Content { get; set; }
 

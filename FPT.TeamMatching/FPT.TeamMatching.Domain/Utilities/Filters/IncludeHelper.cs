@@ -185,12 +185,17 @@ public static class IncludeHelper
     private static IQueryable<Review> Review(IQueryable<Review> queryable)
     {
         queryable = queryable
+            .Include(d => d.Reviewer1)
+            .Include(d => d.Reviewer2)
             .Include(x => x.Project)
             .ThenInclude(y => y.Topic)
             .ThenInclude(e => e.IdeaVersion)
             .ThenInclude(y => y.Idea)
-            .Include(d => d.Reviewer1)
-            .Include(d => d.Reviewer2);
+            .Include(x => x.Project)
+            .ThenInclude(y => y.Topic)
+            .ThenInclude(e => e.TopicVersions);
+            
+            
         return queryable;
     }
 
