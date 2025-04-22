@@ -92,7 +92,7 @@ public class IdeaService : BaseService<Idea>, IIdeaService
                     .WithMessage("Không có đợt duyệt ứng với ngày hiện tại");
             }
 
-            //ki hien tai
+            //ki cua stage idea
             var semester = await _semesterRepository.GetSemesterByStageIdeaId(stageIdea.Id);
             if (semester == null)
             {
@@ -312,7 +312,7 @@ public class IdeaService : BaseService<Idea>, IIdeaService
                     .WithMessage("Không có đợt duyệt ứng với ngày hiện tại");
             }
 
-            //ki hien tai
+            //ki cua stage idea
             var semester = await _semesterRepository.GetSemesterByStageIdeaId(stageIdea.Id);
             if (semester == null)
             {
@@ -438,41 +438,6 @@ public class IdeaService : BaseService<Idea>, IIdeaService
             //    Status = IdeaVersionRequestStatus.Pending,
             //    Role = "SubMentor",
             //};
-
-            //mentor nop idea -> topic 
-            //tao topic
-            //Gen topic code
-            var semesterCode = semester.SemesterCode;
-            var semesterPrefix = semester.SemesterPrefixName;
-            //get so luong topic cua ki
-            var numberOfTopic = _topicRepository.NumberOfTopicBySemesterId(semester.Id);
-
-            // Tạo số thứ tự tiếp theo
-            int nextNumberTopic = numberOfTopic + 1;
-
-            // Tạo topic code mới theo định dạng: semesterPrefix + semesterCode + "SE" + số thứ tự (3 chữ số)
-            string newTopicCode = $"{semesterPrefix}{semesterCode}SE{nextNumberTopic:D3}";
-
-            var topic = new Topic
-            {
-                IdeaVersionId = ideaVersion.Id,
-            };
-            //check k trùng topic code
-            var codeExist = _topicRepository.IsExistedTopicCode(newTopicCode);
-            if (!codeExist)
-            {
-                topic.TopicCode = newTopicCode;
-            }
-            await SetBaseEntityForCreation(topic);
-            _topicRepository.Add(topic);
-
-            saveChange = await _unitOfWork.SaveChanges();
-            if (!saveChange)
-            {
-                return new ResponseBuilder()
-                    .WithStatus(Const.FAIL_CODE)
-                    .WithMessage(Const.FAIL_SAVE_MSG);
-            }
 
             //gửi noti cho submentor (nếu có)
             //var command = new NotificationCreateCommand

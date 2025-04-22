@@ -24,6 +24,8 @@ public class IdeaVersionRequestService : BaseService<IdeaVersionRequest>, IIdeaV
     private readonly IIdeaVersionRepository _ideaVersionRepository;
     private readonly IIdeaRepository _ideaRepository;
     private readonly ISemesterRepository _semesterRepository;
+    private readonly IStageIdeaRepositoty _stageIdeaRepositoty;
+    private readonly ITopicRepository _topicRepository;
     private readonly IUserRepository _userRepository;
     private readonly IIdeaService _ideaService;
     private readonly IAnswerCriteriaRepository _answerCriteriaRepository;
@@ -36,6 +38,8 @@ public class IdeaVersionRequestService : BaseService<IdeaVersionRequest>, IIdeaV
         _ideaRepository = unitOfWork.IdeaRepository;
         _ideaVersionRepository = unitOfWork.IdeaVersionRepository;
         _semesterRepository = unitOfWork.SemesterRepository;
+        _stageIdeaRepositoty = unitOfWork.StageIdeaRepository;
+        _topicRepository = unitOfWork.TopicRepository;
         _userRepository = unitOfWork.UserRepository;
         _answerCriteriaRepository = unitOfWork.AnswerCriteriaRepository;
         _ideaService = ideaService;
@@ -145,24 +149,78 @@ public class IdeaVersionRequestService : BaseService<IdeaVersionRequest>, IIdeaV
             if (!newIdeaVersionRequests.Any()) return HandlerNotFound("No available councils");
 
             _ideaVersionRequestRepository.AddRange(newIdeaVersionRequests);
-            var check = await _unitOfWork.SaveChanges();
-            if (check)
+            var saveChange = await _unitOfWork.SaveChanges();
+            if (!saveChange)
             {
-                var ideaVersion = await _ideaVersionRepository.GetById((Guid)command.IdeaVersionId);
-                //send noti cho 3 nguoi council
-                var request = new NotificationCreateForGroupUser
-                {
-                    Description = "Đề tài " + ideaVersion.Abbreviations + " đang chờ bạn duyệt với vai trò Council",
-                };
-                await _notificationService.CreateForGroupUsers(request, councils.Select(e => e.Id).ToList());
-                //
                 return new ResponseBuilder()
                     .WithStatus(Const.SUCCESS_CODE)
-                   .WithMessage("Created council requests successfully.");
+                   .WithMessage("Failed to create council requests.");
             }
-            return new ResponseBuilder()
+            var ideaVersion = await _ideaVersionRepository.GetById((Guid)command.IdeaVersionId);
+            //send noti cho 3 nguoi council
+            var request = new NotificationCreateForGroupUser
+            {
+                Description = "Đề tài " + ideaVersion.Abbreviations + " đang chờ bạn duyệt với vai trò Council",
+            };
+            await _notificationService.CreateForGroupUsers(request, councils.Select(e => e.Id).ToList());
+            //
+
+            //lay ra stageIdea hien tai
+            var stageIdea = await _stageIdeaRepositoty.GetCurrentStageIdea();
+            if (stageIdea == null)
+            {
+                return new ResponseBuilder()
                     .WithStatus(Const.FAIL_CODE)
-                    .WithMessage("Failed to create council requests.");
+                    .WithMessage("Không có đợt duyệt ứng với ngày hiện tại");
+            }
+
+            //ki cua stage idea
+            var semester = await _semesterRepository.GetSemesterByStageIdeaId(stageIdea.Id);
+            if (semester == null)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("Không có kì ứng với đợt duyệt hiện tại");
+            }
+
+            //mentor nop idea -> topic 
+            //tao topic
+            //Gen topic code
+            var semesterCode = semester.SemesterCode;
+            var semesterPrefix = semester.SemesterPrefixName;
+            //get so luong topic cua ki
+            var numberOfTopic = _topicRepository.NumberOfTopicBySemesterId(semester.Id);
+
+            // Tạo số thứ tự tiếp theo
+            int nextNumberTopic = numberOfTopic + 1;
+
+            // Tạo topic code mới theo định dạng: semesterPrefix + semesterCode + "SE" + số thứ tự (3 chữ số)
+            string newTopicCode = $"{semesterPrefix}{semesterCode}SE{nextNumberTopic:D3}";
+
+            var topic = new Topic
+            {
+                IdeaVersionId = ideaVersion.Id,
+            };
+            //check k trùng topic code
+            var codeExist = _topicRepository.IsExistedTopicCode(newTopicCode);
+            if (!codeExist)
+            {
+                topic.TopicCode = newTopicCode;
+            }
+            await SetBaseEntityForCreation(topic);
+            _topicRepository.Add(topic);
+
+            saveChange = await _unitOfWork.SaveChanges();
+            if (!saveChange)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage(Const.FAIL_SAVE_MSG);
+            }
+
+            return new ResponseBuilder()
+                    .WithStatus(Const.SUCCESS_CODE)
+                    .WithMessage(Const.SUCCESS_SAVE_MSG);
         }
         catch (Exception ex)
         {
@@ -362,16 +420,16 @@ public class IdeaVersionRequestService : BaseService<IdeaVersionRequest>, IIdeaV
                         .WithStatus(Const.NOT_FOUND_CODE)
                         .WithMessage(Const.NOT_FOUND_MSG);
             }
-            var idea = await _ideaRepository.GetById((Guid)ideaVersionRequest.IdeaVersion.IdeaId);
-            if (idea == null)
-            {
-                return new ResponseBuilder()
-                        .WithStatus(Const.NOT_FOUND_CODE)
-                        .WithMessage(Const.NOT_FOUND_MSG);
-            }
             //neu mentor response 
             if (ideaVersionRequest.Role == "Mentor")
             {
+                var idea = await _ideaRepository.GetById((Guid)ideaVersionRequest.IdeaVersion.IdeaId);
+                if (idea == null)
+                {
+                    return new ResponseBuilder()
+                            .WithStatus(Const.NOT_FOUND_CODE)
+                            .WithMessage(Const.NOT_FOUND_MSG);
+                }
                 //neu la status la consider -> sua status cua idea -> ConsiderByMentor
                 if (ideaVersionRequest.Status == IdeaVersionRequestStatus.Consider)
                 {
@@ -386,22 +444,10 @@ public class IdeaVersionRequestService : BaseService<IdeaVersionRequest>, IIdeaV
                                 .WithMessage(Const.FAIL_SAVE_MSG);
                     }
                 }
-
-                //noti cho owner
-                var noti = new NotificationCreateForIndividual
+                //neu la status la reject -> sua status cua idea -> reject
+                if (ideaVersionRequest.Status == IdeaVersionRequestStatus.Rejected)
                 {
-                    UserId = ideaVersionRequest.IdeaVersion.Idea.OwnerId,
-                    Description = "Đề tài " + ideaVersionRequest.IdeaVersion.Abbreviations + " đã được " + ideaVersionRequest.IdeaVersion.Idea.Mentor.Code + " (Mentor) duyệt. Hãy kiểm tra kết quả!",
-                };
-                await _notificationService.CreateForUser(noti);
-            }
-            //neu council response 
-            else if (ideaVersionRequest.Role == "Council")
-            {
-                //neu la status la consider -> sua status cua idea -> ConsiderByCouncil
-                if (ideaVersionRequest.Status == IdeaVersionRequestStatus.Consider)
-                {
-                    idea.Status = IdeaStatus.ConsiderByCouncil;
+                    idea.Status = IdeaStatus.Rejected;
                     await SetBaseEntityForUpdate(idea);
                     _ideaRepository.Update(idea);
                     saveChange = await _unitOfWork.SaveChanges();
@@ -412,14 +458,40 @@ public class IdeaVersionRequestService : BaseService<IdeaVersionRequest>, IIdeaV
                                 .WithMessage(Const.FAIL_SAVE_MSG);
                     }
                 }
-                //noti cho mentor
+                //noti cho owner
+                var ideaInclude = await _ideaRepository.GetById((Guid)ideaVersionRequest.IdeaVersion.IdeaId, true);
                 var noti = new NotificationCreateForIndividual
                 {
-                    UserId = ideaVersionRequest.IdeaVersion.Idea.MentorId,
-                    Description = "Đề tài " + ideaVersionRequest.IdeaVersion.Abbreviations + " được yêu cầu chỉnh sửa",
+                    UserId = ideaVersionRequest.IdeaVersion.Idea.OwnerId,
+                    Description = "Đề tài " + ideaVersionRequest.IdeaVersion.Abbreviations + " đã được " + ideaInclude.Mentor.Code + " (Mentor) duyệt. Hãy kiểm tra kết quả!",
                 };
                 await _notificationService.CreateForUser(noti);
             }
+            ////neu council response 
+            //else if (ideaVersionRequest.Role == "Council")
+            //{
+            //    //neu la status la consider -> sua status cua request
+            //    if (ideaVersionRequest.Status == IdeaVersionRequestStatus.Consider)
+            //    {
+            //        idea.Status = IdeaStatus.ConsiderByCouncil;
+            //        await SetBaseEntityForUpdate(idea);
+            //        _ideaRepository.Update(idea);
+            //        saveChange = await _unitOfWork.SaveChanges();
+            //        if (!saveChange)
+            //        {
+            //            return new ResponseBuilder()
+            //                    .WithStatus(Const.FAIL_CODE)
+            //                    .WithMessage(Const.FAIL_SAVE_MSG);
+            //        }
+            //    }
+            //    //noti cho mentor
+            //    var noti = new NotificationCreateForIndividual
+            //    {
+            //        UserId = ideaVersionRequest.IdeaVersion.Idea.MentorId,
+            //        Description = "Đề tài " + ideaVersionRequest.IdeaVersion.Abbreviations + " được yêu cầu chỉnh sửa",
+            //    };
+            //    await _notificationService.CreateForUser(noti);
+            //}
             return new ResponseBuilder()
                 .WithStatus(Const.SUCCESS_CODE)
                 .WithMessage(Const.SUCCESS_SAVE_MSG);
