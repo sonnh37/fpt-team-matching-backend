@@ -42,6 +42,56 @@ namespace FPT.TeamMatching.Services
                     .WithMessage(errorMessage);
             }
         }
+        
+        public async Task<string> GenerateNewTopicCode(Guid? semesterId)
+        {
+            try
+            {
+                var semester = await _semesterRepository.GetById(semesterId.Value);
+                if (semester == null) return string.Empty;
+                var semesterCode = semester.SemesterCode;
+                var semesterPrefix = semester.SemesterPrefixName;
+                    
+                //get so luong idea dc duyet approve cua ki
+                var numberOfIdeas = await _unitOfWork.IdeaRepository.NumberApprovedIdeasOfSemester(semester.Id);
+
+                // Tạo số thứ tự tiếp theo
+                int nextNumberIdea = numberOfIdeas + 1;
+
+                // Tạo mã Idea mới theo định dạng:
+                // semesterPrefix + semesterCode + "SE" + số thứ tự (2 chữ số)
+                string newIdeaCode = $"{semesterPrefix}{semesterCode}SE{nextNumberIdea:D2}";
+                return newIdeaCode;
+            }
+            catch (Exception ex)
+            {
+                var errorMessage = $"An error {typeof(SemesterResult).Name}: {ex.Message}";
+                return string.Empty;
+            }
+        }
+        
+        public async Task<string> GenerateNewTeamCode(Guid? semesterId)
+        {
+            try
+            {
+                var semester = await _semesterRepository.GetById(semesterId.Value);
+                if (semester == null) return string.Empty;
+                var numberOfProjects = await _unitOfWork.ProjectRepository.NumberOfInProgressProjectInSemester(semester.Id);
+                // Tạo số thứ tự tiếp theo
+                int nextNumber = numberOfProjects + 1;
+                string semesterCode = semester.SemesterCode;
+                //Tạo mã nhóm
+                string newTeamCode = $"{semesterCode}SE{nextNumber:D3}";
+
+                return newTeamCode;
+
+            }
+            catch (Exception ex)
+            {
+                var errorMessage = $"An error {typeof(SemesterResult).Name}: {ex.Message}";
+                return string.Empty;
+            }
+        }
 
         // public async Task<BusinessResult> GetPresentSemester()
         // {

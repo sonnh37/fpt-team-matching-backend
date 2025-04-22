@@ -95,7 +95,7 @@ public class IdeaVersionRequestRepository : BaseRepository<IdeaVersionRequest>, 
     {
         return await GetQueryable()
             //sua db
-            //.Where(ir => ir.IdeaId == ideaId && ir.Role == "Council" && ir.Status == IdeaRequestStatus.Approved)
+            .Where(ir => ir.IdeaVersion != null && ir.IdeaVersion.IdeaId == ideaId && ir.Role == "Council" && ir.Status == IdeaVersionRequestStatus.Approved)
             .CountAsync();
     }
 
@@ -103,7 +103,7 @@ public class IdeaVersionRequestRepository : BaseRepository<IdeaVersionRequest>, 
     {
         return await GetQueryable()
             //sua db
-            //.Where(ir => ir.IdeaId == ideaId && ir.Role == "Council")
+            .Where(ir => ir.IdeaVersion != null && ir.IdeaVersion.IdeaId == ideaId && ir.Role == "Council")
             .CountAsync();
     }
 
@@ -111,7 +111,17 @@ public class IdeaVersionRequestRepository : BaseRepository<IdeaVersionRequest>, 
     {
         return await GetQueryable()
             //sua db
-            //.Where(ir => ir.IdeaId == ideaId && ir.Role == "Council" && ir.Status == IdeaRequestStatus.Rejected)
+            .Include(m => m.IdeaVersion)
+            .Where(ir => ir.IdeaVersion != null && ir.IdeaVersion.IdeaId == ideaId && ir.Role == "Council" && ir.Status == IdeaVersionRequestStatus.Rejected)
+            .CountAsync();
+    }
+    
+    public async Task<int> CountConsiderCouncilsForIdea(Guid ideaId)
+    {
+        return await GetQueryable()
+            //sua db
+            .Include(m => m.IdeaVersion)
+            .Where(ir => ir.IdeaVersion != null && ir.IdeaVersion.IdeaId == ideaId && ir.Role == "Council" && ir.Status == IdeaVersionRequestStatus.Consider)
             .CountAsync();
     }
 

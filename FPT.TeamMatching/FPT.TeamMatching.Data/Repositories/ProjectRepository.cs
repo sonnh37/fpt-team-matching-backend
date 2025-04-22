@@ -109,7 +109,7 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
         return number;
     }
 
-    public async Task<Project?> GetProjectByLeaderId(Guid leaderId)
+    public async Task<Project?> GetProjectByLeaderId(Guid? leaderId)
     {
         var project = await _context.Projects.Where(e => e.IsDeleted == false &&
                                                          e.LeaderId == leaderId &&
