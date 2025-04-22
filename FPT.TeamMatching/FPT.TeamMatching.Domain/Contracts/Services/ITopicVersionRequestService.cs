@@ -1,4 +1,6 @@
 ﻿using FPT.TeamMatching.Domain.Contracts.Services.Bases;
+using FPT.TeamMatching.Domain.Models.Requests.Commands.TopicVersionRequests;
+using FPT.TeamMatching.Domain.Models.Responses;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,5 +11,7 @@ namespace FPT.TeamMatching.Domain.Contracts.Services
 {
     public interface ITopicVersionRequestService: IBaseService
     {
+        Task<BusinessResult> RespondByLecturerOrManager(RespondByMentorOrManager request);
+        Task<BusinessResult> GetByRole(string role);
     }
 }

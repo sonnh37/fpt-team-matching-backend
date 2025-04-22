@@ -9,7 +9,7 @@ namespace FPT.TeamMatching.Domain.Models.Requests.Commands.AnswerCriterias
 {
     public class AnswerCriteriaCreateCommand: CreateCommand
     {
-        public Guid? IdeaRequestId { get; set; }
+        public Guid? IdeaVersionRequestId { get; set; }
 
         public Guid? CriteriaId { get; set; }
 

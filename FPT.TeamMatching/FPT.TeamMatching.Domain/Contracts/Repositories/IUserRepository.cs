@@ -12,7 +12,7 @@ public interface IUserRepository : IBaseRepository<User>
     Task<User?> GetByEmail(string keyword);
     Task<User?> GetByUsername(string username);
     Task<List<PartnerInfoResult>> GetAllUsersWithNameOnly();
-    Task<List<User>> GetThreeCouncilsForIdeaRequest(Guid ideaId);
+    Task<List<User>> GetCouncilsForIdeaVersionRequest(Guid ideaVersionId);
     Task<User?> GetReviewerByMatchingEmail(string keyword);
     Task<List<UserIdEmailResult>> GetAllReviewerIdAndUsername();
 
@@ -20,5 +20,6 @@ public interface IUserRepository : IBaseRepository<User>
 
     Task<List<User>?> GetStudentDoNotHaveTeam();
 
-    Task<(List<User>, int)> GetAllByCouncilWithIdeaRequestPending(UserGetAllQuery query);
+    Task<(List<User>, int)> GetAllByCouncilWithIdeaVersionRequestPending(UserGetAllQuery query);
+    Task<List<EmailSuggestionModels>> GetAllEmailSuggestions(string email);
 }

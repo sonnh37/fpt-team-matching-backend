@@ -28,9 +28,9 @@ public class IdeaVersionRequestController : ControllerBase
     }
     
     [HttpGet("me/by-status-and-roles")]
-    public async Task<IActionResult> GetIdeaRequestsCurrentByStatusAndRoles([FromQuery] IdeaVersionRequestGetListByStatusAndRoleQuery query)
+    public async Task<IActionResult> GetIdeaVersionRequestsCurrentByStatusAndRoles([FromQuery] IdeaVersionRequestGetListByStatusAndRoleQuery query)
     {
-        var msg = await _service.GetIdeaRequestsForCurrentReviewerByRolesAndStatus<IdeaVersionRequestResult>(query);
+        var msg = await _service.GetIdeaVersionRequestsForCurrentReviewerByRolesAndStatus<IdeaVersionRequestResult>(query);
         return Ok(msg);
     }
     
@@ -94,16 +94,16 @@ public class IdeaVersionRequestController : ControllerBase
         return Ok(businessResult);
     }
 
-    [HttpPut("lecturer-response")]
-    public async Task<IActionResult> LecturerResponse([FromBody] IdeaVersionRequestLecturerOrCouncilResponseCommand request)
+    [HttpPut("respond-by-mentor-or-council")]
+    public async Task<IActionResult> RespondByMentorOrCouncil([FromBody] IdeaVersionRequestLecturerOrCouncilResponseCommand request)
     {
-        var businessResult = await _service.LecturerResponse(request);
+        var businessResult = await _service.RespondByMentorOrCouncil(request);
 
         return Ok(businessResult);
     }
 
     //[HttpPut("council-response")]
-    //public async Task<IActionResult> CouncilResponse([FromBody] IdeaRequestLecturerOrCouncilResponseCommand request)
+    //public async Task<IActionResult> CouncilResponse([FromBody] IdeaVersionRequestLecturerOrCouncilResponseCommand request)
     //{
     //    var businessResult = await _service.CouncilResponse(request);
 

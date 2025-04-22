@@ -468,7 +468,20 @@ public class ReviewService : BaseService<Review>, IReviewService
                 ws1.Column("G").Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
 
                 ws1.Column("H").Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-                ws1.Column("K").Style.DateFormat.Format = "mm-dd-yyyy";
+                // ws1.Column("K").Style.DateFormat.Format = "mm-dd-yyyy";
+                int lastRowWs1 = ws1.LastRowUsed().RowNumber();
+                var rangeWs1 = ws1.Range($"K4:K{lastRowWs1}");
+
+                rangeWs1.CreateDataValidation()
+                    .Date
+                    .Between(DateTime.Now, new DateTime(9999, 12, 31));
+                // Tự động điều chỉnh độ rộng cột
+                ws1.Columns().AdjustToContents();
+                var slotWs1 = ws1.Range($"L4:L{lastRowWs1}");
+                slotWs1.CreateDataValidation()
+                    .WholeNumber
+                    .Between(1, 5);
+
                 // Tự động điều chỉnh độ rộng cột
                 ws1.Columns().AdjustToContents();
                 #endregion
@@ -521,7 +534,17 @@ public class ReviewService : BaseService<Review>, IReviewService
                 ws2.Column("G").Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
 
                 ws2.Column("H").Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                // ws2.Column("K").Style.DateFormat.Format = "mm-dd-yyyy";
+                int lastRowWs2 = ws2.LastRowUsed().RowNumber();
+                var rangeWs2 = ws2.Range($"K4:K{lastRowWs2}");
 
+                rangeWs2.CreateDataValidation()
+                    .Date
+                    .Between(DateTime.Now, new DateTime(9999, 12, 31));
+                var slotWs2 = ws2.Range($"L4:L{lastRowWs2}");
+                slotWs2.CreateDataValidation()
+                    .WholeNumber
+                    .Between(1, 5);
                 // Tự động điều chỉnh độ rộng cột
                 ws2.Columns().AdjustToContents();
                 #endregion
@@ -574,9 +597,20 @@ public class ReviewService : BaseService<Review>, IReviewService
                 ws3.Column("G").Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
 
                 ws3.Column("H").Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                // ws3.Column("K").Style.DateFormat.Format = "mm-dd-yyyy";
+                int lastRowWs3 = ws3.LastRowUsed().RowNumber();
+                var rangeWs3 = ws3.Range($"K4:K{lastRowWs3}");
 
+                rangeWs3.CreateDataValidation()
+                    .Date
+                    .Between(DateTime.Now, new DateTime(9999, 12, 31));
                 // Tự động điều chỉnh độ rộng cột
                 ws3.Columns().AdjustToContents();
+                
+                var slotWs3 = ws3.Range($"L4:L{lastRowWs3}");
+                slotWs3.CreateDataValidation()
+                    .WholeNumber
+                    .Between(1, 5);
                 #endregion
 
                 using (MemoryStream ms = new MemoryStream())
@@ -597,6 +631,25 @@ public class ReviewService : BaseService<Review>, IReviewService
             return new ResponseBuilder()
                 .WithStatus(Const.FAIL_CODE)
                 .WithMessage(errorMessage);
+        }
+    }
+
+    public async Task<BusinessResult> GetReviewByReviewerId(Guid reviewerId)
+    {
+        try
+        {
+            var result = await _reviewRepository.GetReviewByReviewerId(reviewerId);
+            // var resultMapper = _mapper.Map<List<ReviewResult>>(result);
+            return new ResponseBuilder()
+                .WithStatus(Const.SUCCESS_CODE)
+                .WithMessage(Const.SUCCESS_READ_MSG)
+                .WithData(result);
+        }
+        catch (Exception e)
+        {
+            return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage(e.Message);
         }
     }
 
@@ -623,16 +676,16 @@ public class ReviewService : BaseService<Review>, IReviewService
         {
             return dt;
         }
-        int index = 1;
-        projects.ForEach(item =>
+
+        var index = 1;
+        foreach (var item in projects)
         {
-            //sua db
-            //dt.Rows.Add(index++, item.Idea.IdeaCode, item.TeamCode,
-            //    item.Idea.EnglishName, item.Idea.VietNamName,
-            //    item.Idea.Mentor.LastName + " " + item.Idea.Mentor.FirstName,
-            //    item.Idea.Mentor.Code,
-            //    (item.Idea.SubMentorId == null ? null : item.Idea.SubMentor.Code));
-        });
+            dt.Rows.Add(index++, item.Topic.TopicCode, item.TeamCode,
+            item.Topic.IdeaVersion.EnglishName, item.Topic.IdeaVersion.VietNamName,
+            item.Topic.IdeaVersion.Idea.Mentor.LastName + " " + item.Topic.IdeaVersion.Idea.Mentor.FirstName,
+            item.Topic.IdeaVersion.Idea.Mentor.Code,
+            (item.Topic.IdeaVersion.Idea.SubMentor == null ? null : item.Topic.IdeaVersion.Idea.SubMentor.Code));
+        }
         return dt;
     }
     private DataTable GetReview()

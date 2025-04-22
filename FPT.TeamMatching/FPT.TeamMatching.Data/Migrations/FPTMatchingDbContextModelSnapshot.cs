@@ -38,7 +38,7 @@ namespace FPT.TeamMatching.Data.Migrations
                     b.Property<Guid?>("CriteriaId")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid?>("IdeaRequestId")
+                    b.Property<Guid?>("IdeaVersionRequestId")
                         .HasColumnType("uuid");
 
                     b.Property<bool>("IsDeleted")
@@ -60,7 +60,7 @@ namespace FPT.TeamMatching.Data.Migrations
 
                     b.HasIndex("CriteriaId");
 
-                    b.HasIndex("IdeaRequestId");
+                    b.HasIndex("IdeaVersionRequestId");
 
                     b.ToTable("AnswerCriteria", (string)null);
                 });
@@ -400,26 +400,11 @@ namespace FPT.TeamMatching.Data.Migrations
                         .HasColumnType("uuid")
                         .HasDefaultValueSql("gen_random_uuid()");
 
-                    b.Property<string>("Abbreviations")
-                        .HasColumnType("text");
-
                     b.Property<string>("CreatedBy")
                         .HasColumnType("text");
 
                     b.Property<DateTimeOffset?>("CreatedDate")
                         .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("text");
-
-                    b.Property<string>("EnglishName")
-                        .HasColumnType("text");
-
-                    b.Property<string>("EnterpriseName")
-                        .HasColumnType("text");
-
-                    b.Property<string>("File")
-                        .HasColumnType("text");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
@@ -429,9 +414,6 @@ namespace FPT.TeamMatching.Data.Migrations
 
                     b.Property<bool>("IsExistedTeam")
                         .HasColumnType("boolean");
-
-                    b.Property<int>("MaxTeamSize")
-                        .HasColumnType("integer");
 
                     b.Property<Guid?>("MentorId")
                         .HasColumnType("uuid");
@@ -460,9 +442,6 @@ namespace FPT.TeamMatching.Data.Migrations
                     b.Property<DateTimeOffset?>("UpdatedDate")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("VietNamName")
-                        .HasColumnType("text");
-
                     b.HasKey("Id");
 
                     b.HasIndex("MentorId");
@@ -483,11 +462,26 @@ namespace FPT.TeamMatching.Data.Migrations
                         .HasColumnType("uuid")
                         .HasDefaultValueSql("gen_random_uuid()");
 
+                    b.Property<string>("Abbreviations")
+                        .HasColumnType("text");
+
                     b.Property<string>("CreatedBy")
                         .HasColumnType("text");
 
                     b.Property<DateTimeOffset?>("CreatedDate")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text");
+
+                    b.Property<string>("EnglishName")
+                        .HasColumnType("text");
+
+                    b.Property<string>("EnterpriseName")
+                        .HasColumnType("text");
+
+                    b.Property<string>("File")
+                        .HasColumnType("text");
 
                     b.Property<Guid?>("IdeaId")
                         .HasColumnType("uuid");
@@ -501,6 +495,9 @@ namespace FPT.TeamMatching.Data.Migrations
                     b.Property<Guid?>("StageIdeaId")
                         .HasColumnType("uuid");
 
+                    b.Property<int?>("TeamSize")
+                        .HasColumnType("integer");
+
                     b.Property<string>("UpdatedBy")
                         .HasColumnType("text");
 
@@ -509,6 +506,9 @@ namespace FPT.TeamMatching.Data.Migrations
 
                     b.Property<int?>("Version")
                         .HasColumnType("integer");
+
+                    b.Property<string>("VietNamName")
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -1011,7 +1011,7 @@ namespace FPT.TeamMatching.Data.Migrations
                     b.Property<string>("Note")
                         .HasColumnType("text");
 
-                    b.Property<double>("NumbOfStar")
+                    b.Property<double>("PercentContribution")
                         .HasColumnType("double precision");
 
                     b.Property<Guid?>("RateById")
@@ -1209,7 +1209,7 @@ namespace FPT.TeamMatching.Data.Migrations
                     b.Property<string>("Note")
                         .HasColumnType("text");
 
-                    b.Property<DateTimeOffset?>("PublicIdeaDate")
+                    b.Property<DateTimeOffset?>("PublicTopicDate")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("SemesterCode")
@@ -1578,6 +1578,9 @@ namespace FPT.TeamMatching.Data.Migrations
                     b.Property<DateTimeOffset?>("CreatedDate")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<string>("Feedback")
+                        .HasColumnType("text");
+
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("boolean");
 
@@ -1737,13 +1740,14 @@ namespace FPT.TeamMatching.Data.Migrations
                         .WithMany("AnswerCriterias")
                         .HasForeignKey("CriteriaId");
 
-                    b.HasOne("FPT.TeamMatching.Domain.Entities.IdeaVersionRequest", "IdeaRequest")
+                    b.HasOne("FPT.TeamMatching.Domain.Entities.IdeaVersionRequest", "IdeaVersionRequest")
                         .WithMany("AnswerCriterias")
-                        .HasForeignKey("IdeaRequestId");
+                        .HasForeignKey("IdeaVersionRequestId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("Criteria");
 
-                    b.Navigation("IdeaRequest");
+                    b.Navigation("IdeaVersionRequest");
                 });
 
             modelBuilder.Entity("FPT.TeamMatching.Domain.Entities.Blog", b =>
@@ -1857,7 +1861,8 @@ namespace FPT.TeamMatching.Data.Migrations
                 {
                     b.HasOne("FPT.TeamMatching.Domain.Entities.Idea", "Idea")
                         .WithMany("IdeaVersions")
-                        .HasForeignKey("IdeaId");
+                        .HasForeignKey("IdeaId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("FPT.TeamMatching.Domain.Entities.StageIdea", "StageIdea")
                         .WithMany("IdeaVersions")
@@ -1871,15 +1876,16 @@ namespace FPT.TeamMatching.Data.Migrations
             modelBuilder.Entity("FPT.TeamMatching.Domain.Entities.IdeaVersionRequest", b =>
                 {
                     b.HasOne("FPT.TeamMatching.Domain.Entities.CriteriaForm", "CriteriaForm")
-                        .WithMany("IdeaRequests")
+                        .WithMany("IdeaVersionRequests")
                         .HasForeignKey("CriteriaFormId");
 
                     b.HasOne("FPT.TeamMatching.Domain.Entities.IdeaVersion", "IdeaVersion")
                         .WithMany("IdeaVersionRequests")
-                        .HasForeignKey("IdeaVersionId");
+                        .HasForeignKey("IdeaVersionId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("FPT.TeamMatching.Domain.Entities.User", "Reviewer")
-                        .WithMany("IdeaRequestOfReviewers")
+                        .WithMany("IdeaVersionRequestOfReviewers")
                         .HasForeignKey("ReviewerId");
 
                     b.Navigation("CriteriaForm");
@@ -2200,7 +2206,7 @@ namespace FPT.TeamMatching.Data.Migrations
                 {
                     b.Navigation("CriteriaXCriteriaForms");
 
-                    b.Navigation("IdeaRequests");
+                    b.Navigation("IdeaVersionRequests");
 
                     b.Navigation("Semesters");
                 });
@@ -2314,7 +2320,7 @@ namespace FPT.TeamMatching.Data.Migrations
 
                     b.Navigation("IdeaOfSubMentors");
 
-                    b.Navigation("IdeaRequestOfReviewers");
+                    b.Navigation("IdeaVersionRequestOfReviewers");
 
                     b.Navigation("InvitationOfReceivers");
 

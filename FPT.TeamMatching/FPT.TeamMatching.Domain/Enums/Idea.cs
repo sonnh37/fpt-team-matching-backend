@@ -4,7 +4,9 @@ public enum IdeaStatus
 {
     Pending,
     Approved,
-    Rejected
+    Rejected,
+    ConsiderByMentor,
+    ConsiderByCouncil,
 }
 
 public enum IdeaType

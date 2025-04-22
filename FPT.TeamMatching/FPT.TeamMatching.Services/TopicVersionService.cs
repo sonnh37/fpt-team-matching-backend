@@ -15,71 +15,33 @@ using System.Text;
 using System.Threading.Tasks;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Notifications;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.TopicVersions;
+using FPT.TeamMatching.Domain.Models.Requests.Commands.TopicVersionRequests;
 
 namespace FPT.TeamMatching.Services
 {
     public class TopicVersionService : BaseService<TopicVersion>, ITopicVersionService
     {
-        private readonly ITopicVersionRepository _ideaHistoryRepository;
+        private readonly ITopicVersionRepository _topicVersionRepository;
         private readonly IIdeaRepository _ideaRepository;
+        private readonly ITopicRepository _topicRepository;
+        private readonly ITopicVersionRequestRepository _topicVersionRequestRepository;
         private readonly INotificationService _notificationService;
         public TopicVersionService(IMapper mapper, IUnitOfWork unitOfWork, INotificationService notificationService) : base(mapper, unitOfWork)
         {
-            _ideaHistoryRepository = unitOfWork.TopicVersionRepository;
+            _topicVersionRepository = unitOfWork.TopicVersionRepository;
+            _topicVersionRequestRepository = unitOfWork.TopicVersionRequestRepository;
             _ideaRepository = unitOfWork.IdeaRepository;
+            _topicRepository = unitOfWork.TopicRepository;
             _notificationService = notificationService;
         }
 
-        public async Task<BusinessResult> LecturerUpdate(LecturerUpdateCommand request)
-        {
-            try
-            {
-                var ideaHistory = await _ideaHistoryRepository.GetById((Guid)request.Id, true);
-                if (ideaHistory == null)
-                {
-                    return new ResponseBuilder()
-                        .WithStatus(Const.NOT_FOUND_CODE)
-                        .WithMessage(Const.NOT_FOUND_MSG);
-                }
-                ideaHistory.Status = request.Status;
-                ideaHistory.Comment = request.Comment;
-                await SetBaseEntityForUpdate(ideaHistory);
-                _ideaHistoryRepository.Update(ideaHistory);
-                var isSuccess = await _unitOfWork.SaveChanges();
-                // if (isSuccess)
-                // {
-                //     //noti duyệt sửa đề tài
-                //     var noti = new NotificationCreateForTeam
-                //     {
-                //         ProjectId = ideaHistory.Idea.Project.Id,
-                //         Description = ideaHistory.Idea.Mentor.Code +
-                //                         " đã duyệt yêu cầu chỉnh sửa đề tài sau review " + ideaHistory.ReviewStage +
-                //                         " của nhóm bạn. Hãy kiểm tra!",
-                //     };
-                //     await _notificationService.CreateForTeam(noti);
-                //     //
-                    return new ResponseBuilder()
-                        .WithStatus(Const.SUCCESS_CODE)
-                        .WithMessage(Const.SUCCESS_SAVE_MSG);
-                // }
-                // return new ResponseBuilder()
-                //         .WithStatus(Const.FAIL_CODE)
-                //         .WithMessage(Const.FAIL_SAVE_MSG);
-            }
-            catch (Exception ex)
-            {
-                var errorMessage = $"An error occurred in {typeof(TopicVersionResult).Name}: {ex.Message}";
-                return new ResponseBuilder()
-                    .WithStatus(Const.FAIL_CODE)
-                    .WithMessage(errorMessage);
-            }
-        }
+        
 
         public async Task<BusinessResult> GetAllTopicVersionByIdeaId(Guid ideaId)
         {
             try
             {
-                var result = await _ideaHistoryRepository.GetAllByIdeaId(ideaId);
+                var result = await _topicVersionRepository.GetAllByIdeaId(ideaId);
                 return new ResponseBuilder()
                     .WithStatus(Const.SUCCESS_CODE)
                     .WithData(result)
@@ -94,53 +56,73 @@ namespace FPT.TeamMatching.Services
             }
         }
 
-        public async Task<BusinessResult> StudentUpdateIdea(StudentUpdateIdeaCommand request)
+        public async Task<BusinessResult> UpdateByStudent(UpdateTopicByStudentCommand request)
         {
             try
             {
-                if (request.IdeaId == null)
+                if (request.TopicId == null)
                 {
                     return new ResponseBuilder()
                     .WithStatus(Const.FAIL_CODE)
-                    .WithMessage("Nhập đề tài id");
+                    .WithMessage("Nhập đề tài");
                 }
-                var idea = await _ideaRepository.GetById((Guid)request.IdeaId);
-                if (idea == null)
+                var topic = await _topicRepository.GetById((Guid)request.TopicId, true);
+                if (topic == null)
                 {
                     return new ResponseBuilder()
                     .WithStatus(Const.FAIL_CODE)
                     .WithMessage("Đề tài không tồn tại");
                 }
-                var ideaHistory = new TopicVersion
+                //tao TopicVersion
+                var topicVersion = new TopicVersion
                 {
-                    //sua db
-                    //IdeaId = request.IdeaId,
+                    Id = Guid.NewGuid(),
+                    TopicId = topic.Id,
                     Status = Domain.Enums.TopicVersionStatus.Pending,
                     FileUpdate = request.FileUpdate,
                     ReviewStage = request.ReviewStage,
                     Note = request.Note,
-                    CreatedDate = DateTime.Now,
-                    UpdatedDate = DateTime.Now,
                 };
-                _ideaHistoryRepository.Add(ideaHistory);
+                await SetBaseEntityForCreation(topicVersion);
+                _topicVersionRepository.Add(topicVersion);
+
                 var isSuccess = await _unitOfWork.SaveChanges();
-                if (isSuccess)
+                if (!isSuccess)
                 {
-                    //noti chỉnh sửa đề tài cho mentor
-                    var noti = new NotificationCreateForIndividual
-                    {
-                        UserId = idea.MentorId,
-                        Description = "Đề tài " + idea.Abbreviations + " gửi yêu cầu chỉnh sửa sau review " + ideaHistory.ReviewStage,
-                    };
-                    await _notificationService.CreateForUser(noti);
-                    //
                     return new ResponseBuilder()
-                        .WithStatus(Const.SUCCESS_CODE)
-                        .WithMessage(Const.SUCCESS_SAVE_MSG);
-                }
-                return new ResponseBuilder()
                         .WithStatus(Const.FAIL_CODE)
                         .WithMessage(Const.FAIL_SAVE_MSG);
+                }
+                //tao TopicVersionRequest
+                var topicVersionRequest = new TopicVersionRequest
+                {
+                    TopicVersionId = topicVersion.Id,
+                    ReviewerId = topic.IdeaVersion.Idea.MentorId,
+                    Status = TopicVersionRequestStatus.Pending,
+                    Role = "Mentor"
+                };
+                await SetBaseEntityForCreation(topicVersionRequest);
+                _topicVersionRequestRepository.Add(topicVersionRequest);
+
+                isSuccess = await _unitOfWork.SaveChanges();
+                if (!isSuccess)
+                {
+                    return new ResponseBuilder()
+                        .WithStatus(Const.FAIL_CODE)
+                        .WithMessage(Const.FAIL_SAVE_MSG);
+                }
+
+                //noti chỉnh sửa đề tài cho mentor
+                var noti = new NotificationCreateForIndividual
+                {
+                    UserId = topic.IdeaVersion.Idea.MentorId,
+                    Description = "Đề tài " + topic.IdeaVersion.Abbreviations + " gửi yêu cầu chỉnh sửa sau review " + topicVersion.ReviewStage,
+                };
+                await _notificationService.CreateForUser(noti);
+                //
+                return new ResponseBuilder()
+                    .WithStatus(Const.SUCCESS_CODE)
+                    .WithMessage(Const.SUCCESS_SAVE_MSG);
             }
             catch (Exception ex)
             {

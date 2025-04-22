@@ -130,6 +130,7 @@ public class MappingProfile : Profile
         CreateMap<IdeaVersion, IdeaVersionResult>().ReverseMap();
         CreateMap<IdeaVersion, IdeaVersionCreateCommand>().ReverseMap();
         CreateMap<IdeaVersion, IdeaVersionUpdateCommand>().ReverseMap();
+        CreateMap<IdeaVersion, IdeaVersionResubmitByStudentOrMentor>().ReverseMap();
 
         #endregion
 
@@ -153,6 +154,7 @@ public class MappingProfile : Profile
         #region Review
 
         CreateMap<Review, ReviewResult>().ReverseMap();
+        // CreateMap<List<Review>, List<ReviewResult>>().ReverseMap();
         CreateMap<Review, ReviewCreateCommand>().ReverseMap();
         CreateMap<Review, ReviewUpdateCommand>().ReverseMap();
 
@@ -322,6 +324,7 @@ public class MappingProfile : Profile
         CreateMap<AnswerCriteria, AnswerCriteriaResult>().ReverseMap();
         CreateMap<AnswerCriteria, AnswerCriteriaCreateCommand>().ReverseMap();
         CreateMap<AnswerCriteria, AnswerCriteriaUpdateCommand>().ReverseMap();
+        CreateMap<AnswerCriteria, AnswerCriteriaForLecturerRespond>().ReverseMap();
 
         #endregion
 

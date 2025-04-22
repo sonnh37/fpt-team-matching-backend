@@ -17,14 +17,14 @@ public partial class FPTMatchingDbContext : BaseDbContext
 
     public virtual DbSet<Invitation> Invitations { get; set; } //
 
-    public virtual DbSet<BlogCv> BlogCvs { get; set; }//
+    public virtual DbSet<BlogCv> BlogCvs { get; set; } //
 
     public virtual DbSet<Like> Likes { get; set; } //
 
     public virtual DbSet<Notification> Notifications { get; set; } //
-    
+
     public virtual DbSet<Profession> Professions { get; set; } //
-    
+
     public virtual DbSet<Specialty> Specialties { get; set; } //
 
     public virtual DbSet<ProfileStudent> ProfileStudents { get; set; } //
@@ -49,7 +49,7 @@ public partial class FPTMatchingDbContext : BaseDbContext
 
     public virtual DbSet<IdeaVersion> IdeaVersions { get; set; } //
 
-    public virtual DbSet<IdeaVersionRequest> IdeaRequests { get; set; } //
+    public virtual DbSet<IdeaVersionRequest> IdeaVersionRequests { get; set; } //
 
     public virtual DbSet<Conversation> Conversations { get; set; } //
 
@@ -60,7 +60,7 @@ public partial class FPTMatchingDbContext : BaseDbContext
     public virtual DbSet<UserXRole> UserXRoles { get; set; } //
 
     public virtual DbSet<Role> Roles { get; set; } //
-    
+
     public virtual DbSet<Topic> Topics { get; set; } //
 
     public virtual DbSet<TopicVersion> TopicVersions { get; set; } //
@@ -99,7 +99,7 @@ public partial class FPTMatchingDbContext : BaseDbContext
 
             entity.HasOne(d => d.User).WithMany(p => p.Blogs)
                 .HasForeignKey(d => d.UserId);
-            
+
             entity.HasOne(d => d.Project).WithMany(p => p.Blogs)
                 .HasForeignKey(d => d.ProjectId);
         });
@@ -200,10 +200,10 @@ public partial class FPTMatchingDbContext : BaseDbContext
 
             entity.HasOne(d => d.User).WithOne(p => p.ProfileStudent)
                 .HasForeignKey<ProfileStudent>(d => d.UserId);
-            
+
             entity.HasOne(d => d.Specialty).WithMany(p => p.ProfileStudents)
                 .HasForeignKey(d => d.SpecialtyId);
-            
+
             entity.HasOne(d => d.Semester).WithMany(p => p.ProfileStudents)
                 .HasForeignKey(d => d.SemesterId);
         });
@@ -222,27 +222,27 @@ public partial class FPTMatchingDbContext : BaseDbContext
 
             entity.HasOne(d => d.Topic).WithOne(p => p.Project)
                 .HasForeignKey<Project>(d => d.TopicId);
-            
+
             entity.HasMany(p => p.TeamMembers)
                 .WithOne(t => t.Project)
                 .OnDelete(DeleteBehavior.Cascade);
-    
+
             entity.HasMany(p => p.Invitations)
                 .WithOne(i => i.Project)
                 .OnDelete(DeleteBehavior.Cascade);
-    
+
             entity.HasMany(p => p.Reviews)
                 .WithOne(r => r.Project)
                 .OnDelete(DeleteBehavior.Cascade);
-    
+
             entity.HasMany(p => p.Blogs)
                 .WithOne(b => b.Project)
                 .OnDelete(DeleteBehavior.Cascade);
-    
+
             entity.HasMany(p => p.CapstoneSchedules)
                 .WithOne(c => c.Project)
                 .OnDelete(DeleteBehavior.Cascade);
-    
+
             entity.HasMany(p => p.MentorTopicRequests)
                 .WithOne(m => m.Project)
                 .OnDelete(DeleteBehavior.Cascade);
@@ -359,7 +359,7 @@ public partial class FPTMatchingDbContext : BaseDbContext
 
             entity.HasOne(d => d.Role).WithMany(p => p.UserXRoles)
                 .HasForeignKey(d => d.RoleId);
-            
+
             entity.HasOne(d => d.Semester).WithMany(p => p.UserXRoles)
                 .HasForeignKey(d => d.SemesterId);
         });
@@ -375,7 +375,6 @@ public partial class FPTMatchingDbContext : BaseDbContext
 
             entity.HasOne(d => d.CriteriaForm).WithMany(p => p.Semesters)
                 .HasForeignKey(d => d.CriteriaFormId);
-
         });
 
         modelBuilder.Entity<Idea>(entity =>
@@ -389,7 +388,7 @@ public partial class FPTMatchingDbContext : BaseDbContext
 
             entity.HasOne(d => d.Owner).WithMany(p => p.IdeaOfOwners)
                 .HasForeignKey(d => d.OwnerId);
-            
+
             entity.HasOne(d => d.Mentor).WithMany(p => p.IdeaOfMentors)
                 .HasForeignKey(d => d.MentorId);
 
@@ -398,22 +397,6 @@ public partial class FPTMatchingDbContext : BaseDbContext
 
             entity.HasOne(d => d.Specialty).WithMany(p => p.Ideas)
                 .HasForeignKey(d => d.SpecialtyId);
-            
-            // Add these cascade configurations
-            //entity.HasOne(d => d.Topic)
-            //    .WithOne(p => p.Idea)
-            //    .HasForeignKey<Topic>(d => d.IdeaId)
-            //    .OnDelete(DeleteBehavior.SetNull);
-    
-            //entity.HasMany(d => d.IdeaRequests)
-            //    .WithOne(p => p.Idea)
-            //    .HasForeignKey(d => d.IdeaId)
-            //    .OnDelete(DeleteBehavior.Cascade);
-    
-            //entity.HasMany(d => d.MentorTopicRequests)
-            //    .WithOne(p => p.Idea)
-            //    .HasForeignKey(d => d.IdeaId)
-            //    .OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<IdeaVersion>(entity =>
@@ -426,7 +409,8 @@ public partial class FPTMatchingDbContext : BaseDbContext
                 .HasDefaultValueSql("gen_random_uuid()");
 
             entity.HasOne(d => d.Idea).WithMany(p => p.IdeaVersions)
-                .HasForeignKey(d => d.IdeaId);
+                .HasForeignKey(d => d.IdeaId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             entity.HasOne(d => d.StageIdea).WithMany(p => p.IdeaVersions)
                 .HasForeignKey(d => d.StageIdeaId);
@@ -442,12 +426,12 @@ public partial class FPTMatchingDbContext : BaseDbContext
                 .HasDefaultValueSql("gen_random_uuid()");
 
             entity.HasOne(d => d.IdeaVersion).WithMany(p => p.IdeaVersionRequests)
-                .HasForeignKey(d => d.IdeaVersionId);
+                .HasForeignKey(d => d.IdeaVersionId).OnDelete(DeleteBehavior.Cascade);
 
-            entity.HasOne(d => d.Reviewer).WithMany(p => p.IdeaRequestOfReviewers)
+            entity.HasOne(d => d.Reviewer).WithMany(p => p.IdeaVersionRequestOfReviewers)
                 .HasForeignKey(d => d.ReviewerId);
 
-            entity.HasOne(d => d.CriteriaForm).WithMany(p => p.IdeaRequests)
+            entity.HasOne(d => d.CriteriaForm).WithMany(p => p.IdeaVersionRequests)
                 .HasForeignKey(d => d.CriteriaFormId);
         });
 
@@ -462,7 +446,6 @@ public partial class FPTMatchingDbContext : BaseDbContext
 
             entity.HasOne(d => d.IdeaVersion).WithOne(p => p.Topic)
                 .HasForeignKey<Topic>(d => d.IdeaVersionId);
-
         });
 
         modelBuilder.Entity<TopicVersion>(entity =>
@@ -476,7 +459,6 @@ public partial class FPTMatchingDbContext : BaseDbContext
 
             entity.HasOne(d => d.Topic).WithMany(p => p.TopicVersions)
                 .HasForeignKey(d => d.TopicId);
-
         });
 
         modelBuilder.Entity<TopicVersionRequest>(entity =>
@@ -489,11 +471,10 @@ public partial class FPTMatchingDbContext : BaseDbContext
                 .HasDefaultValueSql("gen_random_uuid()");
 
             entity.HasOne(d => d.TopicVersion).WithMany(p => p.TopicVersionRequests)
-               .HasForeignKey(d => d.TopicVersionId);
+                .HasForeignKey(d => d.TopicVersionId);
 
             entity.HasOne(d => d.Reviewer).WithMany(p => p.TopicVersionReviewers)
-               .HasForeignKey(d => d.ReviewerId);
-
+                .HasForeignKey(d => d.ReviewerId);
         });
 
         modelBuilder.Entity<Specialty>(entity =>
@@ -595,7 +576,6 @@ public partial class FPTMatchingDbContext : BaseDbContext
 
             entity.Property(e => e.Id).ValueGeneratedOnAdd()
                 .HasDefaultValueSql("gen_random_uuid()");
-
         });
 
         modelBuilder.Entity<CriteriaForm>(entity =>
@@ -633,8 +613,8 @@ public partial class FPTMatchingDbContext : BaseDbContext
             entity.Property(e => e.Id).ValueGeneratedOnAdd()
                 .HasDefaultValueSql("gen_random_uuid()");
 
-            entity.HasOne(d => d.IdeaRequest).WithMany(p => p.AnswerCriterias)
-                .HasForeignKey(d => d.IdeaRequestId);
+            entity.HasOne(d => d.IdeaVersionRequest).WithMany(p => p.AnswerCriterias)
+                .HasForeignKey(d => d.IdeaVersionRequestId).OnDelete(DeleteBehavior.Cascade);
 
             entity.HasOne(d => d.Criteria).WithMany(p => p.AnswerCriterias)
                 .HasForeignKey(d => d.CriteriaId);

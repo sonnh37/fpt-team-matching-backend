@@ -20,7 +20,7 @@ public class UserRepository : BaseRepository<User>, IUserRepository
     {
     }
 
-    public async Task<(List<User>, int)> GetAllByCouncilWithIdeaRequestPending(UserGetAllQuery query)
+    public async Task<(List<User>, int)> GetAllByCouncilWithIdeaVersionRequestPending(UserGetAllQuery query)
     {
         var queryable = GetQueryable();
         queryable = queryable.Include(m => m.UserXRoles).ThenInclude(m => m.Role);
@@ -29,8 +29,8 @@ public class UserRepository : BaseRepository<User>, IUserRepository
             m.UserXRoles.Any(uxr => uxr.Role != null && uxr.Role.RoleName == "Council"));
 
         queryable = queryable
-            .Where(m => m.IdeaRequestOfReviewers.Any(n => n.Status == IdeaVersionRequestStatus.Pending))
-            .Include(m => m.IdeaRequestOfReviewers
+            .Where(m => m.IdeaVersionRequestOfReviewers.Any(n => n.Status == IdeaVersionRequestStatus.Pending))
+            .Include(m => m.IdeaVersionRequestOfReviewers
                 .Where(n => n.Status == IdeaVersionRequestStatus.Pending));
 
         if (query.Department.HasValue)
@@ -70,7 +70,6 @@ public class UserRepository : BaseRepository<User>, IUserRepository
         }
     }
 
-
     public async Task<User?> GetUserByUsernameOrEmail(string key)
     {
         key = key.Trim().ToLower();
@@ -92,20 +91,21 @@ public class UserRepository : BaseRepository<User>, IUserRepository
         return entity;
     }
 
-    public async Task<List<User>> GetThreeCouncilsForIdeaRequest(Guid ideaId)
+    public async Task<List<User>> GetCouncilsForIdeaVersionRequest(Guid ideaVersionId)
     {
         var queryable = GetQueryable();
         queryable = queryable.Include(m => m.UserXRoles).ThenInclude(m => m.Role);
 
         // Lấy thông tin idea để lấy mentor
-        var idea = await GetQueryable<Idea>()
-            .Where(i => i.Id == ideaId)
-            .Select(i => new { i.MentorId, i.SubMentorId })
+        var ideaVersion = await GetQueryable<IdeaVersion>()
+            .Where(i => i.Id == ideaVersionId)
+            .Include(e => e.StageIdea)
+            .Include(e => e.Idea)
             .FirstOrDefaultAsync();
 
-        if (idea == null)
+        if (ideaVersion == null)
         {
-            throw new Exception("Idea not found");
+            throw new Exception("Idea Version not found");
         }
 
         var councils = await queryable
@@ -120,9 +120,21 @@ public class UserRepository : BaseRepository<User>, IUserRepository
             .OrderBy(x => x.ApprovedCount)
             .Select(x => x.Council)
             .ToListAsync();
-
+        if (ideaVersion.StageIdea == null)
+        {
+            throw new Exception("Stage idea not found");
+        }
+        if (ideaVersion.Idea == null)
+        {
+            throw new Exception("Idea not found");
+        }
+        var number = ideaVersion.StageIdea.NumberReviewer;
+        if (number == null)
+        {
+            throw new Exception("Number reviewer not found");
+        }
         // Lọc bỏ những council trùng với mentor hoặc sub-mentor
-        councils = councils.Where(c => c.Id != idea.MentorId && c.Id != idea.SubMentorId).Take(3).ToList();
+        councils = councils.Where(c => c.Id != ideaVersion.Idea.MentorId && c.Id != ideaVersion.Idea.SubMentorId).Take((int)number).ToList();
 
         return councils;
     }
@@ -199,5 +211,19 @@ public class UserRepository : BaseRepository<User>, IUserRepository
                                                                tm.Status == TeamMemberStatus.Fail2)))
             .ToListAsync();
         return students;
+    }
+    
+    public async Task<List<EmailSuggestionModels>> GetAllEmailSuggestions(string email)
+    {
+       var result = await GetQueryable()
+           .Where(e => e.IsDeleted == false && e.Email.Contains(email))
+           .Select(x => new EmailSuggestionModels
+           {
+               Email = x.Email,
+               UserId = x.Id,
+           })
+           .Take(5)
+           .ToListAsync();
+       return result;
     }
 }

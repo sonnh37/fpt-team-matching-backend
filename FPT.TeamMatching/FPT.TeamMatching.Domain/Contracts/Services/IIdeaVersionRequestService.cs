@@ -15,12 +15,12 @@ namespace FPT.TeamMatching.Domain.Contracts.Services
 {
     public interface IIdeaVersionRequestService : IBaseService
     {
-        Task<BusinessResult> LecturerResponse(IdeaVersionRequestLecturerOrCouncilResponseCommand command);
-        //Task<BusinessResult> CouncilResponse(IdeaRequestLecturerOrCouncilResponseCommand command);
+        Task<BusinessResult> RespondByMentorOrCouncil(IdeaVersionRequestLecturerOrCouncilResponseCommand command);
+        //Task<BusinessResult> CouncilResponse(IdeaVersionRequestLecturerOrCouncilResponseCommand command);
 
         Task<BusinessResult> GetAll<TResult>(IdeaVersionRequestGetAllQuery query) where TResult : BaseResult;
 
-        Task<BusinessResult> GetIdeaRequestsForCurrentReviewerByRolesAndStatus<TResult>(
+        Task<BusinessResult> GetIdeaVersionRequestsForCurrentReviewerByRolesAndStatus<TResult>(
             IdeaVersionRequestGetListByStatusAndRoleQuery query)
             where TResult : BaseResult;
 

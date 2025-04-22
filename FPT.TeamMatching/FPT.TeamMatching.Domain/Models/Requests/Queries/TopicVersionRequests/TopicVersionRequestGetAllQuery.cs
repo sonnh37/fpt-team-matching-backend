@@ -19,5 +19,8 @@ namespace FPT.TeamMatching.Domain.Models.Requests.Queries.TopicVersionRequests
         public TopicVersionRequestStatus? Status { get; set; }
 
         public string? Role { get; set; }
+
+        public string? Feedback { get; set; }
+
     }
 }

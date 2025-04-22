@@ -30,4 +30,5 @@ public interface IIdeaRepository : IBaseRepository<Idea>
     Task<List<Idea>> GetIdeasByIdeaCodes(string[] ideaCode);
 
     Task<(List<Idea>, int)> GetIdeasOfSupervisors(IdeaGetListOfSupervisorsQuery query);
+
 }

@@ -65,5 +65,18 @@ namespace FPT.TeamMatching.API.Controllers
             return Ok(businessResult);
         }
 
+        [HttpPost("update-topic-by-student")]
+        public async Task<IActionResult> UpdateTopicByStudent([FromBody] UpdateTopicByStudentCommand command)
+        {
+            var msg = await _service.UpdateByStudent(command);
+            return Ok(msg);
+        }
+
+        [HttpGet("get-by-idea-version-id")]
+        public async Task<IActionResult> GetByTopicId([FromQuery] Guid id)
+        {
+            var msg = await _service.GetAllTopicVersionByIdeaId(id);
+            return Ok(msg);
+        }
     }
 }

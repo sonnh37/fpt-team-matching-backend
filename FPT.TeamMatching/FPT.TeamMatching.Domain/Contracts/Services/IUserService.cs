@@ -16,11 +16,10 @@ public interface IUserService : IBaseService
 
     Task<BusinessResult> UpdateUserCacheAsync(UserUpdateCacheCommand newCacheJson);
 
-    Task<BusinessResult> GetAllByCouncilWithIdeaRequestPending(UserGetAllQuery query);
+    Task<BusinessResult> GetAllByCouncilWithIdeaVersionRequestPending(UserGetAllQuery query);
     
     Task<BusinessResult> GetByEmail<TResult>(string email) where TResult : BaseResult;
-
-
+    
     //
     // Task<BusinessResult> GetByUsername(string username);
     //
@@ -45,4 +44,5 @@ public interface IUserService : IBaseService
     Task<BusinessResult> ImportLecturers(IFormFile file);
     Task<BusinessResult> ImportLecturer(CreateByManagerCommand command);
     Task<BusinessResult> UpdateStudentExistedRange(UserResult[] users);
+    Task<BusinessResult> GetSuggestionByEmail(string email);
 }

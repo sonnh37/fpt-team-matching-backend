@@ -340,7 +340,7 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
                 var noti = new NotificationCreateForIndividual
                 {
                     UserId = invitation.SenderId,
-                    Description = receiver?.Code + "đã từ chối lời mời tham gia nhóm của bạn",
+                    Description = receiver?.Code + " đã từ chối lời mời tham gia nhóm của bạn",
                 };
                 await _notificationService.CreateForUser(noti);
                 //
@@ -373,7 +373,7 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
                     var noti = new NotificationCreateForTeam
                     {
                         ProjectId = invitation.ProjectId,
-                        Description = receiver?.Code + "đã đồng ý lời mời tham gia nhóm của bạn",
+                        Description = receiver?.Code + " đã đồng ý lời mời tham gia nhóm của bạn",
                     };
                     await _notificationService.CreateForTeam(noti);
                     //
@@ -524,7 +524,11 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
             }
 
             // Tính toán available slots
-            //sua db
+            //
+            //
+
+
+
             //int availableSlots = project.Idea == null
             //    ? 6 - project.TeamMembers.Count
             //    : (project.Idea.MaxTeamSize) - project.TeamMembers.Count;

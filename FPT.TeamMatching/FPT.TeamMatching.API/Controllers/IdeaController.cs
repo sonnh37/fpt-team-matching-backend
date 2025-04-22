@@ -79,17 +79,17 @@ public class IdeaController : ControllerBase
         return Ok(businessResult);
     }
 
-    [HttpPost("student-create-pending")]
-    public async Task<IActionResult> CreatePending([FromBody] IdeaStudentCreatePendingCommand request)
+    [HttpPost("create-pending-by-student")]
+    public async Task<IActionResult> CreatePendingByStudent([FromBody] IdeaStudentCreatePendingCommand request)
     {
-        var msg = await _service.StudentCreatePending(request);
+        var msg = await _service.CreatePendingByStudent(request);
         return Ok(msg);
     }
 
-    [HttpPost("lecturer-create-pending")]
-    public async Task<IActionResult> CreatePending([FromBody] IdeaLecturerCreatePendingCommand request)
+    [HttpPost("create-pending-by-lecturer")]
+    public async Task<IActionResult> CreatePendingByLecturer([FromBody] IdeaLecturerCreatePendingCommand request)
     {
-        var msg = await _service.LecturerCreatePending(request);
+        var msg = await _service.CreatePendingByLecturer(request);
         return Ok(msg);
     }
 

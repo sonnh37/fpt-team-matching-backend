@@ -26,8 +26,9 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
     public async Task<IList<Idea>> GetIdeasByUserId(Guid userId)
     {
         var ideas = await _dbContext.Ideas.Where(e => e.OwnerId == userId)
-            //sua db
-            //.Include(e => e.IdeaRequests).ThenInclude(e => e.Reviewer)
+            .Include(e => e.IdeaVersions).ThenInclude(e => e.IdeaVersionRequests).ThenInclude(e => e.Reviewer)
+            .Include(e => e.IdeaVersions).ThenInclude(e => e.StageIdea)
+            //.Include(e => e.IdeaVersionRequests).ThenInclude(e => e.Reviewer)
             //.Include(e => e.StageIdea)
             .ToListAsync();
         return ideas;
@@ -36,8 +37,9 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
     public async Task<IList<Idea>> GetIdeasByTypeMentorAndEnterprise()
     {
         var ideas = await _dbContext.Ideas.Where(e => e.Type == IdeaType.Enterprise || e.Type == IdeaType.Lecturer)
-            //sua db
-            //.Include(e => e.IdeaRequests).ThenInclude(e => e.Reviewer)
+            .Include(e => e.IdeaVersions).ThenInclude(e => e.IdeaVersionRequests).ThenInclude(e => e.Reviewer)
+            .Include(e => e.IdeaVersions).ThenInclude(e => e.StageIdea)
+            //.Include(e => e.IdeaVersionRequests).ThenInclude(e => e.Reviewer)
             //.Include(e => e.StageIdea)
             .ToListAsync();
         return ideas;
@@ -50,13 +52,15 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
             .OrderByDescending(m => m.CreatedDate)
             //sua db
             //.Include(m => m.StageIdea)
+            .Include(e => e.IdeaVersions).ThenInclude(e => e.IdeaVersionRequests).ThenInclude(e => e.Reviewer)
+            .Include(e => e.IdeaVersions).ThenInclude(e => e.StageIdea)
+            .Include(e => e.IdeaVersions).ThenInclude(e => e.StageIdea).ThenInclude(m => m.Semester)
+
             .Include(m => m.Owner)
             .Include(m => m.Mentor)
             .Include(m => m.SubMentor)
-            .Include(m => m.Specialty)
+            .Include(m => m.Specialty).ThenInclude(m => m.Profession)
             //sua db
-            //.Include(m => m.Project)
-            //.Include(e => e.IdeaRequests).ThenInclude(e => e.Reviewer)
             .ToListAsync();
 
         return ideas;
@@ -71,7 +75,7 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
                                                       )
             .OrderByDescending(m => m.CreatedDate)
             //.Include(m => m.StageIdea)
-            //.Include(e => e.IdeaRequests).ThenInclude(e => e.Reviewer)
+            //.Include(e => e.IdeaVersionRequests).ThenInclude(e => e.Reviewer)
             .ToListAsync();
 
         return ideas;
@@ -81,7 +85,7 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
     {
         var number = await _dbContext.Ideas.Where(e => e.Status == IdeaStatus.Approved &&
                                                        e.IsDeleted == false)
-                                                       //sua db
+            //sua db
                                                        //&&
                                                        //e.StageIdea != null &&
                                                        //e.StageIdea.SemesterId == semesterId)
@@ -136,6 +140,7 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
     
         return idea;
     }
+
     public async Task<int> NumberOfIdeaMentorOrOwner(Guid userId)
     {
         var number = await _dbContext.Ideas.Where(e => e.IsDeleted == false &&
@@ -148,38 +153,48 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
     {
         // Use async query execution and optimize the LINQ query
         return await GetQueryable()
-            //sua db
-            //.Where(x => x.StageIdea.SemesterId == semesterId)
-            //.Where(x => x.Project.Reviews.Any(review => review.Number == reviewNumber))
-            //.Where(x => x.Topic.Project.Reviews.Any(review => review.Number == reviewNumber))
+                .Include(x => x.IdeaVersions)
+                .ThenInclude(x => x.StageIdea)
+                .Include(x => x.IdeaVersions)
+                .ThenInclude(x => x.Topic)
+                .ThenInclude(x => x.Project)
+                .ThenInclude(p => p.Reviews)
+                .Where(x => x.IdeaVersions.Any(iv =>
+                    iv.StageIdea.SemesterId == semesterId &&
+                    iv.Topic.Project.Reviews.Any(r => r.Number == reviewNumber) 
+                ))
             .Select(y => new CustomIdeaResultModel
             {
                 IdeaId = y.Id,
-                //sua db
-                //TeamCode = y.Project.TeamCode,
-                //IdeaCode = y.IdeaCode,
-                //Review = y.Project.Reviews
-                //    .Where(review => review.Number == reviewNumber)
-                //    .Select(review => new ReviewUpdateCommand
-                //    {
-                //        Id = review.Id,
-                //        Number = review.Number,
-                //        Description = review.Description,
-                //        Reviewer1Id = review.Reviewer1Id,
-                //        Reviewer2Id = review.Reviewer2Id,
-                //        FileUpload = review.FileUpload,
-                //        ProjectId = review.ProjectId,
-                //    })
-                //    .FirstOrDefault()
+                TeamCode = y.IdeaVersions.FirstOrDefault().Topic.Project.TeamCode,
+                IdeaCode = y.IdeaVersions.FirstOrDefault().Topic.TopicCode,
+                Review = y.IdeaVersions.FirstOrDefault().Topic.Project.Reviews
+                .Where(review => review.Number == reviewNumber)
+                .Select(review => new ReviewUpdateCommand
+                {
+                    Id = review.Id,
+                    Number = review.Number,
+                    Description = review.Description,
+                    Reviewer1Id = review.Reviewer1Id,
+                    Reviewer2Id = review.Reviewer2Id,
+                    FileUpload = review.FileUpload,
+                    ProjectId = review.ProjectId,
+                })
+                .FirstOrDefault()
             })
             .ToListAsync();
     }
 
     public async Task<List<Idea>> GetIdeasByIdeaCodes(string[] ideaCode)
     {
-        //sua db
         //return await _dbContext.Ideas.Include(x => x.Project).Where(x => ideaCode.Contains(x.IdeaCode)).ToListAsync();
-        return await _dbContext.Ideas.Include(x => x.IdeaVersions).ToListAsync();
+        return await _dbContext.Ideas
+            .Include(x => x.IdeaVersions)
+            .ThenInclude(x => x.Topic)
+            .ThenInclude(x => x.Project)
+            .Where(x => x.IdeaVersions
+                .Any(iv => ideaCode.Contains(iv.Topic.TopicCode)))
+            .ToListAsync();
     }
 
     public async Task<(List<Idea>, int)> GetIdeasOfSupervisors(IdeaGetListOfSupervisorsQuery query)
@@ -187,7 +202,7 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
         var queryable = GetQueryable();
         queryable = queryable
             //sua db
-            //.Include(m => m.IdeaRequests)
+            //.Include(m => m.IdeaVersionRequests)
             .Include(m => m.Owner)
             .ThenInclude(u => u.UserXRoles)
             .ThenInclude(ur => ur.Role)
@@ -201,11 +216,12 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
         // 
         // queryable = queryable.Where(m => m.MentorTopicRequests.All(x => x.Status != MentorTopicRequestStatus.Approved));
 
-        if (!string.IsNullOrEmpty(query.EnglishName))
-        {
-            queryable = queryable.Where(m =>
-                m.EnglishName != null && m.EnglishName.ToLower().Trim().Contains(query.EnglishName.ToLower().Trim()));
-        }
+        //sua db
+        //if (!string.IsNullOrEmpty(query.EnglishName))
+        //{
+        //    queryable = queryable.Where(m =>
+        //        m.EnglishName != null && m.EnglishName.ToLower().Trim().Contains(query.EnglishName.ToLower().Trim()));
+        //}
         
         if (query.IsExistedTeam != null) queryable = queryable.Where(m => query.IsExistedTeam.Value == m.IsExistedTeam);
 

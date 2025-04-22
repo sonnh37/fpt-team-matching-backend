@@ -29,9 +29,9 @@ public class UserController : ControllerBase
     }
     
     [HttpGet("council/pending-ideas")]
-    public async Task<IActionResult> GetAllByCouncilWithIdeaRequestPending([FromQuery] UserGetAllQuery query)
+    public async Task<IActionResult> GetAllByCouncilWithIdeaVersionRequestPending([FromQuery] UserGetAllQuery query)
     {
-        var msg = await _userService.GetAllByCouncilWithIdeaRequestPending(query);
+        var msg = await _userService.GetAllByCouncilWithIdeaVersionRequestPending(query);
         return Ok(msg);
     }
 
@@ -144,6 +144,13 @@ public class UserController : ControllerBase
     public async Task<IActionResult> UpdateStudentExistedRange([FromBody] UserResult[] userResults)
     {
         var msg = await _userService.UpdateStudentExistedRange(userResults);
+        return Ok(msg);
+    }
+
+    [HttpGet("get-suggestions-emails")]
+    public async Task<IActionResult> GetTeamMembers([FromQuery]string email)
+    {
+        var msg = await _userService.GetSuggestionByEmail(email);
         return Ok(msg);
     }
 }
