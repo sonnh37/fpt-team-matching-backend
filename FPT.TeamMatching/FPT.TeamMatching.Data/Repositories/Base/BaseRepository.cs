@@ -80,23 +80,14 @@ public class BaseRepository<TEntity> : IBaseRepository<TEntity> where TEntity : 
         queryable = IncludeHelper.Apply(queryable);
         queryable = FilterHelper.Apply(queryable, query);
 
-        if (query.IsPagination)
-        {
-            // Tổng số count sau khi  filter khi chưa lọc trang
-            var totalOrigin = queryable.Count();
-            // Sắp sếp
-            queryable = Sort(queryable, query);
-            // Lọc trang
-            var results = await GetQueryablePagination(queryable, query).ToListAsync();
+        queryable = Sort(queryable, query);
+    
+        var total = queryable.Count();
+        var results = query.IsPagination 
+            ? await GetQueryablePagination(queryable, query).ToListAsync()
+            : await queryable.ToListAsync();
 
-            return (results, totalOrigin);
-        }
-        else
-        {
-            queryable = Sort(queryable, query);
-            var results = await queryable.ToListAsync();
-            return (results, results.Count);
-        }
+        return (results, query.IsPagination ? total : results.Count);
     }
 
     // Get all
@@ -108,7 +99,7 @@ public class BaseRepository<TEntity> : IBaseRepository<TEntity> where TEntity : 
         return result;
     }
 
-    public virtual async Task<TEntity?> GetById(Guid id, bool isInclude = false)
+    public virtual async Task<TEntity?> GetById(Guid? id, bool isInclude = false)
     {
         var queryable = GetQueryable(x => x.Id == id);
         queryable = isInclude ? IncludeHelper.Apply(queryable) : queryable;

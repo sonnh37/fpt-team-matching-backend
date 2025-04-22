@@ -14,6 +14,7 @@ using FPT.TeamMatching.Domain.Models.Results;
 using FPT.TeamMatching.Domain.Models.Results.Bases;
 using FPT.TeamMatching.Domain.Utilities;
 using FPT.TeamMatching.Services.Bases;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace FPT.TeamMatching.Services;
@@ -154,7 +155,6 @@ public class IdeaService : BaseService<Idea>, IIdeaService
                 Id = Guid.NewGuid(),
                 MentorId = ideaCreateModel.MentorId,
                 SpecialtyId = ideaCreateModel.SpecialtyId,
-
                 Status = IdeaStatus.Pending,
                 OwnerId = userId,
                 Type = IdeaType.Student,
@@ -650,7 +650,7 @@ public class IdeaService : BaseService<Idea>, IIdeaService
     #endregion
 
     private const double APPROVAL_THRESHOLD = 0.5;
-    private const int MIN_REVIEWERS = 3;
+    private const int MIN_REVIEWERS = 2;
     private const int RANDOM_SUFFIX_MIN = 1000;
     private const int RANDOM_SUFFIX_MAX = 9999;
     private const int MAX_TEAMNAME_LENGTH = 15;
@@ -706,8 +706,8 @@ public class IdeaService : BaseService<Idea>, IIdeaService
     {
         try
         {
-            var ideaVersionCurrent = idea.IdeaVersions?
-                .FirstOrDefault(m => m.StageIdeaId == stageIdeaCurrent.Id && !m.IsDeleted);
+            var ideaVersionCurrent = _ideaVersionRepository.GetQueryable()
+                .FirstOrDefault(m => m.IdeaId == idea.Id && m.StageIdeaId == stageIdeaCurrent.Id && !m.IsDeleted);
 
             if (ideaVersionCurrent == null) return;
 
@@ -730,8 +730,23 @@ public class IdeaService : BaseService<Idea>, IIdeaService
         if (idea.Owner?.UserXRoles?.Any(e => e.Role?.RoleName == "Student") != true)
             return;
 
-        var topicResult = await CreateTopicForIdea(ideaVersion, stageIdea);
-        if (topicResult == null) return;
+        // Kiểm tra xem IdeaVersion đã có Topic chưa
+        var existingTopic = await _topicRepository.GetQueryable().SingleOrDefaultAsync(m => m.IdeaVersionId == ideaVersion.Id);
+        TopicResult? topicResult = null;
+
+        if (existingTopic == null)
+        {
+            topicResult = await CreateTopicForIdea(ideaVersion, stageIdea);
+            if (topicResult == null) return;
+        }
+        else
+        {
+            topicResult = new TopicResult 
+            {
+                Id = existingTopic.Id,
+                TopicCode = existingTopic.TopicCode
+            };
+        }
 
         var existedProject = await _projectRepository.GetProjectByLeaderId(idea.OwnerId);
 
@@ -820,7 +835,10 @@ public class IdeaService : BaseService<Idea>, IIdeaService
         try
         {
             idea.Owner = null;
-            idea.IdeaVersions = new List<IdeaVersion>();
+            idea.Mentor = null;
+            idea.SubMentor = null;
+            idea.Specialty = null;
+            // idea.IdeaVersions = new List<IdeaVersion>();
             idea.Status = status;
 
             await SetBaseEntityForUpdate(idea);

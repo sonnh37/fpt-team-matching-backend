@@ -98,7 +98,7 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
         var ideas = await GetQueryable()
             .Include(e => e.Owner).ThenInclude(e => e.UserXRoles).ThenInclude(e => e.Role)
             //sua db
-            .Include(e => e.IdeaVersions).ThenInclude(m => m.StageIdea)
+            // .Include(e => e.IdeaVersions).ThenInclude(m => m.StageIdea)
             // .Include(e => e.).ThenInclude(m => m.StageIdea)
             .Where(e =>
                 e.IsDeleted == false &&
