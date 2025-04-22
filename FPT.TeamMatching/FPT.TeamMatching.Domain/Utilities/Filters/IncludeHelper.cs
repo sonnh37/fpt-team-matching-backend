@@ -66,8 +66,10 @@ public static class IncludeHelper
     private static IQueryable<IdeaVersionRequest> IdeaVersionRequest(IQueryable<IdeaVersionRequest> queryable)
     {
         queryable = queryable
-            .Include(m => m.IdeaVersion).ThenInclude(e => e.Idea).ThenInclude(e => e.Mentor)
-            .Include(m => m.IdeaVersion).ThenInclude(e => e.Idea).ThenInclude(e => e.SubMentor)
+            .Include(m => m.IdeaVersion)
+            //.ThenInclude(e => e.Idea).ThenInclude(e => e.Mentor)
+            .Include(m => m.IdeaVersion)
+            //.ThenInclude(e => e.Idea).ThenInclude(e => e.SubMentor)
             .Include(m => m.Reviewer);
         return queryable;
     }
@@ -174,6 +176,9 @@ public static class IncludeHelper
             //.Include(e => e.Topic).ThenInclude(e => e.Idea)
             //.ThenInclude(e => e.Specialty).ThenInclude(e => e.Profession)
             //.Include(m => m.Topic).ThenInclude(e => e.Idea).ThenInclude(m => m.Owner)
+            .Include(x => x.Topic)
+            .ThenInclude(x => x.IdeaVersion)
+            .ThenInclude(x => x.Idea)
             .Include(x => x.MentorFeedback);
 
         return queryable;
@@ -182,12 +187,17 @@ public static class IncludeHelper
     private static IQueryable<Review> Review(IQueryable<Review> queryable)
     {
         queryable = queryable
+            .Include(d => d.Reviewer1)
+            .Include(d => d.Reviewer2)
             .Include(x => x.Project)
             .ThenInclude(y => y.Topic)
             .ThenInclude(e => e.IdeaVersion)
             .ThenInclude(y => y.Idea)
-            .Include(d => d.Reviewer1)
-            .Include(d => d.Reviewer2);
+            .Include(x => x.Project)
+            .ThenInclude(y => y.Topic)
+            .ThenInclude(e => e.TopicVersions);
+            
+            
         return queryable;
     }
 

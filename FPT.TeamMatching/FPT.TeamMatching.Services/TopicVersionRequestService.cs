@@ -170,5 +170,23 @@ namespace FPT.TeamMatching.Services
                     .WithMessage(errorMessage);
             }
         }
+
+        public async Task<BusinessResult> GetByRole(string role)
+        {
+            try
+            {
+                var result = await _topicVersionRequestRepository.GetByRole(role);
+                return new ResponseBuilder()
+                    .WithStatus(Const.SUCCESS_CODE)
+                    .WithMessage(Const.SUCCESS_SAVE_MSG)
+                    .WithData(result);
+            }
+            catch (Exception e)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage(Const.FAIL_SAVE_MSG);
+            }
+        }
     }
 }

@@ -12,5 +12,6 @@ namespace FPT.TeamMatching.Domain.Contracts.Services
     public interface ITopicVersionRequestService: IBaseService
     {
         Task<BusinessResult> RespondByLecturerOrManager(RespondByMentorOrManager request);
+        Task<BusinessResult> GetByRole(string role);
     }
 }

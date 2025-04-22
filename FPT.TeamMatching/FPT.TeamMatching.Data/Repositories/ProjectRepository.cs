@@ -39,6 +39,7 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
                 .ThenInclude(e => e.Specialty)
                 .ThenInclude(e => e.Profession)
                 .Include(e => e.Invitations)
+                .Include(x => x.Reviews)
                 .FirstOrDefaultAsync();
             if (project != null)
             {
@@ -184,15 +185,22 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
     public async Task<(List<Project>, int)> GetProjectsForMentor(ProjectGetListForMentorQuery query, Guid userId)
     {
         var queryable = GetQueryable();
-        queryable = queryable
+        queryable =  queryable
             //sua db
-            //.Include(m => m.Idea)
+            .Include(x => x.Leader)
+            .Include(m => m.Topic)
+            .ThenInclude(x => x.IdeaVersion)
+            .ThenInclude(x => x.Idea)
             .Include(m => m.Leader)
             .Include(m => m.MentorFeedback);
 
         //sua db
         //queryable = queryable.Where(m => m.Idea != null && m.Idea.MentorId == userId);
-        queryable = queryable.Where(m => m.Topic.IdeaVersionId != null && m.Topic.IdeaVersionId == userId);
+        queryable = queryable.Where(m => m.Topic != null &&
+                                         m.Topic.IdeaVersion != null && 
+                                         m.Topic.IdeaVersion.Idea != null && 
+                                         m.Topic.IdeaVersion.Idea.MentorId != null && 
+                                         m.Topic.IdeaVersion.Idea.MentorId == userId);
 
         queryable = BaseFilterHelper.Base(queryable, query);
         if (query.IsPagination)

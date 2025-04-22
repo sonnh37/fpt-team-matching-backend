@@ -315,6 +315,12 @@ public class ProjectService : BaseService<Project>, IProjectService
                 ws.Column("A").Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
                 ws.Column("A").Style.Alignment.Vertical = XLAlignmentVerticalValues.Center;
 
+                int lastRow = ws.LastRowUsed().RowNumber();
+                var range = ws.Range($"D3:D{lastRow}");
+
+                range.CreateDataValidation()
+                    .Date
+                    .Between(DateTime.Now, new DateTime(9999, 12, 31));
                 // Tự động điều chỉnh độ rộng cột
                 ws.Columns().AdjustToContents();
                 using (MemoryStream ms = new MemoryStream())
