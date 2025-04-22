@@ -174,6 +174,7 @@ public static class IncludeHelper
             //.Include(e => e.Topic).ThenInclude(e => e.Idea)
             //.ThenInclude(e => e.Specialty).ThenInclude(e => e.Profession)
             //.Include(m => m.Topic).ThenInclude(e => e.Idea).ThenInclude(m => m.Owner)
+            .Include(x => x.Reviews)
             .Include(x => x.Topic)
             .ThenInclude(x => x.IdeaVersion)
             .ThenInclude(x => x.Idea)

@@ -367,4 +367,21 @@ public class ProjectService : BaseService<Project>, IProjectService
                 .WithMessage(errorMessage);
         }
     }
+    public async Task<BusinessResult> GetProjectBySemesterAndStage(Guid semesterId, int stage)
+    {
+        try
+        {
+            var result = await _projectRepository.GetProjectBySemesterIdAndDefenseStage(semesterId, stage);
+            return new ResponseBuilder()
+                .WithStatus(Const.SUCCESS_CODE)
+                .WithData(result)
+                .WithMessage(Const.SUCCESS_READ_MSG);
+        }
+        catch (Exception e)
+        {
+            return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage(e.Message);
+        }
+    }
 }

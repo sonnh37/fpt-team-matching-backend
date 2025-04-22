@@ -106,6 +106,21 @@ namespace FPT.TeamMatching.Services
                         }
                     }
 
+                    if (topicVersionRequest.Status == Domain.Enums.TopicVersionRequestStatus.Rejected)
+                    {
+                        topicVersion.Status = Domain.Enums.TopicVersionStatus.Rejected;
+                        await SetBaseEntityForUpdate(topicVersion);
+                        _topicVersionRepository.Update(topicVersion);
+
+                        isSuccess = await _unitOfWork.SaveChanges();
+                        if (!isSuccess)
+                        {
+                            return new ResponseBuilder()
+                                .WithStatus(Const.FAIL_CODE)
+                                .WithMessage(Const.FAIL_SAVE_MSG);
+                        }
+                    }
+
                 }
 
                 //neu la manager -> update TopicVersion va noti

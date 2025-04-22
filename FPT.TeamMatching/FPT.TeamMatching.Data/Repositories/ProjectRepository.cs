@@ -122,6 +122,7 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
     public async Task<List<Project>> GetProjectBySemesterIdAndDefenseStage(Guid semesterId, int defenseStage)
     {
         var project = await _context.Projects
+            .Include(x => x.CapstoneSchedules)
             .Include(x => x.Topic)
             .ThenInclude(x => x.IdeaVersion)
             .ThenInclude(x => x.Idea)
