@@ -21,6 +21,7 @@ namespace FPT.TeamMatching.Services;
 public class IdeaVersionRequestService : BaseService<IdeaVersionRequest>, IIdeaVersionRequestService
 {
     private readonly IIdeaVersionRequestRepository _ideaVersionRequestRepository;
+    private readonly IIdeaVersionRepository _ideaVersionRepository;
     private readonly IIdeaRepository _ideaRepository;
     private readonly ISemesterRepository _semesterRepository;
     private readonly IUserRepository _userRepository;
@@ -33,6 +34,7 @@ public class IdeaVersionRequestService : BaseService<IdeaVersionRequest>, IIdeaV
     {
         _ideaVersionRequestRepository = unitOfWork.IdeaVersionRequestRepository;
         _ideaRepository = unitOfWork.IdeaRepository;
+        _ideaVersionRepository = unitOfWork.IdeaVersionRepository;
         _semesterRepository = unitOfWork.SemesterRepository;
         _userRepository = unitOfWork.UserRepository;
         _answerCriteriaRepository = unitOfWork.AnswerCriteriaRepository;
@@ -121,11 +123,8 @@ public class IdeaVersionRequestService : BaseService<IdeaVersionRequest>, IIdeaV
     {
         try
         {
-            //sua db
-            //if (command.IdeaId == Guid.Empty || command.IdeaId == null) return HandlerFail("No Idea Id provided");
-            //var councils = await _userRepository.GetThreeCouncilsForIdeaVersionRequest(command.IdeaId.Value);
-            //if (!councils.Any()) return HandlerFail("No available councils");
-            var councils = await _userRepository.GetThreeCouncilsForIdeaVersionRequest(command.IdeaVersionId.Value);
+            if (command.IdeaVersionId == Guid.Empty || command.IdeaVersionId == null) return HandlerFail("Nhập idea version ");
+            var councils = await _userRepository.GetCouncilsForIdeaVersionRequest(command.IdeaVersionId.Value);
             if (!councils.Any()) return HandlerFail("No available councils");
 
             var newIdeaVersionRequests = new List<IdeaVersionRequest>();
@@ -134,10 +133,10 @@ public class IdeaVersionRequestService : BaseService<IdeaVersionRequest>, IIdeaV
             {
                 var ideaVersionRequest = new IdeaVersionRequest
                 {
-                    //IdeaId = command.IdeaId,
-                    //ReviewerId = council.Id,
-                    //Status = IdeaVersionRequestStatus.Pending,
-                    //Role = "Council",
+                    IdeaVersionId = command.IdeaVersionId,
+                    ReviewerId = council.Id,
+                    Status = IdeaVersionRequestStatus.Pending,
+                    Role = "Council",
                 };
                 await SetBaseEntityForCreation(ideaVersionRequest);
                 newIdeaVersionRequests.Add(ideaVersionRequest);
@@ -149,15 +148,11 @@ public class IdeaVersionRequestService : BaseService<IdeaVersionRequest>, IIdeaV
             var check = await _unitOfWork.SaveChanges();
             if (check)
             {
-                //sua db
-                //var idea = await _ideaRepository.GetById((Guid)command.IdeaId);
-                var idea = await _ideaRepository.GetById((Guid)command.IdeaVersionId);
+                var ideaVersion = await _ideaVersionRepository.GetById((Guid)command.IdeaVersionId);
                 //send noti cho 3 nguoi council
                 var request = new NotificationCreateForGroupUser
                 {
-                    //sua db
-                    //Description = "Đề tài " + idea.Abbreviations + " đang chờ bạn duyệt với vai trò Council",
-                    Description = "Đề tài " + " đang chờ bạn duyệt với vai trò Council",
+                    Description = "Đề tài " + ideaVersion.Abbreviations + " đang chờ bạn duyệt với vai trò Council",
                 };
                 await _notificationService.CreateForGroupUsers(request, councils.Select(e => e.Id).ToList());
                 //
@@ -341,7 +336,7 @@ public class IdeaVersionRequestService : BaseService<IdeaVersionRequest>, IIdeaV
                         .WithStatus(Const.FAIL_CODE)
                         .WithMessage(Const.FAIL_SAVE_MSG);
             }
-            var answerCriteriaList = _mapper.Map<List<AnswerCriteria>>(command.answerCriteriaList);
+            var answerCriteriaList = _mapper.Map<List<AnswerCriteria>>(command.AnswerCriteriaList);
             foreach (var answerCriteria in answerCriteriaList)
             {
                 answerCriteria.IdeaVersionRequestId = ideaVersionRequest.Id;
@@ -355,14 +350,73 @@ public class IdeaVersionRequestService : BaseService<IdeaVersionRequest>, IIdeaV
                         .WithStatus(Const.FAIL_CODE)
                         .WithMessage(Const.FAIL_SAVE_MSG);
             }
-            //neu mentor response thi gui noti cho student 
+            if (ideaVersionRequest.IdeaVersion == null)
+            {
+                return new ResponseBuilder()
+                        .WithStatus(Const.NOT_FOUND_CODE)
+                        .WithMessage(Const.NOT_FOUND_MSG);
+            }
+            if (ideaVersionRequest.IdeaVersion.IdeaId == null)
+            {
+                return new ResponseBuilder()
+                        .WithStatus(Const.NOT_FOUND_CODE)
+                        .WithMessage(Const.NOT_FOUND_MSG);
+            }
+            var idea = await _ideaRepository.GetById((Guid)ideaVersionRequest.IdeaVersion.IdeaId);
+            if (idea == null)
+            {
+                return new ResponseBuilder()
+                        .WithStatus(Const.NOT_FOUND_CODE)
+                        .WithMessage(Const.NOT_FOUND_MSG);
+            }
+            //neu mentor response 
             if (ideaVersionRequest.Role == "Mentor")
             {
+                //neu la status la consider -> sua status cua idea -> ConsiderByMentor
+                if (ideaVersionRequest.Status == IdeaVersionRequestStatus.Consider)
+                {
+                    idea.Status = IdeaStatus.ConsiderByMentor;
+                    await SetBaseEntityForUpdate(idea);
+                    _ideaRepository.Update(idea);
+                    saveChange = await _unitOfWork.SaveChanges();
+                    if (!saveChange)
+                    {
+                        return new ResponseBuilder()
+                                .WithStatus(Const.FAIL_CODE)
+                                .WithMessage(Const.FAIL_SAVE_MSG);
+                    }
+                }
+
                 //noti cho owner
                 var noti = new NotificationCreateForIndividual
                 {
                     UserId = ideaVersionRequest.IdeaVersion.Idea.OwnerId,
                     Description = "Đề tài " + ideaVersionRequest.IdeaVersion.Abbreviations + " đã được " + ideaVersionRequest.IdeaVersion.Idea.Mentor.Code + " (Mentor) duyệt. Hãy kiểm tra kết quả!",
+                };
+                await _notificationService.CreateForUser(noti);
+            }
+            //neu council response 
+            else if (ideaVersionRequest.Role == "Council")
+            {
+                //neu la status la consider -> sua status cua idea -> ConsiderByCouncil
+                if (ideaVersionRequest.Status == IdeaVersionRequestStatus.Consider)
+                {
+                    idea.Status = IdeaStatus.ConsiderByCouncil;
+                    await SetBaseEntityForUpdate(idea);
+                    _ideaRepository.Update(idea);
+                    saveChange = await _unitOfWork.SaveChanges();
+                    if (!saveChange)
+                    {
+                        return new ResponseBuilder()
+                                .WithStatus(Const.FAIL_CODE)
+                                .WithMessage(Const.FAIL_SAVE_MSG);
+                    }
+                }
+                //noti cho mentor
+                var noti = new NotificationCreateForIndividual
+                {
+                    UserId = ideaVersionRequest.IdeaVersion.Idea.MentorId,
+                    Description = "Đề tài " + ideaVersionRequest.IdeaVersion.Abbreviations + " được yêu cầu chỉnh sửa",
                 };
                 await _notificationService.CreateForUser(noti);
             }
