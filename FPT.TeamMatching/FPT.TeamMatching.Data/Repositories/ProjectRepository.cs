@@ -39,6 +39,7 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
                 .ThenInclude(e => e.Specialty)
                 .ThenInclude(e => e.Profession)
                 .Include(e => e.Invitations)
+                .Include(x => x.Reviews)
                 .FirstOrDefaultAsync();
             if (project != null)
             {
@@ -186,6 +187,7 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
         var queryable = GetQueryable();
         queryable =  queryable
             //sua db
+            .Include(x => x.Leader)
             .Include(m => m.Topic)
             .ThenInclude(x => x.IdeaVersion)
             .ThenInclude(x => x.Idea)
