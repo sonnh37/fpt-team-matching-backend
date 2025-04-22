@@ -151,8 +151,8 @@ namespace FPT.TeamMatching.Services
                 }
 
                 return new ResponseBuilder()
-                            .WithStatus(Const.FAIL_CODE)
-                            .WithMessage(Const.FAIL_SAVE_MSG);
+                            .WithStatus(Const.SUCCESS_CODE)
+                            .WithMessage(Const.SUCCESS_SAVE_MSG);
             }
             catch (Exception ex)
             {

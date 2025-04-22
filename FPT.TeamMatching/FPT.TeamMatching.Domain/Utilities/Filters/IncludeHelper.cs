@@ -66,8 +66,10 @@ public static class IncludeHelper
     private static IQueryable<IdeaVersionRequest> IdeaVersionRequest(IQueryable<IdeaVersionRequest> queryable)
     {
         queryable = queryable
-            .Include(m => m.IdeaVersion).ThenInclude(e => e.Idea).ThenInclude(e => e.Mentor)
-            .Include(m => m.IdeaVersion).ThenInclude(e => e.Idea).ThenInclude(e => e.SubMentor)
+            .Include(m => m.IdeaVersion)
+            //.ThenInclude(e => e.Idea).ThenInclude(e => e.Mentor)
+            .Include(m => m.IdeaVersion)
+            //.ThenInclude(e => e.Idea).ThenInclude(e => e.SubMentor)
             .Include(m => m.Reviewer);
         return queryable;
     }
