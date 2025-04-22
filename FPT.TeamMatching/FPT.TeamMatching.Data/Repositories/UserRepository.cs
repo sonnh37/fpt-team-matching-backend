@@ -91,20 +91,21 @@ public class UserRepository : BaseRepository<User>, IUserRepository
         return entity;
     }
 
-    public async Task<List<User>> GetThreeCouncilsForIdeaVersionRequest(Guid ideaId)
+    public async Task<List<User>> GetCouncilsForIdeaVersionRequest(Guid ideaVersionId)
     {
         var queryable = GetQueryable();
         queryable = queryable.Include(m => m.UserXRoles).ThenInclude(m => m.Role);
 
         // Lấy thông tin idea để lấy mentor
-        var idea = await GetQueryable<Idea>()
-            .Where(i => i.Id == ideaId)
-            .Select(i => new { i.MentorId, i.SubMentorId })
+        var ideaVersion = await GetQueryable<IdeaVersion>()
+            .Where(i => i.Id == ideaVersionId)
+            .Include(e => e.StageIdea)
+            .Include(e => e.Idea)
             .FirstOrDefaultAsync();
 
-        if (idea == null)
+        if (ideaVersion == null)
         {
-            throw new Exception("Idea not found");
+            throw new Exception("Idea Version not found");
         }
 
         var councils = await queryable
@@ -119,9 +120,21 @@ public class UserRepository : BaseRepository<User>, IUserRepository
             .OrderBy(x => x.ApprovedCount)
             .Select(x => x.Council)
             .ToListAsync();
-
+        if (ideaVersion.StageIdea == null)
+        {
+            throw new Exception("Stage idea not found");
+        }
+        if (ideaVersion.Idea == null)
+        {
+            throw new Exception("Idea not found");
+        }
+        var number = ideaVersion.StageIdea.NumberReviewer;
+        if (number == null)
+        {
+            throw new Exception("Number reviewer not found");
+        }
         // Lọc bỏ những council trùng với mentor hoặc sub-mentor
-        councils = councils.Where(c => c.Id != idea.MentorId && c.Id != idea.SubMentorId).Take(3).ToList();
+        councils = councils.Where(c => c.Id != ideaVersion.Idea.MentorId && c.Id != ideaVersion.Idea.SubMentorId).Take((int)number).ToList();
 
         return councils;
     }

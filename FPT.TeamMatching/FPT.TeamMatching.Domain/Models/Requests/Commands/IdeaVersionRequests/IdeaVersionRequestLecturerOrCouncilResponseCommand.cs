@@ -13,6 +13,6 @@ namespace FPT.TeamMatching.Domain.Models.Requests.Commands.IdeaVersionRequests
     {
         public IdeaVersionRequestStatus? Status { get; set; }
 
-        public List<AnswerCriteriaForLecturerRespond> answerCriteriaList { get; set; }
+        public List<AnswerCriteriaForLecturerRespond>? AnswerCriteriaList { get; set; }
     }
 }
