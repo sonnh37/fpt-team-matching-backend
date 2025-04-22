@@ -20,4 +20,5 @@ public interface IProjectService : IBaseService
     new Task<BusinessResult> DeleteById(Guid id, bool isPermanent = false);
 
     Task<BusinessResult> CreateProjectAndTeammemberForAuto(ProjectCreateCommand project);
+    Task<BusinessResult> GetProjectBySemesterAndStage(Guid semester, int stage);
 }

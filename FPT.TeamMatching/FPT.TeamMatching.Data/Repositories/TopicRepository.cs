@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MongoDB.Driver.Linq;
 
 namespace FPT.TeamMatching.Data.Repositories
 {
@@ -34,6 +35,15 @@ namespace FPT.TeamMatching.Data.Repositories
                                                     e.IdeaVersion.StageIdea.Semester.Id == semesterId)
                                                 .Count();
             return numberOfTopic;
+        }
+        
+        public async Task<List<Topic>> GetAllTopicsByTopicCode(string[] topicCodes)
+        {
+            var result = await _context.Topics
+                .Include(x => x.Project)
+                .Where(x => topicCodes.Contains(x.TopicCode))
+                .ToListAsync();
+            return result;
         }
     }
 }

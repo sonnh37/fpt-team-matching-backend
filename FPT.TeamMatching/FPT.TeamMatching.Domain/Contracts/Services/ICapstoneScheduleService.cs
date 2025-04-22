@@ -16,5 +16,7 @@ namespace FPT.TeamMatching.Domain.Contracts.Services
         Task<BusinessResult> ImportExcelFile(IFormFile file, int stage);
         Task<BusinessResult> GetBySemesterIdAndStage(CapstoneScheduleFilter command);
         Task<BusinessResult> GetByProjectId(Guid projectId);
+       Task<BusinessResult> AddCapstoneSchedule(CapstoneScheduleCreateCommand command);
+       Task<BusinessResult> UpdateCapstoneSchedule(CapstoneScheduleUpdateCommand command);
     }
 }

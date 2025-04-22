@@ -119,4 +119,11 @@ public class ProjectController : ControllerBase
         return Ok(businessResult);
     }
 
+    [HttpGet("get-by-semester-and-stage")]
+    public async Task<IActionResult> GetProjectBySemesterAndStage([FromQuery] Guid semester, [FromQuery] int stage)
+    {
+        var businessResult = await _service.GetProjectBySemesterAndStage(semester, stage);
+        return Ok(businessResult);
+    }
+
 }

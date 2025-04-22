@@ -37,14 +37,15 @@ namespace FPT.TeamMatching.API.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CapstoneScheduleCreateCommand request)
         {
-            var msg = await _service.CreateOrUpdate<CapstoneScheduleResult>(request);
+            // var msg = await _service.CreateOrUpdate<CapstoneScheduleResult>(request);
+            var msg = await _service.AddCapstoneSchedule(request);
             return Ok(msg);
         }
 
         [HttpPut]
         public async Task<IActionResult> Update([FromBody] CapstoneScheduleUpdateCommand request)
         {
-            var businessResult = await _service.CreateOrUpdate<CapstoneScheduleResult>(request);
+            var businessResult = await _service.UpdateCapstoneSchedule(request);
 
             return Ok(businessResult);
         }

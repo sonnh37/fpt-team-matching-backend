@@ -12,5 +12,6 @@ namespace FPT.TeamMatching.Domain.Contracts.Repositories
     {
         int NumberOfTopicBySemesterId(Guid semesterId);
         bool IsExistedTopicCode(string topicCode);
+        Task<List<Topic>> GetAllTopicsByTopicCode(string[] topicCodes);
     }
 }

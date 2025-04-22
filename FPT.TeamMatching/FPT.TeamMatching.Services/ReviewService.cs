@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Pipelines.Sockets.Unofficial.Arenas;
 using System.Data;
+using DocumentFormat.OpenXml.Office2010.ExcelAc;
 
 namespace FPT.TeamMatching.Services;
 
@@ -204,10 +205,15 @@ public class ReviewService : BaseService<Review>, IReviewService
             var reviewUsernameList = reviewList.Select(x => x.Code).ToList();
             var customIdeaModel = await _ideaRepository.GetCustomIdea(semesterId, reviewNumber);
             var reviews = new List<Review>();
+            var listReviewFail = new List<ReviewExcelModels>();
             using (var stream = File.Open(filePath, FileMode.Open, FileAccess.Read))
             {
                 using (var reader = ExcelReaderFactory.CreateReader(stream))
                 {
+                    for (int i = 1; i < reviewNumber; i++)
+                    {
+                        reader.NextResult();
+                    }
                     // Bỏ qua 3 dòng tiêu đề
                     reader.Read();
                     reader.Read();
@@ -220,23 +226,58 @@ public class ReviewService : BaseService<Review>, IReviewService
                             var teamCode = reader.GetValue(2)?.ToString();
                             if (string.IsNullOrWhiteSpace(teamCode))
                             {
+                                break;
+                            }
+
+                            if (reader.GetValue(0) == null)
+                            {
                                 continue;
                             }
+                            var STT = int.Parse(reader.GetValue(0).ToString());
                             //check project exist
                             var project = customIdeaModel.FirstOrDefault(x => x.TeamCode.TrimEnd('\r', '\n') == teamCode);
                             if (project == null)
                             {
+                                listReviewFail.Add(new ReviewExcelModels
+                                {
+                                    STT = STT,
+                                    TopicCode = null,
+                                    Reason = "Not found project"
+                                });
+                                continue;
+                            }
+
+                            if (project.Review.Room != null || project.Review.ReviewDate  != null || project.Review.Reviewer1Id != null || project.Review.Reviewer2Id != null)
+                            {
+                                listReviewFail.Add(new ReviewExcelModels
+                                {
+                                    STT = STT,
+                                    TopicCode = project.IdeaCode ?? null,
+                                    Reason = "Review " + reviewNumber + " của topic này đã tồn tại"
+                                });
                                 continue;
                             }
                             //check idea code
                             var ideaCode = reader.GetValue(1)?.ToString();
                             if (string.IsNullOrWhiteSpace(ideaCode))
                             {
+                                listReviewFail.Add(new ReviewExcelModels
+                                {
+                                    STT = STT,
+                                    TopicCode = project.IdeaCode ?? null,
+                                    Reason = "Topic code trong file không thể null"
+                                });
                                 continue;
                             }
                             //check idea code giong vs idea code cua project
                             if (project.IdeaCode.TrimEnd('\r', '\n') != ideaCode)
                             {
+                                listReviewFail.Add(new ReviewExcelModels
+                                {
+                                    STT = STT,
+                                    TopicCode = project.IdeaCode ?? null,
+                                    Reason = "Lỗi topic code trong file không giống topic code trong hệ thống"
+                                });
                                 continue;
                             }
                             //check reviewer 1, 2 exist
@@ -246,6 +287,12 @@ public class ReviewService : BaseService<Review>, IReviewService
                             var gvhd2 = reader.GetValue(7)?.ToString().ToLower();
                             if (gvhd1 == null)
                             {
+                                listReviewFail.Add(new ReviewExcelModels
+                                {
+                                    STT = STT,
+                                    TopicCode = project.IdeaCode ?? null,
+                                    Reason = "GVHD không thể rỗng"
+                                });
                                 continue;
                             }
 
@@ -254,12 +301,24 @@ public class ReviewService : BaseService<Review>, IReviewService
                                 : new List<string>() { gvhd1 };
                             if (string.IsNullOrWhiteSpace(r1Value) || string.IsNullOrWhiteSpace(r2Value))
                             {
+                                listReviewFail.Add(new ReviewExcelModels
+                                {
+                                    STT = STT,
+                                    TopicCode = project.IdeaCode ?? null,
+                                    Reason = "GVHD không thể rỗng"
+                                });
                                 continue;
                             }
 
                             // kiểm tra reviewer có trong danh giản viên hướng dẫn không
                             if (listGVHD.Contains(r1Value) || listGVHD.Contains(r2Value))
                             {
+                                listReviewFail.Add(new ReviewExcelModels
+                                {
+                                    STT = STT,
+                                    TopicCode = project.IdeaCode ?? null,
+                                    Reason = "Người review không thể là 1 trong 2 GVHD"
+                                });
                                 continue;
                             }
                             // var r1 = await _userRepository.GetReviewerByMatchingEmail(r1Value);
@@ -268,6 +327,12 @@ public class ReviewService : BaseService<Review>, IReviewService
                             var r2 = reviewUsernameList.Contains(r2Value.ToLower());
                             if (!r1 || !r2)
                             {
+                                listReviewFail.Add(new ReviewExcelModels
+                                {
+                                    STT = STT,
+                                    TopicCode = project.IdeaCode ?? null,
+                                    Reason = "Người review không tồn tại"
+                                });
                                 continue;
                             }
 
@@ -276,6 +341,12 @@ public class ReviewService : BaseService<Review>, IReviewService
                             DateTimeOffset date;
                             if (string.IsNullOrWhiteSpace(dateValue) || !DateTimeOffset.TryParse(dateValue, out date))
                             {
+                                listReviewFail.Add(new ReviewExcelModels
+                                {
+                                    STT = STT,
+                                    TopicCode = project.IdeaCode ?? null,
+                                    Reason = "Ngày review không hợp lệ"
+                                });
                                 continue;
                             }
 
@@ -284,10 +355,22 @@ public class ReviewService : BaseService<Review>, IReviewService
                             int slot;
                             if (string.IsNullOrWhiteSpace(slotValue) || !Int32.TryParse(slotValue, out slot))
                             {
+                                listReviewFail.Add(new ReviewExcelModels
+                                {
+                                    STT = STT,
+                                    TopicCode = project.IdeaCode ?? null,
+                                    Reason = "Slot là kiểu int và dữ liệu từ 1 - 5"
+                                });
                                 continue;
                             }
                             if (slot > 5 || slot < 1)
                             {
+                                listReviewFail.Add(new ReviewExcelModels
+                                {
+                                    STT = STT,
+                                    TopicCode = project.IdeaCode ?? null,
+                                    Reason = "Slot là kiểu int và dữ liệu từ 1 - 5"
+                                });
                                 continue;
                             }
 
@@ -295,6 +378,12 @@ public class ReviewService : BaseService<Review>, IReviewService
                             var room = reader.GetValue(12)?.ToString();
                             if (string.IsNullOrWhiteSpace(room))
                             {
+                                listReviewFail.Add(new ReviewExcelModels
+                                {
+                                    STT = STT,
+                                    TopicCode = project.IdeaCode ?? null,
+                                    Reason = "Room không thể rỗng"
+                                });
                                 continue;
                             }
 
@@ -320,7 +409,8 @@ public class ReviewService : BaseService<Review>, IReviewService
             await _unitOfWork.SaveChanges();
             return new ResponseBuilder()
                 .WithStatus(Const.SUCCESS_CODE)
-                .WithMessage("Import file success");
+                .WithMessage("Import file success")
+                .WithData(listReviewFail);
         }
         catch (Exception ex)
         {
