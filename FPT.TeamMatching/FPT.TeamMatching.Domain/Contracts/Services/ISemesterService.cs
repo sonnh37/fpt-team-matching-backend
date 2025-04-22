@@ -15,5 +15,8 @@ namespace FPT.TeamMatching.Domain.Contracts.Services
     {
         // Task<BusinessResult> GetPresentSemester();
         Task<BusinessResult> GetCurrentSemester();
+
+        Task<string> GenerateNewTeamCode(Guid? semesterId);
+        Task<string> GenerateNewTopicCode(Guid? semesterId);
     }
 }
