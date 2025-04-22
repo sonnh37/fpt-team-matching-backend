@@ -22,7 +22,7 @@ public interface IBaseRepository<TEntity> : IBaseRepository
 
     Task<(List<TEntity>, int)> GetData(GetQueryableQuery query);
 
-    Task<TEntity?> GetById(Guid id, bool isInclude = false);
+    Task<TEntity?> GetById(Guid? id, bool isInclude = false);
 
     void Add(TEntity entity);
 

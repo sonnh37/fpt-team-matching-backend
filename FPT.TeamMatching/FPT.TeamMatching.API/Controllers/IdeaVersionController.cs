@@ -61,5 +61,12 @@ namespace FPT.TeamMatching.API.Controllers
 
             return Ok(businessResult);
         }
+
+        [HttpPost("resubmit-by-student-or-mentor")]
+        public async Task<IActionResult> ResubmitByStudentOrMentor([FromBody] IdeaVersionResubmitByStudentOrMentor request)
+        {
+            var msg = await _service.ResubmitByStudentOrMentor(request);
+            return Ok(msg);
+        }
     }
 }

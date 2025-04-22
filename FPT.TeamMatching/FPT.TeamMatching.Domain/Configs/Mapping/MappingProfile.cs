@@ -130,6 +130,7 @@ public class MappingProfile : Profile
         CreateMap<IdeaVersion, IdeaVersionResult>().ReverseMap();
         CreateMap<IdeaVersion, IdeaVersionCreateCommand>().ReverseMap();
         CreateMap<IdeaVersion, IdeaVersionUpdateCommand>().ReverseMap();
+        CreateMap<IdeaVersion, IdeaVersionResubmitByStudentOrMentor>().ReverseMap();
 
         #endregion
 

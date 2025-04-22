@@ -15,7 +15,8 @@ public class IdeaVersionRequestRepository : BaseRepository<IdeaVersionRequest>, 
 {
     private readonly IIdeaRepository _ideaRepository;
 
-    public IdeaVersionRequestRepository(FPTMatchingDbContext dbContext, IIdeaRepository ideaRepository) : base(dbContext)
+    public IdeaVersionRequestRepository(FPTMatchingDbContext dbContext, IIdeaRepository ideaRepository) :
+        base(dbContext)
     {
         _ideaRepository = ideaRepository;
     }
@@ -59,43 +60,29 @@ public class IdeaVersionRequestRepository : BaseRepository<IdeaVersionRequest>, 
     {
         var queryable = GetQueryable();
         queryable = queryable
-            //sua db
             .Include(m => m.IdeaVersion).ThenInclude(m => m.StageIdea)
             .Include(m => m.Reviewer);
 
         queryable = queryable.Where(m =>
             m.Status != null && m.Role != null &&
-            query.Roles.Contains(m.Role) && query.Status == m.Status && m.ReviewerId == userId) 
-            //sua db
-            //&&
-            //(m.Idea == null || m.Idea.StageIdea == null || !query.StageNumber.HasValue ||
-             //m.Idea.StageIdea.StageNumber == query.StageNumber.Value))
-            ;
-        
-        if (query.IsPagination)
-        {
-            // Tổng số count sau khi  filter khi chưa lọc trang
-            var totalOrigin = queryable.Count();
-            // Sắp sếp
-            queryable = Sort(queryable, query);
-            // Lọc trang
-            var results = await GetQueryablePagination(queryable, query).ToListAsync();
+            query.Roles.Contains(m.Role) && query.Status == m.Status && m.ReviewerId == userId);
 
-            return (results, totalOrigin);
-        }
-        else
-        {
-            queryable = Sort(queryable, query);
-            var results = await queryable.ToListAsync();
-            return (results, results.Count);
-        }
+        queryable = Sort(queryable, query);
+
+        var total = queryable.Count();
+        var results = query.IsPagination
+            ? await GetQueryablePagination(queryable, query).ToListAsync()
+            : await queryable.ToListAsync();
+
+        return (results, query.IsPagination ? total : results.Count);
     }
 
     public async Task<int> CountApprovedCouncilsForIdea(Guid ideaId)
     {
         return await GetQueryable()
             //sua db
-            //.Where(ir => ir.IdeaId == ideaId && ir.Role == "Council" && ir.Status == IdeaRequestStatus.Approved)
+            .Where(ir => ir.IdeaVersion != null && ir.IdeaVersion.IdeaId == ideaId && ir.Role == "Council" &&
+                         ir.Status == IdeaVersionRequestStatus.Approved)
             .CountAsync();
     }
 
@@ -103,7 +90,7 @@ public class IdeaVersionRequestRepository : BaseRepository<IdeaVersionRequest>, 
     {
         return await GetQueryable()
             //sua db
-            //.Where(ir => ir.IdeaId == ideaId && ir.Role == "Council")
+            .Where(ir => ir.IdeaVersion != null && ir.IdeaVersion.IdeaId == ideaId && ir.Role == "Council")
             .CountAsync();
     }
 
@@ -111,7 +98,19 @@ public class IdeaVersionRequestRepository : BaseRepository<IdeaVersionRequest>, 
     {
         return await GetQueryable()
             //sua db
-            //.Where(ir => ir.IdeaId == ideaId && ir.Role == "Council" && ir.Status == IdeaRequestStatus.Rejected)
+            .Include(m => m.IdeaVersion)
+            .Where(ir => ir.IdeaVersion != null && ir.IdeaVersion.IdeaId == ideaId && ir.Role == "Council" &&
+                         ir.Status == IdeaVersionRequestStatus.Rejected)
+            .CountAsync();
+    }
+
+    public async Task<int> CountConsiderCouncilsForIdea(Guid ideaId)
+    {
+        return await GetQueryable()
+            //sua db
+            .Include(m => m.IdeaVersion)
+            .Where(ir => ir.IdeaVersion != null && ir.IdeaVersion.IdeaId == ideaId && ir.Role == "Council" &&
+                         ir.Status == IdeaVersionRequestStatus.Consider)
             .CountAsync();
     }
 
@@ -122,7 +121,7 @@ public class IdeaVersionRequestRepository : BaseRepository<IdeaVersionRequest>, 
         var queryable = GetQueryable();
         //sua db
         //queryable = queryable.Include(m => m.Idea)
-            //.Include(m => m.Reviewer);
+        //.Include(m => m.Reviewer);
         queryable = queryable.Where(m => m.ReviewerId == null);
 
         if (query.IsPagination)
@@ -143,5 +142,4 @@ public class IdeaVersionRequestRepository : BaseRepository<IdeaVersionRequest>, 
             return (results, results.Count);
         }
     }
-
 }
