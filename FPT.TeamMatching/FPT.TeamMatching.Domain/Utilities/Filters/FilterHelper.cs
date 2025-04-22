@@ -5,6 +5,8 @@ using FPT.TeamMatching.Domain.Models.Requests.Queries.Base;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.BlogCvs;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Blogs;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Comments;
+using FPT.TeamMatching.Domain.Models.Requests.Queries.CriteriaForms;
+using FPT.TeamMatching.Domain.Models.Requests.Queries.Criterias;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.CriteriaXCriteriaForms;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Ideas;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.IdeaVersionRequest;
@@ -44,6 +46,10 @@ public static class FilterHelper
                 BlogCv((queryable as IQueryable<BlogCv>)!, blogCvQuery) as IQueryable<TEntity>,
             CriteriaXCriteriaFormGetAllQuery criteriaXCriteriaFormQuery =>
                 CriteriaXCriteriaForm((queryable as IQueryable<CriteriaXCriteriaForm>)!, criteriaXCriteriaFormQuery) as IQueryable<TEntity>,
+            CriteriaFormGetAllQuery criteriaFormQuery => 
+            CriteriaForm((queryable as IQueryable<CriteriaForm>)!, criteriaFormQuery) as IQueryable<TEntity>,
+            CriteriaGetAllQuery criteriaQuery => 
+            Criteria((queryable as IQueryable<Criteria>)!, criteriaQuery) as IQueryable<TEntity>,
             LikeGetAllQuery likeQuery =>
                 Like((queryable as IQueryable<Like>)!, likeQuery) as IQueryable<TEntity>,
             _ => BaseFilterHelper.Base(queryable, query),
@@ -118,6 +124,35 @@ public static class FilterHelper
             queryable = queryable.Where(m =>
                 m.CriteriaFormId != null && m.CriteriaFormId == query.CriteriaFormId);
         }
+
+        queryable = BaseFilterHelper.Base(queryable, query);
+
+        return queryable;
+    }
+    private static IQueryable<Criteria>? Criteria(IQueryable<Criteria> queryable, CriteriaGetAllQuery query)
+    {
+        if (!string.IsNullOrEmpty(query.Question))
+             {
+                  queryable = queryable.Where(m =>
+                    m.Question != null && m.Question.ToLower().Trim().Contains(query.Question.ToLower().Trim()));
+            }
+            if (query.ValueType != null)
+        {
+            queryable = queryable.Where(m =>
+                m.ValueType != null && m.ValueType == query.ValueType);
+        }
+        queryable = BaseFilterHelper.Base(queryable, query);
+
+        return queryable;
+    }
+    private static IQueryable<CriteriaForm>? CriteriaForm(IQueryable<CriteriaForm> queryable, CriteriaFormGetAllQuery query)
+    {
+        if (!string.IsNullOrEmpty(query.Title))
+        {
+            queryable = queryable.Where(m =>
+                m.Title != null && m.Title.ToLower().Trim().Contains(query.Title.ToLower().Trim()));
+        }
+
 
         queryable = BaseFilterHelper.Base(queryable, query);
 
