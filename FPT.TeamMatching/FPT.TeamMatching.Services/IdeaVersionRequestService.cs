@@ -157,7 +157,7 @@ public class IdeaVersionRequestService : BaseService<IdeaVersionRequest>, IIdeaV
                    .WithMessage("Failed to create council requests.");
             }
             var ideaVersion = await _ideaVersionRepository.GetById((Guid)command.IdeaVersionId);
-            //send noti cho 3 nguoi council
+            //send noti cho councils
             var request = new NotificationCreateForGroupUser
             {
                 Description = "Đề tài " + ideaVersion.Abbreviations + " đang chờ bạn duyệt với vai trò Council",
@@ -462,36 +462,12 @@ public class IdeaVersionRequestService : BaseService<IdeaVersionRequest>, IIdeaV
                 var ideaInclude = await _ideaRepository.GetById((Guid)ideaVersionRequest.IdeaVersion.IdeaId, true);
                 var noti = new NotificationCreateForIndividual
                 {
-                    UserId = ideaVersionRequest.IdeaVersion.Idea.OwnerId,
+                    UserId = ideaInclude.OwnerId,
                     Description = "Đề tài " + ideaVersionRequest.IdeaVersion.Abbreviations + " đã được " + ideaInclude.Mentor.Code + " (Mentor) duyệt. Hãy kiểm tra kết quả!",
                 };
                 await _notificationService.CreateForUser(noti);
             }
-            ////neu council response 
-            //else if (ideaVersionRequest.Role == "Council")
-            //{
-            //    //neu la status la consider -> sua status cua request
-            //    if (ideaVersionRequest.Status == IdeaVersionRequestStatus.Consider)
-            //    {
-            //        idea.Status = IdeaStatus.ConsiderByCouncil;
-            //        await SetBaseEntityForUpdate(idea);
-            //        _ideaRepository.Update(idea);
-            //        saveChange = await _unitOfWork.SaveChanges();
-            //        if (!saveChange)
-            //        {
-            //            return new ResponseBuilder()
-            //                    .WithStatus(Const.FAIL_CODE)
-            //                    .WithMessage(Const.FAIL_SAVE_MSG);
-            //        }
-            //    }
-            //    //noti cho mentor
-            //    var noti = new NotificationCreateForIndividual
-            //    {
-            //        UserId = ideaVersionRequest.IdeaVersion.Idea.MentorId,
-            //        Description = "Đề tài " + ideaVersionRequest.IdeaVersion.Abbreviations + " được yêu cầu chỉnh sửa",
-            //    };
-            //    await _notificationService.CreateForUser(noti);
-            //}
+            
             return new ResponseBuilder()
                 .WithStatus(Const.SUCCESS_CODE)
                 .WithMessage(Const.SUCCESS_SAVE_MSG);
