@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using ExcelDataReader;
 using FPT.TeamMatching.Domain.Models.Responses;
@@ -153,7 +154,23 @@ namespace FPT.TeamMatching.Services
                                         TopicCode = ideaCode,
                                         Reason = "Thời gian không thể là rỗng"
                                     });
+                                    continue;
                                 }
+                                
+                                var regex = new Regex(@"^\s*(\d{2}:\d{2})\s*-\s*(\d{2}:\d{2})\s*$");
+                                var match = regex.Match(time);
+
+                                if (!match.Success)
+                                {
+                                    failList.Add(new CapstoneScheduleExcelModel
+                                    {
+                                        STT = stt,
+                                        TopicCode = ideaCode,
+                                        Reason = "Thời gian không hợp lệ. Theo format HH:mm - HH:mm"
+                                    });
+                                    continue;
+                                }
+                                
                                 var hallname = reader.GetValue(5).ToString();
                                 if (string.IsNullOrWhiteSpace(hallname.Trim()))
                                 {
@@ -163,6 +180,7 @@ namespace FPT.TeamMatching.Services
                                         TopicCode = ideaCode,
                                         Reason = "Hội trường không thể là rỗng"
                                     });
+                                    continue;
                                 }
                                 capStoneReaders.Add(new CapStoneReader
                                 {
@@ -207,6 +225,7 @@ namespace FPT.TeamMatching.Services
                             TopicCode = capStoneReader.IdeaCode,
                             Reason = "Bị trùng lịch trong file"
                         });    
+                        continue;
                     }
                     if (listCapstoneSchedule.Any(x => x.Project.Topic.TopicCode == capStoneReader.IdeaCode && x.Stage == stage))
                     {
@@ -216,6 +235,7 @@ namespace FPT.TeamMatching.Services
                             TopicCode = capStoneReader.IdeaCode,
                             Reason = "Lịch của nhóm này đã tồn tại"
                         }); 
+                        continue;
                     }
                     if (topicsDic.TryGetValue(capStoneReader.IdeaCode, out Topic topic))
                     {
@@ -236,6 +256,7 @@ namespace FPT.TeamMatching.Services
                             TopicCode = capStoneReader.IdeaCode,
                             Reason = "Không tìm thấy Topic code"
                         });
+                        continue;
                     }
                 }
                 _unitOfWork.CapstoneScheduleRepository.AddRange(capstones);
