@@ -384,7 +384,7 @@ public class IdeaVersionRequestService : BaseService<IdeaVersionRequest>, IIdeaV
     {
         try
         {
-            var ideaVersionRequest = await _ideaVersionRequestRepository.GetById(command.Id);
+            var ideaVersionRequest = await _ideaVersionRequestRepository.GetById(command.Id, true);
             if (ideaVersionRequest == null)
             {
                 return new ResponseBuilder()
@@ -420,20 +420,17 @@ public class IdeaVersionRequestService : BaseService<IdeaVersionRequest>, IIdeaV
                     .WithStatus(Const.FAIL_CODE)
                     .WithMessage(Const.FAIL_SAVE_MSG);
             }
-            
-            
-            var ideaVersion = await _ideaVersionRepository.GetById(ideaVersionRequest.IdeaVersionId);
 
-            if (ideaVersion == null)
+            if (ideaVersionRequest.IdeaVersion == null)
             {
                 return new ResponseBuilder()
                     .WithStatus(Const.NOT_FOUND_CODE)
                     .WithMessage(Const.NOT_FOUND_MSG);
             }
 
-            if (ideaVersion.IdeaId == null)
+            if (ideaVersionRequest.IdeaVersion.IdeaId == null)
             {
-                return new ResponseBuilder() 
+                return new ResponseBuilder()
                     .WithStatus(Const.NOT_FOUND_CODE)
                     .WithMessage(Const.NOT_FOUND_MSG);
             }
@@ -441,7 +438,7 @@ public class IdeaVersionRequestService : BaseService<IdeaVersionRequest>, IIdeaV
             //neu mentor response 
             if (ideaVersionRequest.Role == "Mentor")
             {
-                var idea = await _ideaRepository.GetById(ideaVersion.IdeaId);
+                var idea = await _ideaRepository.GetById((Guid)ideaVersionRequest.IdeaVersion.IdeaId);
                 if (idea == null)
                 {
                     return new ResponseBuilder()
@@ -450,60 +447,46 @@ public class IdeaVersionRequestService : BaseService<IdeaVersionRequest>, IIdeaV
                 }
 
                 //neu la status la consider -> sua status cua idea -> ConsiderByMentor
-                // Cập nhật trạng thái idea
-                idea.Status = ideaVersionRequest.Status switch
+                if (ideaVersionRequest.Status == IdeaVersionRequestStatus.Consider)
                 {
-                    IdeaVersionRequestStatus.Consider => IdeaStatus.ConsiderByMentor,
-                    IdeaVersionRequestStatus.Rejected => IdeaStatus.Rejected,
-                    _ => idea.Status
-                };
+                    idea.Status = IdeaStatus.ConsiderByMentor;
+                    await SetBaseEntityForUpdate(idea);
+                    _ideaRepository.Update(idea);
+                    saveChange = await _unitOfWork.SaveChanges();
+                    if (!saveChange)
+                    {
+                        return new ResponseBuilder()
+                            .WithStatus(Const.FAIL_CODE)
+                            .WithMessage(Const.FAIL_SAVE_MSG);
+                    }
+                }
 
-                await SetBaseEntityForUpdate(idea);
-                _ideaRepository.Update(idea);
-                saveChange = await _unitOfWork.SaveChanges();
-                if (!saveChange)
+                //neu la status la reject -> sua status cua idea -> reject
+                if (ideaVersionRequest.Status == IdeaVersionRequestStatus.Rejected)
                 {
-                    return new ResponseBuilder()
-                        .WithStatus(Const.FAIL_CODE)
-                        .WithMessage(Const.FAIL_SAVE_MSG);
+                    idea.Status = IdeaStatus.Rejected;
+                    await SetBaseEntityForUpdate(idea);
+                    _ideaRepository.Update(idea);
+                    saveChange = await _unitOfWork.SaveChanges();
+                    if (!saveChange)
+                    {
+                        return new ResponseBuilder()
+                            .WithStatus(Const.FAIL_CODE)
+                            .WithMessage(Const.FAIL_SAVE_MSG);
+                    }
                 }
 
                 //noti cho owner
-                var ideaInclude = await _ideaRepository.GetById(ideaVersion.IdeaId, true);
+                var ideaInclude = await _ideaRepository.GetById((Guid)ideaVersionRequest.IdeaVersion.IdeaId, true);
                 var noti = new NotificationCreateForIndividual
                 {
-                    UserId = idea.OwnerId,
-                    Description = "Đề tài " + ideaVersionRequest?.IdeaVersion?.Abbreviations + " đã được " +
-                                  ideaInclude?.Mentor?.Code + " (Mentor) duyệt. Hãy kiểm tra kết quả!",
+                    UserId = ideaVersionRequest.IdeaVersion.Idea.OwnerId,
+                    Description = "Đề tài " + ideaVersionRequest.IdeaVersion.Abbreviations + " đã được " +
+                                  ideaInclude.Mentor.Code + " (Mentor) duyệt. Hãy kiểm tra kết quả!",
                 };
                 await _notificationService.CreateForUser(noti);
             }
 
-            ////neu council response 
-            //else if (ideaVersionRequest.Role == "Council")
-            //{
-            //    //neu la status la consider -> sua status cua request
-            //    if (ideaVersionRequest.Status == IdeaVersionRequestStatus.Consider)
-            //    {
-            //        idea.Status = IdeaStatus.ConsiderByCouncil;
-            //        await SetBaseEntityForUpdate(idea);
-            //        _ideaRepository.Update(idea);
-            //        saveChange = await _unitOfWork.SaveChanges();
-            //        if (!saveChange)
-            //        {
-            //            return new ResponseBuilder()
-            //                    .WithStatus(Const.FAIL_CODE)
-            //                    .WithMessage(Const.FAIL_SAVE_MSG);
-            //        }
-            //    }
-            //    //noti cho mentor
-            //    var noti = new NotificationCreateForIndividual
-            //    {
-            //        UserId = ideaVersionRequest.IdeaVersion.Idea.MentorId,
-            //        Description = "Đề tài " + ideaVersionRequest.IdeaVersion.Abbreviations + " được yêu cầu chỉnh sửa",
-            //    };
-            //    await _notificationService.CreateForUser(noti);
-            //}
             return new ResponseBuilder()
                 .WithStatus(Const.SUCCESS_CODE)
                 .WithMessage(Const.SUCCESS_SAVE_MSG);
