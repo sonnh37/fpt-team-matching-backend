@@ -28,6 +28,8 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
                                                                // (e.Status == TeamMemberStatus.InProgress ||
                                                                //  e.Status == TeamMemberStatus.Pending ) &&
                                                                (e.Status == TeamMemberStatus.Fail1 ||
+                                                                e.Status == TeamMemberStatus.Pass1 ||
+                                                                e.Status == TeamMemberStatus.Pass2 ||
                                                                 e.Status == TeamMemberStatus.InProgress ||
                                                                 e.Status == TeamMemberStatus.Pending) && 
                                                                e.IsDeleted == false)
