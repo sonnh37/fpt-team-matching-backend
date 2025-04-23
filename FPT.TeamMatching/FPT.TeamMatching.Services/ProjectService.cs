@@ -29,14 +29,16 @@ public class ProjectService : BaseService<Project>, IProjectService
     private readonly ITeamMemberService _serviceTeam;
     private readonly ITeamMemberRepository _teamMemberRepository;
     private readonly ISemesterRepository _semesterRepository;
+    private readonly ISemesterService _semesterService;
 
-    public ProjectService(IMapper mapper, IUnitOfWork unitOfWork, ITeamMemberService teamMemberService) : base(mapper,
+    public ProjectService(IMapper mapper, IUnitOfWork unitOfWork, ITeamMemberService teamMemberService, ISemesterService semesterService) : base(mapper,
         unitOfWork)
     {
         _projectRepository = unitOfWork.ProjectRepository;
         _serviceTeam = teamMemberService;
         _teamMemberRepository = unitOfWork.TeamMemberRepository;
         _semesterRepository = unitOfWork.SemesterRepository;
+        _semesterService = semesterService;
     }
 
     public async Task<BusinessResult> GetProjectsForMentor(ProjectGetListForMentorQuery query)
@@ -122,7 +124,7 @@ public class ProjectService : BaseService<Project>, IProjectService
                 ProjectId = result.Id,
                 Role = Domain.Enums.TeamMemberRole.Leader,
                 JoinDate = DateTime.UtcNow,
-                Status = TeamMemberStatus.InProgress
+                Status = TeamMemberStatus.Pending
             };
 
 
@@ -131,6 +133,47 @@ public class ProjectService : BaseService<Project>, IProjectService
 
             if (teamresult.Status != 1) return teamresult;
 
+
+            var msg = new ResponseBuilder()
+                .WithData(result)
+                .WithStatus(Const.SUCCESS_CODE)
+                .WithMessage(Const.SUCCESS_SAVE_MSG);
+
+            return msg;
+        }
+        catch (Exception ex)
+        {
+            var errorMessage = $"An error occurred while create {typeof(ProjectResult).Name}: {ex.Message}";
+            return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage(errorMessage);
+        }
+    }
+    
+    public async Task<BusinessResult> CreateProjectAndTeammemberForAuto(ProjectCreateCommand project)
+    {
+        try
+        {
+            // Create project
+            var entity = await CreateOrUpdateEntity(project);
+            var result = _mapper.Map<ProjectResult>(entity);
+            if (result == null)
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage(Const.FAIL_SAVE_MSG);
+
+            // Create team
+            var team = new TeamMemberCreateCommand
+            {
+                UserId = result.LeaderId,
+                ProjectId = result.Id,
+                Role = TeamMemberRole.Leader,
+                JoinDate = DateTime.UtcNow,
+                Status = TeamMemberStatus.InProgress
+            };
+
+            var teamresult = await _serviceTeam.CreateOrUpdate<TeamMemberResult>(team);
+            if (teamresult.Status != 1) return teamresult;
 
             var msg = new ResponseBuilder()
                 .WithData(result)
@@ -365,6 +408,23 @@ public class ProjectService : BaseService<Project>, IProjectService
             return new ResponseBuilder()
                 .WithStatus(Const.FAIL_CODE)
                 .WithMessage(errorMessage);
+        }
+    }
+    public async Task<BusinessResult> GetProjectBySemesterAndStage(Guid semesterId, int stage)
+    {
+        try
+        {
+            var result = await _projectRepository.GetProjectBySemesterIdAndDefenseStage(semesterId, stage);
+            return new ResponseBuilder()
+                .WithStatus(Const.SUCCESS_CODE)
+                .WithData(result)
+                .WithMessage(Const.SUCCESS_READ_MSG);
+        }
+        catch (Exception e)
+        {
+            return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage(e.Message);
         }
     }
 }

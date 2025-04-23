@@ -1,6 +1,7 @@
 ﻿using FPT.TeamMatching.Domain.Entities;
 using FPT.TeamMatching.Domain.Entities.Base;
 using FPT.TeamMatching.Domain.Enums;
+using FPT.TeamMatching.Domain.Models.Requests.Queries.AnswerCriterias;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Base;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.BlogCvs;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Blogs;
@@ -32,10 +33,13 @@ public static class FilterHelper
                 StageIdea((queryable as IQueryable<StageIdea>)!, stageIdeaQuery) as IQueryable<TEntity>,
             ProjectGetAllQuery ProjectQuery =>
                 Project((queryable as IQueryable<Project>)!, ProjectQuery) as IQueryable<TEntity>,
+            AnswerCriteriaGetAllQuery AnswerCriteriaQuery =>
+                AnswerCriteria((queryable as IQueryable<AnswerCriteria>)!, AnswerCriteriaQuery) as IQueryable<TEntity>,
             CommentGetAllQuery commentQuery =>
                 Comment((queryable as IQueryable<Comment>)!, commentQuery) as IQueryable<TEntity>,
             IdeaVersionRequestGetAllQuery ideaVersionRequestQuery =>
-                IdeaVersionRequest((queryable as IQueryable<IdeaVersionRequest>)!, ideaVersionRequestQuery) as IQueryable<TEntity>,
+                IdeaVersionRequest((queryable as IQueryable<IdeaVersionRequest>)!, ideaVersionRequestQuery) as
+                    IQueryable<TEntity>,
             IdeaGetAllQuery ideaQuery =>
                 Idea((queryable as IQueryable<Idea>)!, ideaQuery) as IQueryable<TEntity>,
             InvitationGetAllQuery invitationQuery =>
@@ -45,15 +49,29 @@ public static class FilterHelper
             BlogCvGetAllQuery blogCvQuery =>
                 BlogCv((queryable as IQueryable<BlogCv>)!, blogCvQuery) as IQueryable<TEntity>,
             CriteriaXCriteriaFormGetAllQuery criteriaXCriteriaFormQuery =>
-                CriteriaXCriteriaForm((queryable as IQueryable<CriteriaXCriteriaForm>)!, criteriaXCriteriaFormQuery) as IQueryable<TEntity>,
-            CriteriaFormGetAllQuery criteriaFormQuery => 
-            CriteriaForm((queryable as IQueryable<CriteriaForm>)!, criteriaFormQuery) as IQueryable<TEntity>,
-            CriteriaGetAllQuery criteriaQuery => 
-            Criteria((queryable as IQueryable<Criteria>)!, criteriaQuery) as IQueryable<TEntity>,
+                CriteriaXCriteriaForm((queryable as IQueryable<CriteriaXCriteriaForm>)!, criteriaXCriteriaFormQuery) as
+                    IQueryable<TEntity>,
+            CriteriaFormGetAllQuery criteriaFormQuery =>
+                CriteriaForm((queryable as IQueryable<CriteriaForm>)!, criteriaFormQuery) as IQueryable<TEntity>,
+            CriteriaGetAllQuery criteriaQuery =>
+                Criteria((queryable as IQueryable<Criteria>)!, criteriaQuery) as IQueryable<TEntity>,
             LikeGetAllQuery likeQuery =>
                 Like((queryable as IQueryable<Like>)!, likeQuery) as IQueryable<TEntity>,
             _ => BaseFilterHelper.Base(queryable, query),
         };
+    }
+
+    private static IQueryable<BaseEntity> AnswerCriteria(IQueryable<AnswerCriteria> queryable,
+        AnswerCriteriaGetAllQuery query)
+    {
+        if (query.IdeaVersionRequestId != null)
+        {
+            queryable = queryable.Where(m => m.IdeaVersionRequestId == query.IdeaVersionRequestId);
+        }
+
+        queryable = BaseFilterHelper.Base(queryable, query);
+
+        return queryable;
     }
 
     private static IQueryable<BaseEntity> Project(IQueryable<Project> queryable, ProjectGetAllQuery query)
@@ -112,13 +130,15 @@ public static class FilterHelper
         return queryable;
     }
 
-    private static IQueryable<CriteriaXCriteriaForm>? CriteriaXCriteriaForm(IQueryable<CriteriaXCriteriaForm> queryable, CriteriaXCriteriaFormGetAllQuery query)
+    private static IQueryable<CriteriaXCriteriaForm>? CriteriaXCriteriaForm(IQueryable<CriteriaXCriteriaForm> queryable,
+        CriteriaXCriteriaFormGetAllQuery query)
     {
         if (query.CriteriaId != null)
         {
             queryable = queryable.Where(m =>
                 m.CriteriaId != null && m.CriteriaId == query.CriteriaId);
         }
+
         if (query.CriteriaFormId != null)
         {
             queryable = queryable.Where(m =>
@@ -129,23 +149,28 @@ public static class FilterHelper
 
         return queryable;
     }
+
     private static IQueryable<Criteria>? Criteria(IQueryable<Criteria> queryable, CriteriaGetAllQuery query)
     {
         if (!string.IsNullOrEmpty(query.Question))
-             {
-                  queryable = queryable.Where(m =>
-                    m.Question != null && m.Question.ToLower().Trim().Contains(query.Question.ToLower().Trim()));
-            }
-            if (query.ValueType != null)
+        {
+            queryable = queryable.Where(m =>
+                m.Question != null && m.Question.ToLower().Trim().Contains(query.Question.ToLower().Trim()));
+        }
+
+        if (query.ValueType != null)
         {
             queryable = queryable.Where(m =>
                 m.ValueType != null && m.ValueType == query.ValueType);
         }
+
         queryable = BaseFilterHelper.Base(queryable, query);
 
         return queryable;
     }
-    private static IQueryable<CriteriaForm>? CriteriaForm(IQueryable<CriteriaForm> queryable, CriteriaFormGetAllQuery query)
+
+    private static IQueryable<CriteriaForm>? CriteriaForm(IQueryable<CriteriaForm> queryable,
+        CriteriaFormGetAllQuery query)
     {
         if (!string.IsNullOrEmpty(query.Title))
         {
@@ -158,6 +183,7 @@ public static class FilterHelper
 
         return queryable;
     }
+
     private static IQueryable<Invitation>? Invitation(IQueryable<Invitation> queryable, InvitationGetAllQuery query)
     {
         if (query.Type != null)
@@ -205,6 +231,7 @@ public static class FilterHelper
             queryable = queryable.Where(m =>
                 m.UserId == query.UserId);
         }
+
         if (!string.IsNullOrWhiteSpace(query.Title))
         {
             queryable = queryable.Where(m =>
@@ -238,14 +265,15 @@ public static class FilterHelper
 
     private static IQueryable<BlogCv>? BlogCv(IQueryable<BlogCv> queryable, BlogCvGetAllQuery query)
     {
-
         if (query.BlogId != null)
         {
             queryable = queryable.Where(m =>
                 m.BlogId == query.BlogId);
         }
+
         return queryable;
     }
+
     private static IQueryable<Idea>? Idea(IQueryable<Idea> queryable, IdeaGetAllQuery query)
     {
         //sua db
@@ -313,7 +341,7 @@ public static class FilterHelper
             string searchEmail = query.Email.Trim().ToLower();
             queryable = queryable.Where(m => m.Email != null && m.Email.ToLower().Contains(searchEmail));
         }
-        
+
         if (query.Department.HasValue)
         {
             queryable = queryable.Where(m =>
@@ -325,7 +353,8 @@ public static class FilterHelper
         return queryable;
     }
 
-    private static IQueryable<IdeaVersionRequest>? IdeaVersionRequest(IQueryable<IdeaVersionRequest> queryable, IdeaVersionRequestGetAllQuery query)
+    private static IQueryable<IdeaVersionRequest>? IdeaVersionRequest(IQueryable<IdeaVersionRequest> queryable,
+        IdeaVersionRequestGetAllQuery query)
     {
         if (query.Status.HasValue)
         {
