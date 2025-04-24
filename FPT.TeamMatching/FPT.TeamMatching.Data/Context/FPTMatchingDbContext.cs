@@ -51,11 +51,11 @@ public partial class FPTMatchingDbContext : BaseDbContext
 
     public virtual DbSet<IdeaVersionRequest> IdeaVersionRequests { get; set; } //
 
-    public virtual DbSet<Conversation> Conversations { get; set; } //
-
-    public virtual DbSet<ConversationMember> ConversationMembers { get; set; } //
-
-    public virtual DbSet<Message> Messages { get; set; } //
+    // public virtual DbSet<Conversation> Conversations { get; set; } //
+    //
+    // public virtual DbSet<ConversationMember> ConversationMembers { get; set; } //
+    //
+    // public virtual DbSet<Message> Messages { get; set; } //
 
     public virtual DbSet<UserXRole> UserXRoles { get; set; } //
 

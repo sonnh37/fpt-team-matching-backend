@@ -2,9 +2,12 @@ using System.Text.Json;
 using AutoMapper;
 using Confluent.Kafka;
 using FPT.TeamMatching.Domain.Configs;
+using FPT.TeamMatching.Domain.Contracts.Services;
 using FPT.TeamMatching.Domain.Contracts.UnitOfWorks;
 using FPT.TeamMatching.Domain.Entities;
 using FPT.TeamMatching.Domain.Models;
+using FPT.TeamMatching.Domain.Models.Responses;
+using FPT.TeamMatching.Domain.Models.Results;
 using FPT.TeamMatching.Domain.Utilities.Redis;
 using Microsoft.AspNetCore.SignalR;
 using Quartz.Util;
@@ -19,15 +22,16 @@ public class ChatHub : Hub
     private readonly IDatabase _redis;
     private readonly IMongoUnitOfWork _unitOfWork;
     private readonly RedisUtil _redisUtil;
-
+    private readonly IUserService _userService;
     public ChatHub(IMongoUnitOfWork unitOfWork, IMapper mapper, RedisConfig redisConfig,
-        IKafkaProducerConfig kafkaProducerConfig, RedisUtil redisUtil)
+        IKafkaProducerConfig kafkaProducerConfig, RedisUtil redisUtil, IUserService userService)
     {
         _unitOfWork = unitOfWork;
         _mapper = mapper;
         _redis = redisConfig.GetConnection();
         _kafkaProducer = kafkaProducerConfig;
         _redisUtil = redisUtil;
+        _userService = userService;
     }
     
     public async Task SendMessage(string message)
@@ -87,29 +91,53 @@ public class ChatHub : Hub
             // để tạo ra conversation và conversation member
             if (conn.ConversationId == null)
             {
-                // Tạo conversation mới
-                var conversationEntity = new Conversation
+                var foundConversation = await _unitOfWork.ConversationMemberRepository.GetAllByUserIdAsync(conn.UserId.Value);
+                var foundPartnerConversation = await _unitOfWork.ConversationMemberRepository.GetAllByUserIdAsync(conn.PartnerId.Value);
+                var commonConversation = foundConversation
+                    .Where(u => foundPartnerConversation.Any(p => p.ConversationId == u.ConversationId))
+                    .FirstOrDefault();
+                if (commonConversation != null) 
                 {
-                    ConversationName = ""
-                };
-                _unitOfWork.ConversationRepository.Add(conversationEntity);
+                    conn.ConversationId = Guid.Parse(commonConversation.ConversationId);
+                }
+                else
+                {
+                    // Tạo conversation mới
+                    var conversationEntity = new Conversation
+                    {
+                        ConversationName = ""
+                    };
+                    await _unitOfWork.ConversationRepository.Add(conversationEntity);
 
-                // Tạo conversation member
-                var conversationUser = new ConversationMember
-                {
-                    ConversationId = conversationEntity.Id,
-                    UserId = conn.UserId.ToString()
-                };
-                _unitOfWork.ConversationMemberRepository.Add(conversationUser);
+                    // Tạo conversation member
+                    var userResponse = await _userService.GetById<UserResult>(conn.UserId.Value) ;
+                    var userInfo = userResponse.Data as UserResult;
+                    var userRoles = userInfo.UserXRoles.Select(x => x.Role.RoleName).ToList();
+                    var conversationUser = new ConversationMember
+                    {
+                        ConversationId = conversationEntity.Id,
+                        UserId = conn.UserId.ToString(),
+                        Code = userInfo.Code,
+                        AvatarUrl = userInfo.Avatar ?? null,
+                        Role = userRoles
+                    };
+                    await _unitOfWork.ConversationMemberRepository.Add(conversationUser);
 
-                var conversationPartner = new ConversationMember
-                {
-                    ConversationId = conversationEntity.Id,
-                    UserId = conn.PartnerId.ToString()
-                };
-                _unitOfWork.ConversationMemberRepository.Add(conversationPartner);
-                // Gắn conversation ID vào cho request lại
-                conn.ConversationId = Guid.Parse(conversationEntity.Id);
+                    var partnerResponse = await _userService.GetById<UserResult>(conn.UserId.Value) ;
+                    var partner = partnerResponse.Data as UserResult;
+                    var partnerRoles = partner.UserXRoles.Select(x => x.Role.RoleName).ToList();
+                    var conversationPartner = new ConversationMember
+                    {
+                        ConversationId = conversationEntity.Id,
+                        UserId = conn.PartnerId.ToString(),
+                        Code = partner.Code,
+                        AvatarUrl = partner.Avatar ?? null,
+                        Role = partnerRoles,
+                    };
+                   await  _unitOfWork.ConversationMemberRepository.Add(conversationPartner);
+                    // Gắn conversation ID vào cho request lại
+                    conn.ConversationId = Guid.Parse(conversationEntity.Id);
+                }
             }
 
             //1.2 Thêm vào SignalR group

@@ -1,17 +1,17 @@
-﻿networks:
-  default:
-    external: true
-    name: my-network
-services:
+﻿services:
   fpt.teammatching.api:
+#    image: loctodaleservice/fpt-team-matching:latest
+#    ports:
+#      - "8081:8080"
     image: fpt.teammatching.api
     ports:
       - "8081:8080"
     build:
       context: .
-      dockerfile: FPT.TeamMatching.API/Dockerfile
+      dockerfile: Dockerfile
     env_file:
-      - FPT.TeamMatching.API/.env
+      - ./FPT.TeamMatching.API/.env
+    restart: always
   redis:
     image: redis:7.0
     container_name: fpt.matching.redis

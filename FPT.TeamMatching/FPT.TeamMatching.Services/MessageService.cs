@@ -47,6 +47,7 @@ public class MessageService : IMessageService
             {
                 GroupId = "chat-consumer",
                 BootstrapServers = "fpt.matching.kafka:9092",
+                // BootstrapServers = "localhost:29092",
                 AutoOffsetReset = AutoOffsetReset.Earliest,
                 EnableAutoCommit = false,
                 IsolationLevel = IsolationLevel.ReadUncommitted

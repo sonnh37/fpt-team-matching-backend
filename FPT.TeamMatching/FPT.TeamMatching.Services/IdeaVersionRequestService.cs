@@ -480,9 +480,9 @@ public class IdeaVersionRequestService : BaseService<IdeaVersionRequest>, IIdeaV
                 var ideaInclude = await _ideaRepository.GetById((Guid)ideaVersionRequest.IdeaVersion.IdeaId, true);
                 var noti = new NotificationCreateForIndividual
                 {
-                    UserId = ideaVersionRequest.IdeaVersion.Idea.OwnerId,
+                    UserId = ideaInclude?.OwnerId,
                     Description = "Đề tài " + ideaVersionRequest.IdeaVersion.Abbreviations + " đã được " +
-                                  ideaInclude.Mentor.Code + " (Mentor) duyệt. Hãy kiểm tra kết quả!",
+                                  ideaInclude?.Mentor?.Code + " (Mentor) duyệt. Hãy kiểm tra kết quả!",
                 };
                 await _notificationService.CreateForUser(noti);
             }

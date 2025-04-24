@@ -53,7 +53,11 @@ public class ConversationMemberService : IConversationMemberService
                         {
                             Id = part.UserId,
                             FirstName = user.FirstName, 
-                            LastName = user.LastName    
+                            LastName = user.LastName,
+                            AvatarUrl = part.AvatarUrl,
+                            Code = part.Code,
+                            Role = part.Role,
+                            
                         },
                         LastMessageResult = lastedMessage,
                     });
