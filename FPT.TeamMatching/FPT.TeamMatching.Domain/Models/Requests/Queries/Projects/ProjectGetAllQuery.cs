@@ -19,5 +19,11 @@ public class ProjectGetAllQuery : GetQueryableQuery
     public int? TeamSize { get; set; }
 
     public int? DefenseStage { get; set; }
+    
+    public bool IsHasTeam { get; set; }
+    
+    public Guid? SpecialtyId { get; set; }
+    public Guid? ProfessionId { get; set; }
+    public string? EnglishName { get; set; }
 
 }
