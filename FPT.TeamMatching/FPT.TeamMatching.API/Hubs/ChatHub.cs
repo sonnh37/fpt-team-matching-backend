@@ -2,9 +2,12 @@ using System.Text.Json;
 using AutoMapper;
 using Confluent.Kafka;
 using FPT.TeamMatching.Domain.Configs;
+using FPT.TeamMatching.Domain.Contracts.Services;
 using FPT.TeamMatching.Domain.Contracts.UnitOfWorks;
 using FPT.TeamMatching.Domain.Entities;
 using FPT.TeamMatching.Domain.Models;
+using FPT.TeamMatching.Domain.Models.Responses;
+using FPT.TeamMatching.Domain.Models.Results;
 using FPT.TeamMatching.Domain.Utilities.Redis;
 using Microsoft.AspNetCore.SignalR;
 using Quartz.Util;
@@ -19,7 +22,7 @@ public class ChatHub : Hub
     private readonly IDatabase _redis;
     private readonly IMongoUnitOfWork _unitOfWork;
     private readonly RedisUtil _redisUtil;
-
+    private readonly IUserService _userService;
     public ChatHub(IMongoUnitOfWork unitOfWork, IMapper mapper, RedisConfig redisConfig,
         IKafkaProducerConfig kafkaProducerConfig, RedisUtil redisUtil)
     {
@@ -106,17 +109,27 @@ public class ChatHub : Hub
                     _unitOfWork.ConversationRepository.Add(conversationEntity);
 
                     // Tạo conversation member
+                    var userResponse = await _userService.GetById<UserResult>(conn.UserId.Value) ;
+                    var userInfo = userResponse.Data as UserResult;
                     var conversationUser = new ConversationMember
                     {
                         ConversationId = conversationEntity.Id,
-                        UserId = conn.UserId.ToString()
+                        UserId = conn.UserId.ToString(),
+                        Code = userInfo.Code,
+                        AvatarUrl = userInfo.Avatar ?? null,
+                        Role = userInfo.UserXRoles,
                     };
                     _unitOfWork.ConversationMemberRepository.Add(conversationUser);
 
+                    var partnerResponse = await _userService.GetById<UserResult>(conn.UserId.Value) ;
+                    var partner = partnerResponse.Data as UserResult;
                     var conversationPartner = new ConversationMember
                     {
                         ConversationId = conversationEntity.Id,
-                        UserId = conn.PartnerId.ToString()
+                        UserId = conn.PartnerId.ToString(),
+                        Code = partner.Code,
+                        AvatarUrl = partner.Avatar ?? null,
+                        Role = partner.UserXRoles,
                     };
                     _unitOfWork.ConversationMemberRepository.Add(conversationPartner);
                     // Gắn conversation ID vào cho request lại

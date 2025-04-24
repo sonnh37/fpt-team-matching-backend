@@ -1,8 +1,14 @@
 ﻿services:
   fpt.teammatching.api:
-    image: loctodaleservice/fpt-team-matching:latest
+#    image: loctodaleservice/fpt-team-matching:latest
+#    ports:
+#      - "8081:8080"
+    image: fpt.teammatching.api
     ports:
       - "8081:8080"
+    build:
+      context: .
+      dockerfile: Dockerfile
     env_file:
       - ./FPT.TeamMatching.API/.env
     restart: always
