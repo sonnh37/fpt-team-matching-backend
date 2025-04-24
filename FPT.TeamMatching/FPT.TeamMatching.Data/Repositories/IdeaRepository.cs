@@ -94,7 +94,10 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
 
     public async Task<List<Idea>> GetIdeaWithResultDateIsToday()
     {
-        var today = DateTime.UtcNow;
+        var todayLocalMidnight = DateTime.Now.Date; // VD: 24/4/2024 00:00:00 GMT+7
+    
+        // Chuyển sang UTC (VD: 23/4/2024 17:00:00 GMT+0 nếu bạn ở GMT+7)
+        var todayUtcMidnight = todayLocalMidnight.ToUniversalTime();
         var ideas = await GetQueryable()
             .Include(e => e.Owner).ThenInclude(e => e.UserXRoles).ThenInclude(e => e.Role)
             //sua db
@@ -105,9 +108,9 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
                 e.Status == IdeaStatus.Pending &&
                 e.IdeaVersions.Any(iv =>
                     iv.StageIdea != null &&
-                    iv.StageIdea.ResultDate.Year == today.Year &&
-                    iv.StageIdea.ResultDate.Month == today.Month &&
-                    iv.StageIdea.ResultDate.Day == today.Day
+                    iv.StageIdea.ResultDate.Year == todayUtcMidnight.Year &&
+                    iv.StageIdea.ResultDate.Month == todayUtcMidnight.Month &&
+                    iv.StageIdea.ResultDate.Day == todayUtcMidnight.Day
                 )
             ).ToListAsync();
 
