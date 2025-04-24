@@ -115,7 +115,7 @@ public class ApiHubService : IApiHubService
         _client.DefaultRequestHeaders.Add("X-API-Key", _apiKey);
         _client.DefaultRequestHeaders.Add("X-Account-Name", _username);
 
-        var response = await _client.PostAsync("recommend_jobs", content);
+        var response = await _client.PostAsync("recommend_users", content);
 
         if (!response.IsSuccessStatusCode)
         {

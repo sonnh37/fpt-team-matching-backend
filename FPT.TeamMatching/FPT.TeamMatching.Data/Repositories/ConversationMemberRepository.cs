@@ -11,12 +11,10 @@ namespace FPT.TeamMatching.Data.Repositories;
 public class ConversationMemberRepository : IConversationMemberRepository
 {
     private readonly IMongoCollection<ConversationMember> _collection;
-    private readonly FPTMatchingDbContext _dbContext;
 
-    public ConversationMemberRepository(ChatRoomDbContext collection, FPTMatchingDbContext dbContext)
+    public ConversationMemberRepository(ChatRoomDbContext collection)
     {
         _collection = collection.GetDatabase().GetCollection<ConversationMember>("conversationMembers");
-        _dbContext = dbContext;
     }
 
     public async Task Add(ConversationMember conversationMember)

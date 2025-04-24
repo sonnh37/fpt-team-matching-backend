@@ -13,7 +13,7 @@ public class ConversationMember
     
     [BsonElement] public string? Code { get; set; }
     
-    [BsonElement] public ICollection<UserXRoleResult>? Role { get; set; }
+    public List<string>? Role { get; set; }
 
     [BsonElement("conversationId")] public string? ConversationId { get; set; }
 
