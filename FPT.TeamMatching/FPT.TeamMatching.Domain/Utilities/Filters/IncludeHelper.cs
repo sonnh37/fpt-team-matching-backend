@@ -173,13 +173,18 @@ public static class IncludeHelper
     {
         queryable = queryable.Include(e => e.TeamMembers).ThenInclude(e => e.User)
             //sua db
-            //.Include(e => e.Topic).ThenInclude(e => e.Idea)
+            //.Include(e => e.Invitations)
             //.ThenInclude(e => e.Specialty).ThenInclude(e => e.Profession)
             //.Include(m => m.Topic).ThenInclude(e => e.Idea).ThenInclude(m => m.Owner)
             .Include(x => x.Reviews)
             .Include(x => x.Topic)
-            .ThenInclude(x => x.IdeaVersion)
-            .ThenInclude(x => x.Idea)
+                .ThenInclude(x => x.IdeaVersion)
+                .ThenInclude(x => x.Idea)
+                .ThenInclude(x => x.Owner)
+            .Include(x => x.Topic)
+                .ThenInclude(x => x.IdeaVersion)
+                .ThenInclude(x => x.Idea)
+                .ThenInclude(x => x.Specialty)
             .Include(x => x.MentorFeedback);
 
         return queryable;
@@ -197,8 +202,8 @@ public static class IncludeHelper
             .Include(x => x.Project)
             .ThenInclude(y => y.Topic)
             .ThenInclude(e => e.TopicVersions);
-            
-            
+
+
         return queryable;
     }
 

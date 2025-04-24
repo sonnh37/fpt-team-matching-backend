@@ -789,14 +789,14 @@ public class IdeaService : BaseService<Idea>, IIdeaService
             var truncatedName = ideaVersion.EnglishName?.Length > MAX_TEAMNAME_LENGTH
                 ? ideaVersion.EnglishName.Substring(0, MAX_TEAMNAME_LENGTH)
                 : ideaVersion.EnglishName;
-
+            
             var command = new ProjectCreateCommand
             {
                 LeaderId = idea.OwnerId,
                 TopicId = topicResult.Id,
                 TeamCode = newTeamCode,
                 TeamName = $"{truncatedName}-{Random.Shared.Next(RANDOM_SUFFIX_MIN, RANDOM_SUFFIX_MAX)}",
-                TeamSize = ideaVersion.TeamSize,
+                TeamSize = 1,
                 Status = ProjectStatus.Pending
             };
 
