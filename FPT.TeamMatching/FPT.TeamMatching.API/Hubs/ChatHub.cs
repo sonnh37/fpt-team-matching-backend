@@ -24,13 +24,14 @@ public class ChatHub : Hub
     private readonly RedisUtil _redisUtil;
     private readonly IUserService _userService;
     public ChatHub(IMongoUnitOfWork unitOfWork, IMapper mapper, RedisConfig redisConfig,
-        IKafkaProducerConfig kafkaProducerConfig, RedisUtil redisUtil)
+        IKafkaProducerConfig kafkaProducerConfig, RedisUtil redisUtil, IUserService userService)
     {
         _unitOfWork = unitOfWork;
         _mapper = mapper;
         _redis = redisConfig.GetConnection();
         _kafkaProducer = kafkaProducerConfig;
         _redisUtil = redisUtil;
+        _userService = userService;
     }
     
     public async Task SendMessage(string message)
@@ -106,32 +107,34 @@ public class ChatHub : Hub
                     {
                         ConversationName = ""
                     };
-                    _unitOfWork.ConversationRepository.Add(conversationEntity);
+                    await _unitOfWork.ConversationRepository.Add(conversationEntity);
 
                     // Tạo conversation member
                     var userResponse = await _userService.GetById<UserResult>(conn.UserId.Value) ;
                     var userInfo = userResponse.Data as UserResult;
+                    var userRoles = userInfo.UserXRoles.Select(x => x.Role.RoleName).ToList();
                     var conversationUser = new ConversationMember
                     {
                         ConversationId = conversationEntity.Id,
                         UserId = conn.UserId.ToString(),
                         Code = userInfo.Code,
                         AvatarUrl = userInfo.Avatar ?? null,
-                        Role = userInfo.UserXRoles,
+                        Role = userRoles
                     };
-                    _unitOfWork.ConversationMemberRepository.Add(conversationUser);
+                    await _unitOfWork.ConversationMemberRepository.Add(conversationUser);
 
                     var partnerResponse = await _userService.GetById<UserResult>(conn.UserId.Value) ;
                     var partner = partnerResponse.Data as UserResult;
+                    var partnerRoles = partner.UserXRoles.Select(x => x.Role.RoleName).ToList();
                     var conversationPartner = new ConversationMember
                     {
                         ConversationId = conversationEntity.Id,
                         UserId = conn.PartnerId.ToString(),
                         Code = partner.Code,
                         AvatarUrl = partner.Avatar ?? null,
-                        Role = partner.UserXRoles,
+                        Role = partnerRoles,
                     };
-                    _unitOfWork.ConversationMemberRepository.Add(conversationPartner);
+                   await  _unitOfWork.ConversationMemberRepository.Add(conversationPartner);
                     // Gắn conversation ID vào cho request lại
                     conn.ConversationId = Guid.Parse(conversationEntity.Id);
                 }

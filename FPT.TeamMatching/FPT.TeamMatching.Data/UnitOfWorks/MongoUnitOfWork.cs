@@ -25,5 +25,4 @@ public class MongoUnitOfWork : IMongoUnitOfWork
     public IConversationMemberRepository ConversationMemberRepository { get; }
 
     public IMessageRepository MessageRepository { get; }
-
 }
