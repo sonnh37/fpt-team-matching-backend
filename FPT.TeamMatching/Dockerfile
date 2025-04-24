@@ -7,8 +7,14 @@ EXPOSE 8081
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
+COPY ["FPT.TeamMatching.sln", "."]
 COPY ["FPT.TeamMatching.API/FPT.TeamMatching.API.csproj", "FPT.TeamMatching.API/"]
-RUN dotnet restore "FPT.TeamMatching.API/FPT.TeamMatching.API.csproj"
+COPY ["FPT.TeamMatching.Data/FPT.TeamMatching.Data.csproj", "FPT.TeamMatching.Data/"]
+COPY ["FPT.TeamMatching.Domain/FPT.TeamMatching.Domain.csproj", "FPT.TeamMatching.Domain/"]
+COPY ["FPT.TeamMatching.Services/FPT.TeamMatching.Services.csproj", "FPT.TeamMatching.Services/"]
+RUN dotnet restore "FPT.TeamMatching.sln"
+
+#RUN #dotnet restore "FPT.TeamMatching.API/FPT.TeamMatching.API.csproj"
 COPY . .
 WORKDIR "/src/FPT.TeamMatching.API"
 RUN dotnet build "FPT.TeamMatching.API.csproj" -c $BUILD_CONFIGURATION -o /app/build
