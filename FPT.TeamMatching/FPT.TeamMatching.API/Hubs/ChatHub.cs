@@ -87,29 +87,41 @@ public class ChatHub : Hub
             // để tạo ra conversation và conversation member
             if (conn.ConversationId == null)
             {
-                // Tạo conversation mới
-                var conversationEntity = new Conversation
+                var foundConversation = await _unitOfWork.ConversationMemberRepository.GetAllByUserIdAsync(conn.UserId.Value);
+                var foundPartnerConversation = await _unitOfWork.ConversationMemberRepository.GetAllByUserIdAsync(conn.PartnerId.Value);
+                var commonConversation = foundConversation
+                    .Where(u => foundPartnerConversation.Any(p => p.ConversationId == u.ConversationId))
+                    .FirstOrDefault();
+                if (commonConversation != null) 
                 {
-                    ConversationName = ""
-                };
-                _unitOfWork.ConversationRepository.Add(conversationEntity);
+                    conn.ConversationId = Guid.Parse(commonConversation.ConversationId);
+                }
+                else
+                {
+                    // Tạo conversation mới
+                    var conversationEntity = new Conversation
+                    {
+                        ConversationName = ""
+                    };
+                    _unitOfWork.ConversationRepository.Add(conversationEntity);
 
-                // Tạo conversation member
-                var conversationUser = new ConversationMember
-                {
-                    ConversationId = conversationEntity.Id,
-                    UserId = conn.UserId.ToString()
-                };
-                _unitOfWork.ConversationMemberRepository.Add(conversationUser);
+                    // Tạo conversation member
+                    var conversationUser = new ConversationMember
+                    {
+                        ConversationId = conversationEntity.Id,
+                        UserId = conn.UserId.ToString()
+                    };
+                    _unitOfWork.ConversationMemberRepository.Add(conversationUser);
 
-                var conversationPartner = new ConversationMember
-                {
-                    ConversationId = conversationEntity.Id,
-                    UserId = conn.PartnerId.ToString()
-                };
-                _unitOfWork.ConversationMemberRepository.Add(conversationPartner);
-                // Gắn conversation ID vào cho request lại
-                conn.ConversationId = Guid.Parse(conversationEntity.Id);
+                    var conversationPartner = new ConversationMember
+                    {
+                        ConversationId = conversationEntity.Id,
+                        UserId = conn.PartnerId.ToString()
+                    };
+                    _unitOfWork.ConversationMemberRepository.Add(conversationPartner);
+                    // Gắn conversation ID vào cho request lại
+                    conn.ConversationId = Guid.Parse(conversationEntity.Id);
+                }
             }
 
             //1.2 Thêm vào SignalR group
