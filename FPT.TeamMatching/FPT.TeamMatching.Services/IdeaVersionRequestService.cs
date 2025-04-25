@@ -181,7 +181,7 @@ public class IdeaVersionRequestService : BaseService<IdeaVersionRequest>, IIdeaV
             }
 
             var ideaVersion = await _ideaVersionRepository.GetById((Guid)command.IdeaVersionId);
-            //send noti cho 3 nguoi council
+            //send noti cho councils
             var request = new NotificationCreateForGroupUser
             {
                 Description = "Đề tài " + ideaVersion.Abbreviations + " đang chờ bạn duyệt với vai trò Council",
@@ -244,8 +244,6 @@ public class IdeaVersionRequestService : BaseService<IdeaVersionRequest>, IIdeaV
             if (ideaVersionRequest == null) return HandlerFail("Not found ideaVersionRequest");
 
             ideaVersionRequest.Status = command.Status;
-            //sua db
-            //ideaVersionRequest.Content = command.Content;
             ideaVersionRequest.ProcessDate = DateTime.UtcNow;
             _ideaVersionRequestRepository.Update(ideaVersionRequest);
             var check = await _unitOfWork.SaveChanges();
@@ -486,7 +484,7 @@ public class IdeaVersionRequestService : BaseService<IdeaVersionRequest>, IIdeaV
                 };
                 await _notificationService.CreateForUser(noti);
             }
-
+            
             return new ResponseBuilder()
                 .WithStatus(Const.SUCCESS_CODE)
                 .WithMessage(Const.SUCCESS_SAVE_MSG);
