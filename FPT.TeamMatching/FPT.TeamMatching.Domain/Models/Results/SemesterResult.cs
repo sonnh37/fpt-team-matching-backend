@@ -19,6 +19,10 @@ public class SemesterResult : BaseResult
 
     public DateTimeOffset? EndDate { get; set; }
 
+    public int? LimitTopicMentorOnly { get; set; }
+
+    public int? LimitTopicSubMentor { get; set; }
+
     public CriteriaFormResult? CriteriaForm { get; set; }
 
     public ICollection<ProfileStudentResult> ProfileStudents { get; set; } = new List<ProfileStudentResult>();
