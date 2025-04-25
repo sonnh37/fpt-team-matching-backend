@@ -83,6 +83,8 @@ public class TeamMemberService : BaseService<TeamMember>, ITeamMemberService
                         .WithStatus(Const.FAIL_CODE)
                         .WithMessage("Nhập danh sách thành viên cần cập nhật");
             }
+            var teamMember1 = await _teamMemberRepository.GetById(requests.updateList[0].Id);
+            var project = await _projectRepository.GetById((Guid)teamMember1.ProjectId);
             if (requests.defenseNumber == 1)
             {
                 //check status cua cac thanh vien
@@ -117,18 +119,18 @@ public class TeamMemberService : BaseService<TeamMember>, ITeamMemberService
                     .WithStatus(Const.FAIL_CODE)
                     .WithMessage(Const.FAIL_SAVE_MSG);
                 }
+
+                if (project == null)
+                {
+                    return new ResponseBuilder()
+                    .WithStatus(Const.NOT_FOUND_CODE)
+                    .WithMessage(Const.NOT_FOUND_MSG);
+                }
                 //check nếu team có fail1 thì đổi defenseStage sang 2
-                var hasFail1 = requests.updateList.Where(e => e.Status == Domain.Enums.TeamMemberStatus.Fail1).Any();
+                var hasFail1 = requests.updateList.Any(e => e.Status == Domain.Enums.TeamMemberStatus.Fail1);
                 if (hasFail1)
                 {
-                    var teamMember = await _teamMemberRepository.GetById(requests.updateList[0].Id);
-                    var project = await _projectRepository.GetById((Guid)teamMember.ProjectId);
-                    if (project == null)
-                    {
-                        return new ResponseBuilder()
-                        .WithStatus(Const.NOT_FOUND_CODE)
-                        .WithMessage(Const.NOT_FOUND_MSG);
-                    }
+                    
                     project.DefenseStage = 2;
                     await SetBaseEntityForUpdate(project);
                     _projectRepository.Update(project);
@@ -142,6 +144,24 @@ public class TeamMemberService : BaseService<TeamMember>, ITeamMemberService
                     return new ResponseBuilder()
                     .WithStatus(Const.SUCCESS_CODE)
                     .WithMessage(Const.SUCCESS_SAVE_MSG);
+                }
+
+                //check all pass
+                var allPassed1 = requests.updateList.All(e => e.Status == Domain.Enums.TeamMemberStatus.Pass1);
+                if (allPassed1)
+                {
+                    project.Status = Domain.Enums.ProjectStatus.Completed;
+                    await SetBaseEntityForUpdate(project);
+                    _projectRepository.Update(project);
+
+                    isSuccess = await _unitOfWork.SaveChanges();
+                    if (!isSuccess)
+                    {
+                        return new ResponseBuilder()
+                        .WithStatus(Const.FAIL_CODE)
+                        .WithMessage(Const.FAIL_SAVE_MSG);
+                    }
+
                 }
             }
             else if (requests.defenseNumber == 2)
@@ -177,6 +197,19 @@ public class TeamMemberService : BaseService<TeamMember>, ITeamMemberService
                     .WithStatus(Const.FAIL_CODE)
                     .WithMessage(Const.FAIL_SAVE_MSG);
                 }
+
+                project.Status = Domain.Enums.ProjectStatus.Completed;
+                await SetBaseEntityForUpdate(project);
+                _projectRepository.Update(project);
+
+                isSuccess = await _unitOfWork.SaveChanges();
+                if (!isSuccess)
+                {
+                    return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage(Const.FAIL_SAVE_MSG);
+                }
+
                 return new ResponseBuilder()
                     .WithStatus(Const.SUCCESS_CODE)
                     .WithMessage(Const.SUCCESS_SAVE_MSG);
@@ -185,7 +218,7 @@ public class TeamMemberService : BaseService<TeamMember>, ITeamMemberService
             {
                 return new ResponseBuilder()
                         .WithStatus(Const.FAIL_CODE)
-                        .WithMessage("Defense number is 1 or 2");
+                        .WithMessage("Lần bảo vệ đồ án phải là 1 hoặc 2");
             }
 
             return new ResponseBuilder()

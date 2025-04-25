@@ -244,8 +244,6 @@ public class IdeaVersionRequestService : BaseService<IdeaVersionRequest>, IIdeaV
             if (ideaVersionRequest == null) return HandlerFail("Not found ideaVersionRequest");
 
             ideaVersionRequest.Status = command.Status;
-            //sua db
-            //ideaVersionRequest.Content = command.Content;
             ideaVersionRequest.ProcessDate = DateTime.UtcNow;
             _ideaVersionRequestRepository.Update(ideaVersionRequest);
             var check = await _unitOfWork.SaveChanges();
