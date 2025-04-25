@@ -123,7 +123,7 @@ public class ChatHub : Hub
                     };
                     await _unitOfWork.ConversationMemberRepository.Add(conversationUser);
 
-                    var partnerResponse = await _userService.GetById<UserResult>(conn.UserId.Value) ;
+                    var partnerResponse = await _userService.GetById<UserResult>(conn.PartnerId.Value) ;
                     var partner = partnerResponse.Data as UserResult;
                     var partnerRoles = partner.UserXRoles.Select(x => x.Role.RoleName).ToList();
                     var conversationPartner = new ConversationMember
