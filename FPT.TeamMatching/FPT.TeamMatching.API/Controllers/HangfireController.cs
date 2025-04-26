@@ -53,7 +53,7 @@ public class HangfireController : ControllerBase
     public ActionResult PublicIdeaResult()
     {
         var name = _configuration.GetSection("HANGFIRE_SERVER_LOCAL");
-        _recurringJobManager.AddOrUpdate("public-idea-result", () => _ideaService.AutoUpdateIdeaStatus(), Cron.Minutely, new RecurringJobOptions { QueueName = name.Value });
+        _recurringJobManager.AddOrUpdate("public-idea-result", () => _ideaService.AutoUpdateIdeaStatus(), Cron.Daily, new RecurringJobOptions { QueueName = name.Value });
         return Ok();
     }
 

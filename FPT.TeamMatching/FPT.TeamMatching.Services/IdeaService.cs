@@ -9,6 +9,7 @@ using FPT.TeamMatching.Domain.Models.Requests.Commands.Notifications;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Projects;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Topics;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Ideas;
+using FPT.TeamMatching.Domain.Models.Requests.Queries.IdeaVersionRequest;
 using FPT.TeamMatching.Domain.Models.Responses;
 using FPT.TeamMatching.Domain.Models.Results;
 using FPT.TeamMatching.Domain.Models.Results.Bases;
@@ -756,7 +757,36 @@ public class IdeaService : BaseService<Idea>, IIdeaService
         }
         else
         {
-            await UpdateExistingProject(existedProject, topicResult);
+            await UpdateExistingProject(existedProject, stageIdea, topicResult);
+        }
+    }
+    
+    public async Task<BusinessResult> GetIdeasOfReviewerByRolesAndStatus<TResult>(
+        IdeaGetListByStatusAndRoleQuery query) where TResult : BaseResult
+    {
+        try
+        {
+            var userIdClaims = GetUserIdFromClaims();
+            var userId = userIdClaims.Value;
+            var (data, total) =
+                await _ideaRepository.GetIdeasOfReviewerByRolesAndStatus(query,
+                    userId);
+
+            var results = _mapper.Map<List<TResult>>(data);
+
+            var response = new QueryResult(query, results, total);
+
+            return new ResponseBuilder()
+                .WithData(response)
+                .WithStatus(Const.SUCCESS_CODE)
+                .WithMessage(Const.SUCCESS_READ_MSG);
+        }
+        catch (Exception ex)
+        {
+            var errorMessage = $"An error occurred in {typeof(TResult).Name}: {ex.Message}";
+            return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage(errorMessage);
         }
     }
 
@@ -809,11 +839,14 @@ public class IdeaService : BaseService<Idea>, IIdeaService
         }
     }
 
-    private async Task UpdateExistingProject(Project existingProject, TopicResult topicResult)
+    private async Task UpdateExistingProject(Project existingProject, StageIdea stageIdea, TopicResult topicResult)
     {
         try
         {
+            var newTeamCode = await _semesterService.GenerateNewTeamCode(stageIdea.SemesterId);
             existingProject.TopicId = topicResult.Id;
+            existingProject.TeamCode = newTeamCode; 
+            existingProject.Status = ProjectStatus.Pending;
             await SetBaseEntityForUpdate(existingProject);
             _projectRepository.Update(existingProject);
 
