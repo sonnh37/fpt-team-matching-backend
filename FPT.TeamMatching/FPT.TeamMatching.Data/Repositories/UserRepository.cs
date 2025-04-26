@@ -124,17 +124,21 @@ public class UserRepository : BaseRepository<User>, IUserRepository
         {
             throw new Exception("Stage idea not found");
         }
+
         if (ideaVersion.Idea == null)
         {
             throw new Exception("Idea not found");
         }
+
         var number = ideaVersion.StageIdea.NumberReviewer;
         if (number == null)
         {
             throw new Exception("Number reviewer not found");
         }
+
         // Lọc bỏ những council trùng với mentor hoặc sub-mentor
-        councils = councils.Where(c => c.Id != ideaVersion.Idea.MentorId && c.Id != ideaVersion.Idea.SubMentorId).Take((int)number).ToList();
+        councils = councils.Where(c => c.Id != ideaVersion.Idea.MentorId && c.Id != ideaVersion.Idea.SubMentorId)
+            .Take((int)number).ToList();
 
         return councils;
     }
@@ -144,6 +148,17 @@ public class UserRepository : BaseRepository<User>, IUserRepository
         var queryable = GetQueryable();
 
         var user = await queryable.Where(e => e.Email != null && e.Email.ToLower().Trim() == keyword.ToLower().Trim())
+            .SingleOrDefaultAsync();
+
+        return user;
+    }
+
+    public async Task<User?> GetByIdWithProjects(Guid? userId)
+    {
+        var queryable = GetQueryable(m => m.Id == userId);
+
+        var user = await queryable.Include(m => m.IdeaOfMentors)
+            .Include(m => m.IdeaOfSubMentors)
             .SingleOrDefaultAsync();
 
         return user;
@@ -212,18 +227,18 @@ public class UserRepository : BaseRepository<User>, IUserRepository
             .ToListAsync();
         return students;
     }
-    
+
     public async Task<List<EmailSuggestionModels>> GetAllEmailSuggestions(string email)
     {
-       var result = await GetQueryable()
-           .Where(e => e.IsDeleted == false && e.Email.Contains(email))
-           .Select(x => new EmailSuggestionModels
-           {
-               Email = x.Email,
-               UserId = x.Id,
-           })
-           .Take(5)
-           .ToListAsync();
-       return result;
+        var result = await GetQueryable()
+            .Where(e => e.IsDeleted == false && e.Email.Contains(email))
+            .Select(x => new EmailSuggestionModels
+            {
+                Email = x.Email,
+                UserId = x.Id,
+            })
+            .Take(5)
+            .ToListAsync();
+        return result;
     }
 }

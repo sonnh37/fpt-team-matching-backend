@@ -9,6 +9,8 @@ using System.Text.RegularExpressions;
 using FPT.TeamMatching.Domain.Models;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Reviews;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Ideas;
+using FPT.TeamMatching.Domain.Models.Requests.Queries.IdeaVersionRequest;
+using MongoDB.Driver.Linq;
 
 namespace FPT.TeamMatching.Data.Repositories;
 
@@ -116,7 +118,41 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
 
         return ideas;
     }
+    
+    public async Task<(List<Idea>, int)> GetIdeasOfReviewerByRolesAndStatus(
+        IdeaGetListByStatusAndRoleQuery query, Guid userId)
+    {
+        var queryable = GetQueryable()
+            .Include(i => i.Owner)
+            .Include(i => i.Mentor)
+            .Include(i => i.SubMentor)
+            .Include(i => i.Specialty)
+            .Include(i => i.IdeaVersions)
+            .ThenInclude(iv => iv.StageIdea)
+            .Include(i => i.IdeaVersions).ThenInclude(m => m.Topic).ThenInclude(m => m.Project)
+            .Include(i => i.IdeaVersions)
+            .ThenInclude(iv => iv.IdeaVersionRequests)
+            .ThenInclude(iv => iv.AnswerCriterias)
+            .Where(i => i.IdeaVersions.Any(iv => 
+                iv.IdeaVersionRequests.Any(ivr => 
+                    ivr.Status != null &&
+                    ivr.Role != null &&
+                    query.Roles.Contains(ivr.Role) &&
+                    query.Status == ivr.Status &&
+                    ivr.ReviewerId == userId)));
+        
+        queryable = queryable.Where(m => m.Status == query.IdeaStatus);
 
+        queryable = Sort(queryable, query);
+
+        var total = await queryable.CountAsync();
+        var results = query.IsPagination
+            ? await GetQueryablePagination(queryable, query).ToListAsync()
+            : await queryable.ToListAsync();
+
+        return (results, query.IsPagination ? total : results.Count);
+    }
+    
     public async Task<Idea?> GetIdeaPendingInStageIdeaOfUser(Guid userId, Guid stageIdeaId)
     {
         var idea = await _dbContext.Ideas

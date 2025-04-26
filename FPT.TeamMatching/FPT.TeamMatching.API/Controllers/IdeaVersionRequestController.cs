@@ -28,7 +28,7 @@ public class IdeaVersionRequestController : ControllerBase
     }
     
     [HttpGet("me/by-status-and-roles")]
-    public async Task<IActionResult> GetIdeaVersionRequestsCurrentByStatusAndRoles([FromQuery] IdeaVersionRequestGetListByStatusAndRoleQuery query)
+    public async Task<IActionResult> GetIdeaVersionRequestsCurrentByStatusAndRoles([FromQuery] IdeaGetListByStatusAndRoleQuery query)
     {
         var msg = await _service.GetIdeaVersionRequestsForCurrentReviewerByRolesAndStatus<IdeaVersionRequestResult>(query);
         return Ok(msg);

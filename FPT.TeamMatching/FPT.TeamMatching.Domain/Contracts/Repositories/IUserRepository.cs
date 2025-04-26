@@ -20,6 +20,8 @@ public interface IUserRepository : IBaseRepository<User>
 
     Task<List<User>?> GetStudentDoNotHaveTeam();
 
+    Task<User?> GetByIdWithProjects(Guid? userId);
+
     Task<(List<User>, int)> GetAllByCouncilWithIdeaVersionRequestPending(UserGetAllQuery query);
     Task<List<EmailSuggestionModels>> GetAllEmailSuggestions(string email);
 }

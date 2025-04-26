@@ -73,7 +73,7 @@ public class IdeaVersionRequestService : BaseService<IdeaVersionRequest>, IIdeaV
     }
 
     public async Task<BusinessResult> GetIdeaVersionRequestsForCurrentReviewerByRolesAndStatus<TResult>(
-        IdeaVersionRequestGetListByStatusAndRoleQuery query) where TResult : BaseResult
+        IdeaGetListByStatusAndRoleQuery query) where TResult : BaseResult
     {
         try
         {
