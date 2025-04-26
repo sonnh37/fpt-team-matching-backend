@@ -185,20 +185,15 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
                                          m.Topic.IdeaVersion.Idea.MentorId == userId);
 
         queryable = BaseFilterHelper.Base(queryable, query);
-        if (query.IsPagination)
-        {
-            var totalOrigin = queryable.Count();
-            queryable = Sort(queryable, query);
-            var results = await GetQueryablePagination(queryable, query).ToListAsync();
+        
+        queryable = Sort(queryable, query);
+    
+        var total = queryable.Count();
+        var results = query.IsPagination 
+            ? await GetQueryablePagination(queryable, query).ToListAsync()
+            : await queryable.ToListAsync();
 
-            return (results, totalOrigin);
-        }
-        else
-        {
-            queryable = Sort(queryable, query);
-            var results = await queryable.ToListAsync();
-            return (results, results.Count);
-        }
+        return (results, query.IsPagination ? total : results.Count);
     }
 
     public async Task<Project?> GetProjectByTopicId(Guid topicId)

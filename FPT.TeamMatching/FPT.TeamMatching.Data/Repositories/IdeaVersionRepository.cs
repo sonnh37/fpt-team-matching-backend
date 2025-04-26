@@ -14,6 +14,7 @@ namespace FPT.TeamMatching.Data.Repositories
     public class IdeaVersionRepository : BaseRepository<IdeaVersion>, IIdeaVersionRepository
     {
         private readonly FPTMatchingDbContext _context;
+
         public IdeaVersionRepository(FPTMatchingDbContext dbContext) : base(dbContext)
         {
             _context = dbContext;
@@ -22,8 +23,8 @@ namespace FPT.TeamMatching.Data.Repositories
         public async Task<List<IdeaVersion>> GetIdeaVersionsByIdeaId(Guid ideaId)
         {
             var ideaVersions = await _context.IdeaVersions.Where(e => e.IsDeleted == false &&
-                                                                e.IdeaId == ideaId)
-                                                        .ToListAsync();
+                    e.IdeaId == ideaId)
+                .ToListAsync();
             return ideaVersions;
         }
     }

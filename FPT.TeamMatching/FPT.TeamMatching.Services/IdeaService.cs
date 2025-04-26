@@ -731,8 +731,22 @@ public class IdeaService : BaseService<Idea>, IIdeaService
         if (idea.Owner?.UserXRoles?.Any(e => e.Role?.RoleName == "Student") != true)
             return;
 
+        var ideaVersionsOfIdea = await _ideaVersionRepository.GetIdeaVersionsByIdeaId(ideaVersion.IdeaId.Value);
+        var ideaVersionListId = ideaVersionsOfIdea.Select(m => m.Id).ToList().ConvertAll<Guid?>(x => x);
+        var existingTopics = await _unitOfWork.TopicRepository.GetTopicByIdeaVersionId(ideaVersionListId);
+        
+        
         // Kiểm tra xem IdeaVersion đã có Topic chưa
         var existingTopic = await _topicRepository.GetQueryable().SingleOrDefaultAsync(m => m.IdeaVersionId == ideaVersion.Id);
+        
+        var existingTopicFilterds = existingTopics.Where(m => m.Id != existingTopic?.Id).ToList();
+        if (existingTopicFilterds.Count != 0)
+        {
+            // remove
+            _unitOfWork.TopicRepository.DeleteRangePermanently(existingTopicFilterds);
+            await _unitOfWork.SaveChanges();
+        }
+        
         TopicResult? topicResult = null;
 
         if (existingTopic == null)
@@ -795,11 +809,16 @@ public class IdeaService : BaseService<Idea>, IIdeaService
         try
         {
             var newTopicCode = await _semesterService.GenerateNewTopicCode(stageIdea.SemesterId);
-            var res = await _topicService.CreateOrUpdate<TopicResult>(new TopicCreateCommand
+            var codeExist = _topicRepository.IsExistedTopicCode(newTopicCode);
+            if (codeExist) return null;
+            
+            var topicCreateCommand = new TopicCreateCommand
             {
                 IdeaVersionId = ideaVersion.Id,
-                TopicCode = newTopicCode,
-            });
+                TopicCode = newTopicCode
+            };
+
+            var res = await _topicService.CreateOrUpdate<TopicResult>(topicCreateCommand);
 
             return res.Status == 1 ? res.Data as TopicResult : null;
         }

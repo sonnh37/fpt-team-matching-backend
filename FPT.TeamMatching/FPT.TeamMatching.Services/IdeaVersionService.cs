@@ -80,6 +80,8 @@ namespace FPT.TeamMatching.Services
                     .WithMessage(Const.NOT_FOUND_MSG);
                 }
                 var ideaVersionsOfIdea = await _ideaVersionRepository.GetIdeaVersionsByIdeaId(idea.Id);
+                var ideaVersionListId = ideaVersionsOfIdea.Select(m => m.Id).ToList().ConvertAll<Guid?>(x => x);
+                var existingTopics = await _unitOfWork.TopicRepository.GetTopicByIdeaVersionId(ideaVersionListId);
                 //tao IdeaVersion
                 var ideaVersion = _mapper.Map<IdeaVersion>(request);
                 ideaVersion.Id = Guid.NewGuid();
@@ -94,6 +96,22 @@ namespace FPT.TeamMatching.Services
                         .WithStatus(Const.FAIL_CODE)
                         .WithMessage(Const.FAIL_SAVE_MSG);
                 }
+                
+                if (existingTopics.Count > 0)
+                {
+                    var topic = existingTopics[0];
+                    topic.IdeaVersionId = ideaVersion.Id;
+                    _unitOfWork.TopicRepository.Update(topic); 
+                    saveChange = await _unitOfWork.SaveChanges();
+                    if (!saveChange)
+                    {
+                        return new ResponseBuilder()
+                            .WithStatus(Const.FAIL_CODE)
+                            .WithMessage(Const.FAIL_SAVE_MSG);
+                    }
+                }
+                
+               
 
                 //tao IdeaVersionRequest
                 //neu la student -> tao cho mentor
