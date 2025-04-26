@@ -19,6 +19,8 @@ public interface IUserService : IBaseService
     Task<BusinessResult> GetAllByCouncilWithIdeaVersionRequestPending(UserGetAllQuery query);
     
     Task<BusinessResult> GetByEmail<TResult>(string email) where TResult : BaseResult;
+
+    Task<BusinessResult> CheckUserProjectSlotAvailability(Guid? userId);
     
     //
     // Task<BusinessResult> GetByUsername(string username);
