@@ -53,6 +53,7 @@ namespace FPT.TeamMatching.Data.Repositories
             var queryable = GetQueryable();
             queryable = queryable
                 .Include(x => x.IdeaVersion).ThenInclude(m => m.Idea)
+                .Include(x => x.IdeaVersion).ThenInclude(m => m.IdeaVersionRequests)
                 .Include(m => m.Project)
                 .Include(m => m.MentorTopicRequests)
                 .Include(m => m.TopicVersions);

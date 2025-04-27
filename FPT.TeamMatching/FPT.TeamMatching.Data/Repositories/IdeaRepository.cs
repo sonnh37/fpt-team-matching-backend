@@ -97,7 +97,7 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
     public async Task<List<Idea>> GetIdeaWithResultDateIsToday()
     {
         var todayLocalMidnight = DateTime.Now.Date; // VD: 24/4/2024 00:00:00 GMT+7
-    
+
         // Chuyển sang UTC (VD: 23/4/2024 17:00:00 GMT+0 nếu bạn ở GMT+7)
         var todayUtcMidnight = todayLocalMidnight.ToUniversalTime();
         var ideas = await GetQueryable()
@@ -118,7 +118,7 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
 
         return ideas;
     }
-    
+
     public async Task<(List<Idea>, int)> GetIdeasOfReviewerByRolesAndStatus(
         IdeaGetListByStatusAndRoleQuery query, Guid userId)
     {
@@ -133,13 +133,21 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
             .Include(i => i.IdeaVersions)
             .ThenInclude(iv => iv.IdeaVersionRequests)
             .ThenInclude(iv => iv.AnswerCriterias)
-            .Where(i => i.IdeaVersions.Any(iv => 
-                iv.IdeaVersionRequests.Any(ivr => 
+            .Where(i => i.IdeaVersions.Any(iv =>
+                iv.IdeaVersionRequests.Any(ivr =>
                     ivr.Status != null &&
                     ivr.Role != null &&
                     query.Roles.Contains(ivr.Role) &&
                     query.Status == ivr.Status &&
                     ivr.ReviewerId == userId)));
+
+        // Thêm điều kiện kiểm tra Topic null nếu có role Mentor, 
+        // Mentor: thì chỉ lấy những idea chưa có topic
+        // Council: lấy idea có topic
+        if (query.Roles.Contains("Mentor"))
+        {
+            queryable = queryable.Where(i => i.IdeaVersions.All(iv => iv.Topic == null));
+        }
         
         queryable = queryable.Where(m => m.Status == query.IdeaStatus);
 
@@ -152,7 +160,7 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
 
         return (results, query.IsPagination ? total : results.Count);
     }
-    
+
     public async Task<Idea?> GetIdeaPendingInStageIdeaOfUser(Guid userId, Guid stageIdeaId)
     {
         var idea = await _dbContext.Ideas

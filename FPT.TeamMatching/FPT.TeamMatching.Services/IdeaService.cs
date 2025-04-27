@@ -708,8 +708,10 @@ public class IdeaService : BaseService<Idea>, IIdeaService
         try
         {
             var ideaVersionCurrent = _ideaVersionRepository.GetQueryable()
-                .FirstOrDefault(m => m.IdeaId == idea.Id && m.StageIdeaId == stageIdeaCurrent.Id && !m.IsDeleted);
-
+                .Where(m => m.IdeaId == idea.Id && 
+                            !m.IsDeleted)
+                .OrderByDescending(m => m.Version)
+                .FirstOrDefault();
             if (ideaVersionCurrent == null) return;
 
             if (status == IdeaStatus.Approved)
@@ -735,7 +737,15 @@ public class IdeaService : BaseService<Idea>, IIdeaService
         var ideaVersionListId = ideaVersionsOfIdea.Select(m => m.Id).ToList().ConvertAll<Guid?>(x => x);
         var existingTopics = await _unitOfWork.TopicRepository.GetTopicByIdeaVersionId(ideaVersionListId);
         
-        
+        if (existingTopics.Count > 0)
+        {
+            var topic = existingTopics[0];
+            topic.IdeaVersionId = ideaVersion.Id;
+            _unitOfWork.TopicRepository.Update(topic); 
+            await _unitOfWork.SaveChanges();
+        }
+
+
         // Kiểm tra xem IdeaVersion đã có Topic chưa
         var existingTopic = await _topicRepository.GetQueryable().SingleOrDefaultAsync(m => m.IdeaVersionId == ideaVersion.Id);
         
