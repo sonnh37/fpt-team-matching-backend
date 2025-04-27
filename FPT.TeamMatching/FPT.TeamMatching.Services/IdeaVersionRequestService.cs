@@ -14,6 +14,7 @@ using FPT.TeamMatching.Domain.Models.Results.Bases;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Notifications;
 using NetTopologySuite.Triangulate.Tri;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.IdeaVersionRequests;
+using FPT.TeamMatching.Domain.Models.Requests.Commands.Topics;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.IdeaVersionRequest;
 
 namespace FPT.TeamMatching.Services;
@@ -30,9 +31,14 @@ public class IdeaVersionRequestService : BaseService<IdeaVersionRequest>, IIdeaV
     private readonly IIdeaService _ideaService;
     private readonly IAnswerCriteriaRepository _answerCriteriaRepository;
     private readonly INotificationService _notificationService;
+    private readonly ITopicService _topicService;
+    private readonly ISemesterService _semesterService;
 
     public IdeaVersionRequestService(IMapper mapper, IUnitOfWork unitOfWork, IIdeaService ideaService,
-        INotificationService notificationService) : base(mapper,
+        INotificationService notificationService,
+        ITopicService topicService,
+        ISemesterService semesterService
+    ) : base(mapper,
         unitOfWork)
     {
         _ideaVersionRequestRepository = unitOfWork.IdeaVersionRequestRepository;
@@ -45,6 +51,8 @@ public class IdeaVersionRequestService : BaseService<IdeaVersionRequest>, IIdeaV
         _answerCriteriaRepository = unitOfWork.AnswerCriteriaRepository;
         _ideaService = ideaService;
         _notificationService = notificationService;
+        _topicService = topicService;
+        _semesterService = semesterService;
     }
 
     public async Task<BusinessResult>
@@ -73,7 +81,7 @@ public class IdeaVersionRequestService : BaseService<IdeaVersionRequest>, IIdeaV
     }
 
     public async Task<BusinessResult> GetIdeaVersionRequestsForCurrentReviewerByRolesAndStatus<TResult>(
-        IdeaVersionRequestGetListByStatusAndRoleQuery query) where TResult : BaseResult
+        IdeaGetListByStatusAndRoleQuery query) where TResult : BaseResult
     {
         try
         {
@@ -132,26 +140,20 @@ public class IdeaVersionRequestService : BaseService<IdeaVersionRequest>, IIdeaV
         {
             //lay ra stageIdea hien tai
             var stageIdea = await _stageIdeaRepositoty.GetCurrentStageIdea();
-            if (stageIdea == null)
-            {
-                return new ResponseBuilder()
-                    .WithStatus(Const.FAIL_CODE)
-                    .WithMessage("Không có đợt duyệt ứng với ngày hiện tại");
-            }
+            if (stageIdea == null) return HandlerFail("Không có đợt duyệt ứng với ngày hiện tại");
 
             //ki cua stage idea
             var semester = await _semesterRepository.GetSemesterByStageIdeaId(stageIdea.Id);
-            if (semester == null)
-            {
-                return new ResponseBuilder()
-                    .WithStatus(Const.FAIL_CODE)
-                    .WithMessage("Không có kì ứng với đợt duyệt hiện tại");
-            }
+            if (semester == null) return HandlerFail("Không có kì ứng với đợt duyệt hiện tại");
+
+            var ideaVersion = await _ideaVersionRepository.GetById(command.IdeaVersionId);
+            if (ideaVersion == null) return HandlerFail("Ko tìm thấy ideaVersionId");
 
             if (command.IdeaVersionId == Guid.Empty || command.IdeaVersionId == null)
                 return HandlerFail("Nhập idea version ");
+
             var councils = await _userRepository.GetCouncilsForIdeaVersionRequest(command.IdeaVersionId.Value);
-            if (!councils.Any()) return HandlerFail("No available councils");
+            if (councils.Count == 0) return HandlerFail("No available councils");
 
             var newIdeaVersionRequests = new List<IdeaVersionRequest>();
 
@@ -169,66 +171,45 @@ public class IdeaVersionRequestService : BaseService<IdeaVersionRequest>, IIdeaV
                 newIdeaVersionRequests.Add(ideaVersionRequest);
             }
 
-            if (!newIdeaVersionRequests.Any()) return HandlerNotFound("No available councils");
+            if (newIdeaVersionRequests.Count == 0) return HandlerNotFound("No available councils");
 
             _ideaVersionRequestRepository.AddRange(newIdeaVersionRequests);
             var saveChange = await _unitOfWork.SaveChanges();
-            if (!saveChange)
-            {
-                return new ResponseBuilder()
-                    .WithStatus(Const.SUCCESS_CODE)
-                    .WithMessage("Failed to create council requests.");
-            }
+            if (!saveChange) return HandlerFail("Failed to create council requests");
 
-            var ideaVersion = await _ideaVersionRepository.GetById((Guid)command.IdeaVersionId);
-            //send noti cho 3 nguoi council
+            //send noti cho councils
             var request = new NotificationCreateForGroupUser
             {
-                Description = "Đề tài " + ideaVersion.Abbreviations + " đang chờ bạn duyệt với vai trò Council",
+                Description = "Đề tài " + ideaVersion?.Abbreviations + " đang chờ bạn duyệt với vai trò Council",
             };
             await _notificationService.CreateForGroupUsers(request, councils.Select(e => e.Id).ToList());
-            //
-
 
             //mentor nop idea -> topic 
             //tao topic
             //Gen topic code
-            var semesterCode = semester.SemesterCode;
-            var semesterPrefix = semester.SemesterPrefixName;
-            //get so luong topic cua ki
-            var numberOfTopic = _topicRepository.NumberOfTopicBySemesterId(semester.Id);
+            var ideaVersionsOfIdea = await _ideaVersionRepository.GetIdeaVersionsByIdeaId(ideaVersion.IdeaId.Value);
+            var ideaVersionListId = ideaVersionsOfIdea.Select(m => m.Id).ToList().ConvertAll<Guid?>(x => x);
+            var existingTopics = await _unitOfWork.TopicRepository.GetTopicByIdeaVersionId(ideaVersionListId);
 
-            // Tạo số thứ tự tiếp theo
-            int nextNumberTopic = numberOfTopic + 1;
-
-            // Tạo topic code mới theo định dạng: semesterPrefix + semesterCode + "SE" + số thứ tự (3 chữ số)
-            string newTopicCode = $"{semesterPrefix}{semesterCode}SE{nextNumberTopic:D3}";
-
-            var topic = new Topic
-            {
-                IdeaVersionId = ideaVersion.Id,
-            };
-            //check k trùng topic code
-            var codeExist = _topicRepository.IsExistedTopicCode(newTopicCode);
-            if (!codeExist)
-            {
-                topic.TopicCode = newTopicCode;
-            }
-
-            await SetBaseEntityForCreation(topic);
-            _topicRepository.Add(topic);
-
-            saveChange = await _unitOfWork.SaveChanges();
-            if (!saveChange)
-            {
+            if (existingTopics.Count != 0)
                 return new ResponseBuilder()
-                    .WithStatus(Const.FAIL_CODE)
-                    .WithMessage(Const.FAIL_SAVE_MSG);
-            }
+                    .WithStatus(Const.SUCCESS_CODE)
+                    .WithMessage(Const.SUCCESS_READ_MSG);
+            
+            var newTopicCode = await _semesterService.GenerateNewTopicCode(stageIdea.SemesterId);
+            var codeExist = _topicRepository.IsExistedTopicCode(newTopicCode);
+            if (codeExist) return HandlerFail("Trùng topic code");
 
-            return new ResponseBuilder()
-                .WithStatus(Const.SUCCESS_CODE)
-                .WithMessage(Const.SUCCESS_SAVE_MSG);
+            var topicCreateCommand = new TopicCreateCommand
+            {
+                IdeaVersionId = ideaVersion?.Id,
+                TopicCode = newTopicCode
+            };
+
+            var res = await _topicService.CreateOrUpdate<TopicResult>(topicCreateCommand);
+
+            return res;
+
         }
         catch (Exception ex)
         {
@@ -244,8 +225,6 @@ public class IdeaVersionRequestService : BaseService<IdeaVersionRequest>, IIdeaV
             if (ideaVersionRequest == null) return HandlerFail("Not found ideaVersionRequest");
 
             ideaVersionRequest.Status = command.Status;
-            //sua db
-            //ideaVersionRequest.Content = command.Content;
             ideaVersionRequest.ProcessDate = DateTime.UtcNow;
             _ideaVersionRequestRepository.Update(ideaVersionRequest);
             var check = await _unitOfWork.SaveChanges();

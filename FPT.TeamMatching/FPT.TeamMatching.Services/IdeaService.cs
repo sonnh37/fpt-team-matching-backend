@@ -9,6 +9,7 @@ using FPT.TeamMatching.Domain.Models.Requests.Commands.Notifications;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Projects;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Topics;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Ideas;
+using FPT.TeamMatching.Domain.Models.Requests.Queries.IdeaVersionRequest;
 using FPT.TeamMatching.Domain.Models.Responses;
 using FPT.TeamMatching.Domain.Models.Results;
 using FPT.TeamMatching.Domain.Models.Results.Bases;
@@ -707,8 +708,10 @@ public class IdeaService : BaseService<Idea>, IIdeaService
         try
         {
             var ideaVersionCurrent = _ideaVersionRepository.GetQueryable()
-                .FirstOrDefault(m => m.IdeaId == idea.Id && m.StageIdeaId == stageIdeaCurrent.Id && !m.IsDeleted);
-
+                .Where(m => m.IdeaId == idea.Id && 
+                            !m.IsDeleted)
+                .OrderByDescending(m => m.Version)
+                .FirstOrDefault();
             if (ideaVersionCurrent == null) return;
 
             if (status == IdeaStatus.Approved)
@@ -730,8 +733,30 @@ public class IdeaService : BaseService<Idea>, IIdeaService
         if (idea.Owner?.UserXRoles?.Any(e => e.Role?.RoleName == "Student") != true)
             return;
 
+        var ideaVersionsOfIdea = await _ideaVersionRepository.GetIdeaVersionsByIdeaId(ideaVersion.IdeaId.Value);
+        var ideaVersionListId = ideaVersionsOfIdea.Select(m => m.Id).ToList().ConvertAll<Guid?>(x => x);
+        var existingTopics = await _unitOfWork.TopicRepository.GetTopicByIdeaVersionId(ideaVersionListId);
+        
+        if (existingTopics.Count > 0)
+        {
+            var topic = existingTopics[0];
+            topic.IdeaVersionId = ideaVersion.Id;
+            _unitOfWork.TopicRepository.Update(topic); 
+            await _unitOfWork.SaveChanges();
+        }
+
+
         // Kiểm tra xem IdeaVersion đã có Topic chưa
         var existingTopic = await _topicRepository.GetQueryable().SingleOrDefaultAsync(m => m.IdeaVersionId == ideaVersion.Id);
+        
+        var existingTopicFilterds = existingTopics.Where(m => m.Id != existingTopic?.Id).ToList();
+        if (existingTopicFilterds.Count != 0)
+        {
+            // remove
+            _unitOfWork.TopicRepository.DeleteRangePermanently(existingTopicFilterds);
+            await _unitOfWork.SaveChanges();
+        }
+        
         TopicResult? topicResult = null;
 
         if (existingTopic == null)
@@ -756,7 +781,36 @@ public class IdeaService : BaseService<Idea>, IIdeaService
         }
         else
         {
-            await UpdateExistingProject(existedProject, topicResult);
+            await UpdateExistingProject(existedProject, stageIdea, topicResult);
+        }
+    }
+    
+    public async Task<BusinessResult> GetIdeasOfReviewerByRolesAndStatus<TResult>(
+        IdeaGetListByStatusAndRoleQuery query) where TResult : BaseResult
+    {
+        try
+        {
+            var userIdClaims = GetUserIdFromClaims();
+            var userId = userIdClaims.Value;
+            var (data, total) =
+                await _ideaRepository.GetIdeasOfReviewerByRolesAndStatus(query,
+                    userId);
+
+            var results = _mapper.Map<List<TResult>>(data);
+
+            var response = new QueryResult(query, results, total);
+
+            return new ResponseBuilder()
+                .WithData(response)
+                .WithStatus(Const.SUCCESS_CODE)
+                .WithMessage(Const.SUCCESS_READ_MSG);
+        }
+        catch (Exception ex)
+        {
+            var errorMessage = $"An error occurred in {typeof(TResult).Name}: {ex.Message}";
+            return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage(errorMessage);
         }
     }
 
@@ -765,11 +819,16 @@ public class IdeaService : BaseService<Idea>, IIdeaService
         try
         {
             var newTopicCode = await _semesterService.GenerateNewTopicCode(stageIdea.SemesterId);
-            var res = await _topicService.CreateOrUpdate<TopicResult>(new TopicCreateCommand
+            var codeExist = _topicRepository.IsExistedTopicCode(newTopicCode);
+            if (codeExist) return null;
+            
+            var topicCreateCommand = new TopicCreateCommand
             {
                 IdeaVersionId = ideaVersion.Id,
-                TopicCode = newTopicCode,
-            });
+                TopicCode = newTopicCode
+            };
+
+            var res = await _topicService.CreateOrUpdate<TopicResult>(topicCreateCommand);
 
             return res.Status == 1 ? res.Data as TopicResult : null;
         }
@@ -809,11 +868,14 @@ public class IdeaService : BaseService<Idea>, IIdeaService
         }
     }
 
-    private async Task UpdateExistingProject(Project existingProject, TopicResult topicResult)
+    private async Task UpdateExistingProject(Project existingProject, StageIdea stageIdea, TopicResult topicResult)
     {
         try
         {
+            var newTeamCode = await _semesterService.GenerateNewTeamCode(stageIdea.SemesterId);
             existingProject.TopicId = topicResult.Id;
+            existingProject.TeamCode = newTeamCode; 
+            existingProject.Status = ProjectStatus.Pending;
             await SetBaseEntityForUpdate(existingProject);
             _projectRepository.Update(existingProject);
 

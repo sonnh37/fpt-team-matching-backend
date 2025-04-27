@@ -4,12 +4,16 @@ using FPT.TeamMatching.Domain.Enums;
 using FPT.TeamMatching.Domain.Models;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Ideas;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Ideas;
+using FPT.TeamMatching.Domain.Models.Requests.Queries.IdeaVersionRequest;
 
 namespace FPT.TeamMatching.Domain.Contracts.Repositories;
 
 public interface IIdeaRepository : IBaseRepository<Idea>
 {
     Task<IList<Idea>> GetIdeasByUserId(Guid userId);
+
+    Task<(List<Idea>, int)> GetIdeasOfReviewerByRolesAndStatus(
+        IdeaGetListByStatusAndRoleQuery query, Guid userId);
 
     Task<int> NumberApprovedIdeasOfSemester(Guid? semesterId);
 

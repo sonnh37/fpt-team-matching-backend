@@ -56,7 +56,7 @@ public class IdeaVersionRequestRepository : BaseRepository<IdeaVersionRequest>, 
 
 
     public async Task<(List<IdeaVersionRequest>, int)> GetIdeaVersionRequestsForCurrentReviewerByRolesAndStatus(
-        IdeaVersionRequestGetListByStatusAndRoleQuery query, Guid userId)
+        IdeaGetListByStatusAndRoleQuery query, Guid userId)
     {
         var queryable = GetQueryable();
         queryable = queryable

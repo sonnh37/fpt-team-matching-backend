@@ -153,4 +153,11 @@ public class UserController : ControllerBase
         var msg = await _userService.GetSuggestionByEmail(email);
         return Ok(msg);
     }
+    
+    [HttpGet("{userId:guid}/check-project-slot-availability")]
+    public async Task<IActionResult> CheckUserHasProjects([FromRoute] Guid? userId)
+    {
+        var hasProjects = await _userService.CheckUserProjectSlotAvailability(userId);
+        return Ok(hasProjects);
+    }
 }

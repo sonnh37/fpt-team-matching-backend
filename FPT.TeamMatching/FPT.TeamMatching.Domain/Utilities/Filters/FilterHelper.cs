@@ -309,11 +309,10 @@ public static class FilterHelper
         {
             queryable = queryable.Where(m => m.Status == query.Status);
         }
-        //sua db
-        //if (query.IsExistedTeam != null)
-        //{
-        //    queryable = queryable.Where(m => m.IsExistedTeam == query.IsExistedTeam.Value);
-        //}
+        if (query.IsExistedTeam != null)
+        {
+            queryable = queryable.Where(m => m.IsExistedTeam == query.IsExistedTeam);
+        }
 
         queryable = BaseFilterHelper.Base(queryable, query);
 

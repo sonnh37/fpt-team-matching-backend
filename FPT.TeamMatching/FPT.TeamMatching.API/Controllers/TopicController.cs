@@ -1,5 +1,6 @@
 ﻿using FPT.TeamMatching.Domain.Contracts.Services;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Topics;
+using FPT.TeamMatching.Domain.Models.Requests.Queries.Projects;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Topics;
 using FPT.TeamMatching.Domain.Models.Results;
 using FPT.TeamMatching.Domain.Utilities;
@@ -61,6 +62,13 @@ namespace FPT.TeamMatching.API.Controllers
         {
             var businessResult = await _service.DeleteById(request.Id, request.IsPermanent);
 
+            return Ok(businessResult);
+        }
+        
+        [HttpGet("me/mentor-topics")]
+        public async Task<IActionResult> GetTopicsForMentor([FromQuery] TopicGetListForMentorQuery query)
+        {
+            var businessResult = await _service.GetTopicsForMentor(query);
             return Ok(businessResult);
         }
 

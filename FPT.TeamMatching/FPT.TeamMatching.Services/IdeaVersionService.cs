@@ -45,41 +45,23 @@ namespace FPT.TeamMatching.Services
         {
             try
             {
-                //get user
                 var user = await GetUserAsync();
-
-                //lay ra stageIdea hien tai
-                var stageIdea = await _stageIdeaRepositoty.GetCurrentStageIdea();
-                if (stageIdea == null)
-                {
-                    return new ResponseBuilder()
-                        .WithStatus(Const.FAIL_CODE)
-                        .WithMessage("Không có đợt duyệt ứng với ngày hiện tại");
-                }
-
-                //ki hien tai
-                var semester = await _semesterRepository.GetSemesterByStageIdeaId(stageIdea.Id);
-                if (semester == null)
-                {
-                    return new ResponseBuilder()
-                        .WithStatus(Const.FAIL_CODE)
-                        .WithMessage("Không có kì ứng với đợt duyệt hiện tại");
-                }
                 
-                if (request.IdeaId == null)
-                {
-                    return new ResponseBuilder()
-                    .WithStatus(Const.FAIL_CODE)
-                    .WithMessage("Nhập idea id");
-                }
+                var stageIdea = await _stageIdeaRepositoty.GetCurrentStageIdea();
+                if (stageIdea == null) return HandlerFail("Không có đợt duyệt ứng với ngày hiện tại");
+
+                var semester = await _semesterRepository.GetSemesterByStageIdeaId(stageIdea.Id);
+                if (semester == null) return HandlerFail("Không có kì ứng với đợt duyệt hiện tại");
+
+                if (request.IdeaId == null) return HandlerFail("Nhap IdeaId");
+                
                 var idea = await _ideaRepository.GetById((Guid)request.IdeaId);
-                if (idea == null)
-                {
-                    return new ResponseBuilder()
-                    .WithStatus(Const.NOT_FOUND_CODE)
-                    .WithMessage(Const.NOT_FOUND_MSG);
-                }
+                if (idea == null) return HandlerNotFound();
+                
+                // Check có ideaVersion cũ có topic ko
                 var ideaVersionsOfIdea = await _ideaVersionRepository.GetIdeaVersionsByIdeaId(idea.Id);
+                var ideaVersionListId = ideaVersionsOfIdea.Select(m => m.Id).ToList().ConvertAll<Guid?>(x => x);
+                var existingTopics = await _unitOfWork.TopicRepository.GetTopicByIdeaVersionId(ideaVersionListId);
                 //tao IdeaVersion
                 var ideaVersion = _mapper.Map<IdeaVersion>(request);
                 ideaVersion.Id = Guid.NewGuid();
@@ -94,6 +76,22 @@ namespace FPT.TeamMatching.Services
                         .WithStatus(Const.FAIL_CODE)
                         .WithMessage(Const.FAIL_SAVE_MSG);
                 }
+                
+                if (existingTopics.Count > 0)
+                {
+                    var topic = existingTopics[0];
+                    topic.IdeaVersionId = ideaVersion.Id;
+                    _unitOfWork.TopicRepository.Update(topic); 
+                    saveChange = await _unitOfWork.SaveChanges();
+                    if (!saveChange)
+                    {
+                        return new ResponseBuilder()
+                            .WithStatus(Const.FAIL_CODE)
+                            .WithMessage(Const.FAIL_SAVE_MSG);
+                    }
+                }
+                
+               
 
                 //tao IdeaVersionRequest
                 //neu la student -> tao cho mentor
