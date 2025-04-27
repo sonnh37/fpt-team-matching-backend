@@ -28,7 +28,7 @@ jobs:
 
     # Build Docker image
     - name: Build the Docker image
-      run: docker build -f FPT.TeamMatching/FPT.TeamMatching.API/Dockerfile FPT.TeamMatching/ --tag sonnh37/fpt-team-matching-backend:latest
+      run: docker build -f FPT.TeamMatching/Dockerfile FPT.TeamMatching/ --tag sonnh37/fpt-team-matching-backend:latest
 
     # Push Docker image lên Docker Hub
     - name: Push Docker image
