@@ -307,12 +307,11 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
     {
         var queryable = GetQueryable();
 
-        var ideas = queryable.Where(e => e.IsDeleted == false &&
+        var ideas = queryable.Include(m => m.IdeaVersions).ThenInclude(m => m.StageIdea).Where(e => e.IsDeleted == false &&
                                             e.MentorId == mentorId &&
                                             e.SubMentorId == null &&
                                             (e.Status == IdeaStatus.Approved || e.Status == IdeaStatus.ConsiderByMentor || e.Status == IdeaStatus.ConsiderByCouncil))
-                                .Where(i => i.IdeaVersions != null &&
-                                    i.IdeaVersions.OrderByDescending(iv => iv.Version).FirstOrDefault() != null);
+                                .Where(i => i.IdeaVersions.OrderByDescending(iv => iv.Version).FirstOrDefault() != null);
 
         var result = ideas.Where(e => e.IdeaVersions.Any(e => e.StageIdea != null &&
                                                                     e.StageIdea.SemesterId == semesterId))
