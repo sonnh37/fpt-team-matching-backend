@@ -14,6 +14,7 @@ namespace FPT.TeamMatching.API.Controllers;
 
 [Route(Const.API_NOTIFICATIONS)]
 [ApiController]
+[Authorize]
 public class NotificationController : ControllerBase
 {
     private readonly INotificationService _notificationService;

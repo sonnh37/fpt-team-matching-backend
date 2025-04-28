@@ -3,6 +3,7 @@ using FPT.TeamMatching.Domain.Models.Requests.Commands.Roles;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Role;
 using FPT.TeamMatching.Domain.Models.Results;
 using FPT.TeamMatching.Domain.Utilities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,6 +11,7 @@ namespace FPT.TeamMatching.API.Controllers
 {
     [Route(Const.API_ROLES)]
     [ApiController]
+    [Authorize]
     public class RoleController : ControllerBase
     {
         private readonly IRoleService _service;

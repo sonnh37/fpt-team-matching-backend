@@ -3,6 +3,7 @@ using FPT.TeamMatching.Domain.Models.Requests.Commands.CriteriaForms;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.CriteriaForms;
 using FPT.TeamMatching.Domain.Models.Results;
 using FPT.TeamMatching.Domain.Utilities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,6 +11,7 @@ namespace FPT.TeamMatching.API.Controllers
 {
     [Route(Const.API_CRITERIA_FORMS)]
     [ApiController]
+    [Authorize]
     public class CriteriaFormController : ControllerBase
     {
         private readonly ICriteriaFormService _service;

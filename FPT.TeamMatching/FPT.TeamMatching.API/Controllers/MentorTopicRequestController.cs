@@ -11,6 +11,7 @@ namespace FPT.TeamMatching.API.Controllers
 {
     [Route(Const.API_MENTOR_TOPIC_REQUESTS)]
     [ApiController]
+    [Authorize]
     public class MentorTopicRequestController : ControllerBase
     {
         private readonly IMentorTopicRequestService _service;

@@ -12,6 +12,7 @@ namespace FPT.TeamMatching.API.Controllers;
 
 [Route(Const.API_PROJECTS)]
 [ApiController]
+[Authorize]
 public class ProjectController : ControllerBase
 {
     private readonly IProjectService _service;

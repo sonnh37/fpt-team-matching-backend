@@ -1,12 +1,14 @@
 using FPT.TeamMatching.Domain.Contracts.Services;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Message;
 using FPT.TeamMatching.Domain.Utilities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FPT.TeamMatching.API.Controllers;
 
 [Route(Const.API_MESSAGE)]
 [ApiController]
+[Authorize]
 public class MessageController : ControllerBase
 {
     private readonly IMessageService _messageService;

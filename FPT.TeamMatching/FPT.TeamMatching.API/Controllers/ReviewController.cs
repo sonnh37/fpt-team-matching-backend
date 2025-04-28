@@ -4,12 +4,14 @@ using FPT.TeamMatching.Domain.Models.Requests.Commands.Reviews;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Reviews;
 using FPT.TeamMatching.Domain.Models.Results;
 using FPT.TeamMatching.Domain.Utilities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FPT.TeamMatching.API.Controllers;
 
 [Route(Const.API_REVIEWS)]
 [ApiController]
+[Authorize]
 public class ReviewController : ControllerBase
 {
     private readonly IReviewService _service;

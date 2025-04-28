@@ -3,12 +3,14 @@ using FPT.TeamMatching.Domain.Models.Requests.Commands.Invitations;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Invitations;
 using FPT.TeamMatching.Domain.Models.Results;
 using FPT.TeamMatching.Domain.Utilities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FPT.TeamMatching.API.Controllers;
 
 [Route(Const.API_INVITATIONS)]
 [ApiController]
+[Authorize]
 public class InvitationController : ControllerBase
 {
     private readonly IInvitationService _service;
