@@ -349,6 +349,7 @@ public class UserService : BaseService<User>, IUserService
                                     {
                                         UserId = null,
                                         RoleId = roleStudent.Id,
+                                        SemesterId = upComingSemester.Id,
                                     }
                                 }
                             };
@@ -471,16 +472,35 @@ public class UserService : BaseService<User>, IUserService
                     .WithStatus(Const.FAIL_CODE)
                     .WithMessage("No upcoming semester!");
             }
+            var roleStudent = await _unitOfWork.RoleRepository.GetByRoleName("Student");
+            if (roleStudent == null)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("No role student!");
+            }
             var listEntity = _mapper.Map<List<User>>(users);
             var userIds = listEntity.Select(x => x.Id).ToList();
             var profileStudents = await _unitOfWork.ProfileStudentRepository.GetProfileByUserIds(userIds);
+            List<UserXRole> userXRoles = new List<UserXRole>();
             foreach (var user in listEntity)
             {
                 user.ProfileStudent = profileStudents.FirstOrDefault(x => x.UserId == user.Id);
                 user.ProfileStudent ??= new ProfileStudent();
                 user.ProfileStudent.SemesterId = upComingSemester.Id;
+                userXRoles.Add(new UserXRole
+                {
+                    UserId = user.Id,
+                    SemesterId = upComingSemester.Id,
+                    RoleId = roleStudent.Id,
+                    IsPrimary = true,
+                    IsDeleted = false,
+                    CreatedDate = DateTime.Now,
+                    UpdatedDate = DateTime.Now,
+                });
             }
             _userRepository.UpdateRange(listEntity);
+            _userXRoleRepository.AddRange(userXRoles);
             var saveChange = await _unitOfWork.SaveChanges();
             if (!saveChange)
             {

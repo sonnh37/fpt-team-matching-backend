@@ -45,15 +45,18 @@ public class HangfireController : ControllerBase
     [HttpGet("/RecurringJob/create-reviews")]
     public ActionResult CreateReviews()
     {
-        _recurringJobManager.AddOrUpdate("create-reviews", () => _reviewService.CreateReviewsForActiveProject(),Cron.Minutely);
+        _recurringJobManager.AddOrUpdate("create-reviews", () => _reviewService.CreateReviewsForActiveProject(),Cron.Daily);
         return Ok();
     }
 
-    [HttpGet("/RecurringJob/public-idea-result")]
+    [HttpGet("background-job/public-idea-result")]
     public ActionResult PublicIdeaResult()
     {
         var name = _configuration.GetSection("HANGFIRE_SERVER_LOCAL");
-        _recurringJobManager.AddOrUpdate("public-idea-result", () => _ideaService.AutoUpdateIdeaStatus(), Cron.Minutely, new RecurringJobOptions { QueueName = name.Value });
+        // var selectedDate = DateTimeOffset.Parse("2025-4-29 00:00:00");
+        _recurringJobManager.RemoveIfExists("public-idea-result");
+        _recurringJobManager.AddOrUpdate("public-idea-result", () => _ideaService.AutoUpdateIdeaStatus(), "0 0 30 5 *", new RecurringJobOptions { QueueName = name.Value });
+        // _backgroundJobClient.Schedule(() => _ideaService.AutoUpdateIdeaStatus(), selectedDate);
         return Ok();
     }
 
@@ -63,5 +66,13 @@ public class HangfireController : ControllerBase
         var name = _configuration.GetSection("HANGFIRE_SERVER_LOCAL");
         _recurringJobManager.AddOrUpdate("update-project-in-progress", () => _ideaService.AutoUpdateProjectInProgress(), Cron.Minutely, new RecurringJobOptions { QueueName = name.Value });
         return Ok();
+    }
+
+    [HttpGet("/trigger-now")]
+    public ActionResult TriggerNow([FromQuery] string jobId)
+    {
+        _recurringJobManager.Trigger(jobId);
+        _recurringJobManager.RemoveIfExists(jobId);
+        return Ok("Triggered create-reviews job successfully!");
     }
 }
