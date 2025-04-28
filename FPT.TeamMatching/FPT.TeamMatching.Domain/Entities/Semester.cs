@@ -18,9 +18,9 @@ public class Semester : BaseEntity
 
     public DateTimeOffset? EndDate { get; set; }
 
-    public int? LimitTopicMentorOnly { get; set; }
+    public int LimitTopicMentorOnly { get; set; }
 
-    public int? LimitTopicSubMentor { get; set; }
+    public int LimitTopicSubMentor { get; set; }
 
     public CriteriaForm? CriteriaForm { get; set; }
 
