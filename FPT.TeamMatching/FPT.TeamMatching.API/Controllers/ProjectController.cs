@@ -114,7 +114,7 @@ public class ProjectController : ControllerBase
     [HttpPut("update-defense-stage")]
     public async Task<IActionResult> UpdateDefenseStage([FromBody] UpdateDefenseStage command)
     {
-        var businessResult = await _service.UpdateDefenStage(command);
+        var businessResult = await _service.UpdateDefenseStage(command);
 
         return Ok(businessResult);
     }
