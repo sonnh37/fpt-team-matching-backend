@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using DocumentFormat.OpenXml.Spreadsheet;
 using ExcelDataReader;
 using FPT.TeamMatching.Domain.Contracts.Repositories;
 using FPT.TeamMatching.Domain.Contracts.Services;
@@ -39,7 +38,7 @@ public class UserService : BaseService<User>, IUserService
         _semesterRepository = _unitOfWork.SemesterRepository;
         _ideaRepository = _unitOfWork.IdeaRepository;
     }
-
+    
     public async Task<BusinessResult> GetByEmail<TResult>(string email) where TResult : BaseResult
     {
         try
@@ -156,7 +155,7 @@ public class UserService : BaseService<User>, IUserService
                 Console.WriteLine($"Error parsing cache: {ex.Message}, Raw Data: {user.Cache}");
                 existingCache = new JObject(); // Nếu lỗi thì dùng cache mới
             }
-
+            
             if (newCacheJson.Cache != null)
             {
                 JObject newCache = JObject.Parse(newCacheJson.Cache);
@@ -207,7 +206,7 @@ public class UserService : BaseService<User>, IUserService
                 .WithMessage(errorMessage);
         }
     }
-
+    
     public async Task<BusinessResult> Create(UserCreateCommand command)
     {
         try
@@ -372,8 +371,8 @@ public class UserService : BaseService<User>, IUserService
             }
 
             var filePath = Path.Combine(uploadsFolder, file.Name);
-
-
+            
+            
             using (var stream = new FileStream(filePath, FileMode.Create))
             {
                 file.CopyTo(stream);
@@ -394,13 +393,11 @@ public class UserService : BaseService<User>, IUserService
                                 existingUsers.Add(userDictionary[email]);
                                 continue;
                             }
-
                             var code = reader.GetValue(2).ToString();
                             if (code == null || code.ToString() == "")
                             {
-                                throw new Exception("User with with email: " + email + " is not invalid code");
+                                throw new Exception("User with with email: "+ email + " is not invalid code") ;
                             }
-
                             var firstname = reader.GetValue(3).ToString();
                             var lastname = reader.GetValue(4).ToString();
 
@@ -431,7 +428,6 @@ public class UserService : BaseService<User>, IUserService
                     } while (reader.NextResult());
                 }
             }
-
             var mapExistingUser = _mapper.Map<List<UserResult>>(existingUsers);
             if (users.Count == 0 && mapExistingUser.Count > 0)
             {
@@ -440,7 +436,6 @@ public class UserService : BaseService<User>, IUserService
                     .WithData(mapExistingUser)
                     .WithMessage("Danh sách cập nhật đang bị trùng hoặc không tồn tại.");
             }
-
             _userRepository.AddRange(users);
             var saveChange = await _unitOfWork.SaveChanges();
             if (!saveChange)
@@ -450,13 +445,10 @@ public class UserService : BaseService<User>, IUserService
                     .WithStatus(Const.FAIL_CODE)
                     .WithMessage(Const.FAIL_SAVE_MSG);
             }
-
             return new ResponseBuilder()
                 .WithData(mapExistingUser)
                 .WithStatus(mapExistingUser.Any() ? 2 : Const.SUCCESS_CODE)
-                .WithMessage(mapExistingUser.Any()
-                    ? "Cập nhật thành công. Nhưng vẫn còn những tài khoản đang bị trùng."
-                    : Const.SUCCESS_SAVE_MSG);
+                .WithMessage(mapExistingUser.Any() ? "Cập nhật thành công. Nhưng vẫn còn những tài khoản đang bị trùng." : Const.SUCCESS_SAVE_MSG);
         }
         catch (Exception e)
         {
@@ -479,7 +471,6 @@ public class UserService : BaseService<User>, IUserService
                     .WithData(userModel)
                     .WithMessage("Tài khoản này đã tồn tại. Bạn có muốn cập nhật lại tài khoản này không ?");
             }
-
             var upComingSemester = await _unitOfWork.SemesterRepository.GetUpComingSemester();
             if (upComingSemester == null)
             {
@@ -487,7 +478,7 @@ public class UserService : BaseService<User>, IUserService
                     .WithStatus(Const.FAIL_CODE)
                     .WithMessage("No upcoming semester!");
             }
-
+            
             var roleStudent = await _unitOfWork.RoleRepository.GetByRoleName("Student");
             if (roleStudent == null)
             {
@@ -495,7 +486,6 @@ public class UserService : BaseService<User>, IUserService
                     .WithStatus(Const.FAIL_CODE)
                     .WithMessage("No role student!");
             }
-
             var user = new User
             {
                 Email = command.Email,
@@ -528,7 +518,7 @@ public class UserService : BaseService<User>, IUserService
                     .WithStatus(Const.FAIL_CODE)
                     .WithMessage(Const.FAIL_SAVE_MSG);
             }
-
+            
             return new ResponseBuilder()
                 .WithStatus(Const.SUCCESS_CODE)
                 .WithMessage(Const.SUCCESS_READ_MSG);
@@ -552,18 +542,37 @@ public class UserService : BaseService<User>, IUserService
                     .WithStatus(Const.FAIL_CODE)
                     .WithMessage("No upcoming semester!");
             }
+            var roleStudent = await _unitOfWork.RoleRepository.GetByRoleName("Student");
+            if (roleStudent == null)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("No role student!");
+            }
 
             var listEntity = _mapper.Map<List<User>>(users);
             var userIds = listEntity.Select(x => x.Id).ToList();
             var profileStudents = await _unitOfWork.ProfileStudentRepository.GetProfileByUserIds(userIds);
+            List<UserXRole> userXRoles = new List<UserXRole>();
             foreach (var user in listEntity)
             {
                 user.ProfileStudent = profileStudents.FirstOrDefault(x => x.UserId == user.Id);
                 user.ProfileStudent ??= new ProfileStudent();
                 user.ProfileStudent.SemesterId = upComingSemester.Id;
+                userXRoles.Add(new UserXRole
+                {
+                    UserId = user.Id,
+                    SemesterId = upComingSemester.Id,
+                    RoleId = roleStudent.Id,
+                    IsPrimary = true,
+                    IsDeleted = false,
+                    CreatedDate = DateTime.Now,
+                    UpdatedDate = DateTime.Now,
+                });
             }
 
             _userRepository.UpdateRange(listEntity);
+            _userXRoleRepository.AddRange(userXRoles);
             var saveChange = await _unitOfWork.SaveChanges();
             if (!saveChange)
             {
@@ -571,10 +580,11 @@ public class UserService : BaseService<User>, IUserService
                     .WithStatus(Const.FAIL_CODE)
                     .WithMessage(Const.FAIL_SAVE_MSG);
             }
-
+            
             return new ResponseBuilder()
                 .WithStatus(Const.SUCCESS_CODE)
                 .WithMessage(Const.SUCCESS_READ_MSG);
+            
         }
         catch (Exception e)
         {
@@ -584,21 +594,22 @@ public class UserService : BaseService<User>, IUserService
         }
     }
 
+ 
 
     public async Task<BusinessResult> ImportLecturers(IFormFile file)
     {
-        try
+       try
         {
             List<User> users = new List<User>();
             List<User> existingUsers = new List<User>();
             Dictionary<string, User> userDictionary = new Dictionary<string, User>();
             var usersQueryable = await _userRepository.GetQueryable().ToListAsync();
-
+            
             foreach (var user in usersQueryable)
             {
                 userDictionary.Add(user.Email, user);
             }
-
+            
             var roleLecture = await _unitOfWork.RoleRepository.GetByRoleName("Lecturer");
             if (roleLecture == null)
             {
