@@ -20,7 +20,7 @@ public interface IUserService : IBaseService
     
     Task<BusinessResult> GetByEmail<TResult>(string email) where TResult : BaseResult;
 
-    Task<BusinessResult> CheckUserProjectSlotAvailability(Guid? userId);
+    Task<BusinessResult> CheckMentorAndSubMentorSlotAvailability(Guid mentorId, Guid? subMentorId);
     
     //
     // Task<BusinessResult> GetByUsername(string username);
