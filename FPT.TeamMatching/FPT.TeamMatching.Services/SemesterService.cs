@@ -53,15 +53,15 @@ namespace FPT.TeamMatching.Services
                 var semesterPrefix = semester.SemesterPrefixName;
                     
                 //get so luong idea dc duyet approve cua ki
-                var numberOfIdeas = await _unitOfWork.IdeaRepository.NumberApprovedIdeasOfSemester(semester.Id);
+                var numberOfTopics = _unitOfWork.TopicRepository.NumberOfTopicBySemesterId(semester.Id);
 
                 // Tạo số thứ tự tiếp theo
-                int nextNumberIdea = numberOfIdeas + 1;
+                int nextNumberTopic = numberOfTopics + 1;
 
                 // Tạo mã Idea mới theo định dạng:
                 // semesterPrefix + semesterCode + "SE" + số thứ tự (2 chữ số)
-                string newIdeaCode = $"{semesterPrefix}{semesterCode}SE{nextNumberIdea:D2}";
-                return newIdeaCode;
+                string newTopicCode = $"{semesterPrefix}{semesterCode}SE{nextNumberTopic:D2}";
+                return newTopicCode;
             }
             catch (Exception ex)
             {

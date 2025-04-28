@@ -9,6 +9,7 @@ using FPT.TeamMatching.Domain.Models.Requests.Commands.Notifications;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Projects;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Topics;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Ideas;
+using FPT.TeamMatching.Domain.Models.Requests.Queries.IdeaVersionRequest;
 using FPT.TeamMatching.Domain.Models.Responses;
 using FPT.TeamMatching.Domain.Models.Results;
 using FPT.TeamMatching.Domain.Models.Results.Bases;
@@ -34,6 +35,7 @@ public class IdeaService : BaseService<Idea>, IIdeaService
     private readonly IProjectService _projectService;
     private readonly ISemesterService _semesterService;
     private readonly ITopicService _topicService;
+    private readonly IUserService _userService;
     private readonly ILogger<IdeaService> _logger;
 
     public IdeaService(IMapper mapper, IUnitOfWork unitOfWork,
@@ -41,6 +43,7 @@ public class IdeaService : BaseService<Idea>, IIdeaService
         ISemesterService semesterService,
         ITopicService topicService,
         INotificationService notificationService,
+        IUserService userService,
         ILogger<IdeaService> logger
     ) : base(mapper,
         unitOfWork)
@@ -58,9 +61,10 @@ public class IdeaService : BaseService<Idea>, IIdeaService
         _projectService = projectService;
         _semesterService = semesterService;
         _topicService = topicService;
+        _userService = userService;
         _logger = logger;
     }
-    
+
     #region Queries
 
     public async Task<BusinessResult> GetIdeasByUserId()
@@ -98,178 +102,39 @@ public class IdeaService : BaseService<Idea>, IIdeaService
     }
 
 
+    #region Create-by-student
+
     public async Task<BusinessResult> CreatePendingByStudent(IdeaStudentCreatePendingCommand ideaCreateModel)
     {
         try
         {
-            //lay ra stageIdea hien tai
-            var stageIdea = await _stageIdeaRepositoty.GetCurrentStageIdea();
-            if (stageIdea == null)
+            // 1. Validate stage and semester
+            var (stageIdea, semester) = await GetCurrentStageAndSemester();
+            if (stageIdea == null || semester == null)
             {
-                return new ResponseBuilder()
-                    .WithStatus(Const.FAIL_CODE)
-                    .WithMessage("Không có đợt duyệt ứng với ngày hiện tại");
+                return HandlerFail("Không tìm thấy đợt duyệt hoặc kì tương ứng");
             }
 
-            //ki cua stage idea
-            var semester = await _semesterRepository.GetSemesterByStageIdeaId(stageIdea.Id);
-            if (semester == null)
+            // 2. Validate student's existing ideas
+            var validationError = await ValidateStudentIdeas(ideaCreateModel, stageIdea.Id, semester.Id);
+            if (validationError.Status != 1)
             {
-                return new ResponseBuilder()
-                    .WithStatus(Const.FAIL_CODE)
-                    .WithMessage("Không có kì ứng với đợt duyệt hiện tại");
+                return validationError;
             }
 
-            //check student co idea approve trong ki nay k
-            var userId = GetUserIdFromClaims();
-            var ideaApprovedInSemester =
-                await _ideaRepository.GetIdeaApproveInSemesterOfUser((Guid)userId, semester.Id);
-            if (ideaApprovedInSemester != null)
-            {
-                return new ResponseBuilder()
-                    .WithStatus(Const.FAIL_CODE)
-                    .WithMessage("Sinh viên đã có đề tài được duyệt trong kì này");
-            }
+            // 3. Create and save idea
+            var idea = await CreateIdea(ideaCreateModel);
+            if (!await _unitOfWork.SaveChanges()) return HandlerFail("Lưu không thành công idea");
 
-            //check student co idea dang pending trong dot duyet nay k
-            var ideaPendingInStageIdea =
-                await _ideaRepository.GetIdeaPendingInStageIdeaOfUser((Guid)userId, (Guid)stageIdea.Id);
-            if (ideaPendingInStageIdea != null)
-            {
-                return new ResponseBuilder()
-                    .WithStatus(Const.FAIL_CODE)
-                    .WithMessage("Sinh viên có đề tài đang trong quá trình duyệt ở kì này");
-            }
+            // 4. Create and save idea version
+            var ideaVersion = await CreateIdeaVersion(ideaCreateModel, idea.Id, stageIdea.Id);
+            if (!await _unitOfWork.SaveChanges()) return HandlerFail("Lưu không thành công idea version");
 
-            //var ideaEntity = _mapper.Map<Idea>(idea);
-            //if (ideaEntity == null)
-            //{
-            //    return new ResponseBuilder()
-            //        .WithStatus(Const.FAIL_CODE)
-            //        .WithMessage(Const.FAIL_SAVE_MSG);
-            //}
 
-            //tao Idea
-            var idea = new Idea
-            {
-                Id = Guid.NewGuid(),
-                MentorId = ideaCreateModel.MentorId,
-                SpecialtyId = ideaCreateModel.SpecialtyId,
-                Status = IdeaStatus.Pending,
-                OwnerId = userId,
-                Type = IdeaType.Student,
-                IsExistedTeam = true,
-                IsEnterpriseTopic = false
-            };
-            await SetBaseEntityForCreation(idea);
-            _ideaRepository.Add(idea);
-            var saveChange = await _unitOfWork.SaveChanges();
-            if (!saveChange)
-            {
-                return new ResponseBuilder()
-                    .WithStatus(Const.FAIL_CODE)
-                    .WithMessage(Const.FAIL_SAVE_MSG);
-            }
-
-            //tao IdeaVersion
-            var ideaVersion = new IdeaVersion
-            {
-                Id = Guid.NewGuid(),
-                IdeaId = idea.Id,
-                StageIdeaId = stageIdea.Id,
-                Version = 1,
-                VietNamName = ideaCreateModel.VietNamName,
-                EnglishName = ideaCreateModel.EnglishName,
-                Description = ideaCreateModel.Description,
-                Abbreviations = ideaCreateModel.Abbreviations,
-                File = ideaCreateModel.File,
-                TeamSize = ideaCreateModel.TeamSize,
-            };
-
-            await SetBaseEntityForCreation(ideaVersion);
-            _ideaVersionRepository.Add(ideaVersion);
-            saveChange = await _unitOfWork.SaveChanges();
-            if (!saveChange)
-            {
-                return new ResponseBuilder()
-                    .WithStatus(Const.FAIL_CODE)
-                    .WithMessage(Const.FAIL_SAVE_MSG);
-            }
-
-            //tao IdeaVersionRequest cho mentor
-            var ideaVersionRequest = new IdeaVersionRequest
-            {
-                IdeaVersionId = ideaVersion.Id,
-                ReviewerId = idea.MentorId,
-                CriteriaFormId = semester.CriteriaFormId,
-                Status = IdeaVersionRequestStatus.Pending,
-                Role = "Mentor",
-            };
-            await SetBaseEntityForCreation(ideaVersionRequest);
-            _ideaVersionRequestRepository.Add(ideaVersionRequest);
-            saveChange = await _unitOfWork.SaveChanges();
-            if (!saveChange)
-            {
-                return new ResponseBuilder()
-                    .WithStatus(Const.FAIL_CODE)
-                    .WithMessage(Const.FAIL_SAVE_MSG);
-            }
-            //tao IdeaVersionRequest cho submentor (neu co)
-            //var ideaVersionRequest = new IdeaVersionRequest
-            //{
-            //    IdeaVersionId = ideaVersion.Id,
-            //    ReviewerId = idea.SubMentorId,
-            //    CriteriaFormId = semester.CriteriaFormId,
-            //    Status = IdeaVersionRequestStatus.Pending,
-            //    Role = "SubMentor",
-            //};
-
-            #region cmt
-
-            //ideaEntity.StageIdeaId = stageIdea.Id;
-            //ideaEntity.Status = IdeaStatus.Pending;
-            //ideaEntity.OwnerId = userId;
-            //ideaEntity.Type = IdeaType.Student;
-            //ideaEntity.IsExistedTeam = true;
-            //ideaEntity.IsEnterpriseTopic = false;
-            //await SetBaseEntityForCreation(ideaEntity);
-            //_ideaRepository.Add(ideaEntity);
-
-            //var saveChange = await _unitOfWork.SaveChanges();
-            //if (!saveChange)
-            //{
-            //    return new ResponseBuilder()
-            //        .WithStatus(Const.FAIL_CODE)
-            //        .WithMessage(Const.FAIL_SAVE_MSG);
-            //}
-
-            //var ideaVersion = await CreateIdeaVersion(ideaEntity.Id, stageIdea.Id);
-
-            // Tạo IdeaVersionRequest cho mentor
-            //var mentorRequest = await CreateIdeaVersionRequest(
-            //    ideaVersion.Id, 
-            //    ideaEntity.MentorId, 
-            //    "Mentor");
-
-            // Nếu có submentor thì tạo request cho submentor
-            //if (ideaEntity.SubMentorId != null)
-            //{
-            //    var subMentorRequest = await CreateIdeaVersionRequest(
-            //        ideaVersion.Id, 
-            //        ideaEntity.SubMentorId, 
-            //        "SubMentor");
-            //}
-
-            #endregion
-
-            //gửi noti cho mentor
-            var command = new NotificationCreateForIndividual
-            {
-                UserId = idea.MentorId,
-                Description = "Đề tài " + ideaVersion.Abbreviations + " đang chờ bạn duyệt với vai trò Mentor",
-            };
-            await _notificationService.CreateForUser(command);
-            //gửi noti cho submentor (nếu có)
+            // 5. Create requests and notifications
+            await CreateVersionRequests(idea, ideaVersion.Id, semester.CriteriaFormId.Value);
+            if (!await _unitOfWork.SaveChanges()) return HandlerFail("Lưu không thành công idea version request");
+            await SendNotifications(idea, ideaVersion.Abbreviations);
 
             return new ResponseBuilder()
                 .WithStatus(Const.SUCCESS_CODE)
@@ -277,215 +142,297 @@ public class IdeaService : BaseService<Idea>, IIdeaService
         }
         catch (Exception ex)
         {
-            var errorMessage = $"An error occurred while updating : {ex.Message}";
-            return new ResponseBuilder()
-                .WithStatus(Const.FAIL_CODE)
-                .WithMessage(errorMessage);
+            return HandlerError($"Lỗi khi tạo đề tài: {ex.Message}");
         }
     }
 
-    private async Task<IdeaVersion> CreateIdeaVersion(Guid ideaId, Guid stageIdeaId)
+// Helper methods
+
+
+    private async Task<BusinessResult> ValidateStudentIdeas(IdeaStudentCreatePendingCommand model, Guid stageIdeaId,
+        Guid semesterId)
+    {
+        var userId = GetUserIdFromClaims();
+
+        if (await _ideaRepository.GetIdeaApproveInSemesterOfUser(userId, semesterId) != null)
+        {
+            return HandlerFail("Sinh viên đã có đề tài được duyệt trong kì này");
+        }
+
+        if (await _ideaRepository.GetIdeaPendingInStageIdeaOfUser(userId, stageIdeaId) != null)
+        {
+            return HandlerFail("Sinh viên có đề tài đang trong quá trình duyệt ở kì này");
+        }
+
+        if (model.MentorId == null) return HandlerFail("Bat buoc phai nhap mentorId");
+        // Check Mentor và sub
+        var resBool = await _userService.CheckMentorAndSubMentorSlotAvailability(model.MentorId.Value,
+            model.SubMentorId);
+        if (resBool.Status != 1 || resBool.Data == null) return resBool;
+        var isHasSlot = resBool.Data is bool;
+        if (!isHasSlot) return HandlerFail(resBool.Message);
+
+        return new ResponseBuilder()
+            .WithStatus(Const.SUCCESS_CODE)
+            .WithMessage(Const.SUCCESS_SAVE_MSG);
+    }
+
+    private async Task<Idea> CreateIdea(IdeaStudentCreatePendingCommand model)
+    {
+        var idea = new Idea
+        {
+            Id = Guid.NewGuid(),
+            MentorId = model.MentorId,
+            SubMentorId = model.SubMentorId,
+            SpecialtyId = model.SpecialtyId,
+            Status = IdeaStatus.Pending,
+            OwnerId = GetUserIdFromClaims(),
+            Type = IdeaType.Student,
+            IsExistedTeam = true,
+            IsEnterpriseTopic = false
+        };
+
+        await SetBaseEntityForCreation(idea);
+        _ideaRepository.Add(idea);
+        return idea;
+    }
+
+    private async Task<IdeaVersion> CreateIdeaVersion(
+        IdeaStudentCreatePendingCommand model, Guid ideaId, Guid stageIdeaId)
     {
         var ideaVersion = new IdeaVersion
         {
+            Id = Guid.NewGuid(),
             IdeaId = ideaId,
             StageIdeaId = stageIdeaId,
-            Version = 1
+            Version = 1,
+            VietNamName = model.VietNamName,
+            EnglishName = model.EnglishName,
+            Description = model.Description,
+            Abbreviations = model.Abbreviations,
+            File = model.File,
+            TeamSize = model.TeamSize,
         };
 
         await SetBaseEntityForCreation(ideaVersion);
         _ideaVersionRepository.Add(ideaVersion);
-
         return ideaVersion;
     }
 
-    private async Task<IdeaVersionRequest> CreateIdeaVersionRequest(
-        Guid ideaVersionId,
-        Guid? reviewerId,
-        string role)
+    private async Task CreateVersionRequests(Idea idea, Guid versionId, Guid criteriaFormId)
     {
-        var ideaVersionRequest = new IdeaVersionRequest
+        // Mentor request
+        var mentorRequest = new IdeaVersionRequest
         {
-            IdeaVersionId = ideaVersionId,
-            ReviewerId = reviewerId,
+            IdeaVersionId = versionId,
+            ReviewerId = idea.MentorId,
+            CriteriaFormId = criteriaFormId,
             Status = IdeaVersionRequestStatus.Pending,
-            Role = role,
-            ProcessDate = DateTime.UtcNow
+            Role = "Mentor",
         };
+        await SetBaseEntityForCreation(mentorRequest);
+        _ideaVersionRequestRepository.Add(mentorRequest);
 
-        await SetBaseEntityForCreation(ideaVersionRequest);
-        _ideaVersionRequestRepository.Add(ideaVersionRequest);
-
-        return ideaVersionRequest;
+        // Submentor request if exists
+        if (idea.SubMentorId.HasValue)
+        {
+            var subMentorRequest = new IdeaVersionRequest
+            {
+                IdeaVersionId = versionId,
+                ReviewerId = idea.SubMentorId.Value,
+                CriteriaFormId = criteriaFormId,
+                Status = IdeaVersionRequestStatus.Pending,
+                Role = "SubMentor",
+            };
+            await SetBaseEntityForCreation(subMentorRequest);
+            _ideaVersionRequestRepository.Add(subMentorRequest);
+        }
     }
 
+    #endregion
+
+    #region Create-by-lecturer
 
     public async Task<BusinessResult> CreatePendingByLecturer(IdeaLecturerCreatePendingCommand ideaCreateModel)
     {
         try
         {
-            //lay ra stageIdea hien tai
-            var stageIdea = await _stageIdeaRepositoty.GetCurrentStageIdea();
-            if (stageIdea == null)
+            // 1. Validate stage and semester
+            var (stageIdea, semester) = await GetCurrentStageAndSemester();
+            if (stageIdea == null || semester == null) return HandlerFail("Không tìm thấy đợt duyệt hoặc kì tương ứng");
+
+            // 2. Validate lecturer-specific rules
+            var validationError = await ValidateLecturerRules(ideaCreateModel);
+            if (validationError.Status != 1)
             {
-                return new ResponseBuilder()
-                    .WithStatus(Const.FAIL_CODE)
-                    .WithMessage("Không có đợt duyệt ứng với ngày hiện tại");
+                return validationError;
             }
 
-            //ki cua stage idea
-            var semester = await _semesterRepository.GetSemesterByStageIdeaId(stageIdea.Id);
-            if (semester == null)
+            // 3. Create and save idea
+            var idea = await CreateLecturerIdea(ideaCreateModel);
+            if (!await _unitOfWork.SaveChanges()) return HandlerFail("Lưu không thành công idea");
+
+            // 4. Create and save idea version
+            var ideaVersion = await CreateLecturerIdeaVersion(ideaCreateModel, idea.Id, stageIdea.Id);
+            if (!await _unitOfWork.SaveChanges()) return HandlerFail("Lưu không thành công idea version");
+
+            // 5. Create requests and notifications (mentor auto-approved for lecturer)
+            await CreateLecturerVersionRequests(idea, ideaVersion.Id, semester.CriteriaFormId.Value);
+            if (!await _unitOfWork.SaveChanges()) return HandlerFail("Lưu không thành công idea version request");
+
+            // No need to notify mentor as it's auto-approved
+            if (idea.SubMentorId.HasValue)
             {
-                return new ResponseBuilder()
-                    .WithStatus(Const.FAIL_CODE)
-                    .WithMessage("Không có kì ứng với đợt duyệt hiện tại");
+                await SendNotifications(idea, ideaVersion.Abbreviations);
             }
 
-            //check đề tài đki thứ 5 phải có submentor
-            var userId = GetUserIdFromClaims();
-            var numberOfIdeaMentorOrOwner = await _ideaRepository.NumberOfIdeaMentorOrOwner((Guid)userId);
-            if (numberOfIdeaMentorOrOwner > 4)
-            {
-                //k co submentor
-                if (ideaCreateModel.SubMentorId == null)
-                {
-                    return new ResponseBuilder()
-                        .WithStatus(Const.FAIL_CODE)
-                        .WithMessage("Đề tài thứ 5 trở lên cần có submentor");
-                }
-
-                //k tim thay submentor
-                var submentor = await _userRepository.GetById((Guid)ideaCreateModel.SubMentorId);
-                if (submentor == null)
-                {
-                    return new ResponseBuilder()
-                        .WithStatus(Const.FAIL_CODE)
-                        .WithMessage("Không tồn tại submentor");
-                }
-            }
-
-            //check đề tài doanh nghiệp thì phải nhập tên doanh nghiệp
-            if (ideaCreateModel.IsEnterpriseTopic)
-            {
-                if (ideaCreateModel.EnterpriseName == null)
-                {
-                    return new ResponseBuilder()
-                        .WithStatus(Const.FAIL_CODE)
-                        .WithMessage("Đề tài doanh nghiệp cần nhập tên doanh nghiệp");
-                }
-            }
-
-            //tao Idea
-            var idea = new Idea
-            {
-                Id = Guid.NewGuid(),
-                MentorId = userId,
-                SpecialtyId = ideaCreateModel.SpecialtyId,
-
-                Status = IdeaStatus.Pending,
-                OwnerId = userId,
-                IsExistedTeam = false,
-                IsEnterpriseTopic = ideaCreateModel.IsEnterpriseTopic,
-            };
-            if (idea.IsEnterpriseTopic)
-            {
-                idea.Type = IdeaType.Enterprise;
-            }
-            else
-            {
-                idea.Type = IdeaType.Lecturer;
-            }
-
-            await SetBaseEntityForCreation(idea);
-            _ideaRepository.Add(idea);
-            var saveChange = await _unitOfWork.SaveChanges();
-            if (!saveChange)
-            {
-                return new ResponseBuilder()
-                    .WithStatus(Const.FAIL_CODE)
-                    .WithMessage(Const.FAIL_SAVE_MSG);
-            }
-
-            //tao IdeaVersion
-            var ideaVersion = new IdeaVersion
-            {
-                Id = Guid.NewGuid(),
-                IdeaId = idea.Id,
-                StageIdeaId = stageIdea.Id,
-                Version = 1,
-                VietNamName = ideaCreateModel.VietNamName,
-                EnglishName = ideaCreateModel.EnglishName,
-                Description = ideaCreateModel.Description,
-                Abbreviations = ideaCreateModel.Abbreviations,
-                File = ideaCreateModel.File,
-                TeamSize = ideaCreateModel.TeamSize,
-            };
-            if (idea.IsEnterpriseTopic)
-            {
-                ideaVersion.EnterpriseName = ideaCreateModel.EnterpriseName;
-            }
-
-            await SetBaseEntityForCreation(ideaVersion);
-            _ideaVersionRepository.Add(ideaVersion);
-            saveChange = await _unitOfWork.SaveChanges();
-            if (!saveChange)
-            {
-                return new ResponseBuilder()
-                    .WithStatus(Const.FAIL_CODE)
-                    .WithMessage(Const.FAIL_SAVE_MSG);
-            }
-
-            //tao IdeaVersionRequest cho mentor
-            var ideaVersionRequest = new IdeaVersionRequest
-            {
-                IdeaVersionId = ideaVersion.Id,
-                ReviewerId = idea.MentorId,
-                CriteriaFormId = semester.CriteriaFormId,
-                Status = IdeaVersionRequestStatus.Approved,
-                Role = "Mentor",
-            };
-            await SetBaseEntityForCreation(ideaVersionRequest);
-            _ideaVersionRequestRepository.Add(ideaVersionRequest);
-
-            saveChange = await _unitOfWork.SaveChanges();
-            if (!saveChange)
-            {
-                return new ResponseBuilder()
-                    .WithStatus(Const.FAIL_CODE)
-                    .WithMessage(Const.FAIL_SAVE_MSG);
-            }
-            //tao IdeaVersionRequest cho submentor (neu co)
-            //var ideaVersionRequest = new IdeaVersionRequest
-            //{
-            //    IdeaVersionId = ideaVersion.Id,
-            //    ReviewerId = idea.SubMentorId,
-            //    CriteriaFormId = semester.CriteriaFormId,
-            //    Status = IdeaVersionRequestStatus.Pending,
-            //    Role = "SubMentor",
-            //};
-
-            //gửi noti cho submentor (nếu có)
-            //var command = new NotificationCreateCommand
-            //{
-            //    UserId = userId,
-            //    Description = "Test, create idea",
-            //    Type = NotificationType.General,
-            //    IsRead = false,
-            //};
-            //await _notificationService.CreateOrUpdate<NotificationResult>(command);
             return new ResponseBuilder()
                 .WithStatus(Const.SUCCESS_CODE)
                 .WithMessage(Const.SUCCESS_SAVE_MSG);
         }
         catch (Exception ex)
         {
-            var errorMessage = $"An error occurred while updating : {ex.Message}";
-            return new ResponseBuilder()
-                .WithStatus(Const.FAIL_CODE)
-                .WithMessage(errorMessage);
+            return HandlerError($"Lỗi khi tạo đề tài: {ex.Message}");
         }
     }
+
+    private async Task<BusinessResult> ValidateLecturerRules(IdeaLecturerCreatePendingCommand model)
+    {
+        var userId = GetUserIdFromClaims();
+        if (userId == null)
+            return HandlerFailAuth();
+
+        // Validate submentor exists if provided
+        if (model.SubMentorId.HasValue)
+        {
+            var submentor = await _userRepository.GetById(model.SubMentorId.Value);
+            if (submentor == null)
+                return HandlerFail("Không tồn tại submentor");
+        }
+
+        // Check if this is 5th+ idea and needs submentor
+        // var numberOfIdeas = await _ideaRepository.NumberOfIdeaMentorOrOwner(userId.Value);
+        // if (numberOfIdeas > 4 && model.SubMentorId == null)
+        //     return HandlerFail("Đề tài thứ 5 trở lên cần có submentor");
+
+        // Check Mentor và sub
+        var resBool = await _userService.CheckMentorAndSubMentorSlotAvailability(userId.Value,
+            model.SubMentorId);
+        if (resBool.Status != 1 || resBool.Data == null) return resBool;
+        var isHasSlot = resBool.Data is bool;
+        if (!isHasSlot) return HandlerFail(resBool.Message);
+
+        // Check enterprise topic requirements
+        if (model.IsEnterpriseTopic && string.IsNullOrEmpty(model.EnterpriseName))
+            return HandlerFail("Đề tài doanh nghiệp cần nhập tên doanh nghiệp");
+
+        return new ResponseBuilder()
+            .WithStatus(Const.SUCCESS_CODE)
+            .WithMessage(Const.SUCCESS_READ_MSG);
+    }
+
+    private async Task<Idea> CreateLecturerIdea(IdeaLecturerCreatePendingCommand model)
+    {
+        var userId = GetUserIdFromClaims();
+
+        var idea = new Idea
+        {
+            Id = Guid.NewGuid(),
+            MentorId = userId,
+            SubMentorId = model.SubMentorId,
+            SpecialtyId = model.SpecialtyId,
+            Status = IdeaStatus.Pending,
+            OwnerId = userId,
+            IsExistedTeam = false,
+            IsEnterpriseTopic = model.IsEnterpriseTopic,
+            Type = model.IsEnterpriseTopic ? IdeaType.Enterprise : IdeaType.Lecturer
+        };
+
+        await SetBaseEntityForCreation(idea);
+        _ideaRepository.Add(idea);
+        return idea;
+    }
+
+    private async Task<IdeaVersion> CreateLecturerIdeaVersion(
+        IdeaLecturerCreatePendingCommand model, Guid ideaId, Guid stageIdeaId)
+    {
+        var ideaVersion = new IdeaVersion
+        {
+            Id = Guid.NewGuid(),
+            IdeaId = ideaId,
+            StageIdeaId = stageIdeaId,
+            Version = 1,
+            VietNamName = model.VietNamName,
+            EnglishName = model.EnglishName,
+            Description = model.Description,
+            Abbreviations = model.Abbreviations,
+            File = model.File,
+            TeamSize = model.TeamSize,
+            EnterpriseName = model.IsEnterpriseTopic ? model.EnterpriseName : null
+        };
+
+        await SetBaseEntityForCreation(ideaVersion);
+        _ideaVersionRepository.Add(ideaVersion);
+        return ideaVersion;
+    }
+
+    private async Task CreateLecturerVersionRequests(Idea idea, Guid versionId, Guid criteriaFormId)
+    {
+        var mentorRequest = new IdeaVersionRequest
+        {
+            IdeaVersionId = versionId,
+            ReviewerId = idea.MentorId,
+            CriteriaFormId = criteriaFormId,
+            Status = IdeaVersionRequestStatus.Approved, // Auto-approved for lecturer
+            Role = "Mentor",
+        };
+        await SetBaseEntityForCreation(mentorRequest);
+        _ideaVersionRequestRepository.Add(mentorRequest);
+
+        if (idea.SubMentorId.HasValue)
+        {
+            var subMentorRequest = new IdeaVersionRequest
+            {
+                IdeaVersionId = versionId,
+                ReviewerId = idea.SubMentorId.Value,
+                CriteriaFormId = criteriaFormId,
+                Status = IdeaVersionRequestStatus.Pending,
+                Role = "SubMentor",
+            };
+            await SetBaseEntityForCreation(subMentorRequest);
+            _ideaVersionRequestRepository.Add(subMentorRequest);
+        }
+    }
+
+    #endregion
+
+    private async Task<(StageIdea? stageIdea, Semester? semester)> GetCurrentStageAndSemester()
+    {
+        var stageIdea = await _stageIdeaRepositoty.GetCurrentStageIdea();
+        if (stageIdea == null) return (null, null);
+
+        var semester = await _semesterRepository.GetSemesterByStageIdeaId(stageIdea.Id);
+        return (stageIdea, semester);
+    }
+
+    private async Task SendNotifications(Idea idea, string abbreviations)
+    {
+        await _notificationService.CreateForUser(new NotificationCreateForIndividual
+        {
+            UserId = idea.MentorId,
+            Description = $"Đề tài {abbreviations} đang chờ bạn duyệt với vai trò Mentor",
+        });
+
+        if (idea.SubMentorId.HasValue)
+        {
+            await _notificationService.CreateForUser(new NotificationCreateForIndividual
+            {
+                UserId = idea.SubMentorId.Value,
+                Description = $"Đề tài {abbreviations} đang chờ bạn duyệt với vai trò SubMentor",
+            });
+        }
+    }
+
 
     public async Task<BusinessResult> GetUserIdeasByStatus(IdeaGetListForUserByStatus query)
     {
@@ -646,7 +593,7 @@ public class IdeaService : BaseService<Idea>, IIdeaService
                 .WithMessage(errorMessage);
         }
     }
-    
+
     #endregion
 
     private const double APPROVAL_THRESHOLD = 0.5;
@@ -707,8 +654,10 @@ public class IdeaService : BaseService<Idea>, IIdeaService
         try
         {
             var ideaVersionCurrent = _ideaVersionRepository.GetQueryable()
-                .FirstOrDefault(m => m.IdeaId == idea.Id && m.StageIdeaId == stageIdeaCurrent.Id && !m.IsDeleted);
-
+                .Where(m => m.IdeaId == idea.Id &&
+                            !m.IsDeleted)
+                .OrderByDescending(m => m.Version)
+                .FirstOrDefault();
             if (ideaVersionCurrent == null) return;
 
             if (status == IdeaStatus.Approved)
@@ -730,8 +679,31 @@ public class IdeaService : BaseService<Idea>, IIdeaService
         if (idea.Owner?.UserXRoles?.Any(e => e.Role?.RoleName == "Student") != true)
             return;
 
+        var ideaVersionsOfIdea = await _ideaVersionRepository.GetIdeaVersionsByIdeaId(ideaVersion.IdeaId.Value);
+        var ideaVersionListId = ideaVersionsOfIdea.Select(m => m.Id).ToList().ConvertAll<Guid?>(x => x);
+        var existingTopics = await _unitOfWork.TopicRepository.GetTopicByIdeaVersionId(ideaVersionListId);
+
+        if (existingTopics.Count > 0)
+        {
+            var topic = existingTopics[0];
+            topic.IdeaVersionId = ideaVersion.Id;
+            _unitOfWork.TopicRepository.Update(topic);
+            await _unitOfWork.SaveChanges();
+        }
+
+
         // Kiểm tra xem IdeaVersion đã có Topic chưa
-        var existingTopic = await _topicRepository.GetQueryable().SingleOrDefaultAsync(m => m.IdeaVersionId == ideaVersion.Id);
+        var existingTopic = await _topicRepository.GetQueryable()
+            .SingleOrDefaultAsync(m => m.IdeaVersionId == ideaVersion.Id);
+
+        var existingTopicFilterds = existingTopics.Where(m => m.Id != existingTopic?.Id).ToList();
+        if (existingTopicFilterds.Count != 0)
+        {
+            // remove
+            _unitOfWork.TopicRepository.DeleteRangePermanently(existingTopicFilterds);
+            await _unitOfWork.SaveChanges();
+        }
+
         TopicResult? topicResult = null;
 
         if (existingTopic == null)
@@ -741,7 +713,7 @@ public class IdeaService : BaseService<Idea>, IIdeaService
         }
         else
         {
-            topicResult = new TopicResult 
+            topicResult = new TopicResult
             {
                 Id = existingTopic.Id,
                 TopicCode = existingTopic.TopicCode
@@ -756,7 +728,36 @@ public class IdeaService : BaseService<Idea>, IIdeaService
         }
         else
         {
-            await UpdateExistingProject(existedProject, topicResult);
+            await UpdateExistingProject(existedProject, stageIdea, topicResult);
+        }
+    }
+
+    public async Task<BusinessResult> GetIdeasOfReviewerByRolesAndStatus<TResult>(
+        IdeaGetListByStatusAndRoleQuery query) where TResult : BaseResult
+    {
+        try
+        {
+            var userIdClaims = GetUserIdFromClaims();
+            var userId = userIdClaims.Value;
+            var (data, total) =
+                await _ideaRepository.GetIdeasOfReviewerByRolesAndStatus(query,
+                    userId);
+
+            var results = _mapper.Map<List<TResult>>(data);
+
+            var response = new QueryResult(query, results, total);
+
+            return new ResponseBuilder()
+                .WithData(response)
+                .WithStatus(Const.SUCCESS_CODE)
+                .WithMessage(Const.SUCCESS_READ_MSG);
+        }
+        catch (Exception ex)
+        {
+            var errorMessage = $"An error occurred in {typeof(TResult).Name}: {ex.Message}";
+            return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage(errorMessage);
         }
     }
 
@@ -765,11 +766,16 @@ public class IdeaService : BaseService<Idea>, IIdeaService
         try
         {
             var newTopicCode = await _semesterService.GenerateNewTopicCode(stageIdea.SemesterId);
-            var res = await _topicService.CreateOrUpdate<TopicResult>(new TopicCreateCommand
+            var codeExist = _topicRepository.IsExistedTopicCode(newTopicCode);
+            if (codeExist) return null;
+
+            var topicCreateCommand = new TopicCreateCommand
             {
                 IdeaVersionId = ideaVersion.Id,
-                TopicCode = newTopicCode,
-            });
+                TopicCode = newTopicCode
+            };
+
+            var res = await _topicService.CreateOrUpdate<TopicResult>(topicCreateCommand);
 
             return res.Status == 1 ? res.Data as TopicResult : null;
         }
@@ -796,7 +802,7 @@ public class IdeaService : BaseService<Idea>, IIdeaService
                 TopicId = topicResult.Id,
                 TeamCode = newTeamCode,
                 TeamName = $"{truncatedName}-{Random.Shared.Next(RANDOM_SUFFIX_MIN, RANDOM_SUFFIX_MAX)}",
-                TeamSize = ideaVersion.TeamSize,
+                TeamSize = 1,
                 Status = ProjectStatus.Pending
             };
 
@@ -809,11 +815,14 @@ public class IdeaService : BaseService<Idea>, IIdeaService
         }
     }
 
-    private async Task UpdateExistingProject(Project existingProject, TopicResult topicResult)
+    private async Task UpdateExistingProject(Project existingProject, StageIdea stageIdea, TopicResult topicResult)
     {
         try
         {
+            var newTeamCode = await _semesterService.GenerateNewTeamCode(stageIdea.SemesterId);
             existingProject.TopicId = topicResult.Id;
+            existingProject.TeamCode = newTeamCode;
+            existingProject.Status = ProjectStatus.Pending;
             await SetBaseEntityForUpdate(existingProject);
             _projectRepository.Update(existingProject);
 

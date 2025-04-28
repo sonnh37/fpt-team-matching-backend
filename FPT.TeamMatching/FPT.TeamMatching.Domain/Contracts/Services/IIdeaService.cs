@@ -8,6 +8,7 @@ using FPT.TeamMatching.Domain.Models.Requests.Queries.Ideas;
 using FPT.TeamMatching.Domain.Models.Responses;
 using FPT.TeamMatching.Domain.Models.Results.Bases;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Ideas;
+using FPT.TeamMatching.Domain.Models.Requests.Queries.IdeaVersionRequest;
 
 namespace FPT.TeamMatching.Domain.Contracts.Services
 {
@@ -24,5 +25,8 @@ namespace FPT.TeamMatching.Domain.Contracts.Services
 
         Task AutoUpdateIdeaStatus();
         Task AutoUpdateProjectInProgress();
+
+        Task<BusinessResult> GetIdeasOfReviewerByRolesAndStatus<TResult>(
+            IdeaGetListByStatusAndRoleQuery query) where TResult : BaseResult;
     }
 }

@@ -2,12 +2,14 @@
 using FPT.TeamMatching.Domain.Contracts.Services;
 using FPT.TeamMatching.Domain.Utilities;
 using Hangfire;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FPT.TeamMatching.API.Controllers;
 
 [Route(Const.HANGFIRE)]
 [ApiController]
+[Authorize]
 public class HangfireController : ControllerBase
 {
     private readonly IBackgroundJobClient _backgroundJobClient;

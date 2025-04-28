@@ -23,5 +23,9 @@ namespace FPT.TeamMatching.Domain.Models.Requests.Queries.Semester
 
         public DateTimeOffset? EndDate { get; set; }
 
+        public int LimitTopicMentorOnly { get; set; }
+
+        public int LimitTopicSubMentor { get; set; }
+
     }
 }

@@ -11,7 +11,7 @@ namespace FPT.TeamMatching.API.Controllers;
 
 [Route(Const.API_USERS)]
 [ApiController]
-[AllowAnonymous]
+[Authorize]
 public class UserController : ControllerBase
 {
     private readonly IUserService _userService;
@@ -152,5 +152,12 @@ public class UserController : ControllerBase
     {
         var msg = await _userService.GetSuggestionByEmail(email);
         return Ok(msg);
+    }
+    
+    [HttpGet("check-mentor-and-submentor-slot-availability")]
+    public async Task<IActionResult> CheckUserHasProjects([FromQuery] UserCheckMentorAndSubMentorQuery query)
+    {
+        var hasProjects = await _userService.CheckMentorAndSubMentorSlotAvailability(query.MentorId, query.SubMentorId);
+        return Ok(hasProjects);
     }
 }

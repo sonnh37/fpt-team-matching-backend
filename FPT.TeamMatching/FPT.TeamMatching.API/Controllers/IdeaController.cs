@@ -2,14 +2,17 @@
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Ideas;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Projects;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Ideas;
+using FPT.TeamMatching.Domain.Models.Requests.Queries.IdeaVersionRequest;
 using FPT.TeamMatching.Domain.Models.Results;
 using FPT.TeamMatching.Domain.Utilities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FPT.TeamMatching.API.Controllers;
 
 [Route(Const.API_IDEAS)]
 [ApiController]
+[Authorize]
 public class IdeaController : ControllerBase
 {
     private readonly IIdeaService _service;
@@ -90,6 +93,13 @@ public class IdeaController : ControllerBase
     public async Task<IActionResult> CreatePendingByLecturer([FromBody] IdeaLecturerCreatePendingCommand request)
     {
         var msg = await _service.CreatePendingByLecturer(request);
+        return Ok(msg);
+    }
+    
+    [HttpGet("me/by-status-and-roles")]
+    public async Task<IActionResult> GetIdeaVersionRequestsCurrentByStatusAndRoles([FromQuery] IdeaGetListByStatusAndRoleQuery query)
+    {
+        var msg = await _service.GetIdeasOfReviewerByRolesAndStatus<IdeaResult>(query);
         return Ok(msg);
     }
 

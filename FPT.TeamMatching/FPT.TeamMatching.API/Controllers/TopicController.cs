@@ -1,8 +1,10 @@
 ﻿using FPT.TeamMatching.Domain.Contracts.Services;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Topics;
+using FPT.TeamMatching.Domain.Models.Requests.Queries.Projects;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Topics;
 using FPT.TeamMatching.Domain.Models.Results;
 using FPT.TeamMatching.Domain.Utilities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,6 +12,7 @@ namespace FPT.TeamMatching.API.Controllers
 {
     [Route(Const.API_TOPICS)]
     [ApiController]
+    [Authorize]
     public class TopicController : ControllerBase
     {
         private readonly ITopicService _service;
@@ -61,6 +64,13 @@ namespace FPT.TeamMatching.API.Controllers
         {
             var businessResult = await _service.DeleteById(request.Id, request.IsPermanent);
 
+            return Ok(businessResult);
+        }
+        
+        [HttpGet("me/mentor-topics")]
+        public async Task<IActionResult> GetTopicsForMentor([FromQuery] TopicGetListForMentorQuery query)
+        {
+            var businessResult = await _service.GetTopicsForMentor(query);
             return Ok(businessResult);
         }
 

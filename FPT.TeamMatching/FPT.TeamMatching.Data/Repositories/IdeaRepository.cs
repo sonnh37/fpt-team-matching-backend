@@ -9,6 +9,9 @@ using System.Text.RegularExpressions;
 using FPT.TeamMatching.Domain.Models;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Reviews;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Ideas;
+using FPT.TeamMatching.Domain.Models.Requests.Queries.IdeaVersionRequest;
+using MongoDB.Driver.Linq;
+using NetTopologySuite.Algorithm;
 
 namespace FPT.TeamMatching.Data.Repositories;
 
@@ -70,8 +73,8 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
     {
         var ideas = await _dbContext.Ideas.Where(e => e.OwnerId == userId
                                                       && e.Status == status
-                //sua db
-                //&& e.StageIdeaId == stageIdeaId
+            //sua db
+            //&& e.StageIdeaId == stageIdeaId
             )
             .OrderByDescending(m => m.CreatedDate)
             //.Include(m => m.StageIdea)
@@ -94,7 +97,10 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
 
     public async Task<List<Idea>> GetIdeaWithResultDateIsToday()
     {
-        var today = DateTime.UtcNow;
+        var todayLocalMidnight = DateTime.Now.Date; // VD: 24/4/2024 00:00:00 GMT+7
+
+        // Chuyển sang UTC (VD: 23/4/2024 17:00:00 GMT+0 nếu bạn ở GMT+7)
+        var todayUtcMidnight = todayLocalMidnight.ToUniversalTime();
         var ideas = await GetQueryable()
             .Include(e => e.Owner).ThenInclude(e => e.UserXRoles).ThenInclude(e => e.Role)
             //sua db
@@ -105,16 +111,58 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
                 e.Status == IdeaStatus.Pending &&
                 e.IdeaVersions.Any(iv =>
                     iv.StageIdea != null &&
-                    iv.StageIdea.ResultDate.Year == today.Year &&
-                    iv.StageIdea.ResultDate.Month == today.Month &&
-                    iv.StageIdea.ResultDate.Day == today.Day
+                    iv.StageIdea.ResultDate.Year == todayUtcMidnight.Year &&
+                    iv.StageIdea.ResultDate.Month == todayUtcMidnight.Month &&
+                    iv.StageIdea.ResultDate.Day == todayUtcMidnight.Day
                 )
             ).ToListAsync();
 
         return ideas;
     }
 
-    public async Task<Idea?> GetIdeaPendingInStageIdeaOfUser(Guid userId, Guid stageIdeaId)
+    public async Task<(List<Idea>, int)> GetIdeasOfReviewerByRolesAndStatus(
+        IdeaGetListByStatusAndRoleQuery query, Guid userId)
+    {
+        var queryable = GetQueryable()
+            .Include(i => i.Owner)
+            .Include(i => i.Mentor)
+            .Include(i => i.SubMentor)
+            .Include(i => i.Specialty)
+            .Include(i => i.IdeaVersions)
+            .ThenInclude(iv => iv.StageIdea)
+            .Include(i => i.IdeaVersions).ThenInclude(m => m.Topic).ThenInclude(m => m.Project)
+            .Include(i => i.IdeaVersions)
+            .ThenInclude(iv => iv.IdeaVersionRequests)
+            .ThenInclude(iv => iv.AnswerCriterias)
+            .Where(i => i.IdeaVersions.Any(iv =>
+                iv.IdeaVersionRequests.Any(ivr =>
+                    ivr.Status != null &&
+                    ivr.Role != null &&
+                    query.Roles.Contains(ivr.Role) &&
+                    query.Status == ivr.Status &&
+                    ivr.ReviewerId == userId)));
+
+        // Thêm điều kiện kiểm tra Topic null nếu có role Mentor, 
+        // Mentor: thì chỉ lấy những idea chưa có topic
+        // Council: lấy idea có topic
+        if (query.Roles.Contains("Mentor"))
+        {
+            queryable = queryable.Where(i => i.IdeaVersions.All(iv => iv.Topic == null));
+        }
+
+        queryable = queryable.Where(m => m.Status == query.IdeaStatus);
+
+        queryable = Sort(queryable, query);
+
+        var total = await queryable.CountAsync();
+        var results = query.IsPagination
+            ? await GetQueryablePagination(queryable, query).ToListAsync()
+            : await queryable.ToListAsync();
+
+        return (results, query.IsPagination ? total : results.Count);
+    }
+
+    public async Task<Idea?> GetIdeaPendingInStageIdeaOfUser(Guid? userId, Guid stageIdeaId)
     {
         var idea = await _dbContext.Ideas
             .Include(i => i.IdeaVersions)
@@ -127,7 +175,7 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
         return idea;
     }
 
-    public async Task<Idea?> GetIdeaApproveInSemesterOfUser(Guid userId, Guid semesterId)
+    public async Task<Idea?> GetIdeaApproveInSemesterOfUser(Guid? userId, Guid semesterId)
     {
         var idea = await _dbContext.Ideas
             .Include(i => i.IdeaVersions)
@@ -253,5 +301,39 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
             var results = await queryable.ToListAsync();
             return (results, results.Count);
         }
+    }
+
+    public List<Idea>? GetIdeasOnlyMentorOfUserInSemester(Guid mentorId, Guid semesterId)
+    {
+        var queryable = GetQueryable();
+
+        var ideas = queryable.Include(m => m.IdeaVersions).ThenInclude(m => m.StageIdea).Where(e => e.IsDeleted == false &&
+                                            e.MentorId == mentorId &&
+                                            e.SubMentorId == null &&
+                                            (e.Status == IdeaStatus.Approved || e.Status == IdeaStatus.ConsiderByMentor || e.Status == IdeaStatus.ConsiderByCouncil))
+                                .Where(i => i.IdeaVersions.OrderByDescending(iv => iv.Version).FirstOrDefault() != null);
+
+        var result = ideas.Where(e => e.IdeaVersions.Any(e => e.StageIdea != null &&
+                                                                    e.StageIdea.SemesterId == semesterId))
+                            .ToList();
+
+        return result;
+    }
+
+    public List<Idea>? GetIdeasBeSubMentorOfUserInSemester(Guid subMentorId, Guid semesterId)
+    {
+        var queryable = GetQueryable();
+
+        var ideas = queryable.Where(e => e.IsDeleted == false &&
+                                            e.SubMentorId == subMentorId &&
+                                            (e.Status == IdeaStatus.Approved || e.Status == IdeaStatus.ConsiderByMentor || e.Status == IdeaStatus.ConsiderByCouncil))
+                                .Where(i => i.IdeaVersions != null &&
+                                    i.IdeaVersions.OrderByDescending(iv => iv.Version).FirstOrDefault() != null);
+
+        var result = ideas.Where(e => e.IdeaVersions.Any(e => e.StageIdea != null &&
+                                                                    e.StageIdea.SemesterId == semesterId))
+                            .ToList();
+
+        return result;
     }
 }

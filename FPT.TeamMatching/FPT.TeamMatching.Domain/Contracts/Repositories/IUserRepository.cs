@@ -15,11 +15,13 @@ public interface IUserRepository : IBaseRepository<User>
     Task<List<User>> GetCouncilsForIdeaVersionRequest(Guid ideaVersionId);
     Task<User?> GetReviewerByMatchingEmail(string keyword);
     Task<List<UserIdEmailResult>> GetAllReviewerIdAndUsername();
-
     Task<User?> GetById(Guid id);
 
     Task<List<User>?> GetStudentDoNotHaveTeam();
 
+    Task<User?> GetByIdWithProjects(Guid? userId);
+
     Task<(List<User>, int)> GetAllByCouncilWithIdeaVersionRequestPending(UserGetAllQuery query);
     Task<List<EmailSuggestionModels>> GetAllEmailSuggestions(string email);
+
 }

@@ -4,12 +4,14 @@ using FPT.TeamMatching.Domain.Models.Requests.Queries.Base;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.IdeaVersionRequest;
 using FPT.TeamMatching.Domain.Models.Results;
 using FPT.TeamMatching.Domain.Utilities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FPT.TeamMatching.API.Controllers;
 
 [Route(Const.API_IDEA_VERSION_REQUESTS)]
 [ApiController]
+[Authorize]
 public class IdeaVersionRequestController : ControllerBase
 {
     private readonly IIdeaVersionRequestService _service;
@@ -28,7 +30,7 @@ public class IdeaVersionRequestController : ControllerBase
     }
     
     [HttpGet("me/by-status-and-roles")]
-    public async Task<IActionResult> GetIdeaVersionRequestsCurrentByStatusAndRoles([FromQuery] IdeaVersionRequestGetListByStatusAndRoleQuery query)
+    public async Task<IActionResult> GetIdeaVersionRequestsCurrentByStatusAndRoles([FromQuery] IdeaGetListByStatusAndRoleQuery query)
     {
         var msg = await _service.GetIdeaVersionRequestsForCurrentReviewerByRolesAndStatus<IdeaVersionRequestResult>(query);
         return Ok(msg);
