@@ -9,7 +9,7 @@ namespace FPT.TeamMatching.API.Controllers;
 
 [Route(Const.API_SKILLPROFILES)]
 [ApiController]
-[AllowAnonymous]
+[Authorize]
 public class SkillProfileController : ControllerBase
 {
     private readonly ISkillProfileService _skillProfileService;

@@ -3,6 +3,7 @@ using FPT.TeamMatching.Domain.Models.Requests.Commands.Timelines;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Timelines;
 using FPT.TeamMatching.Domain.Models.Results;
 using FPT.TeamMatching.Domain.Utilities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,6 +11,7 @@ namespace FPT.TeamMatching.API.Controllers
 {
     [Route(Const.API_TIMELINES)]
     [ApiController]
+    [Authorize]
     public class TimelineController : ControllerBase
     {
         private readonly ITimelineService _service;

@@ -3,6 +3,7 @@ using FPT.TeamMatching.Domain.Models.Requests.Commands.UserXRoles;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.UserXRoles;
 using FPT.TeamMatching.Domain.Models.Results;
 using FPT.TeamMatching.Domain.Utilities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,6 +11,7 @@ namespace FPT.TeamMatching.API.Controllers
 {
     [Route(Const.API_USER_X_ROLES)]
     [ApiController]
+    [Authorize]
     public class UserXRoleController : ControllerBase
     {
         private readonly IUserXRoleService _service;

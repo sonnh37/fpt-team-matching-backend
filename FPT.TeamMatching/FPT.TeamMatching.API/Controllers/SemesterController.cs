@@ -11,6 +11,7 @@ namespace FPT.TeamMatching.API.Controllers
 {
     [Route(Const.API_SEMESTERS)]
     [ApiController]
+    [Authorize]
     public class SemesterController : ControllerBase
     {
         private readonly ISemesterService _service;

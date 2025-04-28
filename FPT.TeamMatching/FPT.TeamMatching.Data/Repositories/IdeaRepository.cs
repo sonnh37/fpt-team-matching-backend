@@ -162,7 +162,7 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
         return (results, query.IsPagination ? total : results.Count);
     }
 
-    public async Task<Idea?> GetIdeaPendingInStageIdeaOfUser(Guid userId, Guid stageIdeaId)
+    public async Task<Idea?> GetIdeaPendingInStageIdeaOfUser(Guid? userId, Guid stageIdeaId)
     {
         var idea = await _dbContext.Ideas
             .Include(i => i.IdeaVersions)
@@ -175,7 +175,7 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
         return idea;
     }
 
-    public async Task<Idea?> GetIdeaApproveInSemesterOfUser(Guid userId, Guid semesterId)
+    public async Task<Idea?> GetIdeaApproveInSemesterOfUser(Guid? userId, Guid semesterId)
     {
         var idea = await _dbContext.Ideas
             .Include(i => i.IdeaVersions)

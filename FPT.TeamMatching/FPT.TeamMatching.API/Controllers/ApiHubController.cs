@@ -1,11 +1,13 @@
 using FPT.TeamMatching.Domain.Contracts.Services;
 using FPT.TeamMatching.Domain.Models;
 using FPT.TeamMatching.Domain.Utilities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FPT.TeamMatching.API.Controllers;
 [Route(Const.API_HUBS)]
 [ApiController]
+[Authorize]
 public class ApiHubsController : ControllerBase
 {
     private readonly IApiHubService _service;

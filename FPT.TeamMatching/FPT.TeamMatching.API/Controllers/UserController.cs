@@ -11,7 +11,7 @@ namespace FPT.TeamMatching.API.Controllers;
 
 [Route(Const.API_USERS)]
 [ApiController]
-[AllowAnonymous]
+[Authorize]
 public class UserController : ControllerBase
 {
     private readonly IUserService _userService;

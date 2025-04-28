@@ -1,10 +1,12 @@
 using FPT.TeamMatching.Domain.Contracts.Services;
 using FPT.TeamMatching.Domain.Utilities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FPT.TeamMatching.API.Controllers;
 [Route(Const.API_CONVERSATION_MEMBER)]
 [ApiController]
+[Authorize]
 public class ConversationMemberController : ControllerBase
 {
     private readonly IConversationMemberService _conversationMemberService;
