@@ -154,10 +154,10 @@ public class UserController : ControllerBase
         return Ok(msg);
     }
     
-    [HttpGet("{userId:guid}/check-project-slot-availability")]
-    public async Task<IActionResult> CheckUserHasProjects([FromRoute] Guid? userId)
+    [HttpGet("check-mentor-and-submentor-slot-availability")]
+    public async Task<IActionResult> CheckUserHasProjects([FromQuery] UserCheckMentorAndSubMentorQuery query)
     {
-        var hasProjects = await _userService.CheckUserProjectSlotAvailability(userId);
+        var hasProjects = await _userService.CheckMentorAndSubMentorSlotAvailability(query.MentorId, query.SubMentorId);
         return Ok(hasProjects);
     }
 }

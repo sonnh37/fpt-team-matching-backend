@@ -16,8 +16,11 @@ namespace FPT.TeamMatching.Data.Repositories;
 
 public class UserRepository : BaseRepository<User>, IUserRepository
 {
+    private readonly FPTMatchingDbContext _context;
+
     public UserRepository(FPTMatchingDbContext dbContext) : base(dbContext)
     {
+        _context = dbContext;
     }
 
     public async Task<(List<User>, int)> GetAllByCouncilWithIdeaVersionRequestPending(UserGetAllQuery query)
@@ -230,4 +233,6 @@ public class UserRepository : BaseRepository<User>, IUserRepository
             .ToListAsync();
         return result;
     }
+
+    
 }

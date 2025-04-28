@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using DocumentFormat.OpenXml.Spreadsheet;
 using ExcelDataReader;
 using FPT.TeamMatching.Domain.Contracts.Repositories;
 using FPT.TeamMatching.Domain.Contracts.Services;
@@ -26,6 +27,7 @@ public class UserService : BaseService<User>, IUserService
     private readonly IUserRepository _userRepository;
     private readonly IUserXRoleRepository _userXRoleRepository;
     private readonly ISemesterRepository _semesterRepository;
+    private readonly IIdeaRepository _ideaRepository;
 
     public UserService(IMapper mapper,
         IUnitOfWork unitOfWork)
@@ -35,6 +37,7 @@ public class UserService : BaseService<User>, IUserService
         _roleRepository = _unitOfWork.RoleRepository;
         _userXRoleRepository = _unitOfWork.UserXRoleRepository;
         _semesterRepository = _unitOfWork.SemesterRepository;
+        _ideaRepository = _unitOfWork.IdeaRepository;
     }
 
     public async Task<BusinessResult> GetByEmail<TResult>(string email) where TResult : BaseResult
@@ -62,36 +65,67 @@ public class UserService : BaseService<User>, IUserService
         }
     }
 
-    public async Task<BusinessResult> CheckUserProjectSlotAvailability(Guid? userId)
+    public async Task<BusinessResult> CheckMentorAndSubMentorSlotAvailability(Guid mentorId, Guid? subMentorId)
     {
         try
         {
-            var semesterCurrent = await _semesterRepository.GetCurrentSemester();
-            if (semesterCurrent == null) return HandlerFail("Hiện tại chưa đến kì");
+            var upcomingSemester = await _semesterRepository.GetUpComingSemester();
+            if (upcomingSemester == null) return HandlerFail("Không có kì sắp đến");
 
-            var user = await _userRepository.GetByIdWithProjects(userId);
-            if (user == null) return HandlerFail("Không tìm thấy người dùng");
+            var mentor = await _userRepository.GetByIdWithProjects(mentorId);
+            if (mentor == null) return HandlerFail("Không tìm thấy mentor");
 
-            var numberOfProjects = user.IdeaOfMentors.Count() + user.IdeaOfSubMentors.Count();
-            var numberOfLimit = semesterCurrent.LimitTopicMentorOnly + semesterCurrent.LimitTopicSubMentor;
-            if (numberOfProjects < numberOfLimit)
+            var isMentor = await _userXRoleRepository.CheckRoleUserInSemester(mentorId, upcomingSemester.Id, "Mentor");
+            if (!isMentor)
             {
+                return HandlerFail("Người dùng không phải là Mentor");
+            }
+            //k co submentor
+            if (subMentorId == null)
+            {
+                //check idea(chi co mentor) cua mentor in semester 
+                var ideas = _ideaRepository.GetIdeasOnlyMentorOfUserInSemester(mentorId, upcomingSemester.Id);
+                //
+                if (ideas == null || ideas.Count() <= upcomingSemester.LimitTopicMentorOnly)
+                {
+                    return new ResponseBuilder()
+                    .WithData(true)
+                    .WithStatus(Const.SUCCESS_CODE)
+                    .WithMessage("Còn chỗ");
+                }
                 return new ResponseBuilder()
                     .WithData(false)
                     .WithStatus(Const.SUCCESS_CODE)
-                    .WithMessage("Còn chỗ");
+                    .WithMessage("mentor.Code + \" hiện đã Mentor \" + upcomingSemester.LimitTopicMentorOnly + \" đề tài không có SubMentor. Cần SubMentor cho đề tài của bạn!\"");
             }
 
+            //co submentor
+            var subMentor = await _userRepository.GetByIdWithProjects(subMentorId);
+            if (mentor == null) return HandlerFail("Không tìm thấy SubMentor");
+
+            var isSubMentor = await _userXRoleRepository.CheckRoleUserInSemester((Guid)subMentorId, upcomingSemester.Id, "Mentor");
+            if (!isSubMentor)
+            {
+                return HandlerFail("Người dùng không phải là Mentor");
+            }
+
+            var ideasBeSubMentor = _ideaRepository.GetIdeasBeSubMentorOfUserInSemester((Guid)subMentorId, upcomingSemester.Id);
+            if (ideasBeSubMentor == null || ideasBeSubMentor.Count() <= upcomingSemester.LimitTopicSubMentor)
+            {
+                return new ResponseBuilder()
+                    .WithData(true)
+                    .WithStatus(Const.SUCCESS_CODE)
+                    .WithMessage("Còn chỗ");
+            }
             return new ResponseBuilder()
-                .WithData(true)
-                .WithStatus(Const.SUCCESS_CODE)
-                .WithMessage("Hết chỗ");
+                    .WithData(false)
+                    .WithStatus(Const.SUCCESS_CODE)
+                    .WithMessage(mentor.Code + " hiện đã SubMentor " + upcomingSemester.LimitTopicMentorOnly + " đề tài. Hãy chọn SubMentor khác!");
         }
         catch (Exception ex)
         {
             var errorMessage = $"An error occurred in {typeof(UserResult).Name}: {ex.Message}";
             return new ResponseBuilder()
-                .WithData(false)
                 .WithStatus(Const.FAIL_CODE)
                 .WithMessage(errorMessage);
         }

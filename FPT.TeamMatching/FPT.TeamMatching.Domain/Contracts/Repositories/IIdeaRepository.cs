@@ -35,4 +35,7 @@ public interface IIdeaRepository : IBaseRepository<Idea>
 
     Task<(List<Idea>, int)> GetIdeasOfSupervisors(IdeaGetListOfSupervisorsQuery query);
 
+    List<Idea>? GetIdeasOnlyMentorOfUserInSemester(Guid mentorId, Guid semesterId);
+
+    List<Idea>? GetIdeasBeSubMentorOfUserInSemester(Guid subMentorId, Guid semesterId);
 }

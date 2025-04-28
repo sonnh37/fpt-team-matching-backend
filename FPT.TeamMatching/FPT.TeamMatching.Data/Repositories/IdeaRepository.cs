@@ -11,6 +11,7 @@ using FPT.TeamMatching.Domain.Models.Requests.Commands.Reviews;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Ideas;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.IdeaVersionRequest;
 using MongoDB.Driver.Linq;
+using NetTopologySuite.Algorithm;
 
 namespace FPT.TeamMatching.Data.Repositories;
 
@@ -72,8 +73,8 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
     {
         var ideas = await _dbContext.Ideas.Where(e => e.OwnerId == userId
                                                       && e.Status == status
-                //sua db
-                //&& e.StageIdeaId == stageIdeaId
+            //sua db
+            //&& e.StageIdeaId == stageIdeaId
             )
             .OrderByDescending(m => m.CreatedDate)
             //.Include(m => m.StageIdea)
@@ -148,7 +149,7 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
         {
             queryable = queryable.Where(i => i.IdeaVersions.All(iv => iv.Topic == null));
         }
-        
+
         queryable = queryable.Where(m => m.Status == query.IdeaStatus);
 
         queryable = Sort(queryable, query);
@@ -300,5 +301,40 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
             var results = await queryable.ToListAsync();
             return (results, results.Count);
         }
+    }
+
+    public List<Idea>? GetIdeasOnlyMentorOfUserInSemester(Guid mentorId, Guid semesterId)
+    {
+        var queryable = GetQueryable();
+
+        var ideas = queryable.Where(e => e.IsDeleted == false &&
+                                            e.MentorId == mentorId &&
+                                            e.SubMentorId == null &&
+                                            (e.Status == IdeaStatus.Approved || e.Status == IdeaStatus.ConsiderByMentor || e.Status == IdeaStatus.ConsiderByCouncil))
+                                .Where(i => i.IdeaVersions != null &&
+                                    i.IdeaVersions.OrderByDescending(iv => iv.Version).FirstOrDefault() != null);
+
+        var result = ideas.Where(e => e.IdeaVersions.Any(e => e.StageIdea != null &&
+                                                                    e.StageIdea.SemesterId == semesterId))
+                            .ToList();
+
+        return result;
+    }
+
+    public List<Idea>? GetIdeasBeSubMentorOfUserInSemester(Guid subMentorId, Guid semesterId)
+    {
+        var queryable = GetQueryable();
+
+        var ideas = queryable.Where(e => e.IsDeleted == false &&
+                                            e.SubMentorId == subMentorId &&
+                                            (e.Status == IdeaStatus.Approved || e.Status == IdeaStatus.ConsiderByMentor || e.Status == IdeaStatus.ConsiderByCouncil))
+                                .Where(i => i.IdeaVersions != null &&
+                                    i.IdeaVersions.OrderByDescending(iv => iv.Version).FirstOrDefault() != null);
+
+        var result = ideas.Where(e => e.IdeaVersions.Any(e => e.StageIdea != null &&
+                                                                    e.StageIdea.SemesterId == semesterId))
+                            .ToList();
+
+        return result;
     }
 }
