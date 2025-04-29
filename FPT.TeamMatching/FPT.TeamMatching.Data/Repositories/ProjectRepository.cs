@@ -7,26 +7,26 @@ using FPT.TeamMatching.Domain.Enums;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Projects;
 using FPT.TeamMatching.Domain.Utilities.Filters;
 using Microsoft.EntityFrameworkCore;
+using MongoDB.Driver.Linq;
 
 namespace FPT.TeamMatching.Data.Repositories;
 
 public class ProjectRepository : BaseRepository<Project>, IProjectRepository
 {
     private readonly FPTMatchingDbContext _context;
+    private readonly ISemesterRepository _semesterRepository;
 
-    public ProjectRepository(FPTMatchingDbContext dbContext) : base(dbContext)
+    public ProjectRepository(FPTMatchingDbContext dbContext, ISemesterRepository semesterRepository) : base(dbContext)
     {
         _context = dbContext;
+        _semesterRepository = semesterRepository;
     }
 
     public async Task<Project?> GetProjectByUserIdLogin(Guid userId)
     {
+        
         var teamMember = await _context.TeamMembers.Where(e => e.UserId == userId &&
                                                                e.LeaveDate == null &&
-                                                               //(e.Status != TeamMemberStatus.Failed ||
-                                                               // e.Status != TeamMemberStatus.Passed) &&
-                                                               // (e.Status == TeamMemberStatus.InProgress ||
-                                                               //  e.Status == TeamMemberStatus.Pending ) &&
                                                                (e.Status == TeamMemberStatus.Fail1 ||
                                                                 e.Status == TeamMemberStatus.Pass1 ||
                                                                 e.Status == TeamMemberStatus.Pass2 ||
@@ -36,22 +36,34 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
             .OrderByDescending(m => m.CreatedDate)
             .FirstOrDefaultAsync();
         if (teamMember == null) return null;
+
+        var semesterCurrent = await _semesterRepository.GetCurrentSemester();
+        if (semesterCurrent == null) return null;
+
+        var queryable = GetQueryable().Where(e => e.Id == teamMember.ProjectId);
         
-        var project = await _context.Projects.Where(e => e.Id == teamMember.ProjectId)
-            .Include(e => e.TeamMembers)
+        queryable = queryable.Include(e => e.TeamMembers)
             .ThenInclude(e => e.User)
             .Include(e => e.Invitations)
             .Include(x => x.Reviews)
             .Include(x => x.Topic).ThenInclude(m => m.IdeaVersion)
+            .Include(x => x.Topic).ThenInclude(m => m.IdeaVersion).ThenInclude(m => m.StageIdea)
             .Include(x => x.Topic).ThenInclude(m => m.IdeaVersion).ThenInclude(m => m.Idea)
             .Include(x => x.Topic).ThenInclude(m => m.IdeaVersion).ThenInclude(m => m.Idea)
             .ThenInclude(m => m.Specialty)
             .Include(x => x.Topic).ThenInclude(m => m.IdeaVersion).ThenInclude(m => m.Idea)
-            .ThenInclude(m => m.Specialty).ThenInclude(m => m.Profession)
-            .AsSplitQuery()
-            .FirstOrDefaultAsync();
+            .ThenInclude(m => m.Specialty).ThenInclude(m => m.Profession);
+
+        queryable = queryable.Where(m => m.Topic != null &&
+                                                m.Topic.IdeaVersion != null &&
+                                                m.Topic.IdeaVersion.StageIdea != null &&
+                                                m.Topic.IdeaVersion.StageIdea.SemesterId == semesterCurrent.Id
+        );
         
-        return project;
+        
+            
+        
+        return queryable.FirstOrDefault();
     }
 
     public async Task<List<Project>?> GetProjectsStartingNow()
