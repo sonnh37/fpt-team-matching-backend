@@ -4,6 +4,7 @@ using FPT.TeamMatching.Domain.Models.Requests.Commands.CapstoneSchedules;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.CapstoneSchedules;
 using FPT.TeamMatching.Domain.Models.Results;
 using FPT.TeamMatching.Domain.Utilities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,6 +12,7 @@ namespace FPT.TeamMatching.API.Controllers
 {
     [Route(Const.API_CAPSTONE_SCHEDULES)]
     [ApiController]
+    [Authorize]
     public class CapstoneScheduleController : ControllerBase
     {
         private readonly ICapstoneScheduleService _service;

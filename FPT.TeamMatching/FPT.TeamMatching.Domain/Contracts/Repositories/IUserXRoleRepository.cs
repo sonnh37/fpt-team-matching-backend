@@ -5,4 +5,6 @@ namespace FPT.TeamMatching.Domain.Contracts.Repositories;
 
 public interface IUserXRoleRepository : IBaseRepository<UserXRole>
 {
+    Task<bool> CheckRoleUserInSemester(Guid userId, Guid semester, string role);
+
 }

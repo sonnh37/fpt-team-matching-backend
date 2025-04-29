@@ -18,4 +18,5 @@ public interface IProjectRepository : IBaseRepository<Project>
     //Task<List<Project>?> GetProjectsInFourthWeekByToday();
 
     Task<Project?> GetProjectByTopicId(Guid topicId);
+
 }

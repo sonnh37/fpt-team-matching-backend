@@ -3,6 +3,7 @@ using FPT.TeamMatching.Domain.Models.Requests.Commands.BlogCvs;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.BlogCvs;
 using FPT.TeamMatching.Domain.Models.Results;
 using FPT.TeamMatching.Domain.Utilities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -11,6 +12,7 @@ namespace FPT.TeamMatching.API.Controllers;
 
 [Route(Const.API_BLOGCVS)]
 [ApiController]
+[Authorize]
 public class BlogCvController : ControllerBase
 {
     private readonly IBlogCvService _service;

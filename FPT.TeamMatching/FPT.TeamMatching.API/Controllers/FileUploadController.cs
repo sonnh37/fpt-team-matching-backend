@@ -2,12 +2,14 @@ using FPT.TeamMatching.Domain.Configs;
 using FPT.TeamMatching.Domain.Contracts.Services;
 using FPT.TeamMatching.Domain.Models;
 using FPT.TeamMatching.Domain.Utilities;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FPT.TeamMatching.API.Controllers;
 
 [ApiController]
 [Route(Const.API_FILE_UPLOAD)]
+[Authorize]
 public class FileUploadController : ControllerBase
 {
     private readonly IFileUploadService _fileUploadService;

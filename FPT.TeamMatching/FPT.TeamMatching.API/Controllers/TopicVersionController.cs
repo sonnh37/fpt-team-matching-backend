@@ -11,6 +11,7 @@ namespace FPT.TeamMatching.API.Controllers
 {
     [Route(Const.API_TOPIC_VERSIONS)]
     [ApiController]
+    [Authorize]
     public class TopicVersionController : ControllerBase
     {
         private readonly ITopicVersionService _service;

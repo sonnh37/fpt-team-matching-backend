@@ -11,6 +11,7 @@ namespace FPT.TeamMatching.API.Controllers
 {
     [Route(Const.API_SEMESTERS)]
     [ApiController]
+    [Authorize]
     public class SemesterController : ControllerBase
     {
         private readonly ISemesterService _service;
@@ -38,6 +39,13 @@ namespace FPT.TeamMatching.API.Controllers
         public async Task<IActionResult> GetCurrentSemester()
         {
             var msg = await _service.GetCurrentSemester();
+            return Ok(msg);
+        }
+        
+        [HttpGet("before")]
+        public async Task<IActionResult> GetBeforeSemester()
+        {
+            var msg = await _service.GetBeforeSemester();
             return Ok(msg);
         }
 

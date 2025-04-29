@@ -376,7 +376,7 @@ public class ProjectService : BaseService<Project>, IProjectService
         return dt;
     }
 
-    public async Task<BusinessResult> UpdateDefenStage(UpdateDefenseStage command)
+    public async Task<BusinessResult> UpdateDefenseStage(UpdateDefenseStage command)
     {
         try
         {

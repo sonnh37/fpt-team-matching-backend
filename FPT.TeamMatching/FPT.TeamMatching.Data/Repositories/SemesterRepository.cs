@@ -18,13 +18,16 @@ namespace FPT.TeamMatching.Data.Repositories
         {
         }
         
-        // public async Task<Semester?> GetPresentSemester()
-        // {
-        //     var s = await GetQueryable().Where(e => e.StartDate != null && e.StartDate.Value.LocalDateTime.Date <= DateTime.Now.Date && DateTime.Now.Date <= e.EndDate.Value.LocalDateTime.Date)
-        //                                 .FirstOrDefaultAsync();
-        //     return s;
-        // }
+        public async Task<Semester?> GetBeforeSemester()
+        {
+            var now = new DateOnly(DateTime.UtcNow.Year, DateTime.UtcNow.Month, DateTime.UtcNow.Day);
 
+            // Lấy kì học gần nhất đã kết thúc trước ngày hiện tại
+            return await GetQueryable()
+                .Where(e => DateOnly.FromDateTime(e.EndDate.Value.DateTime) < now)
+                .OrderByDescending(e => e.EndDate)
+                .FirstOrDefaultAsync();
+        }
         public async Task<Semester?> GetSemesterByStageIdeaId(Guid stageIdeaId)
         {
             var s = await GetQueryable()
