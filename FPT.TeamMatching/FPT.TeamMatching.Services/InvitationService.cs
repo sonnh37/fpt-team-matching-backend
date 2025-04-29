@@ -175,7 +175,7 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
             {
                 return new ResponseBuilder()
                     .WithStatus(Const.FAIL_CODE)
-                    .WithMessage("Student has idea");
+                    .WithMessage("Người dùng đã có Idea");
             }
 
             //check student trong teammember in process OR pass
@@ -184,7 +184,7 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
             {
                 return new ResponseBuilder()
                     .WithStatus(Const.FAIL_CODE)
-                    .WithMessage("Student is in team now");
+                    .WithMessage("Người dùng đã có nhóm");
             }
 
             //check project exist
