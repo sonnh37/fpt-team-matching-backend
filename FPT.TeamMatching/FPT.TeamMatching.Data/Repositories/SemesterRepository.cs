@@ -48,10 +48,10 @@ namespace FPT.TeamMatching.Data.Repositories
         
         public async Task<Semester?> GetCurrentSemester()
         {
-            var now = new DateOnly(DateTime.UtcNow.Year, DateTime.UtcNow.Month, DateTime.UtcNow.Day);
+            var now = DateTime.UtcNow;
 
             var semester = await GetQueryable()
-                .Where(e => DateOnly.FromDateTime(e.StartDate.Value.DateTime) <= now && DateOnly.FromDateTime(e.EndDate.Value.DateTime) >= now)
+                .Where(e => e.StartDate <= now && e.EndDate >= now)
                 .OrderByDescending(e => e.StartDate)
                 .FirstOrDefaultAsync();
             return semester;

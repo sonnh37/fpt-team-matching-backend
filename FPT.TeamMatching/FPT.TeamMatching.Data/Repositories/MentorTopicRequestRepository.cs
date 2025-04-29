@@ -16,9 +16,11 @@ namespace FPT.TeamMatching.Data.Repositories
     public class MentorTopicRequestRepository : BaseRepository<MentorTopicRequest>, IMentorTopicRequestRepository
     {
         private readonly IUserRepository _userRepository;
-        
+
         private readonly FPTMatchingDbContext _dbContext;
-        public MentorTopicRequestRepository(FPTMatchingDbContext dbContext, IUserRepository userRepository) : base(dbContext)
+
+        public MentorTopicRequestRepository(FPTMatchingDbContext dbContext, IUserRepository userRepository) :
+            base(dbContext)
         {
             _userRepository = userRepository;
             _dbContext = dbContext;
@@ -27,10 +29,10 @@ namespace FPT.TeamMatching.Data.Repositories
         public async Task<List<MentorTopicRequest>?> GetByIdeaId(Guid ideaId)
         {
             var requests = await _dbContext.MentorTopicRequests.Where(e => e.IsDeleted == false &&
-                                                                //sua db
-                                                                //e.IdeaId == ideaId)
-                                                                e.TopicId == ideaId)
-                                                        .ToListAsync();
+                                                                           //sua db
+                                                                           //e.IdeaId == ideaId)
+                                                                           e.TopicId == ideaId)
+                .ToListAsync();
             return requests;
         }
 
@@ -44,7 +46,8 @@ namespace FPT.TeamMatching.Data.Repositories
             return entity;
         }
 
-        public async Task<(List<MentorTopicRequest>, int)> GetUserMentorTopicRequests(MentorTopicRequestGetAllQuery query,
+        public async Task<(List<MentorTopicRequest>, int)> GetUserMentorTopicRequests(
+            MentorTopicRequestGetAllQuery query,
             Guid userId)
         {
             var queryable = GetQueryable();
@@ -57,32 +60,29 @@ namespace FPT.TeamMatching.Data.Repositories
                     m.ProjectId != null && userProjectIds.Contains(m.ProjectId.Value))
                 .Include(m => m.Project)
                 .Include(m => m.Topic)
-                    .ThenInclude(m => m.IdeaVersion)
-                    .ThenInclude(m => m.Idea);
+                .ThenInclude(m => m.IdeaVersion)
+                .ThenInclude(m => m.Idea);
 
-            if (query.IsPagination)
-            {
-                // Tổng số count sau khi  filter khi chưa lọc trang
-                var totalOrigin = queryable.Count();
-                // Sắp sếp
-                queryable = Sort(queryable, query);
-                // Lọc trang
-                var results = await GetQueryablePagination(queryable, query).ToListAsync();
+            queryable = Sort(queryable, query);
 
-                return (results, totalOrigin);
-            }
-            else
-            {
-                queryable = Sort(queryable, query);
-                var results = await queryable.ToListAsync();
-                return (results, results.Count);
-            }
+            var total = queryable.Count();
+            var results = query.IsPagination
+                ? await GetQueryablePagination(queryable, query).ToListAsync()
+                : await queryable.ToListAsync();
+
+            return (results, query.IsPagination ? total : results.Count);
         }
-        
-        public async Task<(List<MentorTopicRequest>, int)> GetMentorMentorTopicRequests(MentorTopicRequestGetAllQuery query,
+
+        public async Task<(List<MentorTopicRequest>, int)> GetMentorMentorTopicRequests(
+            MentorTopicRequestGetAllQuery query,
             Guid userId)
         {
             var queryable = GetQueryable();
+            queryable = queryable
+                .Include(m => m.Topic)
+                .ThenInclude(m => m.IdeaVersion)
+                .ThenInclude(m => m.Idea)
+                .Include(m => m.Project);
             // Check user of mentor 
 
             var types = new List<IdeaType>
@@ -90,40 +90,27 @@ namespace FPT.TeamMatching.Data.Repositories
                 IdeaType.Enterprise,
                 IdeaType.Lecturer
             };
-            var queryable_idea = GetQueryable<Idea>();
-            // var ideaIdsForMentorWithNoTeam = await queryable_idea.Where(m => !m.IsExistedTeam && m.Type != null
-            //     && types.Contains(m.Type.Value) && m.OwnerId == userId).Select(m => m.Id).ToListAsync();
-            // queryable = queryable.Where(m =>
-            //         m.IdeaId != null && ideaIdsForMentorWithNoTeam.Contains(m.IdeaId.Value))
-            //     .Include(m => m.Project)
-            //     .Include(m => m.Idea);
-            
-            var ideaIds = await queryable_idea.Where(m => m.Type != null
-                && types.Contains(m.Type.Value) && m.OwnerId == userId).Select(m => m.Id).ToListAsync();
+            var queryableIdea = GetQueryable<Idea>();
+
+            var ideaIds = await queryableIdea.Where(m => m.Type != null
+                                                         && types.Contains(m.Type.Value) && m.OwnerId == userId)
+                .Select(m => m.Id).ToListAsync();
+
             queryable = queryable.Where(m =>
-                    //sua db
-                    //m.IdeaId != null && ideaIds.Contains(m.IdeaId.Value))
-                    m.TopicId != null && ideaIds.Contains(m.TopicId.Value))
-                .Include(m => m.Project);
-                //.Include(m => m.Idea);
+                //sua db
+                m.Topic != null &&
+                m.Topic.IdeaVersion != null &&
+                m.Topic.IdeaVersion.IdeaId.HasValue &&
+                ideaIds.Contains(m.Topic.IdeaVersion.IdeaId.Value));
 
-            if (query.IsPagination)
-            {
-                // Tổng số count sau khi  filter khi chưa lọc trang
-                var totalOrigin = queryable.Count();
-                // Sắp sếp
-                queryable = Sort(queryable, query);
-                // Lọc trang
-                var results = await GetQueryablePagination(queryable, query).ToListAsync();
+            queryable = Sort(queryable, query);
 
-                return (results, totalOrigin);
-            }
-            else
-            {
-                queryable = Sort(queryable, query);
-                var results = await queryable.ToListAsync();
-                return (results, results.Count);
-            }
+            var total = queryable.Count();
+            var results = query.IsPagination
+                ? await GetQueryablePagination(queryable, query).ToListAsync()
+                : await queryable.ToListAsync();
+
+            return (results, query.IsPagination ? total : results.Count);
         }
     }
 }
