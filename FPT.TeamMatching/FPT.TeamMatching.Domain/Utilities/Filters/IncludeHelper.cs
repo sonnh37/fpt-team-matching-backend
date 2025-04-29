@@ -191,6 +191,8 @@ public static class IncludeHelper
     {
         queryable = queryable.Include(e => e.TeamMembers)
                                 .ThenInclude(e => e.User)
+                                .ThenInclude(e => e.ProfileStudent)
+                                .ThenInclude(e => e.Specialty)
                             .Include(e => e.Topic)
                                 .ThenInclude(e => e.IdeaVersion)
                                 .ThenInclude(e => e.Idea)
