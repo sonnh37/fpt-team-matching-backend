@@ -127,10 +127,10 @@ public class AuthService : IAuthService
 
                 var currentSemester = await _unitOfWork.SemesterRepository.GetCurrentSemester();
 // Tạo access token với private key
-                var accessToken = CreateToken(result, rsa, "AccessToken", kid, currentSemester.Id);
+                var accessToken = CreateToken(result, rsa, "AccessToken", kid, currentSemester?.Id);
 
 // Tạo refresh token với kid giống access token
-                var refreshTokenValue = CreateToken(result, rsa, "RefreshToken", kid, currentSemester.Id);
+                var refreshTokenValue = CreateToken(result, rsa, "RefreshToken", kid, currentSemester?.Id);
 
 // Lưu refresh token và public key vào database
                 var refreshTokenCreateCommand = new RefreshTokenCreateCommand
@@ -256,8 +256,8 @@ public class AuthService : IAuthService
                     var kid = Convert.ToBase64String(SHA256.HashData(Encoding.UTF8.GetBytes(newPublicKey)));
 
                     var currentSemester = await _unitOfWork.SemesterRepository.GetCurrentSemester();
-                    var newAccessToken = CreateToken(userResult, rsa, "AccessToken", kid, currentSemester.Id);
-                    var newRefreshToken = CreateToken(userResult, rsa, "RefreshToken", kid, currentSemester.Id);
+                    var newAccessToken = CreateToken(userResult, rsa, "AccessToken", kid, currentSemester?.Id);
+                    var newRefreshToken = CreateToken(userResult, rsa, "RefreshToken", kid, currentSemester?.Id);
 
                     refreshTokenEntity.Token = newRefreshToken;
                     refreshTokenEntity.PublicKey = newPublicKey;
@@ -393,7 +393,6 @@ public class AuthService : IAuthService
             }
 
             result = res.Data as UserResult;
-            result = result;
         }
         else
         {
@@ -415,9 +414,9 @@ public class AuthService : IAuthService
                 var kid = Convert.ToBase64String(SHA256.HashData(Encoding.UTF8.GetBytes(publicKey)));
 
                 var currentSemester = await _unitOfWork.SemesterRepository.GetCurrentSemester();
-                var accessToken = CreateToken(result, rsa, "AccessToken", kid, currentSemester.Id);
+                var accessToken = CreateToken(result, rsa, "AccessToken", kid, currentSemester?.Id);
 
-                var refreshTokenValue = CreateToken(result, rsa, "RefreshToken", kid, currentSemester.Id);
+                var refreshTokenValue = CreateToken(result, rsa, "RefreshToken", kid, currentSemester?.Id);
 
                 var refreshTokenCreateCommand = new RefreshTokenCreateCommand
                 {
@@ -762,7 +761,10 @@ public class AuthService : IAuthService
 
                 foreach (var role in semesterRoles)
                 {
-                    claims.Add(new Claim("CurrentSemesterRole", role.Role.RoleName));
+                    if (!string.IsNullOrEmpty(role.Role?.RoleName))
+                    {
+                        claims.Add(new Claim("CurrentSemesterRole", role?.Role?.RoleName));
+                    }
                 }
 
                 // Thêm CurrentSemesterId vào claim (chỉ 1 lần)
