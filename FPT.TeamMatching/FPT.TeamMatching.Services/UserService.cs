@@ -86,7 +86,7 @@ public class UserService : BaseService<User>, IUserService
                 //check idea(chi co mentor) cua mentor in semester 
                 var ideas = _ideaRepository.GetIdeasOnlyMentorOfUserInSemester(mentorId, upcomingSemester.Id);
                 //
-                if (ideas == null || ideas.Count() <= upcomingSemester.LimitTopicMentorOnly)
+                if (ideas == null || ideas.Count() < upcomingSemester.LimitTopicMentorOnly)
                 {
                     return new ResponseBuilder()
                     .WithData(true)
@@ -107,10 +107,10 @@ public class UserService : BaseService<User>, IUserService
             if (!isSubMentor)
             {
                 return HandlerFail("Người dùng không phải là Mentor");
-            }
+            } 
 
             var ideasBeSubMentor = _ideaRepository.GetIdeasBeSubMentorOfUserInSemester((Guid)subMentorId, upcomingSemester.Id);
-            if (ideasBeSubMentor == null || ideasBeSubMentor.Count() <= upcomingSemester.LimitTopicSubMentor)
+            if (ideasBeSubMentor == null || ideasBeSubMentor.Count() < upcomingSemester.LimitTopicSubMentor)
             {
                 return new ResponseBuilder()
                     .WithData(true)

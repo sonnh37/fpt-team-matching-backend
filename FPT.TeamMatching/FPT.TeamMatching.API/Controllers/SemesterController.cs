@@ -41,6 +41,13 @@ namespace FPT.TeamMatching.API.Controllers
             var msg = await _service.GetCurrentSemester();
             return Ok(msg);
         }
+        
+        [HttpGet("before")]
+        public async Task<IActionResult> GetBeforeSemester()
+        {
+            var msg = await _service.GetBeforeSemester();
+            return Ok(msg);
+        }
 
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] SemesterCreateCommand request)
