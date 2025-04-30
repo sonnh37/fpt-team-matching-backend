@@ -12,7 +12,7 @@ public interface IUserRepository : IBaseRepository<User>
     Task<User?> GetByEmail(string keyword);
     Task<User?> GetByUsername(string username);
     Task<List<PartnerInfoResult>> GetAllUsersWithNameOnly();
-    Task<List<User>> GetCouncilsForIdeaVersionRequest(Guid ideaVersionId);
+    Task<List<User>> GetCouncilsForIdeaVersionRequest(Guid ideaVersionId, Guid semesterId);
     Task<User?> GetReviewerByMatchingEmail(string keyword);
     Task<List<UserIdEmailResult>> GetAllReviewerIdAndUsername();
     Task<User?> GetById(Guid id);

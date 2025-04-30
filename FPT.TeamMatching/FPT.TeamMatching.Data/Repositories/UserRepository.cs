@@ -77,13 +77,15 @@ public class UserRepository : BaseRepository<User>, IUserRepository
     public async Task<User?> GetById(Guid id)
     {
         var queryable = GetQueryable(x => x.Id == id);
-        queryable = queryable.Include(e => e.UserXRoles).ThenInclude(e => e.Role);
+        queryable = queryable.Include(e => e.UserXRoles).ThenInclude(e => e.Role)
+            .Include(e => e.UserXRoles).ThenInclude(e => e.Semester);
         var entity = await queryable.FirstOrDefaultAsync();
 
         return entity;
     }
+    
 
-    public async Task<List<User>> GetCouncilsForIdeaVersionRequest(Guid ideaVersionId)
+    public async Task<List<User>> GetCouncilsForIdeaVersionRequest(Guid ideaVersionId, Guid semesterId)
     {
         var queryable = GetQueryable();
         queryable = queryable.Include(m => m.UserXRoles).ThenInclude(m => m.Role);
@@ -101,7 +103,10 @@ public class UserRepository : BaseRepository<User>, IUserRepository
         }
 
         var councils = await queryable
-            .Where(u => u.UserXRoles.Any(m => m.Role != null && m.Role.RoleName == "Council"))
+            .Where(u => u.UserXRoles.Any(uxr => 
+                uxr.Role != null &&
+                uxr.Role.RoleName == "Council" &&
+                uxr.SemesterId == semesterId))
             .Select(u => new
             {
                 Council = u,
