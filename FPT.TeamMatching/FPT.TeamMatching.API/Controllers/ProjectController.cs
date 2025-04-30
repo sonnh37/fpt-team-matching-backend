@@ -87,6 +87,13 @@ public class ProjectController : ControllerBase
         var businessResult = await _service.GetProjectByUserIdLogin();
         return Ok(businessResult);
     }
+    
+    [HttpGet("semester-current/get-by-user-id")]
+    public async Task<IActionResult> GetProjectInSemesterCurrentByUserIdLogin()
+    {
+        var businessResult = await _service.GetProjectInSemesterCurrentByUserIdLogin();
+        return Ok(businessResult);
+    }
 
     [HttpGet("get-of-user-login")]
     public async Task<IActionResult> GetProjectOfUserLogin()

@@ -243,7 +243,7 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
             .ThenInclude(x => x.Topic)
             .ThenInclude(x => x.Project)
             .Where(x => x.IdeaVersions
-                .Any(iv => ideaCode.Contains(iv.Topic.TopicCode)))
+                .Any(iv => iv.Topic != null && ideaCode.Contains(iv.Topic.TopicCode)))
             .ToListAsync();
     }
 
@@ -252,26 +252,26 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
         var queryable = GetQueryable();
         queryable = queryable
             //sua db
-            //.Include(m => m.IdeaVersionRequests)
+            .Include(m => m.IdeaVersions).ThenInclude(x => x.Topic).ThenInclude(m => m.MentorTopicRequests)
             .Include(m => m.Owner)
             .ThenInclude(u => u.UserXRoles)
             .ThenInclude(ur => ur.Role)
             //sua db
-            //.Include(m => m.Project)
+            .Include(m => m.IdeaVersions).ThenInclude(x => x.Topic).ThenInclude(m => m.Project)
             .Include(m => m.Mentor)
             .Include(m => m.SubMentor)
-            //.Include(m => m.StageIdea)
-            //.Include(m => m.MentorTopicRequests)
+            .Include(m => m.IdeaVersions).ThenInclude(x => x.StageIdea)
             .Include(m => m.Specialty).ThenInclude(m => m.Profession);
         // 
-        // queryable = queryable.Where(m => m.MentorTopicRequests.All(x => x.Status != MentorTopicRequestStatus.Approved));
+        queryable = queryable.Where(m => 
+            m.IdeaVersions.Any(mx => mx.Topic != null && mx.Topic.MentorTopicRequests.All(x => x.Status != MentorTopicRequestStatus.Approved)));
 
         //sua db
-        //if (!string.IsNullOrEmpty(query.EnglishName))
-        //{
-        //    queryable = queryable.Where(m =>
-        //        m.EnglishName != null && m.EnglishName.ToLower().Trim().Contains(query.EnglishName.ToLower().Trim()));
-        //}
+        if (!string.IsNullOrEmpty(query.EnglishName))
+        {
+            queryable = queryable.Where(mi =>
+                mi.IdeaVersions.Any(m => m.EnglishName != null && m.EnglishName.ToLower().Trim().Contains(query.EnglishName.ToLower().Trim())));
+        }
 
         if (query.IsExistedTeam != null) queryable = queryable.Where(m => query.IsExistedTeam.Value == m.IsExistedTeam);
 

@@ -81,10 +81,33 @@ public class ProjectService : BaseService<Project>, IProjectService
                 return HandlerFail("Người dùng không có project đang tồn tại trong kì này");
 
             var result = _mapper.Map<ProjectResult>(project);
-            if (result == null)
-                return new ResponseBuilder()
-                    .WithStatus(Const.NOT_FOUND_CODE)
-                    .WithMessage(Const.NOT_FOUND_MSG);
+
+            return new ResponseBuilder()
+                .WithData(result)
+                .WithStatus(Const.SUCCESS_CODE)
+                .WithMessage(Const.SUCCESS_READ_MSG);
+        }
+        catch (Exception ex)
+        {
+            return HandlerError(ex.Message);
+        }
+    }
+
+    public async Task<BusinessResult> GetProjectInSemesterCurrentByUserIdLogin()
+    {
+        try
+        {
+            var userId = GetUserIdFromClaims();
+            if (userId == null) return HandlerFailAuth();
+
+            var project = await _projectRepository.GetProjectInSemesterCurrentByUserIdLogin(userId.Value);
+            if (project == null) return HandlerFail("Người dùng không có project đang tồn tại");
+
+            if (project.Status == ProjectStatus.Canceled ||
+                project.Status == ProjectStatus.Completed)
+                return HandlerFail("Người dùng không có project đang tồn tại trong kì này");
+
+            var result = _mapper.Map<ProjectResult>(project);
 
             return new ResponseBuilder()
                 .WithData(result)
