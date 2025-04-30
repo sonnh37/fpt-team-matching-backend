@@ -152,7 +152,7 @@ public class IdeaVersionRequestService : BaseService<IdeaVersionRequest>, IIdeaV
             if (command.IdeaVersionId == Guid.Empty || command.IdeaVersionId == null)
                 return HandlerFail("Nhập idea version ");
 
-            var councils = await _userRepository.GetCouncilsForIdeaVersionRequest(command.IdeaVersionId.Value);
+            var councils = await _userRepository.GetCouncilsForIdeaVersionRequest(command.IdeaVersionId.Value, semester.Id);
             if (councils.Count == 0) return HandlerFail("No available councils");
 
             var newIdeaVersionRequests = new List<IdeaVersionRequest>();

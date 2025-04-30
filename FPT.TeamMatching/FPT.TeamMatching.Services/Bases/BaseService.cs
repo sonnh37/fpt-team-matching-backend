@@ -351,7 +351,7 @@ public abstract class BaseService<TEntity> : BaseService, IBaseService
         }
     }
 
-    private bool IsUserAuthenticated()
+    public bool IsUserAuthenticated()
     {
         return _httpContextAccessor?.HttpContext != null &&
                _httpContextAccessor.HttpContext.User.Identity?.IsAuthenticated == true;

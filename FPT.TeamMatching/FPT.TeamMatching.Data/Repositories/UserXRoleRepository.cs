@@ -16,7 +16,7 @@ public class UserXRoleRepository : BaseRepository<UserXRole>, IUserXRoleReposito
     public async Task<bool> CheckRoleUserInSemester(Guid userId, Guid semesterId, string role)
     {
         var queryable = GetQueryable();
-        var isRole = await queryable.AnyAsync(e => e.IsDeleted == false &&
+        var isRole = await queryable.Include(m => m.Role).AnyAsync(e => e.IsDeleted == false &&
                                                     e.UserId == userId &&
                                                     e.SemesterId == semesterId &&
                                                     e.Role != null &&

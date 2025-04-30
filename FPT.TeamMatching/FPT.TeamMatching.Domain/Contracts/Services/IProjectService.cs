@@ -21,4 +21,6 @@ public interface IProjectService : IBaseService
 
     Task<BusinessResult> CreateProjectAndTeammemberForAuto(ProjectCreateCommand project);
     Task<BusinessResult> GetProjectBySemesterAndStage(Guid semester, int stage);
+
+    Task<BusinessResult> GetProjectInSemesterCurrentByUserIdLogin();
 }

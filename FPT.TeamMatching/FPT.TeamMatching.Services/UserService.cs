@@ -71,7 +71,7 @@ public class UserService : BaseService<User>, IUserService
             var upcomingSemester = await _semesterRepository.GetUpComingSemester();
             if (upcomingSemester == null) return HandlerFail("Không có kì sắp đến");
 
-            var mentor = await _userRepository.GetByIdWithProjects(mentorId);
+            var mentor = await GetUserAsync();
             if (mentor == null) return HandlerFail("Không tìm thấy mentor");
 
             var isMentor = await _userXRoleRepository.CheckRoleUserInSemester(mentorId, upcomingSemester.Id, "Mentor");
@@ -100,7 +100,7 @@ public class UserService : BaseService<User>, IUserService
 
             //co submentor
             var subMentor = await _userRepository.GetByIdWithProjects(subMentorId);
-            if (mentor == null) return HandlerFail("Không tìm thấy SubMentor");
+            if (subMentor == null) return HandlerFail("Không tìm thấy SubMentor");
 
             var isSubMentor = await _userXRoleRepository.CheckRoleUserInSemester((Guid)subMentorId, upcomingSemester.Id, "Mentor");
             if (!isSubMentor)
@@ -135,20 +135,20 @@ public class UserService : BaseService<User>, IUserService
     {
         try
         {
-            var user = await GetUserAsync();
+            if (!IsUserAuthenticated())
+                return HandlerFailAuth();
+
+            var userId = GetUserIdFromClaims();
+            if (userId == null)
+                return HandlerFail("Not found");
+
+            var user = await _userRepository.GetQueryable(m => m.Id == userId).SingleOrDefaultAsync();
             if (user == null) return HandlerFail("No user found.");
 
             JObject existingCache;
             try
             {
-                if (string.IsNullOrWhiteSpace(user.Cache))
-                {
-                    existingCache = new JObject();
-                }
-                else
-                {
-                    existingCache = JObject.Parse(user.Cache);
-                }
+                existingCache = string.IsNullOrWhiteSpace(user.Cache) ? new JObject() : JObject.Parse(user.Cache);
             }
             catch (JsonReaderException ex)
             {
