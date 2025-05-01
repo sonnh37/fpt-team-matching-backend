@@ -9,7 +9,6 @@ namespace FPT.TeamMatching.API.Controllers;
 
 [Route(Const.HANGFIRE)]
 [ApiController]
-[Authorize]
 public class HangfireController : ControllerBase
 {
     private readonly IBackgroundJobClient _backgroundJobClient;

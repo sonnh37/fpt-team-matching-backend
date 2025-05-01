@@ -24,21 +24,20 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
 
     public async Task<Project?> GetProjectByUserIdLogin(Guid userId)
     {
-        
         var teamMember = await _context.TeamMembers.Where(e => e.UserId == userId &&
                                                                e.LeaveDate == null &&
                                                                (e.Status == TeamMemberStatus.Fail1 ||
                                                                 e.Status == TeamMemberStatus.Pass1 ||
                                                                 e.Status == TeamMemberStatus.Pass2 ||
                                                                 e.Status == TeamMemberStatus.InProgress ||
-                                                                e.Status == TeamMemberStatus.Pending) && 
+                                                                e.Status == TeamMemberStatus.Pending) &&
                                                                e.IsDeleted == false)
             .OrderByDescending(m => m.CreatedDate)
             .FirstOrDefaultAsync();
         if (teamMember == null) return null;
 
         var queryable = GetQueryable().Where(e => e.Id == teamMember.ProjectId);
-        
+
         queryable = queryable.Include(e => e.TeamMembers)
             .ThenInclude(e => e.User)
             .Include(e => e.Invitations)
@@ -53,17 +52,16 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
 
         return queryable.FirstOrDefault();
     }
-    
-     public async Task<Project?> GetProjectInSemesterCurrentByUserIdLogin(Guid userId)
+
+    public async Task<Project?> GetProjectInSemesterCurrentByUserIdLogin(Guid userId)
     {
-        
         var teamMember = await _context.TeamMembers.Where(e => e.UserId == userId &&
                                                                e.LeaveDate == null &&
                                                                (e.Status == TeamMemberStatus.Fail1 ||
                                                                 e.Status == TeamMemberStatus.Pass1 ||
                                                                 e.Status == TeamMemberStatus.Pass2 ||
                                                                 e.Status == TeamMemberStatus.InProgress ||
-                                                                e.Status == TeamMemberStatus.Pending) && 
+                                                                e.Status == TeamMemberStatus.Pending) &&
                                                                e.IsDeleted == false)
             .OrderByDescending(m => m.CreatedDate)
             .FirstOrDefaultAsync();
@@ -73,7 +71,7 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
         if (semesterCurrent == null) return null;
 
         var queryable = GetQueryable().Where(e => e.Id == teamMember.ProjectId);
-        
+
         queryable = queryable.Include(e => e.TeamMembers)
             .ThenInclude(e => e.User)
             .Include(e => e.Invitations)
@@ -87,15 +85,85 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
             .ThenInclude(m => m.Specialty).ThenInclude(m => m.Profession);
 
         queryable = queryable.Where(m => m.Topic != null &&
-                                                m.Topic.IdeaVersion != null &&
-                                                m.Topic.IdeaVersion.StageIdea != null &&
-                                                m.Topic.IdeaVersion.StageIdea.SemesterId == semesterCurrent.Id
+                                         m.Topic.IdeaVersion != null &&
+                                         m.Topic.IdeaVersion.StageIdea != null &&
+                                         m.Topic.IdeaVersion.StageIdea.SemesterId == semesterCurrent.Id
         );
-        
-        
-            
-        
+
+
         return queryable.FirstOrDefault();
+    }
+
+    public async Task<(List<Project>, int)> SearchProjects(ProjectSearchQuery query)
+    {
+        var queryable = GetQueryable();
+        queryable = queryable.Include(e => e.TeamMembers)
+            .ThenInclude(e => e.User)
+            .ThenInclude(e => e.ProfileStudent)
+            .ThenInclude(e => e.Specialty)
+            .Include(e => e.Topic)
+            .ThenInclude(e => e.IdeaVersion)
+            .ThenInclude(e => e.Idea)
+            .ThenInclude(e => e.Specialty)
+            .ThenInclude(e => e.Profession)
+            .Include(m => m.Topic)
+            .ThenInclude(e => e.IdeaVersion)
+            .ThenInclude(e => e.Idea)
+            .ThenInclude(m => m.Owner)
+            .Include(x => x.Reviews)
+            .Include(x => x.Topic)
+            .ThenInclude(x => x.IdeaVersion)
+            .ThenInclude(x => x.Idea)
+            .Include(x => x.MentorFeedback);
+
+        if (query.IsHasTeam)
+        {
+            queryable = queryable.Where(m => m.TeamMembers.Count > 0 && m.TopicId != null);
+        }
+
+        if (query.SpecialtyId != null)
+        {
+            queryable = queryable.Where(m =>
+                m.Topic != null && m.Topic.IdeaVersion != null &&
+                m.Topic.IdeaVersion.Idea != null &&
+                m.Topic.IdeaVersion.Idea.SpecialtyId == query.SpecialtyId);
+        }
+
+        if (query.ProfessionId != null)
+        {
+            queryable = queryable.Where(m =>
+                m.Topic != null &&
+                m.Topic.IdeaVersion != null &&
+                m.Topic.IdeaVersion.Idea != null &&
+                m.Topic.IdeaVersion.Idea.Specialty != null &&
+                m.Topic.IdeaVersion.Idea.Specialty.ProfessionId == query.ProfessionId);
+        }
+
+        if (!string.IsNullOrEmpty(query.EnglishName))
+        {
+            queryable = queryable.Where(m =>
+                m.Topic != null &&
+                m.Topic.IdeaVersion != null &&
+                m.Topic.IdeaVersion.EnglishName != null &&
+                m.Topic.IdeaVersion.EnglishName.ToLower().Trim()
+                    .Contains(query.EnglishName.ToLower().Trim()));
+        }
+
+        if (query.Status != null)
+        {
+            queryable = queryable.Where(m => m.Status == query.Status);
+        }
+
+        queryable = BaseFilterHelper.Base(queryable, query);
+
+        queryable = Sort(queryable, query);
+
+        var total = queryable.Count();
+        var results = query.IsPagination
+            ? await GetQueryablePagination(queryable, query).ToListAsync()
+            : await queryable.ToListAsync();
+
+        return (results, query.IsPagination ? total : results.Count);
     }
 
     public async Task<List<Project>?> GetProjectsStartingNow()
@@ -146,7 +214,7 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
                                                         e.Topic.IdeaVersion != null &&
                                                         e.Topic.IdeaVersion.StageIdea != null &&
                                                         e.Topic.IdeaVersion.StageIdea.SemesterId == semesterId)
-                                            .CountAsync();
+            .CountAsync();
         return number;
     }
 
@@ -180,11 +248,11 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
     public async Task<List<Project>?> GetInProgressProjectBySemesterId(Guid semesterId)
     {
         var projects = await GetQueryable().Where(e => e.Status == ProjectStatus.InProgress &&
-                                                e.IsDeleted == false &&
-                                                e.Topic != null &&
-                                                e.Topic.IdeaVersion != null &&
-                                                e.Topic.IdeaVersion.StageIdea != null &&
-                                                e.Topic.IdeaVersion.StageIdea.SemesterId == semesterId)
+                                                       e.IsDeleted == false &&
+                                                       e.Topic != null &&
+                                                       e.Topic.IdeaVersion != null &&
+                                                       e.Topic.IdeaVersion.StageIdea != null &&
+                                                       e.Topic.IdeaVersion.StageIdea.SemesterId == semesterId)
             .Include(x => x.Topic)
             .ThenInclude(x => x.IdeaVersion)
             .ThenInclude(x => x.Idea)
@@ -229,11 +297,11 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
                                          m.Topic.IdeaVersion.Idea.MentorId == userId);
 
         queryable = BaseFilterHelper.Base(queryable, query);
-        
+
         queryable = Sort(queryable, query);
-    
+
         var total = queryable.Count();
-        var results = query.IsPagination 
+        var results = query.IsPagination
             ? await GetQueryablePagination(queryable, query).ToListAsync()
             : await queryable.ToListAsync();
 
@@ -251,6 +319,4 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
             .FirstOrDefaultAsync();
         return project;
     }
-
-    
 }

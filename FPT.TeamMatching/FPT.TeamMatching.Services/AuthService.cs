@@ -93,24 +93,24 @@ public class AuthService : IAuthService
         if (user == null)
             return new ResponseBuilder()
                 .WithStatus(Const.NOT_FOUND_CODE)
-                .WithMessage("Email is not found.");
+                .WithMessage("Email không tìm thấy.");
 
         if (user.Department != query.Department)
         {
             return new ResponseBuilder()
                 .WithStatus(Const.FAIL_CODE)
-                .WithMessage("Your account does not have access to the system");
+                .WithMessage("Tài khoản không có quyền truy cập ở khu vực này");
         }
 
         if (user.Password == null)
             return new ResponseBuilder()
                 .WithStatus(Const.FAIL_CODE)
-                .WithMessage("Your account does not set up the password yet.");
+                .WithMessage("Mật khẩu của tài khoản chưa thiết lập mật khẩu. Vui lòng đăng nhập bằng google!");
 
         if (!BCrypt.Net.BCrypt.Verify(query.Password, user.Password))
             return new ResponseBuilder()
                 .WithStatus(Const.FAIL_CODE)
-                .WithMessage("Password is invalid.");
+                .WithMessage("Mật khẩu không đúng");
 
         var result = _mapper.Map<UserResult>(user);
 
@@ -161,7 +161,7 @@ public class AuthService : IAuthService
 
                 return new ResponseBuilder()
                         .WithStatus(Const.SUCCESS_CODE)
-                        .WithMessage("Login successful.")
+                        .WithMessage("Đăng nhập thành công")
                     ;
             }
             finally

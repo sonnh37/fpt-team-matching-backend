@@ -29,6 +29,13 @@ public class ProjectController : ControllerBase
         return Ok(msg);
     }
     
+    [HttpGet("search")]
+    public async Task<IActionResult> SearchProjects([FromQuery] ProjectSearchQuery query)
+    {
+        var result = await _service.SearchProjects(query);
+        return Ok(result);
+    }
+    
     [HttpGet("me/mentor-projects")]
     public async Task<IActionResult> GetProjectsForMentor([FromQuery] ProjectGetListForMentorQuery query)
     {

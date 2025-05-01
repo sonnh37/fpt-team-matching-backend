@@ -20,5 +20,8 @@ public interface IProjectRepository : IBaseRepository<Project>
     Task<Project?> GetProjectByTopicId(Guid topicId);
 
     Task<Project?> GetProjectInSemesterCurrentByUserIdLogin(Guid userId);
+    
+    Task<(List<Project>, int)> SearchProjects(ProjectSearchQuery query);
+
 
 }
