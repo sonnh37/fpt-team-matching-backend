@@ -17,6 +17,7 @@ using FPT.TeamMatching.Domain.Utilities;
 using FPT.TeamMatching.Services.Bases;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
+using FPT.TeamMatching.Domain.Models.Requests.Queries.Base;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Projects;
 
 // ReSharper disable All
@@ -50,6 +51,32 @@ public class ProjectService : BaseService<Project>, IProjectService
 
             var (data, total) = await _projectRepository.GetProjectsForMentor(query, userId.Value);
             var results = _mapper.Map<List<ProjectResult>>(data);
+            var response = new QueryResult(query, results, total);
+
+            return new ResponseBuilder()
+                .WithData(response)
+                .WithStatus(Const.SUCCESS_CODE)
+                .WithMessage(Const.SUCCESS_READ_MSG);
+        }
+        catch (Exception ex)
+        {
+            var errorMessage = $"An error occurred in {typeof(ProjectResult).Name}: {ex.Message}";
+            return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage(errorMessage);
+        }
+    }
+
+    public async Task<BusinessResult> SearchProjects(ProjectSearchQuery query)
+    {
+        try
+        {
+            List<ProjectResult>? results;
+
+            var (data, total) = await _projectRepository.SearchProjects(query);
+
+            results = _mapper.Map<List<ProjectResult>>(data);
+
             var response = new QueryResult(query, results, total);
 
             return new ResponseBuilder()

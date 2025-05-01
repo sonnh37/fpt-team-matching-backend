@@ -1,15 +1,19 @@
 ﻿using FPT.TeamMatching.Domain.Contracts.Services.Bases;
 using FPT.TeamMatching.Domain.Entities;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Projects;
+using FPT.TeamMatching.Domain.Models.Requests.Queries.Base;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Projects;
 using FPT.TeamMatching.Domain.Models.Responses;
 using FPT.TeamMatching.Domain.Models.Results;
+using FPT.TeamMatching.Domain.Models.Results.Bases;
 
 namespace FPT.TeamMatching.Domain.Contracts.Services;
 
 public interface IProjectService : IBaseService
 {
     //Task<Project?> GetProjectByUserId(Guid userId);
+    Task<BusinessResult> SearchProjects(ProjectSearchQuery query);
+
     Task<BusinessResult> GetProjectByUserIdLogin();
     Task<BusinessResult> CreateProjectAndTeammember(TeamCreateCommand command);
 

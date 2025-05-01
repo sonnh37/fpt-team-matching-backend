@@ -28,14 +28,14 @@ namespace FPT.TeamMatching.API.Controllers
             return Ok(msg);
         }
         
-        [HttpGet("get-user-mentor-idea-requests")]
+        [HttpGet("get-user-mentor-topic-requests")]
         public async Task<IActionResult> GetUserMentorTopicRequests([FromQuery] MentorTopicRequestGetAllQuery query)
         {
             var msg = await _service.GetUserMentorTopicRequests(query);
             return Ok(msg);
         }
         
-        [HttpGet("get-mentor-mentor-idea-requests")]
+        [HttpGet("get-mentor-mentor-topic-requests")]
         public async Task<IActionResult> GetMentorMentorTopicRequests([FromQuery] MentorTopicRequestGetAllQuery query)
         {
             var msg = await _service.GetMentorMentorTopicRequests(query);
@@ -80,7 +80,7 @@ namespace FPT.TeamMatching.API.Controllers
             return Ok(businessResult);
         }
 
-        [HttpPost("student-request-idea")]
+        [HttpPost("student-request-topic")]
         public async Task<IActionResult> StudentRequest([FromBody] StudentRequest request)
         {
             var msg = await _service.StudentRequestIdea(request);
