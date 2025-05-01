@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using FPT.TeamMatching.Data.Context;
+﻿using FPT.TeamMatching.Data.Context;
 using FPT.TeamMatching.Data.Repositories.Base;
 using FPT.TeamMatching.Domain.Contracts.Repositories;
 using FPT.TeamMatching.Domain.Entities;
@@ -9,24 +8,31 @@ using FPT.TeamMatching.Domain.Models.Requests.Queries.Users;
 using FPT.TeamMatching.Domain.Models.Results;
 using FPT.TeamMatching.Domain.Utilities.Filters;
 using Microsoft.EntityFrameworkCore;
-using MongoDB.Driver.Linq;
-using Role = FPT.TeamMatching.Domain.Entities.Role;
 
 namespace FPT.TeamMatching.Data.Repositories;
 
 public class UserRepository : BaseRepository<User>, IUserRepository
 {
     private readonly FPTMatchingDbContext _context;
+    private readonly ISemesterRepository _semesterRepository;
 
-    public UserRepository(FPTMatchingDbContext dbContext) : base(dbContext)
+    public UserRepository(FPTMatchingDbContext dbContext, ISemesterRepository semesterRepository) : base(dbContext)
     {
         _context = dbContext;
+        _semesterRepository = semesterRepository;
     }
 
     public async Task<(List<User>, int)> GetAllByCouncilWithIdeaVersionRequestPending(UserGetAllQuery query)
     {
         var queryable = GetQueryable();
-        queryable = queryable.Include(m => m.UserXRoles).ThenInclude(m => m.Role);
+        queryable = queryable.Include(m => m.UserXRoles).ThenInclude(m => m.Role)
+                .Include(m => m.IdeaVersionRequestOfReviewers)
+                .ThenInclude(m => m.IdeaVersion).ThenInclude(m => m.Idea)
+                .Include(m => m.IdeaVersionRequestOfReviewers)
+                .ThenInclude(m => m.IdeaVersion).ThenInclude(m => m.Topic)
+                .Include(m => m.IdeaVersionRequestOfReviewers)
+                .ThenInclude(m => m.IdeaVersion).ThenInclude(m => m.StageIdea).ThenInclude(m => m.Semester)
+            ;
 
         queryable = queryable.Where(m =>
             m.UserXRoles.Any(uxr => uxr.Role != null && uxr.Role.RoleName == "Council"));
@@ -53,9 +59,124 @@ public class UserRepository : BaseRepository<User>, IUserRepository
         }
 
         queryable = Sort(queryable, query);
-    
+
         var total = queryable.Count();
-        var results = query.IsPagination 
+        var results = query.IsPagination
+            ? await GetQueryablePagination(queryable, query).ToListAsync()
+            : await queryable.ToListAsync();
+
+        return (results, query.IsPagination ? total : results.Count);
+    }
+
+
+    public async Task<(List<User>, int)> GetStudentsNoTeam(UserGetAllQuery query, Guid projectId)
+    {
+        var queryable = GetQueryable();
+
+        queryable = queryable.Include(m => m.UserXRoles).ThenInclude(m => m.Role)
+                .Include(m => m.TeamMembers).ThenInclude(m => m.Project)
+                .Include(m => m.InvitationOfReceivers)
+            ;
+
+        queryable = queryable.Where(m =>
+            !m.InvitationOfReceivers.Any(ior =>
+                (ior.ProjectId == projectId && (ior.Status == InvitationStatus.Pending))) &&
+            m.UserXRoles.Any(uxr => uxr.Role != null && uxr.Role.RoleName == "Student") &&
+            (!m.TeamMembers.Any() ||
+             !m.TeamMembers.Any(tm =>
+                 (tm.Project != null && (tm.Project.Status == ProjectStatus.Pending ||
+                                         tm.Project.Status == ProjectStatus.InProgress))))
+        );
+
+        if (query.Department.HasValue)
+        {
+            queryable = queryable.Where(m =>
+                m.Department == query.Department);
+        }
+
+        if (!string.IsNullOrEmpty(query.EmailOrFullname))
+        {
+            queryable = queryable.Where(m =>
+                m.LastName != null && m.FirstName != null &&
+                ((m.Email != null && m.Email.Contains(query.EmailOrFullname.Trim().ToLower())) ||
+                 (m.LastName.Trim().ToLower() + " " + m.FirstName.Trim().ToLower()).Contains(query.EmailOrFullname
+                     .Trim().ToLower()))
+            );
+        }
+
+        if (!string.IsNullOrEmpty(query.Email))
+        {
+            string searchEmail = query.Email.Trim().ToLower();
+            queryable = queryable.Where(m => m.Email != null && m.Email.ToLower().Contains(searchEmail));
+        }
+
+        queryable = Sort(queryable, query);
+
+        var total = queryable.Count();
+        var results = query.IsPagination
+            ? await GetQueryablePagination(queryable, query).ToListAsync()
+            : await queryable.ToListAsync();
+
+        return (results, query.IsPagination ? total : results.Count);
+    }
+
+
+    public async Task<(List<User>, int)> GetUsersInSemester(UserGetAllInSemesterQuery query)
+    {
+        var semester = await _semesterRepository.GetCurrentSemester();
+        if (semester == null)
+        {
+            return (new List<User>(), 0);
+        }
+
+        var queryable = GetQueryable();
+        queryable = queryable
+            .Include(m => m.UserXRoles)
+            .ThenInclude(x => x.Role)
+            .Include(m => m.Notifications)
+            .Include(m => m.TeamMembers)
+            .Include(m => m.ProfileStudent).ThenInclude(x => x.SkillProfiles)
+            .Include(m => m.ProfileStudent).ThenInclude(x => x.Specialty)
+            .Include(e => e.UserXRoles).ThenInclude(e => e.Semester);
+
+        queryable = queryable.Where(m =>
+            m.UserXRoles.Any(mx =>
+                mx.SemesterId != semester.Id));
+
+        if (!string.IsNullOrEmpty(query.Role))
+        {
+            queryable = queryable.Where(m =>
+                m.UserXRoles.Any(uxr => uxr.Role != null && uxr.Role.RoleName == query.Role));
+        }
+
+        if (!string.IsNullOrEmpty(query.EmailOrFullname))
+        {
+            queryable = queryable.Where(m =>
+                m.LastName != null && m.FirstName != null &&
+                ((m.Email != null && m.Email.Contains(query.EmailOrFullname.Trim().ToLower())) ||
+                 (m.LastName.Trim().ToLower() + " " + m.FirstName.Trim().ToLower()).Contains(query.EmailOrFullname
+                     .Trim().ToLower()))
+            );
+        }
+
+        if (!string.IsNullOrEmpty(query.Email))
+        {
+            string searchEmail = query.Email.Trim().ToLower();
+            queryable = queryable.Where(m => m.Email != null && m.Email.ToLower().Contains(searchEmail));
+        }
+
+        if (query.Department.HasValue)
+        {
+            queryable = queryable.Where(m =>
+                m.Department == query.Department);
+        }
+
+        queryable = BaseFilterHelper.Base(queryable, query);
+
+        queryable = Sort(queryable, query);
+
+        var total = queryable.Count();
+        var results = query.IsPagination
             ? await GetQueryablePagination(queryable, query).ToListAsync()
             : await queryable.ToListAsync();
 
@@ -83,7 +204,27 @@ public class UserRepository : BaseRepository<User>, IUserRepository
 
         return entity;
     }
-    
+
+    public async Task<User?> GetByIdForDetail(Guid id)
+    {
+        var queryable = GetQueryable(x => x.Id == id);
+        queryable = queryable
+            .Include(e => e.UserXRoles).ThenInclude(e => e.Role)
+            .Include(e => e.UserXRoles).ThenInclude(e => e.Semester)
+            .Include(e => e.ProfileStudent)
+            .Include(e => e.SkillProfiles)
+            .Include(e => e.Blogs)
+            .Include(e => e.Projects)
+            .Include(e => e.IdeaOfOwners)
+            .Include(e => e.IdeaOfMentors)
+            .Include(e => e.IdeaOfSubMentors)
+            .Include(e => e.TeamMembers)
+            .Include(e => e.Comments);
+
+        var entity = await queryable.FirstOrDefaultAsync();
+        return entity;
+    }
+
 
     public async Task<List<User>> GetCouncilsForIdeaVersionRequest(Guid ideaVersionId, Guid semesterId)
     {
@@ -103,7 +244,7 @@ public class UserRepository : BaseRepository<User>, IUserRepository
         }
 
         var councils = await queryable
-            .Where(u => u.UserXRoles.Any(uxr => 
+            .Where(u => u.UserXRoles.Any(uxr =>
                 uxr.Role != null &&
                 uxr.Role.RoleName == "Council" &&
                 uxr.SemesterId == semesterId))
@@ -238,6 +379,4 @@ public class UserRepository : BaseRepository<User>, IUserRepository
             .ToListAsync();
         return result;
     }
-
-    
 }

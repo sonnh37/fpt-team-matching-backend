@@ -26,11 +26,7 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
     {
         var teamMember = await _context.TeamMembers.Where(e => e.UserId == userId &&
                                                                e.LeaveDate == null &&
-                                                               (e.Status == TeamMemberStatus.Fail1 ||
-                                                                e.Status == TeamMemberStatus.Pass1 ||
-                                                                e.Status == TeamMemberStatus.Pass2 ||
-                                                                e.Status == TeamMemberStatus.InProgress ||
-                                                                e.Status == TeamMemberStatus.Pending) &&
+                                                               (e.Status != TeamMemberStatus.Fail2) &&
                                                                e.IsDeleted == false)
             .OrderByDescending(m => m.CreatedDate)
             .FirstOrDefaultAsync();

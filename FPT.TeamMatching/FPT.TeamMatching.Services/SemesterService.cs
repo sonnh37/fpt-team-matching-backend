@@ -68,6 +68,31 @@ namespace FPT.TeamMatching.Services
             }
         }
         
+        public async Task<BusinessResult> GetUpComingSemester()
+        {
+            try
+            {
+                var entity = await _semesterRepository.GetUpComingSemester();
+                var result = _mapper.Map<SemesterResult>(entity);
+                if (result == null)
+                    return new ResponseBuilder()
+                        .WithStatus(Const.NOT_FOUND_CODE)
+                        .WithMessage(Const.NOT_FOUND_MSG);
+
+                return new ResponseBuilder()
+                    .WithData(result)
+                    .WithStatus(Const.SUCCESS_CODE)
+                    .WithMessage(Const.SUCCESS_READ_MSG);
+            }
+            catch (Exception ex)
+            {
+                var errorMessage = $"An error {typeof(SemesterResult).Name}: {ex.Message}";
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage(errorMessage);
+            }
+        }
+        
         public async Task<string> GenerateNewTopicCode(Guid? semesterId)
         {
             try
