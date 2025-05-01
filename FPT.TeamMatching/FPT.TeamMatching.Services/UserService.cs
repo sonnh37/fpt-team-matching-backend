@@ -38,7 +38,7 @@ public class UserService : BaseService<User>, IUserService
         _semesterRepository = _unitOfWork.SemesterRepository;
         _ideaRepository = _unitOfWork.IdeaRepository;
     }
-    
+
     public async Task<BusinessResult> GetByEmail<TResult>(string email) where TResult : BaseResult
     {
         try
@@ -49,6 +49,32 @@ public class UserService : BaseService<User>, IUserService
                 return new ResponseBuilder()
                     .WithStatus(Const.NOT_FOUND_CODE)
                     .WithMessage(Const.NOT_FOUND_MSG);
+
+            return new ResponseBuilder()
+                .WithData(result)
+                .WithStatus(Const.SUCCESS_CODE)
+                .WithMessage(Const.SUCCESS_READ_MSG);
+        }
+        catch (Exception ex)
+        {
+            var errorMessage = $"An error {typeof(TResult).Name}: {ex.Message}";
+            return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage(errorMessage);
+        }
+    }
+
+    public async Task<BusinessResult> GetById<TResult>(Guid id) where TResult : BaseResult
+    {
+        try
+        {
+            var entity = await _userRepository.GetByIdForDetail(id);
+            var result = _mapper.Map<TResult>(entity);
+            if (result == null)
+                return new ResponseBuilder()
+                        .WithStatus(Const.NOT_FOUND_CODE)
+                        .WithMessage(Const.NOT_FOUND_MSG)
+                    ;
 
             return new ResponseBuilder()
                 .WithData(result)
@@ -79,6 +105,7 @@ public class UserService : BaseService<User>, IUserService
             {
                 return HandlerFail("Người dùng không phải là Mentor");
             }
+
             //k co submentor
             if (subMentorId == null)
             {
@@ -88,27 +115,31 @@ public class UserService : BaseService<User>, IUserService
                 if (ideas == null || ideas.Count() < upcomingSemester.LimitTopicMentorOnly)
                 {
                     return new ResponseBuilder()
-                    .WithData(true)
-                    .WithStatus(Const.SUCCESS_CODE)
-                    .WithMessage("Còn chỗ");
+                        .WithData(true)
+                        .WithStatus(Const.SUCCESS_CODE)
+                        .WithMessage("Còn chỗ");
                 }
+
                 return new ResponseBuilder()
                     .WithData(false)
                     .WithStatus(Const.SUCCESS_CODE)
-                    .WithMessage("mentor.Code + \" hiện đã Mentor \" + upcomingSemester.LimitTopicMentorOnly + \" đề tài không có SubMentor. Cần SubMentor cho đề tài của bạn!\"");
+                    .WithMessage(
+                        "mentor.Code + \" hiện đã Mentor \" + upcomingSemester.LimitTopicMentorOnly + \" đề tài không có SubMentor. Cần SubMentor cho đề tài của bạn!\"");
             }
 
             //co submentor
             var subMentor = await _userRepository.GetByIdWithProjects(subMentorId);
             if (subMentor == null) return HandlerFail("Không tìm thấy SubMentor");
 
-            var isSubMentor = await _userXRoleRepository.CheckRoleUserInSemester((Guid)subMentorId, upcomingSemester.Id, "Mentor");
+            var isSubMentor =
+                await _userXRoleRepository.CheckRoleUserInSemester((Guid)subMentorId, upcomingSemester.Id, "Mentor");
             if (!isSubMentor)
             {
                 return HandlerFail("Người dùng không phải là Mentor");
-            } 
+            }
 
-            var ideasBeSubMentor = _ideaRepository.GetIdeasBeSubMentorOfUserInSemester((Guid)subMentorId, upcomingSemester.Id);
+            var ideasBeSubMentor =
+                _ideaRepository.GetIdeasBeSubMentorOfUserInSemester((Guid)subMentorId, upcomingSemester.Id);
             if (ideasBeSubMentor == null || ideasBeSubMentor.Count() < upcomingSemester.LimitTopicSubMentor)
             {
                 return new ResponseBuilder()
@@ -116,10 +147,12 @@ public class UserService : BaseService<User>, IUserService
                     .WithStatus(Const.SUCCESS_CODE)
                     .WithMessage("Còn chỗ");
             }
+
             return new ResponseBuilder()
-                    .WithData(false)
-                    .WithStatus(Const.SUCCESS_CODE)
-                    .WithMessage(mentor.Code + " hiện đã SubMentor " + upcomingSemester.LimitTopicMentorOnly + " đề tài. Hãy chọn SubMentor khác!");
+                .WithData(false)
+                .WithStatus(Const.SUCCESS_CODE)
+                .WithMessage(mentor.Code + " hiện đã SubMentor " + upcomingSemester.LimitTopicMentorOnly +
+                             " đề tài. Hãy chọn SubMentor khác!");
         }
         catch (Exception ex)
         {
@@ -155,7 +188,7 @@ public class UserService : BaseService<User>, IUserService
                 Console.WriteLine($"Error parsing cache: {ex.Message}, Raw Data: {user.Cache}");
                 existingCache = new JObject(); // Nếu lỗi thì dùng cache mới
             }
-            
+
             if (newCacheJson.Cache != null)
             {
                 JObject newCache = JObject.Parse(newCacheJson.Cache);
@@ -206,7 +239,56 @@ public class UserService : BaseService<User>, IUserService
                 .WithMessage(errorMessage);
         }
     }
-    
+
+    public async Task<BusinessResult> GetStudentsNoTeam(UserGetAllQuery query)
+    {
+        try
+        {
+            var userId = GetUserIdFromClaims();
+            if (userId == null) return HandlerFailAuth();
+            var projectOfUser = await _unitOfWork.ProjectRepository.GetProjectByLeaderId(userId);
+            if (projectOfUser == null) return HandlerFail("Người dùng không có project hiện tại");
+            
+            var (data, total) = await _userRepository.GetStudentsNoTeam(query, projectOfUser.Id);
+            var results = _mapper.Map<List<UserResult>>(data);
+            var response = new QueryResult(query, results, total);
+
+            return new ResponseBuilder()
+                .WithData(response)
+                .WithStatus(Const.SUCCESS_CODE)
+                .WithMessage(Const.SUCCESS_READ_MSG);
+        }
+        catch (Exception ex)
+        {
+            var errorMessage = $"An error occurred in {typeof(UserResult).Name}: {ex.Message}";
+            return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage(errorMessage);
+        }
+    }
+
+    public async Task<BusinessResult> GetUsersInSemester(UserGetAllInSemesterQuery query)
+    {
+        try
+        {
+            var (data, total) = await _userRepository.GetUsersInSemester(query);
+            var results = _mapper.Map<List<UserResult>>(data);
+            var response = new QueryResult(query, results, total);
+
+            return new ResponseBuilder()
+                .WithData(response)
+                .WithStatus(Const.SUCCESS_CODE)
+                .WithMessage(Const.SUCCESS_READ_MSG);
+        }
+        catch (Exception ex)
+        {
+            var errorMessage = $"An error occurred in {typeof(UserResult).Name}: {ex.Message}";
+            return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage(errorMessage);
+        }
+    }
+
     public async Task<BusinessResult> Create(UserCreateCommand command)
     {
         try
@@ -371,8 +453,8 @@ public class UserService : BaseService<User>, IUserService
             }
 
             var filePath = Path.Combine(uploadsFolder, file.Name);
-            
-            
+
+
             using (var stream = new FileStream(filePath, FileMode.Create))
             {
                 file.CopyTo(stream);
@@ -393,11 +475,13 @@ public class UserService : BaseService<User>, IUserService
                                 existingUsers.Add(userDictionary[email]);
                                 continue;
                             }
+
                             var code = reader.GetValue(2).ToString();
                             if (code == null || code.ToString() == "")
                             {
-                                throw new Exception("User with with email: "+ email + " is not invalid code") ;
+                                throw new Exception("User with with email: " + email + " is not invalid code");
                             }
+
                             var firstname = reader.GetValue(3).ToString();
                             var lastname = reader.GetValue(4).ToString();
 
@@ -428,6 +512,7 @@ public class UserService : BaseService<User>, IUserService
                     } while (reader.NextResult());
                 }
             }
+
             var mapExistingUser = _mapper.Map<List<UserResult>>(existingUsers);
             if (users.Count == 0 && mapExistingUser.Count > 0)
             {
@@ -436,6 +521,7 @@ public class UserService : BaseService<User>, IUserService
                     .WithData(mapExistingUser)
                     .WithMessage("Danh sách cập nhật đang bị trùng hoặc không tồn tại.");
             }
+
             _userRepository.AddRange(users);
             var saveChange = await _unitOfWork.SaveChanges();
             if (!saveChange)
@@ -445,10 +531,13 @@ public class UserService : BaseService<User>, IUserService
                     .WithStatus(Const.FAIL_CODE)
                     .WithMessage(Const.FAIL_SAVE_MSG);
             }
+
             return new ResponseBuilder()
                 .WithData(mapExistingUser)
                 .WithStatus(mapExistingUser.Any() ? 2 : Const.SUCCESS_CODE)
-                .WithMessage(mapExistingUser.Any() ? "Cập nhật thành công. Nhưng vẫn còn những tài khoản đang bị trùng." : Const.SUCCESS_SAVE_MSG);
+                .WithMessage(mapExistingUser.Any()
+                    ? "Cập nhật thành công. Nhưng vẫn còn những tài khoản đang bị trùng."
+                    : Const.SUCCESS_SAVE_MSG);
         }
         catch (Exception e)
         {
@@ -471,6 +560,7 @@ public class UserService : BaseService<User>, IUserService
                     .WithData(userModel)
                     .WithMessage("Tài khoản này đã tồn tại. Bạn có muốn cập nhật lại tài khoản này không ?");
             }
+
             var upComingSemester = await _unitOfWork.SemesterRepository.GetUpComingSemester();
             if (upComingSemester == null)
             {
@@ -478,7 +568,7 @@ public class UserService : BaseService<User>, IUserService
                     .WithStatus(Const.FAIL_CODE)
                     .WithMessage("No upcoming semester!");
             }
-            
+
             var roleStudent = await _unitOfWork.RoleRepository.GetByRoleName("Student");
             if (roleStudent == null)
             {
@@ -486,6 +576,7 @@ public class UserService : BaseService<User>, IUserService
                     .WithStatus(Const.FAIL_CODE)
                     .WithMessage("No role student!");
             }
+
             var user = new User
             {
                 Email = command.Email,
@@ -518,7 +609,7 @@ public class UserService : BaseService<User>, IUserService
                     .WithStatus(Const.FAIL_CODE)
                     .WithMessage(Const.FAIL_SAVE_MSG);
             }
-            
+
             return new ResponseBuilder()
                 .WithStatus(Const.SUCCESS_CODE)
                 .WithMessage(Const.SUCCESS_READ_MSG);
@@ -542,6 +633,7 @@ public class UserService : BaseService<User>, IUserService
                     .WithStatus(Const.FAIL_CODE)
                     .WithMessage("No upcoming semester!");
             }
+
             var roleStudent = await _unitOfWork.RoleRepository.GetByRoleName("Student");
             if (roleStudent == null)
             {
@@ -580,11 +672,10 @@ public class UserService : BaseService<User>, IUserService
                     .WithStatus(Const.FAIL_CODE)
                     .WithMessage(Const.FAIL_SAVE_MSG);
             }
-            
+
             return new ResponseBuilder()
                 .WithStatus(Const.SUCCESS_CODE)
                 .WithMessage(Const.SUCCESS_READ_MSG);
-            
         }
         catch (Exception e)
         {
@@ -594,22 +685,21 @@ public class UserService : BaseService<User>, IUserService
         }
     }
 
- 
 
     public async Task<BusinessResult> ImportLecturers(IFormFile file)
     {
-       try
+        try
         {
             List<User> users = new List<User>();
             List<User> existingUsers = new List<User>();
             Dictionary<string, User> userDictionary = new Dictionary<string, User>();
             var usersQueryable = await _userRepository.GetQueryable().ToListAsync();
-            
+
             foreach (var user in usersQueryable)
             {
                 userDictionary.Add(user.Email, user);
             }
-            
+
             var roleLecture = await _unitOfWork.RoleRepository.GetByRoleName("Lecturer");
             if (roleLecture == null)
             {

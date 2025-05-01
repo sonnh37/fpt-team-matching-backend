@@ -11,6 +11,7 @@ namespace FPT.TeamMatching.Domain.Contracts.Services;
 public interface IUserService : IBaseService
 {
     Task<BusinessResult> Create(UserCreateCommand command);
+    Task<BusinessResult> GetStudentsNoTeam(UserGetAllQuery query);
 
     Task<BusinessResult> UpdatePassword(UserPasswordCommand userPasswordCommand);
 
@@ -21,6 +22,11 @@ public interface IUserService : IBaseService
     Task<BusinessResult> GetByEmail<TResult>(string email) where TResult : BaseResult;
 
     Task<BusinessResult> CheckMentorAndSubMentorSlotAvailability(Guid mentorId, Guid? subMentorId);
+
+    Task<BusinessResult> GetUsersInSemester(UserGetAllInSemesterQuery query);
+
+    Task<BusinessResult> GetById<TResult>(Guid id) where TResult : BaseResult;
+   
     
     //
     // Task<BusinessResult> GetByUsername(string username);

@@ -9,6 +9,7 @@ namespace FPT.TeamMatching.Domain.Contracts.Repositories;
 public interface IUserRepository : IBaseRepository<User>
 {
     Task<User?> GetUserByUsernameOrEmail(string key);
+    Task<(List<User>, int)> GetStudentsNoTeam(UserGetAllQuery query, Guid projectId);
     Task<User?> GetByEmail(string keyword);
     Task<User?> GetByUsername(string username);
     Task<List<PartnerInfoResult>> GetAllUsersWithNameOnly();
@@ -16,6 +17,7 @@ public interface IUserRepository : IBaseRepository<User>
     Task<User?> GetReviewerByMatchingEmail(string keyword);
     Task<List<UserIdEmailResult>> GetAllReviewerIdAndUsername();
     Task<User?> GetById(Guid id);
+    Task<User?> GetByIdForDetail(Guid id);
 
     Task<List<User>?> GetStudentDoNotHaveTeam();
 
@@ -23,5 +25,5 @@ public interface IUserRepository : IBaseRepository<User>
 
     Task<(List<User>, int)> GetAllByCouncilWithIdeaVersionRequestPending(UserGetAllQuery query);
     Task<List<EmailSuggestionModels>> GetAllEmailSuggestions(string email);
-
+    Task<(List<User>, int)> GetUsersInSemester(UserGetAllInSemesterQuery query);
 }

@@ -27,7 +27,21 @@ public class UserController : ControllerBase
         var msg = await _userService.GetAll<UserResult>(query);
         return Ok(msg);
     }
+
+    [HttpGet("current-semester")]
+    public async Task<IActionResult> GetUsersInSemester([FromQuery] UserGetAllInSemesterQuery query)
+    {
+        var msg = await _userService.GetUsersInSemester(query);
+        return Ok(msg);
+    }
     
+    [HttpGet("student/no-team")]
+    public async Task<IActionResult> GetStudentsNoTeam([FromQuery] UserGetAllQuery query)
+    {
+        var msg = await _userService.GetStudentsNoTeam(query);
+        return Ok(msg);
+    }
+
     [HttpGet("council/pending-ideas")]
     public async Task<IActionResult> GetAllByCouncilWithIdeaVersionRequestPending([FromQuery] UserGetAllQuery query)
     {
@@ -49,7 +63,7 @@ public class UserController : ControllerBase
         var msg = await _userService.GetByEmail<UserResult>(email);
         return Ok(msg);
     }
-    
+
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] UserCreateCommand request)
     {
@@ -64,7 +78,7 @@ public class UserController : ControllerBase
 
         return Ok(businessResult);
     }
-    
+
     [HttpPut("update-cache")]
     public async Task<IActionResult> UpdateUserCache([FromBody] UserUpdateCacheCommand request)
     {
@@ -89,7 +103,7 @@ public class UserController : ControllerBase
 
         return Ok(businessResult);
     }
-    
+
     [HttpPut("password")]
     public async Task<IActionResult> UpdatePassword([FromBody] UserPasswordCommand userUpdateCommand)
     {
@@ -125,7 +139,7 @@ public class UserController : ControllerBase
         var msg = await _userService.ImportStudent(command);
         return Ok(msg);
     }
-    
+
     [HttpPost("import/lecturers/many")]
     public async Task<IActionResult> ImportLecturers([FromForm] ImportUserModel file)
     {
@@ -148,12 +162,12 @@ public class UserController : ControllerBase
     }
 
     [HttpGet("get-suggestions-emails")]
-    public async Task<IActionResult> GetTeamMembers([FromQuery]string email)
+    public async Task<IActionResult> GetTeamMembers([FromQuery] string email)
     {
         var msg = await _userService.GetSuggestionByEmail(email);
         return Ok(msg);
     }
-    
+
     [HttpGet("check-mentor-and-submentor-slot-availability")]
     public async Task<IActionResult> CheckUserHasProjects([FromQuery] UserCheckMentorAndSubMentorQuery query)
     {
