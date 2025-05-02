@@ -286,12 +286,41 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
             .Include(m => m.Leader)
             .Include(m => m.MentorFeedback);
 
-        queryable = queryable.Where(m => m.Topic != null &&
-                                         m.Topic.IdeaVersion != null &&
-                                         m.Topic.IdeaVersion.Idea != null &&
-                                         m.Topic.IdeaVersion.Idea.MentorId != null &&
-                                         m.Topic.IdeaVersion.Idea.MentorId == userId);
-
+        if (query.Roles.Contains("Mentor") && query.Roles.Contains("SubMentor"))
+        {
+            queryable = queryable.Where(m =>
+                m.Topic != null &&
+                m.Topic.IdeaVersion != null &&
+                m.Topic.IdeaVersion.Idea != null &&
+                (m.Topic.IdeaVersion.Idea.MentorId == userId ||
+                 m.Topic.IdeaVersion.Idea.SubMentorId == userId));
+        }
+        else if (query.Roles.Contains("Mentor"))
+        {
+            queryable = queryable.Where(m =>
+                m.Topic != null &&
+                m.Topic.IdeaVersion != null &&
+                m.Topic.IdeaVersion.Idea != null &&
+                m.Topic.IdeaVersion.Idea.MentorId == userId);
+        }
+        else if (query.Roles.Contains("SubMentor"))
+        {
+            queryable = queryable.Where(m =>
+                m.Topic != null &&
+                m.Topic.IdeaVersion != null &&
+                m.Topic.IdeaVersion.Idea != null &&
+                m.Topic.IdeaVersion.Idea.SubMentorId == userId);
+        }
+        else
+        {
+            queryable = queryable.Where(m =>
+                m.Topic != null &&
+                m.Topic.IdeaVersion != null &&
+                m.Topic.IdeaVersion.Idea != null &&
+                (m.Topic.IdeaVersion.Idea.MentorId == userId ||
+                 m.Topic.IdeaVersion.Idea.SubMentorId == userId));
+        }
+        
         queryable = BaseFilterHelper.Base(queryable, query);
 
         queryable = Sort(queryable, query);

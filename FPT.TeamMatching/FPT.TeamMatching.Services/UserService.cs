@@ -97,7 +97,7 @@ public class UserService : BaseService<User>, IUserService
             var upcomingSemester = await _semesterRepository.GetUpComingSemester();
             if (upcomingSemester == null) return HandlerFail("Không có kì sắp đến");
 
-            var mentor = await GetUserAsync();
+            var mentor = await _userRepository.GetById(mentorId);
             if (mentor == null) return HandlerFail("Không tìm thấy mentor");
 
             var isMentor = await _userXRoleRepository.CheckRoleUserInSemester(mentorId, upcomingSemester.Id, "Mentor");
@@ -124,7 +124,7 @@ public class UserService : BaseService<User>, IUserService
                     .WithData(false)
                     .WithStatus(Const.SUCCESS_CODE)
                     .WithMessage(
-                        "mentor.Code + \" hiện đã Mentor \" + upcomingSemester.LimitTopicMentorOnly + \" đề tài không có SubMentor. Cần SubMentor cho đề tài của bạn!\"");
+                        $"{mentor.Email} hiện đã Mentor {upcomingSemester.LimitTopicMentorOnly} đề tài không có SubMentor. Cần SubMentor cho đề tài của bạn!");
             }
 
             //co submentor
@@ -248,7 +248,7 @@ public class UserService : BaseService<User>, IUserService
             if (userId == null) return HandlerFailAuth();
             var projectOfUser = await _unitOfWork.ProjectRepository.GetProjectByLeaderId(userId);
             if (projectOfUser == null) return HandlerFail("Người dùng không có project hiện tại");
-            
+
             var (data, total) = await _userRepository.GetStudentsNoTeam(query, projectOfUser.Id);
             var results = _mapper.Map<List<UserResult>>(data);
             var response = new QueryResult(query, results, total);

@@ -31,6 +31,7 @@ public class IdeaService : BaseService<Idea>, IIdeaService
     private readonly INotificationService _notificationService;
     private readonly IIdeaVersionRepository _ideaVersionRepository;
     private readonly IIdeaVersionRequestRepository _ideaVersionRequestRepository;
+    private readonly IIdeaVersionRequestService _ideaVersionRequestService;
     private readonly ITopicRepository _topicRepository;
     private readonly IProjectService _projectService;
     private readonly ISemesterService _semesterService;
@@ -44,11 +45,13 @@ public class IdeaService : BaseService<Idea>, IIdeaService
         ITopicService topicService,
         INotificationService notificationService,
         IUserService userService,
+        IIdeaVersionRequestService ideaVersionRequestService,
         ILogger<IdeaService> logger
     ) : base(mapper,
         unitOfWork)
     {
         _ideaRepository = unitOfWork.IdeaRepository;
+        _ideaVersionRequestService = ideaVersionRequestService;
         _ideaVersionRequestRepository = unitOfWork.IdeaVersionRequestRepository;
         _semesterRepository = unitOfWork.SemesterRepository;
         _projectRepository = unitOfWork.ProjectRepository;
@@ -132,7 +135,7 @@ public class IdeaService : BaseService<Idea>, IIdeaService
 
 
             // 5. Create requests and notifications
-            await CreateVersionRequests(idea, ideaVersion.Id, semester.CriteriaFormId.Value);
+            await _ideaVersionRequestService.CreateVersionRequests(idea, ideaVersion.Id, semester.CriteriaFormId.Value);
             if (!await _unitOfWork.SaveChanges()) return HandlerFail("Lưu không thành công idea version request");
             await SendNotifications(idea, ideaVersion.Abbreviations);
 
@@ -218,37 +221,6 @@ public class IdeaService : BaseService<Idea>, IIdeaService
         _ideaVersionRepository.Add(ideaVersion);
         return ideaVersion;
     }
-
-    private async Task CreateVersionRequests(Idea idea, Guid versionId, Guid criteriaFormId)
-    {
-        // Mentor request
-        var mentorRequest = new IdeaVersionRequest
-        {
-            IdeaVersionId = versionId,
-            ReviewerId = idea.MentorId,
-            CriteriaFormId = criteriaFormId,
-            Status = IdeaVersionRequestStatus.Pending,
-            Role = "Mentor",
-        };
-        await SetBaseEntityForCreation(mentorRequest);
-        _ideaVersionRequestRepository.Add(mentorRequest);
-
-        // Submentor request if exists
-        if (idea.SubMentorId.HasValue)
-        {
-            var subMentorRequest = new IdeaVersionRequest
-            {
-                IdeaVersionId = versionId,
-                ReviewerId = idea.SubMentorId.Value,
-                CriteriaFormId = criteriaFormId,
-                Status = IdeaVersionRequestStatus.Pending,
-                Role = "SubMentor",
-            };
-            await SetBaseEntityForCreation(subMentorRequest);
-            _ideaVersionRequestRepository.Add(subMentorRequest);
-        }
-    }
-
     #endregion
 
     #region Create-by-lecturer
@@ -277,7 +249,7 @@ public class IdeaService : BaseService<Idea>, IIdeaService
             if (!await _unitOfWork.SaveChanges()) return HandlerFail("Lưu không thành công idea version");
 
             // 5. Create requests and notifications (mentor auto-approved for lecturer)
-            await CreateLecturerVersionRequests(idea, ideaVersion.Id, semester.CriteriaFormId.Value);
+            await _ideaVersionRequestService.CreateVersionRequests(idea, ideaVersion.Id, semester.CriteriaFormId.Value);
             if (!await _unitOfWork.SaveChanges()) return HandlerFail("Lưu không thành công idea version request");
 
             // No need to notify mentor as it's auto-approved
@@ -376,34 +348,7 @@ public class IdeaService : BaseService<Idea>, IIdeaService
         return ideaVersion;
     }
 
-    private async Task CreateLecturerVersionRequests(Idea idea, Guid versionId, Guid criteriaFormId)
-    {
-        var mentorRequest = new IdeaVersionRequest
-        {
-            IdeaVersionId = versionId,
-            ReviewerId = idea.MentorId,
-            CriteriaFormId = criteriaFormId,
-            Status = IdeaVersionRequestStatus.Approved, // Auto-approved for lecturer
-            Role = "Mentor",
-        };
-        await SetBaseEntityForCreation(mentorRequest);
-        _ideaVersionRequestRepository.Add(mentorRequest);
-
-        if (idea.SubMentorId.HasValue)
-        {
-            var subMentorRequest = new IdeaVersionRequest
-            {
-                IdeaVersionId = versionId,
-                ReviewerId = idea.SubMentorId.Value,
-                CriteriaFormId = criteriaFormId,
-                Status = IdeaVersionRequestStatus.Pending,
-                Role = "SubMentor",
-            };
-            await SetBaseEntityForCreation(subMentorRequest);
-            _ideaVersionRequestRepository.Add(subMentorRequest);
-        }
-    }
-
+    
     #endregion
 
     private async Task<(StageIdea? stageIdea, Semester? semester)> GetCurrentStageAndSemester()

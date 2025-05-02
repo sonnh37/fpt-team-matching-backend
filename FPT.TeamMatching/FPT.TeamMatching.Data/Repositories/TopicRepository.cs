@@ -17,6 +17,7 @@ namespace FPT.TeamMatching.Data.Repositories
     public class TopicRepository : BaseRepository<Topic>, ITopicRepository
     {
         private readonly FPTMatchingDbContext _context;
+
         public TopicRepository(FPTMatchingDbContext dbContext) : base(dbContext)
         {
             _context = dbContext;
@@ -31,14 +32,14 @@ namespace FPT.TeamMatching.Data.Repositories
         public int NumberOfTopicBySemesterId(Guid semesterId)
         {
             var numberOfTopic = _context.Topics.Where(e => e.IsDeleted == false &&
-                                                    e.IdeaVersion != null &&
-                                                    e.IdeaVersion.StageIdea != null &&
-                                                    e.IdeaVersion.StageIdea.Semester != null &&
-                                                    e.IdeaVersion.StageIdea.Semester.Id == semesterId)
-                                                .Count();
+                                                           e.IdeaVersion != null &&
+                                                           e.IdeaVersion.StageIdea != null &&
+                                                           e.IdeaVersion.StageIdea.Semester != null &&
+                                                           e.IdeaVersion.StageIdea.Semester.Id == semesterId)
+                .Count();
             return numberOfTopic;
         }
-        
+
         public async Task<List<Topic>> GetAllTopicsByTopicCode(string[] topicCodes)
         {
             var result = await _context.Topics
@@ -47,7 +48,7 @@ namespace FPT.TeamMatching.Data.Repositories
                 .ToListAsync();
             return result;
         }
-        
+
         public async Task<(List<Topic>, int)> GetTopicsForMentor(TopicGetListForMentorQuery query, Guid userId)
         {
             var queryable = GetQueryable();
@@ -58,18 +59,43 @@ namespace FPT.TeamMatching.Data.Repositories
                 .Include(m => m.MentorTopicRequests)
                 .Include(m => m.TopicVersions);
 
-            queryable = queryable.Where(m => 
-                                             m.IdeaVersion != null &&
-                                             m.IdeaVersion.Idea != null &&
-                                             m.IdeaVersion.Idea.MentorId != null &&
-                                             m.IdeaVersion.Idea.MentorId == userId);
+            if (query.Roles.Contains("Mentor") && query.Roles.Contains("SubMentor"))
+            {
+                queryable = queryable.Where(m =>
+                    m.IdeaVersion != null &&
+                    m.IdeaVersion.Idea != null &&
+                    (m.IdeaVersion.Idea.MentorId == userId ||
+                     m.IdeaVersion.Idea.SubMentorId == userId));
+            }
+            else if (query.Roles.Contains("Mentor"))
+            {
+                queryable = queryable.Where(m =>
+                    m.IdeaVersion != null &&
+                    m.IdeaVersion.Idea != null &&
+                    m.IdeaVersion.Idea.MentorId == userId);
+            }
+            else if (query.Roles.Contains("SubMentor"))
+            {
+                queryable = queryable.Where(m =>
+                    m.IdeaVersion != null &&
+                    m.IdeaVersion.Idea != null &&
+                    m.IdeaVersion.Idea.SubMentorId == userId);
+            }
+            else
+            {
+                queryable = queryable.Where(m =>
+                    m.IdeaVersion != null &&
+                    m.IdeaVersion.Idea != null &&
+                    (m.IdeaVersion.Idea.MentorId == userId ||
+                     m.IdeaVersion.Idea.SubMentorId == userId));
+            }
 
             queryable = BaseFilterHelper.Base(queryable, query);
-        
+
             queryable = Sort(queryable, query);
-    
+
             var total = queryable.Count();
-            var results = query.IsPagination 
+            var results = query.IsPagination
                 ? await GetQueryablePagination(queryable, query).ToListAsync()
                 : await queryable.ToListAsync();
 

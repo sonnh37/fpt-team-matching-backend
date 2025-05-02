@@ -131,6 +131,7 @@ public class MappingProfile : Profile
         CreateMap<IdeaVersion, IdeaVersionCreateCommand>().ReverseMap();
         CreateMap<IdeaVersion, IdeaVersionUpdateCommand>().ReverseMap();
         CreateMap<IdeaVersion, IdeaVersionResubmitByStudentOrMentor>().ReverseMap();
+        CreateMap<IdeaVersionCreateCommand, IdeaVersionResubmitByStudentOrMentor>().ReverseMap();
 
         #endregion
 
