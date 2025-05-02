@@ -146,7 +146,7 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
         // Thêm điều kiện kiểm tra Topic null nếu có role Mentor, 
         // Mentor: thì chỉ lấy những idea chưa có topic
         // Council: lấy idea có topic
-        if (query.Roles.Contains("Mentor"))
+        if (query.Roles.Contains("Mentor") || query.Roles.Contains("SubMentor"))
         {
             queryable = queryable.Where(i => i.IdeaVersions.All(iv => iv.Topic == null));
         }

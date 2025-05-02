@@ -325,10 +325,30 @@ public abstract class BaseService<TEntity> : BaseService, IBaseService
                 return null;
 
             var userId = GetUserIdFromClaims();
-            if (userId == null)
+            var user = await _unitOfWork.UserRepository.GetById(userId, true);
+            return user ?? null;
+        }
+        catch (Exception ex)
+        {
+            return null;
+        }
+    }
+    
+    protected async Task<User?> GetUserByRole(string role)
+    {
+        try
+        {
+            if (!IsUserAuthenticated())
                 return null;
 
-            return await _unitOfWork.UserRepository.GetById(userId.Value, true);
+            var userId = GetUserIdFromClaims();
+            var user = await _unitOfWork.UserRepository.GetById(userId, true);
+            if (user == null)
+                return null;
+            
+            var isUserHasRole = user.UserXRoles.Any(e => e.Role != null && e.Role.RoleName == "Mentor");
+            
+            return !isUserHasRole ? null : user;
         }
         catch (Exception ex)
         {

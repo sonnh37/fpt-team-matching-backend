@@ -36,14 +36,6 @@ public class IdeaVersionRequestController : ControllerBase
         return Ok(msg);
     }
     
-    [HttpPut("status")]
-    public async Task<IActionResult> UpdateStatus([FromBody] IdeaVersionRequestUpdateStatusCommand request)
-    {
-        var businessResult = await _service.UpdateStatus(request);
-
-        return Ok(businessResult);
-    }
-    
     [HttpPost("create-council-requests")]
     public async Task<IActionResult> CreateCouncilRequests([FromBody] IdeaVersionRequestCreateForCouncilsCommand command)
     {
