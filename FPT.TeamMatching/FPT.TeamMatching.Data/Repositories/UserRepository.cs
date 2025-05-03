@@ -338,10 +338,10 @@ public class UserRepository : BaseRepository<User>, IUserRepository
         return reviewer;
     }
 
-    public async Task<List<UserIdEmailResult>> GetAllReviewerIdAndUsername()
+    public async Task<List<UserIdEmailResult>> GetAllReviewerIdAndUsername(Guid semesterId)
     {
         var result = await GetQueryable()
-            .Where(e => e.UserXRoles.Any(e => e.Role.RoleName == "Reviewer"))
+            .Where(e => e.UserXRoles.Any(e => e.Role.RoleName == "Reviewer" && e.SemesterId == semesterId))
             .Select(x =>
                 new UserIdEmailResult
                 {

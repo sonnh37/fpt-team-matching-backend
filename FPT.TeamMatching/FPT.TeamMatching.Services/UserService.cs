@@ -400,7 +400,8 @@ public class UserService : BaseService<User>, IUserService
 
     public async Task<BusinessResult> GetAllReviewer()
     {
-        var result = await _userRepository.GetAllReviewerIdAndUsername();
+        var currentSemester = await _semesterRepository.GetCurrentSemester();
+        var result = await _userRepository.GetAllReviewerIdAndUsername(currentSemester.Id);
         return new ResponseBuilder()
             .WithData(result)
             .WithStatus(Const.SUCCESS_CODE)

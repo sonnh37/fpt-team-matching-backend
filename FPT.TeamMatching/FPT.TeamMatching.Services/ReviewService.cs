@@ -201,7 +201,8 @@ public class ReviewService : BaseService<Review>, IReviewService
                 await file.CopyToAsync(stream);
             }
 
-            var reviewList = await _userRepository.GetAllReviewerIdAndUsername();
+            var currentSemester = await _semesterRepository.GetCurrentSemester();
+            var reviewList = await _userRepository.GetAllReviewerIdAndUsername(currentSemester.Id);
             var reviewUsernameList = reviewList.Select(x => x.Code).ToList();
             var customIdeaModel = await _ideaRepository.GetCustomIdea(semesterId, reviewNumber);
             var reviews = new List<Review>();
@@ -459,7 +460,7 @@ public class ReviewService : BaseService<Review>, IReviewService
         }
     }
 
-    public async Task<BusinessResult> UpdateFilerReview(UploadFileUrl request)
+    public async Task<BusinessResult> UpdateFilterReview(UploadFileUrl request)
     {
         try
         {
