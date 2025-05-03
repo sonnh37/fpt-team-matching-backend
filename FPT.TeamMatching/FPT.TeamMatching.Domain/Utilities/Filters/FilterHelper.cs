@@ -193,6 +193,25 @@ public static class FilterHelper
             queryable = queryable.Where(m =>
                 m.Type != null && m.Type == query.Type);
         }
+        if (query.ReceiverId != null)
+        {
+            queryable = queryable.Where(m =>
+                m.ReceiverId != null && m.ReceiverId == query.ReceiverId);
+        }
+        if (query.ProjectId != null)
+        {
+            queryable = queryable.Where(m =>
+                m.ProjectId != null && m.ProjectId == query.ProjectId);
+        }
+        if (query.SenderId != null)
+        {
+            queryable = queryable.Where(m =>
+                m.SenderId != null && m.SenderId == query.SenderId);
+        }
+        if (query.Status != null)
+        {
+            queryable = queryable.Where(m => m.Status == query.Status);
+        }
 
         queryable = BaseFilterHelper.Base(queryable, query);
 
@@ -271,6 +290,11 @@ public static class FilterHelper
         {
             queryable = queryable.Where(m =>
                 m.BlogId == query.BlogId);
+        }
+        if (query.UserId != null)
+        {
+            queryable = queryable.Where(m =>
+                m.UserId == query.UserId);
         }
 
         return queryable;
