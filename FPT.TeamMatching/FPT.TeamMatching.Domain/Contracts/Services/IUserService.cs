@@ -11,6 +11,8 @@ namespace FPT.TeamMatching.Domain.Contracts.Services;
 public interface IUserService : IBaseService
 {
     Task<BusinessResult> Create(UserCreateCommand command);
+    Task<BusinessResult> GetAll<TResult>(UserGetAllQuery query) where TResult : BaseResult;
+
     Task<BusinessResult> GetStudentsNoTeam(UserGetAllQuery query);
 
     Task<BusinessResult> UpdatePassword(UserPasswordCommand userPasswordCommand);

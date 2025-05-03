@@ -88,6 +88,13 @@ public class AuthService : IAuthService
 
     public async Task<BusinessResult> Login(AuthQuery query)
     {
+        // check role
+        // var semesterUpComing = await _unitOfWork.SemesterRepository.GetUpComingSemester();
+                                                                          // if (semesterUpComing == null)
+                                                                          //     return new ResponseBuilder()
+                                                                          //         .WithStatus(Const.NOT_FOUND_CODE)
+                                                                          //         .WithMessage("Hệ thống chưa cập nhật kì mới.");
+
         var user = await _userRepository.GetUserByUsernameOrEmail(query.Account);
 
         if (user == null)
@@ -95,6 +102,14 @@ public class AuthService : IAuthService
                 .WithStatus(Const.NOT_FOUND_CODE)
                 .WithMessage("Email không tìm thấy.");
 
+        var hasRole = user.UserXRoles.Any(m => ((m.RoleId != null)));
+        if (!hasRole)
+        {
+            return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage("Tài khoản chưa được phân quyền. Vui lòng liên hệ quản trị viên để được hỗ trợ.");
+        }
+        
         if (user.Department != query.Department)
         {
             return new ResponseBuilder()
@@ -286,7 +301,7 @@ public class AuthService : IAuthService
                 }
                 finally
                 {
-                    rsa.PersistKeyInCsp = false; 
+                    rsa.PersistKeyInCsp = false;
                 }
             }
         }
@@ -735,7 +750,8 @@ public class AuthService : IAuthService
     //     return new JwtSecurityTokenHandler().WriteToken(token);
     // }
     //
-    private string CreateToken(UserResult user, RSACryptoServiceProvider rsa, string tokenType, string kid, Guid? currentSemesterId = null)
+    private string CreateToken(UserResult user, RSACryptoServiceProvider rsa, string tokenType, string kid,
+        Guid? currentSemesterId = null)
     {
         var claims = new List<Claim>
         {
@@ -788,7 +804,7 @@ public class AuthService : IAuthService
 
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
-    
+
     private void SaveHttpOnlyCookie(string accessToken, string refreshToken)
     {
         var httpContext = _httpContextAccessor.HttpContext;
