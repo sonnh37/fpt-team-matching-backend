@@ -96,7 +96,7 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
         // Chuyển sang UTC (VD: 23/4/2024 17:00:00 GMT+0 nếu bạn ở GMT+7)
         var todayUtcMidnight = todayLocalMidnight.ToUniversalTime();
         var ideas = await GetQueryable()
-            .Include(e => e.Owner).ThenInclude(e => e.UserXRoles).ThenInclude(e => e.Role)
+            // .Include(e => e.Owner).ThenInclude(e => e.UserXRoles).ThenInclude(e => e.Role)
             //sua db
             // .Include(e => e.IdeaVersions).ThenInclude(m => m.StageIdea)
             // .Include(e => e.).ThenInclude(m => m.StageIdea)
@@ -117,6 +117,12 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
     public async Task<(List<Idea>, int)> GetIdeasOfReviewerByRolesAndStatus(
         IdeaGetListByStatusAndRoleQuery query, Guid userId)
     {
+        var semester = await _semesterRepository.GetUpComingSemester();
+        if (semester == null)
+        {
+            return (new List<Idea>(), 0);
+        }
+
         var queryable = GetQueryable()
             .Include(i => i.Owner)
             .Include(i => i.Mentor)
@@ -129,6 +135,7 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
             .ThenInclude(iv => iv.IdeaVersionRequests)
             .ThenInclude(iv => iv.AnswerCriterias)
             .Where(i => i.IdeaVersions.Any(iv =>
+                iv.Version == i.IdeaVersions.Max(iv2 => iv2.Version) && 
                 iv.IdeaVersionRequests.Any(ivr =>
                     ivr.Status != null &&
                     ivr.Role != null &&
@@ -136,6 +143,8 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
                     query.Status == ivr.Status &&
                     ivr.ReviewerId == userId)));
 
+        queryable = queryable.Where((m =>
+            m.IdeaVersions.Any(i => i.StageIdea != null && i.StageIdea.SemesterId == semester.Id)));
         // Thêm điều kiện kiểm tra Topic null nếu có role Mentor, 
         // Mentor: thì chỉ lấy những idea chưa có topic
         // Council: lấy idea có topic
@@ -143,6 +152,11 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
         {
             queryable = queryable.Where(i => i.IdeaVersions.All(iv => iv.Topic == null));
         }
+
+        // if (query.Roles.Contains("Council"))
+        // {
+        //     queryable = queryable.Where(i => i.IdeaVersions.Any(iv => iv.Topic != null));
+        // }
 
         queryable = queryable.Where(m => m.Status == query.IdeaStatus);
 
@@ -255,21 +269,21 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
         var queryable = GetQueryable();
         queryable = queryable
             .Include(m => m.IdeaVersions)
-                .ThenInclude(x => x.Topic)
-                .ThenInclude(m => m.MentorTopicRequests)
+            .ThenInclude(x => x.Topic)
+            .ThenInclude(m => m.MentorTopicRequests)
             .Include(m => m.Owner)
-                .ThenInclude(u => u.UserXRoles)
-                .ThenInclude(ur => ur.Role)
+            .ThenInclude(u => u.UserXRoles)
+            .ThenInclude(ur => ur.Role)
             .Include(m => m.IdeaVersions)
-                .ThenInclude(x => x.Topic)
-                .ThenInclude(m => m.Project)
+            .ThenInclude(x => x.Topic)
+            .ThenInclude(m => m.Project)
             .Include(m => m.Mentor)
             .Include(m => m.SubMentor)
             .Include(m => m.IdeaVersions)
-                .ThenInclude(x => x.StageIdea)
-                .ThenInclude(s => s.Semester) // Thêm include cho Semester
+            .ThenInclude(x => x.StageIdea)
+            .ThenInclude(s => s.Semester) // Thêm include cho Semester
             .Include(m => m.Specialty)
-                .ThenInclude(m => m.Profession);
+            .ThenInclude(m => m.Profession);
 
         // Thêm điều kiện kiểm tra publicTopicDate
         queryable = queryable.Where(m =>
