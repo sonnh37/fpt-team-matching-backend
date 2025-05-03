@@ -147,7 +147,7 @@ public abstract class BaseService<TEntity> : BaseService, IBaseService
                 .WithMessage(errorMessage);
         }
     }
-    
+
     protected async Task<TEntity?> CreateOrUpdateEntity(CreateOrUpdateCommand createOrUpdateCommand)
     {
         TEntity? entity;
@@ -251,7 +251,7 @@ public abstract class BaseService<TEntity> : BaseService, IBaseService
         }
     }
 
-   
+
     protected async Task<TEntity?> RestoreEntity(UpdateCommand updateCommand)
     {
         var entity = await _baseRepository.GetById(updateCommand.Id);
@@ -333,8 +333,8 @@ public abstract class BaseService<TEntity> : BaseService, IBaseService
             return null;
         }
     }
-    
-    protected async Task<User?> GetUserByRole(string role)
+
+    protected async Task<User?> GetUserByRole(string role, Guid? semesterId = null)
     {
         try
         {
@@ -345,9 +345,10 @@ public abstract class BaseService<TEntity> : BaseService, IBaseService
             var user = await _unitOfWork.UserRepository.GetById(userId, true);
             if (user == null)
                 return null;
-            
-            var isUserHasRole = user.UserXRoles.Any(e => e.Role != null && e.Role.RoleName == "Mentor");
-            
+
+            var isUserHasRole =
+                user.UserXRoles.Any(e => e.Role != null && e.Role.RoleName == role && e.SemesterId == semesterId);
+
             return !isUserHasRole ? null : user;
         }
         catch (Exception ex)
@@ -355,7 +356,7 @@ public abstract class BaseService<TEntity> : BaseService, IBaseService
             return null;
         }
     }
-    
+
     public bool IsUserAuthenticated()
     {
         return _httpContextAccessor?.HttpContext != null &&
@@ -396,13 +397,11 @@ public abstract class BaseService<TEntity> : BaseService, IBaseService
             .WithStatus(Const.FAIL_CODE)
             .WithMessage(message);
     }
-    
+
     protected BusinessResult HandlerFailAuth()
     {
         return new ResponseBuilder()
             .WithStatus(Const.FAIL_UNAUTHORIZED_CODE)
             .WithMessage(Const.FAIL_UNAUTHORIZED_MSG);
     }
-    
-    
 }

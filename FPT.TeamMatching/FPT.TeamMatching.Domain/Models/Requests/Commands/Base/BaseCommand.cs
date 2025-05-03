@@ -12,11 +12,13 @@ public class CreateOrUpdateCommand : BaseCommand
 
 public class CreateCommand : CreateOrUpdateCommand
 {
+    public string? Note { get; set; }
 }
 
 public class UpdateCommand : CreateOrUpdateCommand
 {
     public Guid Id { get; set; }
+    public string? Note { get; set; }
 }
 
 public class DeleteCommand : BaseCommand

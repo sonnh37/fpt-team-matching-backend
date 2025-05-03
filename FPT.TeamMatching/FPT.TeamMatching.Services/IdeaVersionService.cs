@@ -44,7 +44,8 @@ namespace FPT.TeamMatching.Services
         {
             try
             {
-                var student = await GetUserByRole("Student");
+                var semesterUpComing = await _semesterRepository.GetUpComingSemester();
+                var student = await GetUserByRole("Student", semesterUpComing?.Id);
 
                 var stageIdea = await _stageIdeaRepositoty.GetCurrentStageIdea();
                 if (stageIdea == null) return HandlerFail("Không có đợt duyệt ứng với ngày hiện tại");

@@ -103,7 +103,7 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
         // Chuyển sang UTC (VD: 23/4/2024 17:00:00 GMT+0 nếu bạn ở GMT+7)
         var todayUtcMidnight = todayLocalMidnight.ToUniversalTime();
         var ideas = await GetQueryable()
-            .Include(e => e.Owner).ThenInclude(e => e.UserXRoles).ThenInclude(e => e.Role)
+            // .Include(e => e.Owner).ThenInclude(e => e.UserXRoles).ThenInclude(e => e.Role)
             //sua db
             // .Include(e => e.IdeaVersions).ThenInclude(m => m.StageIdea)
             // .Include(e => e.).ThenInclude(m => m.StageIdea)
@@ -124,6 +124,12 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
     public async Task<(List<Idea>, int)> GetIdeasOfReviewerByRolesAndStatus(
         IdeaGetListByStatusAndRoleQuery query, Guid userId)
     {
+        var semester = await _semesterRepository.GetUpComingSemester();
+        if (semester == null)
+        {
+            return (new List<Idea>(), 0);
+        }
+
         var queryable = GetQueryable()
             .Include(i => i.Owner)
             .Include(i => i.Mentor)
@@ -136,6 +142,7 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
             .ThenInclude(iv => iv.IdeaVersionRequests)
             .ThenInclude(iv => iv.AnswerCriterias)
             .Where(i => i.IdeaVersions.Any(iv =>
+                iv.Version == i.IdeaVersions.Max(iv2 => iv2.Version) && 
                 iv.IdeaVersionRequests.Any(ivr =>
                     ivr.Status != null &&
                     ivr.Role != null &&
@@ -143,6 +150,8 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
                     query.Status == ivr.Status &&
                     ivr.ReviewerId == userId)));
 
+        queryable = queryable.Where((m =>
+            m.IdeaVersions.Any(i => i.StageIdea != null && i.StageIdea.SemesterId == semester.Id)));
         // Thêm điều kiện kiểm tra Topic null nếu có role Mentor, 
         // Mentor: thì chỉ lấy những idea chưa có topic
         // Council: lấy idea có topic
@@ -150,6 +159,11 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
         {
             queryable = queryable.Where(i => i.IdeaVersions.All(iv => iv.Topic == null));
         }
+
+        // if (query.Roles.Contains("Council"))
+        // {
+        //     queryable = queryable.Where(i => i.IdeaVersions.Any(iv => iv.Topic != null));
+        // }
 
         queryable = queryable.Where(m => m.Status == query.IdeaStatus);
 
@@ -248,82 +262,82 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
             .ToListAsync();
     }
 
-   public async Task<(List<Idea>, int)> GetIdeasOfSupervisors(IdeaGetListOfSupervisorsQuery query)
-{
-    var semester = await _semesterRepository.GetCurrentSemester();
-    if (semester == null)
+    public async Task<(List<Idea>, int)> GetIdeasOfSupervisors(IdeaGetListOfSupervisorsQuery query)
     {
-        return (new List<Idea>(), 0);
-    }
+        var semester = await _semesterRepository.GetCurrentSemester();
+        if (semester == null)
+        {
+            return (new List<Idea>(), 0);
+        }
 
-    var semesterId = semester.Id;
-    var currentDate = DateTime.UtcNow; // Sử dụng UTC để tránh vấn đề múi giờ
+        var semesterId = semester.Id;
+        var currentDate = DateTime.UtcNow; // Sử dụng UTC để tránh vấn đề múi giờ
 
-    var queryable = GetQueryable();
-    queryable = queryable
-        .Include(m => m.IdeaVersions)
+        var queryable = GetQueryable();
+        queryable = queryable
+            .Include(m => m.IdeaVersions)
             .ThenInclude(x => x.Topic)
             .ThenInclude(m => m.MentorTopicRequests)
-        .Include(m => m.Owner)
+            .Include(m => m.Owner)
             .ThenInclude(u => u.UserXRoles)
             .ThenInclude(ur => ur.Role)
-        .Include(m => m.IdeaVersions)
+            .Include(m => m.IdeaVersions)
             .ThenInclude(x => x.Topic)
             .ThenInclude(m => m.Project)
-        .Include(m => m.Mentor)
-        .Include(m => m.SubMentor)
-        .Include(m => m.IdeaVersions)
+            .Include(m => m.Mentor)
+            .Include(m => m.SubMentor)
+            .Include(m => m.IdeaVersions)
             .ThenInclude(x => x.StageIdea)
             .ThenInclude(s => s.Semester) // Thêm include cho Semester
-        .Include(m => m.Specialty)
+            .Include(m => m.Specialty)
             .ThenInclude(m => m.Profession);
 
-    // Thêm điều kiện kiểm tra publicTopicDate
-    queryable = queryable.Where(m =>
-        m.IdeaVersions.Any(mx =>
-            mx.Topic != null &&
-            mx.StageIdea != null &&
-            mx.StageIdea.Semester != null &&
-            mx.StageIdea.SemesterId == semesterId &&
-            mx.StageIdea.Semester.PublicTopicDate != null && // Kiểm tra có publicTopicDate
-            mx.StageIdea.Semester.PublicTopicDate <= currentDate && // Đã qua ngày công bố
-            mx.Topic.MentorTopicRequests.All(x => x.Status != MentorTopicRequestStatus.Approved)));
-
-    // Các điều kiện lọc khác giữ nguyên
-    if (!string.IsNullOrEmpty(query.EnglishName))
-    {
-        queryable = queryable.Where(mi =>
-            mi.IdeaVersions.Any(m =>
-                m.EnglishName != null &&
-                m.EnglishName.ToLower().Trim().Contains(query.EnglishName.ToLower().Trim())));
-    }
-
-    if (query.IsExistedTeam != null) 
-    {
-        queryable = queryable.Where(m => query.IsExistedTeam.Value == m.IsExistedTeam);
-    }
-
-    if (query.Types.Count > 0)
-    {
+        // Thêm điều kiện kiểm tra publicTopicDate
         queryable = queryable.Where(m =>
-            m.Type != null && query.Types.Contains(m.Type.Value));
+            m.IdeaVersions.Any(mx =>
+                mx.Topic != null &&
+                mx.StageIdea != null &&
+                mx.StageIdea.Semester != null &&
+                mx.StageIdea.SemesterId == semesterId &&
+                mx.StageIdea.Semester.PublicTopicDate != null && // Kiểm tra có publicTopicDate
+                mx.StageIdea.Semester.PublicTopicDate <= currentDate && // Đã qua ngày công bố
+                mx.Topic.MentorTopicRequests.All(x => x.Status != MentorTopicRequestStatus.Approved)));
+
+        // Các điều kiện lọc khác giữ nguyên
+        if (!string.IsNullOrEmpty(query.EnglishName))
+        {
+            queryable = queryable.Where(mi =>
+                mi.IdeaVersions.Any(m =>
+                    m.EnglishName != null &&
+                    m.EnglishName.ToLower().Trim().Contains(query.EnglishName.ToLower().Trim())));
+        }
+
+        if (query.IsExistedTeam != null)
+        {
+            queryable = queryable.Where(m => query.IsExistedTeam.Value == m.IsExistedTeam);
+        }
+
+        if (query.Types.Count > 0)
+        {
+            queryable = queryable.Where(m =>
+                m.Type != null && query.Types.Contains(m.Type.Value));
+        }
+
+        if (query.Status != null)
+        {
+            queryable = queryable.Where(m => m.Status == query.Status);
+        }
+
+        queryable = BaseFilterHelper.Base(queryable, query);
+        queryable = Sort(queryable, query);
+
+        var total = await queryable.CountAsync();
+        var results = query.IsPagination
+            ? await GetQueryablePagination(queryable, query).ToListAsync()
+            : await queryable.ToListAsync();
+
+        return (results, query.IsPagination ? total : results.Count);
     }
-
-    if (query.Status != null)
-    {
-        queryable = queryable.Where(m => m.Status == query.Status);
-    }
-
-    queryable = BaseFilterHelper.Base(queryable, query);
-    queryable = Sort(queryable, query);
-
-    var total = await queryable.CountAsync();
-    var results = query.IsPagination
-        ? await GetQueryablePagination(queryable, query).ToListAsync()
-        : await queryable.ToListAsync();
-
-    return (results, query.IsPagination ? total : results.Count);
-}
 
     public List<Idea>? GetIdeasOnlyMentorOfUserInSemester(Guid mentorId, Guid semesterId)
     {

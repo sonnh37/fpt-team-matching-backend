@@ -221,6 +221,7 @@ public class IdeaService : BaseService<Idea>, IIdeaService
         _ideaVersionRepository.Add(ideaVersion);
         return ideaVersion;
     }
+
     #endregion
 
     #region Create-by-lecturer
@@ -348,7 +349,6 @@ public class IdeaService : BaseService<Idea>, IIdeaService
         return ideaVersion;
     }
 
-    
     #endregion
 
     private async Task<(StageIdea? stageIdea, Semester? semester)> GetCurrentStageAndSemester()
@@ -621,9 +621,6 @@ public class IdeaService : BaseService<Idea>, IIdeaService
 
     private async Task HandleApprovedIdea(Idea idea, IdeaVersion ideaVersion, StageIdea stageIdea)
     {
-        if (idea.Owner?.UserXRoles?.Any(e => e.Role?.RoleName == "Student") != true)
-            return;
-
         var ideaVersionsOfIdea = await _ideaVersionRepository.GetIdeaVersionsByIdeaId(ideaVersion.IdeaId.Value);
         var ideaVersionListId = ideaVersionsOfIdea.Select(m => m.Id).ToList().ConvertAll<Guid?>(x => x);
         var existingTopics = await _unitOfWork.TopicRepository.GetTopicByIdeaVersionId(ideaVersionListId);
@@ -635,7 +632,6 @@ public class IdeaService : BaseService<Idea>, IIdeaService
             _unitOfWork.TopicRepository.Update(topic);
             await _unitOfWork.SaveChanges();
         }
-
 
         // Kiểm tra xem IdeaVersion đã có Topic chưa
         var existingTopic = await _topicRepository.GetQueryable()
@@ -664,6 +660,16 @@ public class IdeaService : BaseService<Idea>, IIdeaService
                 TopicCode = existingTopic.TopicCode
             };
         }
+
+        // Mentor return
+        var owner = await _unitOfWork.UserRepository.GetQueryable(m => m.Id == idea.OwnerId)
+            .Include(e => e.UserXRoles).ThenInclude(e => e.Role).SingleOrDefaultAsync();
+        var semesterGetUpComing = await _semesterRepository.GetUpComingSemester();
+
+        // Nếu như kì sắp tới mà mentor chưa đc role student thì return
+        if (owner?.UserXRoles?.Any(e => e.Role?.RoleName == "Mentor" && semesterGetUpComing?.Id == e.SemesterId) ==
+            true)
+            return;
 
         var existedProject = await _projectRepository.GetProjectByLeaderId(idea.OwnerId);
 
