@@ -53,7 +53,8 @@ public class IdeaVersionRequestService : BaseService<IdeaVersionRequest>, IIdeaV
 
     public async Task CreateVersionRequests(Idea idea, Guid versionId, Guid criteriaFormId)
     {
-        var mentor = await GetUserByRole("Mentor");
+        var semesterUpComing = await _semesterRepository.GetUpComingSemester();
+        var mentor = await GetUserByRole("Mentor", semesterUpComing?.Id);
         // Mentor request
         var mentorRequest = new IdeaVersionRequest
         {
@@ -259,6 +260,7 @@ public class IdeaVersionRequestService : BaseService<IdeaVersionRequest>, IIdeaV
 
             ideaVersionRequest.Status = command.Status;
             ideaVersionRequest.ProcessDate = DateTime.UtcNow;
+            ideaVersionRequest.Note = command.Note;
 
             await SetBaseEntityForUpdate(ideaVersionRequest);
             _ideaVersionRequestRepository.Update(ideaVersionRequest);
@@ -270,21 +272,24 @@ public class IdeaVersionRequestService : BaseService<IdeaVersionRequest>, IIdeaV
                     .WithMessage(Const.FAIL_SAVE_MSG);
             }
 
-            var answerCriteriaList = _mapper.Map<List<AnswerCriteria>>(command.AnswerCriteriaList);
-            foreach (var answerCriteria in answerCriteriaList)
+            if (ideaVersionRequest.Role != "SubMentor")
             {
-                answerCriteria.IdeaVersionRequestId = ideaVersionRequest.Id;
-                await SetBaseEntityForCreation(answerCriteria);
-            }
+                var answerCriteriaList = _mapper.Map<List<AnswerCriteria>>(command.AnswerCriteriaList);
+                foreach (var answerCriteria in answerCriteriaList)
+                {
+                    answerCriteria.IdeaVersionRequestId = ideaVersionRequest.Id;
+                    await SetBaseEntityForCreation(answerCriteria);
+                }
 
-            _answerCriteriaRepository.AddRange(answerCriteriaList);
-            saveChange = await _unitOfWork.SaveChanges();
-            if (!saveChange)
-            {
-                return new ResponseBuilder()
-                    .WithStatus(Const.FAIL_CODE)
-                    .WithMessage(Const.FAIL_SAVE_MSG);
+                _answerCriteriaRepository.AddRange(answerCriteriaList);
+                if (!await _unitOfWork.SaveChanges())
+                {
+                    return new ResponseBuilder()
+                        .WithStatus(Const.FAIL_CODE)
+                        .WithMessage(Const.FAIL_SAVE_MSG);
+                }
             }
+            
 
             if (ideaVersionRequest.IdeaVersion == null)
             {

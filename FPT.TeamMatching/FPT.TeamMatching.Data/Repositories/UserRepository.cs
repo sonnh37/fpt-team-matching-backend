@@ -22,6 +22,7 @@ public class UserRepository : BaseRepository<User>, IUserRepository
         _semesterRepository = semesterRepository;
     }
 
+
     public async Task<(List<User>, int)> GetAllByCouncilWithIdeaVersionRequestPending(UserGetAllQuery query)
     {
         var queryable = GetQueryable();
@@ -72,16 +73,21 @@ public class UserRepository : BaseRepository<User>, IUserRepository
     public async Task<(List<User>, int)> GetStudentsNoTeam(UserGetAllQuery query, Guid projectId)
     {
         var queryable = GetQueryable();
+        var semester = await _semesterRepository.GetUpComingSemester();
+        if (semester == null)
+        {
+            return (new List<User>(), 0);
+        }
 
         queryable = queryable.Include(m => m.UserXRoles).ThenInclude(m => m.Role)
-                .Include(m => m.TeamMembers).ThenInclude(m => m.Project)
-                .Include(m => m.InvitationOfReceivers)
-            ;
+            .Include(m => m.TeamMembers).ThenInclude(m => m.Project)
+            .Include(m => m.InvitationOfReceivers);
 
         queryable = queryable.Where(m =>
             !m.InvitationOfReceivers.Any(ior =>
                 (ior.ProjectId == projectId && (ior.Status == InvitationStatus.Pending))) &&
-            m.UserXRoles.Any(uxr => uxr.Role != null && uxr.Role.RoleName == "Student") &&
+            m.UserXRoles.Any(uxr =>
+                uxr.Role != null && uxr.Role.RoleName == "Student" && uxr.SemesterId == semester.Id) &&
             (!m.TeamMembers.Any() ||
              !m.TeamMembers.Any(tm =>
                  (tm.Project != null && (tm.Project.Status == ProjectStatus.Pending ||
@@ -183,7 +189,66 @@ public class UserRepository : BaseRepository<User>, IUserRepository
         return (results, query.IsPagination ? total : results.Count);
     }
 
-    public async Task<User?> GetUserByUsernameOrEmail(string key)
+    public async Task<(List<User>, int)> GetData(UserGetAllQuery query)
+    {
+        var queryable = GetQueryable();
+        queryable = queryable
+            .Include(m => m.UserXRoles)
+            .ThenInclude(x => x.Role)
+            .Include(m => m.Notifications)
+            .Include(m => m.TeamMembers)
+            .Include(m => m.ProfileStudent).ThenInclude(x => x.SkillProfiles)
+            .Include(m => m.ProfileStudent).ThenInclude(x => x.Specialty)
+            .Include(e => e.UserXRoles).ThenInclude(e => e.Semester);
+
+        if (!string.IsNullOrEmpty(query.Role))
+        {
+            queryable = queryable.Where(m =>
+                m.UserXRoles.Any(uxr => uxr.Role != null && uxr.Role.RoleName == query.Role));
+        }
+
+        if (query.SemesterId != null)
+        {
+            queryable = queryable.Where(m =>
+                m.UserXRoles.Any(uxr =>
+                    uxr.Role != null && uxr.SemesterId == query.SemesterId));
+        }
+
+        if (!string.IsNullOrEmpty(query.EmailOrFullname))
+        {
+            queryable = queryable.Where(m =>
+                m.LastName != null && m.FirstName != null &&
+                ((m.Email != null && m.Email.Contains(query.EmailOrFullname.Trim().ToLower())) ||
+                 (m.LastName.Trim().ToLower() + " " + m.FirstName.Trim().ToLower()).Contains(query.EmailOrFullname
+                     .Trim().ToLower()))
+            );
+        }
+
+        if (!string.IsNullOrEmpty(query.Email))
+        {
+            string searchEmail = query.Email.Trim().ToLower();
+            queryable = queryable.Where(m => m.Email != null && m.Email.ToLower().Contains(searchEmail));
+        }
+
+        if (query.Department.HasValue)
+        {
+            queryable = queryable.Where(m =>
+                m.Department == query.Department);
+        }
+
+        queryable = BaseFilterHelper.Base(queryable, query);
+
+        queryable = Sort(queryable, query);
+
+        var total = queryable.Count();
+        var results = query.IsPagination
+            ? await GetQueryablePagination(queryable, query).ToListAsync()
+            : await queryable.ToListAsync();
+
+        return (results, query.IsPagination ? total : results.Count);
+    }
+
+    public async Task<User?> GetUserByUsernameOrEmail(string? key)
     {
         key = key.Trim().ToLower();
         var queyable = GetQueryable();
@@ -191,7 +256,8 @@ public class UserRepository : BaseRepository<User>, IUserRepository
 
         return await queyable
             .Where(entity => !entity.IsDeleted)
-            .Where(e => e.Email!.ToLower().Trim() == key || e.Username!.ToLower().Trim() == key)
+            .Where(e => e.Email != null && e.Username != null &&
+                        (e.Email.ToLower().Trim() == key || e.Username.ToLower().Trim() == key))
             .FirstOrDefaultAsync();
     }
 

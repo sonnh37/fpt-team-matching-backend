@@ -8,7 +8,9 @@ namespace FPT.TeamMatching.Domain.Contracts.Repositories;
 
 public interface IUserRepository : IBaseRepository<User>
 {
-    Task<User?> GetUserByUsernameOrEmail(string key);
+    Task<(List<User>, int)> GetData(UserGetAllQuery query);
+
+    Task<User?> GetUserByUsernameOrEmail(string? key);
     Task<(List<User>, int)> GetStudentsNoTeam(UserGetAllQuery query, Guid projectId);
     Task<User?> GetByEmail(string keyword);
     Task<User?> GetByUsername(string username);

@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using FPT.TeamMatching.Domain.Enums;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Topics;
 using FPT.TeamMatching.Domain.Utilities.Filters;
 using MongoDB.Driver.Linq;
@@ -59,6 +60,10 @@ namespace FPT.TeamMatching.Data.Repositories
                 .Include(m => m.MentorTopicRequests)
                 .Include(m => m.TopicVersions);
 
+            queryable = queryable.Where(m =>
+                m.IdeaVersion != null &&
+                m.IdeaVersion.Idea != null &&
+                (m.IdeaVersion.Idea.Status != IdeaStatus.Rejected));
             if (query.Roles.Contains("Mentor") && query.Roles.Contains("SubMentor"))
             {
                 queryable = queryable.Where(m =>

@@ -29,5 +29,7 @@ public class UserGetAllQuery : GetQueryableQuery
     
     public string? Role { get; set; }
     
+    public Guid? SemesterId { get; set; }
+    
     public string? EmailOrFullname { get; set; }
 }
