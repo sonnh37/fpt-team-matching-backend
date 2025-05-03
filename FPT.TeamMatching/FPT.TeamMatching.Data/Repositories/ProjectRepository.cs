@@ -166,9 +166,9 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
     {
         var today = DateTime.UtcNow.Date;
         var project = await _context.Projects
-            .Where(p => p.IsDeleted == false
-                        &&
+            .Where(p => p.IsDeleted == false && 
                         p.Topic.IdeaVersion.Idea != null &&
+                        p.Topic.IdeaVersion.Idea.Status == IdeaStatus.Approved &&
                         p.Topic.IdeaVersion.StageIdea != null &&
                         p.Topic.IdeaVersion.StageIdea.Semester != null &&
                         p.Topic.IdeaVersion.StageIdea.Semester != null &&

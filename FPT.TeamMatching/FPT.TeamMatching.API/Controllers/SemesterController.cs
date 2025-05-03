@@ -3,6 +3,7 @@ using FPT.TeamMatching.Domain.Models.Requests.Commands.Semester;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Semester;
 using FPT.TeamMatching.Domain.Models.Results;
 using FPT.TeamMatching.Domain.Utilities;
+using Hangfire;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -15,10 +16,23 @@ namespace FPT.TeamMatching.API.Controllers
     public class SemesterController : ControllerBase
     {
         private readonly ISemesterService _service;
-
-        public SemesterController(ISemesterService __service)
+        private readonly IConfiguration _configuration;
+        private readonly IIdeaService _ideaService;
+        private readonly IReviewService _reviewService;
+        private readonly IRecurringJobManager _recurringJobManager;
+        public SemesterController(
+            ISemesterService __service,
+            IConfiguration configuration,
+            IIdeaService ideaService,
+            IReviewService reviewService,
+            IRecurringJobManager recurringJobManager
+            )
         {
             _service = __service;
+            _configuration = configuration;
+            _ideaService = ideaService;
+            _reviewService = reviewService;
+            _recurringJobManager = recurringJobManager;
         }
 
         [HttpGet]
@@ -60,6 +74,22 @@ namespace FPT.TeamMatching.API.Controllers
         public async Task<IActionResult> Create([FromBody] SemesterCreateCommand request)
         {
             var msg = await _service.CreateOrUpdate<SemesterResult>(request);
+            if (msg.Status == 1)
+            {
+                // auto-update-project-inprogress
+                var name = _configuration.GetSection("HANGFIRE_SERVER_LOCAL");
+                var timeUpdateProject = Utils.ToCronExpression(request.StartDate.Value);
+                _recurringJobManager.AddOrUpdate("auto-update-project-inprogress-"+request.SemesterCode, () => _ideaService.AutoUpdateProjectInProgress(), timeUpdateProject, new RecurringJobOptions { QueueName = name.Value });
+                // create review hangfire
+                var timeCreateReview = Utils.ToCronExpression(request.StartDate.Value, false, 5); // deplay for 5 minutes for project updated
+                _recurringJobManager.AddOrUpdate("auto-create-review-"+request.SemesterCode, () => _reviewService.CreateReviewsForActiveProject(),timeCreateReview , new RecurringJobOptions { QueueName = name.Value });
+                
+                // auto update idea status 
+                var timePublicIdeaResult = Utils.ToCronExpression(request.PublicTopicDate.Value);
+                _recurringJobManager.AddOrUpdate("auto-update-result-"+request.SemesterCode, () => _ideaService.AutoUpdateIdeaStatus(), timePublicIdeaResult, new RecurringJobOptions { QueueName = name.Value });
+                
+            }
+          
             return Ok(msg);
         }
 
