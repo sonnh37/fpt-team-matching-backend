@@ -4,8 +4,6 @@ public enum TeamMemberRole
 {
     Member,
     Leader,
-    Mentor,
-    SubMentor
 }
 
 public enum TeamMemberStatus

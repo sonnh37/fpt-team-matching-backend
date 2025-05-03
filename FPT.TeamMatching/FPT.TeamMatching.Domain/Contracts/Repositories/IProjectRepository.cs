@@ -23,5 +23,9 @@ public interface IProjectRepository : IBaseRepository<Project>
     
     Task<(List<Project>, int)> SearchProjects(ProjectSearchQuery query);
 
+    Task<List<Project>?> GetPendingProjectsWithNoTopicStartingBySemesterId(Guid semesterId);
+
+    Task<List<Project>?> GetPendingProjectsWithTopicStartingBySemesterId(Guid semesterId);
+
 
 }

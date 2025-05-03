@@ -142,4 +142,20 @@ public class IdeaVersionRequestRepository : BaseRepository<IdeaVersionRequest>, 
             return (results, results.Count);
         }
     }
+
+    public async Task<List<IdeaVersionRequest>?> GetRoleMentorNotApproveInSemester(Guid semesterId)
+    {
+        var queryable = GetQueryable();
+
+        var ideaVersionRequests = await queryable.Where(e => e.IsDeleted == false &&
+                                                            e.Role == "Mentor" &&
+                                                            e.Status != IdeaVersionRequestStatus.Approved &&
+                                                            e.IdeaVersion != null && 
+                                                            e.IdeaVersion.StageIdea != null &&
+                                                            e.IdeaVersion.StageIdea.Semester != null &&
+                                                            e.IdeaVersion.StageIdea.Semester.Id == semesterId)
+                                                .ToListAsync();
+
+        return ideaVersionRequests;
+    }
 }

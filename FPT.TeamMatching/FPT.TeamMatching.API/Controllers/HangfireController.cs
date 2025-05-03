@@ -61,11 +61,11 @@ public class HangfireController : ControllerBase
         return Ok();
     }
 
-    [HttpGet("/RecurringJob/update-project-in-progress")]
+    [HttpGet("/RecurringJob/update-when-semester-start")]
     public ActionResult UpdateProjectInProgress()
     {
         var name = _configuration.GetSection("HANGFIRE_SERVER_LOCAL");
-        _recurringJobManager.AddOrUpdate("update-project-in-progress", () => _ideaService.AutoUpdateProjectInProgress(), Cron.Minutely, new RecurringJobOptions { QueueName = name.Value });
+        _recurringJobManager.AddOrUpdate("update-when-semester-start", () => _ideaService.UpdateWhenSemesterStart(), Cron.Minutely, new RecurringJobOptions { QueueName = name.Value });
         return Ok();
     }
 

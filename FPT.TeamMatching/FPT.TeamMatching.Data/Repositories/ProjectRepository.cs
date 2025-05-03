@@ -166,14 +166,16 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
     {
         var today = DateTime.UtcNow.Date;
         var project = await _context.Projects
-            .Where(p => p.IsDeleted == false && 
-                        p.Topic.IdeaVersion.Idea != null &&
-                        p.Topic.IdeaVersion.Idea.Status == IdeaStatus.Approved &&
+            .Include(e => e.Topic)
+                .ThenInclude(e => e.IdeaVersion)
+                    .ThenInclude(e => e.Idea)
+            .Where(p => p.IsDeleted == false &&
+                        p.Topic != null &&
+                        p.Topic.IdeaVersion != null &&
                         p.Topic.IdeaVersion.StageIdea != null &&
                         p.Topic.IdeaVersion.StageIdea.Semester != null &&
-                        p.Topic.IdeaVersion.StageIdea.Semester != null &&
                         p.Topic.IdeaVersion.StageIdea.Semester.StartDate != null &&
-                        p.Topic.IdeaVersion.StageIdea.Semester.StartDate.Value.UtcDateTime.Date == today
+                        p.Topic.IdeaVersion.StageIdea.Semester.StartDate.Value.Day == DateTime.UtcNow.Day
             )
             .ToListAsync();
         return project;
@@ -261,20 +263,6 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
         return projects;
     }
 
-    //public async Task<List<Project>?> GetProjectsInFourthWeekByToday()
-    //{
-    //    DateTime today = DateTime.UtcNow.Date;
-
-    //    var projects = await _context.Projects.Where(p => p.Idea != null &&
-    //                                        p.Idea.StageIdea != null &&
-    //                                        p.Idea.StageIdea.Semester != null &&
-    //                                        p.Idea.StageIdea.Semester.StartDate != null &&
-    //                                        p.Idea.StageIdea.Semester.StartDate.Value.UtcDateTime.AddDays(3 * 7).Date == today)
-    //                                        .Include(e => e.Idea).ThenInclude(e => e.StageIdea).ThenInclude(e => e.Semester)
-    //                                        .ToListAsync();
-    //    return projects;
-    //}
-
     public async Task<(List<Project>, int)> GetProjectsForMentor(ProjectGetListForMentorQuery query, Guid userId)
     {
         var queryable = GetQueryable();
@@ -320,7 +308,7 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
                 (m.Topic.IdeaVersion.Idea.MentorId == userId ||
                  m.Topic.IdeaVersion.Idea.SubMentorId == userId));
         }
-        
+
         queryable = BaseFilterHelper.Base(queryable, query);
 
         queryable = Sort(queryable, query);
@@ -342,6 +330,41 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
             .ThenInclude(e => e.Idea)
             .ThenInclude(e => e.Mentor)
             .FirstOrDefaultAsync();
+        return project;
+    }
+
+    public async Task<List<Project>?> GetPendingProjectsWithNoTopicStartingBySemesterId(Guid semesterId)
+    {
+        var queryable = GetQueryable();
+
+        var today = DateTime.UtcNow.Day;
+
+        var project = await queryable.Where(p => p.IsDeleted == false &&
+                                                p.TopicId == null &&
+                                                p.Status == ProjectStatus.Pending &&
+                                                p.Leader != null &&
+                                                p.Leader.UserXRoles.Any(r => r.SemesterId == semesterId &&
+                                                                            r.Semester != null &&
+                                                                            r.Semester.StartDate.Value.Day == today))
+                                    .ToListAsync();
+        return project;
+    }
+
+    public async Task<List<Project>?> GetPendingProjectsWithTopicStartingBySemesterId(Guid semesterId)
+    {
+        var queryable = GetQueryable();
+
+        var today = DateTime.UtcNow.Day;
+
+        var project = await queryable.Where(p => p.IsDeleted == false &&
+                                                p.Topic != null &&
+                                                p.Status == ProjectStatus.Pending &&
+                                                p.Topic.IdeaVersion != null &&
+                                                p.Topic.IdeaVersion.StageIdea != null &&
+                                                p.Topic.IdeaVersion.StageIdea.Semester != null &&
+                                                p.Topic.IdeaVersion.StageIdea.Semester.StartDate != null &&
+                                                p.Topic.IdeaVersion.StageIdea.Semester.StartDate.Value.Day == today)
+                                    .ToListAsync();
         return project;
     }
 }
