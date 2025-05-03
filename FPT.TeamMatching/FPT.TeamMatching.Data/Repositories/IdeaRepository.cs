@@ -32,8 +32,6 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
         var ideas = await _dbContext.Ideas.Where(e => e.OwnerId == userId)
             .Include(e => e.IdeaVersions).ThenInclude(e => e.IdeaVersionRequests).ThenInclude(e => e.Reviewer)
             .Include(e => e.IdeaVersions).ThenInclude(e => e.StageIdea)
-            //.Include(e => e.IdeaVersionRequests).ThenInclude(e => e.Reviewer)
-            //.Include(e => e.StageIdea)
             .ToListAsync();
         return ideas;
     }
@@ -43,8 +41,6 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
         var ideas = await _dbContext.Ideas.Where(e => e.Type == IdeaType.Enterprise || e.Type == IdeaType.Lecturer)
             .Include(e => e.IdeaVersions).ThenInclude(e => e.IdeaVersionRequests).ThenInclude(e => e.Reviewer)
             .Include(e => e.IdeaVersions).ThenInclude(e => e.StageIdea)
-            //.Include(e => e.IdeaVersionRequests).ThenInclude(e => e.Reviewer)
-            //.Include(e => e.StageIdea)
             .ToListAsync();
         return ideas;
     }
@@ -54,8 +50,6 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
         var ideas = await _dbContext.Ideas.Where(e => e.OwnerId == userId
                                                       && e.Status == status)
             .OrderByDescending(m => m.CreatedDate)
-            //sua db
-            //.Include(m => m.StageIdea)
             .Include(e => e.IdeaVersions).ThenInclude(e => e.IdeaVersionRequests).ThenInclude(e => e.Reviewer)
             .Include(e => e.IdeaVersions).ThenInclude(e => e.StageIdea)
             .Include(e => e.IdeaVersions).ThenInclude(e => e.StageIdea).ThenInclude(m => m.Semester)
@@ -63,7 +57,6 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
             .Include(m => m.Mentor)
             .Include(m => m.SubMentor)
             .Include(m => m.Specialty).ThenInclude(m => m.Profession)
-            //sua db
             .ToListAsync();
 
         return ideas;
@@ -74,8 +67,8 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
     {
         var ideas = await _dbContext.Ideas.Where(e => e.OwnerId == userId
                                                       && e.Status == status
-                //sua db
-                //&& e.StageIdeaId == stageIdeaId
+            //sua db
+            //&& e.StageIdeaId == stageIdeaId
             )
             .OrderByDescending(m => m.CreatedDate)
             //.Include(m => m.StageIdea)
@@ -343,13 +336,12 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
     {
         var queryable = GetQueryable();
 
-        var ideas = queryable.Include(m => m.IdeaVersions).ThenInclude(m => m.StageIdea).Where(e =>
-                e.IsDeleted == false &&
-                e.MentorId == mentorId &&
-                e.SubMentorId == null &&
-                (e.Status == IdeaStatus.Approved || e.Status == IdeaStatus.ConsiderByMentor ||
-                 e.Status == IdeaStatus.ConsiderByCouncil))
-            .Where(i => i.IdeaVersions.OrderByDescending(iv => iv.Version).FirstOrDefault() != null);
+        var ideas = queryable.Where(e => e.IsDeleted == false &&
+                                            e.MentorId == mentorId &&
+                                            e.SubMentorId == null &&
+                                            e.Status != IdeaStatus.Rejected)
+                                .Where(i => i.IdeaVersions != null &&
+                                    i.IdeaVersions.OrderByDescending(iv => iv.Version).FirstOrDefault() != null);
 
         var result = ideas.Where(e => e.IdeaVersions.Any(e => e.StageIdea != null &&
                                                               e.StageIdea.SemesterId == semesterId))
@@ -363,15 +355,48 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
         var queryable = GetQueryable();
 
         var ideas = queryable.Where(e => e.IsDeleted == false &&
-                                         e.SubMentorId == subMentorId &&
-                                         (e.Status == IdeaStatus.Approved || e.Status == IdeaStatus.ConsiderByMentor ||
-                                          e.Status == IdeaStatus.ConsiderByCouncil))
-            .Where(i => i.IdeaVersions != null &&
-                        i.IdeaVersions.OrderByDescending(iv => iv.Version).FirstOrDefault() != null);
+                                            e.SubMentorId == subMentorId &&
+                                            e.Status != IdeaStatus.Rejected)
+                                .Where(i => i.IdeaVersions != null &&
+                                    i.IdeaVersions.OrderByDescending(iv => iv.Version).FirstOrDefault() != null);
 
         var result = ideas.Where(e => e.IdeaVersions.Any(e => e.StageIdea != null &&
                                                               e.StageIdea.SemesterId == semesterId))
             .ToList();
+
+        return result;
+    }
+
+    public async Task<Idea?> GetIdeaNotRejectOfLeaderInSemester(Guid leaderId, Guid semesterId)
+    {
+        var queryable = GetQueryable();
+
+        var idea = queryable.Where(e => e.IsDeleted == false &&
+                                        e.OwnerId == leaderId &&
+                                        e.Status != IdeaStatus.Rejected)
+                            .Where(i => i.IdeaVersions != null &&
+                                                        i.IdeaVersions.OrderByDescending(iv => iv.Version).FirstOrDefault() != null);
+
+        var result = await idea.Where(e => e.IdeaVersions.Any(e => e.StageIdea != null &&
+                                                                    e.StageIdea.SemesterId == semesterId))
+                                .Include(i => i.IdeaVersions)
+                                .SingleOrDefaultAsync();
+
+        return result;
+    }
+
+    public async Task<List<Idea>?> GetIdeaNotApproveInSemester(Guid semesterId)
+    {
+        var queryable = GetQueryable();
+
+        var ideas = queryable.Where(e => e.IsDeleted == false &&
+                                        e.Status != IdeaStatus.Approved)
+                            .Where(e => e.IdeaVersions != null &&
+                                        e.IdeaVersions.OrderByDescending(iv => iv.Version).FirstOrDefault() != null);
+
+        var result = await ideas.Where(e => e.IdeaVersions.Any(e => e.StageIdea != null &&
+                                                                    e.StageIdea.SemesterId == semesterId))
+                    .ToListAsync();
 
         return result;
     }

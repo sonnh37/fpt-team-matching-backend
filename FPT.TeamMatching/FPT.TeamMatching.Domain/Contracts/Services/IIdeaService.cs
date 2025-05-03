@@ -23,8 +23,8 @@ namespace FPT.TeamMatching.Domain.Contracts.Services
         Task<BusinessResult> UpdateStatusIdea(IdeaUpdateStatusCommand command);
         Task<BusinessResult> GetIdeasOfSupervisors<TResult>(IdeaGetListOfSupervisorsQuery query) where TResult : BaseResult;
 
-        Task AutoUpdateIdeaStatus();
-        Task AutoUpdateProjectInProgress();
+        Task<BusinessResult> AutoUpdateIdeaStatus();
+        Task<BusinessResult> UpdateWhenSemesterStart();
 
         Task<BusinessResult> GetIdeasOfReviewerByRolesAndStatus<TResult>(
             IdeaGetListByStatusAndRoleQuery query) where TResult : BaseResult;

@@ -1,5 +1,6 @@
 ﻿using FPT.TeamMatching.Domain.Contracts.Repositories.Bases;
 using FPT.TeamMatching.Domain.Entities;
+using FPT.TeamMatching.Domain.Enums;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Invitations;
 
 namespace FPT.TeamMatching.Domain.Contracts.Repositories;
@@ -14,5 +15,7 @@ public interface IInvitationRepository : IBaseRepository<Invitation>
     
     // Trong IInvitationRepository
     Task<List<Invitation>> GetPendingInvitationsForProjectFromOtherSendersAsync(Guid userId, Guid projectId, Guid excludeInvitationId);
+
+    Task<List<Invitation>> GetUserInvitationsByStatusAndProjectId(InvitationStatus status, Guid projectId);
 
 }

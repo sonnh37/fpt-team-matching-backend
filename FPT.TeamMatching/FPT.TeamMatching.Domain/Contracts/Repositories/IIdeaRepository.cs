@@ -38,4 +38,8 @@ public interface IIdeaRepository : IBaseRepository<Idea>
     List<Idea>? GetIdeasOnlyMentorOfUserInSemester(Guid mentorId, Guid semesterId);
 
     List<Idea>? GetIdeasBeSubMentorOfUserInSemester(Guid subMentorId, Guid semesterId);
+
+    Task<Idea?> GetIdeaNotRejectOfLeaderInSemester(Guid leaderId, Guid semesterId);
+
+    Task<List<Idea>?> GetIdeaNotApproveInSemester(Guid semesterId);
 }

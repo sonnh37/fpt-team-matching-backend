@@ -76,10 +76,10 @@ namespace FPT.TeamMatching.API.Controllers
             var msg = await _service.CreateOrUpdate<SemesterResult>(request);
             if (msg.Status == 1)
             {
-                // auto-update-project-inprogress
+                // auto-update-when-semester-start
                 var name = _configuration.GetSection("HANGFIRE_SERVER_LOCAL");
                 var timeUpdateProject = Utils.ToCronExpression(request.StartDate.Value);
-                _recurringJobManager.AddOrUpdate("auto-update-project-inprogress-"+request.SemesterCode, () => _ideaService.AutoUpdateProjectInProgress(), timeUpdateProject, new RecurringJobOptions { QueueName = name.Value });
+                _recurringJobManager.AddOrUpdate("auto-update-project-inprogress-"+request.SemesterCode, () => _ideaService.UpdateWhenSemesterStart(), timeUpdateProject, new RecurringJobOptions { QueueName = name.Value });
                 // create review hangfire
                 var timeCreateReview = Utils.ToCronExpression(request.StartDate.Value, false, 5); // deplay for 5 minutes for project updated
                 _recurringJobManager.AddOrUpdate("auto-create-review-"+request.SemesterCode, () => _reviewService.CreateReviewsForActiveProject(),timeCreateReview , new RecurringJobOptions { QueueName = name.Value });

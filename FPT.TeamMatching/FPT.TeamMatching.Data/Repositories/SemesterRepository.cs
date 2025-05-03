@@ -56,5 +56,16 @@ namespace FPT.TeamMatching.Data.Repositories
                 .FirstOrDefaultAsync();
             return semester;
         }
+
+        public Task<Semester?> GetSemesterStartToday()
+        {
+            var queryable = GetQueryable();
+
+            var s = queryable.Where(e => e.IsDeleted == false &&
+                                        e.StartDate.Value.Day == DateTime.UtcNow.Day)
+                                .FirstOrDefaultAsync();
+
+            return s;
+        }
     }
 }

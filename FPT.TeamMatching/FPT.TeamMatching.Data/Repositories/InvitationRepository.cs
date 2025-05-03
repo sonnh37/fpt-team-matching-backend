@@ -157,4 +157,16 @@ public class InvitationRepository : BaseRepository<Invitation>, IInvitationRepos
             return (results, results.Count);
         }
     }
+
+    public async Task<List<Invitation>> GetUserInvitationsByStatusAndProjectId(InvitationStatus status, Guid projectId)
+    {
+        var queryable = GetQueryable();
+
+        var invitations = await queryable.Where(e => e.IsDeleted == false &&
+                                                    e.Status == status &&
+                                                    e.ProjectId == projectId)
+                                        .ToListAsync();      
+
+        return invitations;
+    }
 }
