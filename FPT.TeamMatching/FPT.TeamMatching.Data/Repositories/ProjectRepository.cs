@@ -341,15 +341,16 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
     {
         var queryable = GetQueryable();
 
-        var today = DateTime.UtcNow.Day;
-
-        var project = await queryable.Where(p => p.IsDeleted == false &&
+        var today = DateTime.UtcNow.AddHours(7).Date;
+        var tomorrow = today.AddDays(1);
+        var project = await queryable.Where(p => 
+                                                p.IsDeleted == false &&
                                                 p.TopicId == null &&
                                                 p.Status == ProjectStatus.Pending &&
-                                                p.Leader != null &&
+                                                // p.Leader != null &&
                                                 p.Leader.UserXRoles.Any(r => r.SemesterId == semesterId &&
                                                                             r.Semester != null &&
-                                                                            r.Semester.StartDate.Value.Day == today))
+                                                                            r.Semester.StartDate.Value.AddHours(7) >= today && r.Semester.StartDate.Value.AddHours(7) < tomorrow))
                                     .ToListAsync();
         return project;
     }
