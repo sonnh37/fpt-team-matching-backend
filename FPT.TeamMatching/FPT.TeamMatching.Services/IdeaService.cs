@@ -856,7 +856,7 @@ public class IdeaService : BaseService<Idea>, IIdeaService
             var projectsWithTopic = await _projectRepository.GetPendingProjectsWithTopicStartingBySemesterId(semester.Id);
             if (projectsWithTopic != null)
             {
-                foreach (var project in projectsWithNoTopic)
+                foreach (var project in projectsWithTopic)
                 {
                     var ideaVersion = await _ideaVersionRepository.GetLastIdeaVersionByTopicId((Guid)project.TopicId);
                     if (ideaVersion != null)
