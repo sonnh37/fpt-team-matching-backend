@@ -41,6 +41,7 @@ public interface IUnitOfWork : IBaseUnitOfWork
     IIdeaVersionRequestRepository IdeaVersionRequestRepository { get; }
 
     IMentorTopicRequestRepository MentorTopicRequestRepository { get; }
+    IMentorFeedbackRepository MentorFeedbackRepository { get; }
 
     ICriteriaRepository CriteriaRepository { get; }
     ICriteriaFormRepository CriteriaFormRepository { get; }
