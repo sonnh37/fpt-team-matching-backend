@@ -16,6 +16,8 @@ namespace FPT.TeamMatching.Domain.Contracts.Services
 
         Task<BusinessResult> GetAll<TResult>(IdeaVersionRequestGetAllQuery query) where TResult : BaseResult;
 
+        Task<BusinessResult> GetAllExceptPending<TResult>(IdeaVersionRequestGetAllQuery query) where TResult : BaseResult;
+
         Task<BusinessResult> GetIdeaVersionRequestsForCurrentReviewerByRolesAndStatus<TResult>(
             IdeaGetListByStatusAndRoleQuery query)
             where TResult : BaseResult;

@@ -28,6 +28,9 @@ public class IdeaVersionRequestRepository : BaseRepository<IdeaVersionRequest>, 
         //queryable = queryable.Include(m => m.Idea)
         queryable = queryable
             .Include(m => m.Reviewer);
+        queryable = queryable
+       .Include(m => m.CriteriaForm);
+
 
         if (query.Status.HasValue)
         {
@@ -54,6 +57,38 @@ public class IdeaVersionRequestRepository : BaseRepository<IdeaVersionRequest>, 
         }
     }
 
+    public async Task<(List<IdeaVersionRequest>, int)> GetDataExceptPending(IdeaVersionRequestGetAllQuery query)
+    {
+        var queryable = GetQueryable();
+        //sua db
+        //queryable = queryable.Include(m => m.Idea)
+        queryable = queryable
+            .Include(m => m.Reviewer);
+        queryable = queryable
+       .Include(m => m.CriteriaForm);
+
+            queryable = queryable.Where(m => m.Status != IdeaVersionRequestStatus.Pending
+              );
+        
+
+        if (query.IsPagination)
+        {
+            // Tổng số count sau khi  filter khi chưa lọc trang
+            var totalOrigin = queryable.Count();
+            // Sắp sếp
+            queryable = Sort(queryable, query);
+            // Lọc trang
+            var results = await GetQueryablePagination(queryable, query).ToListAsync();
+
+            return (results, totalOrigin);
+        }
+        else
+        {
+            queryable = Sort(queryable, query);
+            var results = await queryable.ToListAsync();
+            return (results, results.Count);
+        }
+    }
 
     public async Task<(List<IdeaVersionRequest>, int)> GetIdeaVersionRequestsForCurrentReviewerByRolesAndStatus(
         IdeaGetListByStatusAndRoleQuery query, Guid userId)

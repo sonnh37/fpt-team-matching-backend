@@ -107,6 +107,31 @@ public class IdeaVersionRequestService : BaseService<IdeaVersionRequest>, IIdeaV
         }
     }
 
+    public async Task<BusinessResult>
+       GetAllExceptPending<TResult>(IdeaVersionRequestGetAllQuery query) where TResult : BaseResult
+    {
+        try
+        {
+            var (data, total) = await _ideaVersionRequestRepository.GetDataExceptPending(query);
+
+            var results = _mapper.Map<List<TResult>>(data);
+
+            var response = new QueryResult(query, results, total);
+
+            return new ResponseBuilder()
+                .WithData(response)
+                .WithStatus(Const.SUCCESS_CODE)
+                .WithMessage(Const.SUCCESS_READ_MSG);
+        }
+        catch (Exception ex)
+        {
+            var errorMessage = $"An error occurred in {typeof(TResult).Name}: {ex.Message}";
+            return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage(errorMessage);
+        }
+    }
+
     public async Task<BusinessResult> GetIdeaVersionRequestsForCurrentReviewerByRolesAndStatus<TResult>(
         IdeaGetListByStatusAndRoleQuery query) where TResult : BaseResult
     {
