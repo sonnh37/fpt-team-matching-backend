@@ -30,6 +30,7 @@ public class ProjectService : BaseService<Project>, IProjectService
     private readonly ITeamMemberService _serviceTeam;
     private readonly ITeamMemberRepository _teamMemberRepository;
     private readonly ISemesterRepository _semesterRepository;
+    private readonly IReviewRepository _reviewRepository;
     private readonly ISemesterService _semesterService;
 
     public ProjectService(IMapper mapper, IUnitOfWork unitOfWork, ITeamMemberService teamMemberService, ISemesterService semesterService) : base(mapper,
@@ -39,6 +40,7 @@ public class ProjectService : BaseService<Project>, IProjectService
         _serviceTeam = teamMemberService;
         _teamMemberRepository = unitOfWork.TeamMemberRepository;
         _semesterRepository = unitOfWork.SemesterRepository;
+        _reviewRepository = unitOfWork.ReviewRepository;
         _semesterService = semesterService;
     }
 
@@ -430,13 +432,32 @@ public class ProjectService : BaseService<Project>, IProjectService
     {
         try
         {
+            // check date review 3
             var project = await _projectRepository.GetById(command.Id);
             if (project == null)
             {
                 return new ResponseBuilder()
-                .WithStatus(Const.NOT_FOUND_CODE)
-                .WithMessage(Const.NOT_FOUND_MSG);
+                     .WithStatus(Const.FAIL_CODE)
+                     .WithMessage("Không tìm thấy dự án");
             }
+
+            var review3 = await _reviewRepository.GetReviewByProjectIdAndNumber(project.Id, 3);
+            if (review3 == null)
+            {
+                return new ResponseBuilder()
+                     .WithStatus(Const.FAIL_CODE)
+                     .WithMessage("Không tìm thấy review 3 của dự án");
+            }
+
+            var today = DateTime.UtcNow.Date;
+            if (review3.ReviewDate.Value.Date < today || today > review3.ReviewDate.Value.Date.AddDays(7))
+            {
+                return new ResponseBuilder()
+                     .WithStatus(Const.FAIL_CODE)
+                     .WithMessage("Chưa đến ngày đánh giá");
+            }
+            //
+            
             project.DefenseStage = command.DefenseStage;
             await SetBaseEntityForUpdate(project);
             _projectRepository.Update(project);
