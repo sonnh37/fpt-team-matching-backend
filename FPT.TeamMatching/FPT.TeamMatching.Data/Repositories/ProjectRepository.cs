@@ -34,7 +34,9 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
 
         var queryable = GetQueryable().Where(e => e.Id == teamMember.ProjectId);
 
-        queryable = queryable.Include(e => e.TeamMembers)
+        queryable = queryable
+            .Include(e => e.MentorTopicRequests)
+            .Include(e => e.TeamMembers)
             .ThenInclude(e => e.User)
             .Include(e => e.Invitations)
             .Include(x => x.Reviews)

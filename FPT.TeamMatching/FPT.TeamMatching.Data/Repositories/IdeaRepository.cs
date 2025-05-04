@@ -49,7 +49,7 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
         var queryable = GetQueryable();
 
         var ideas = await queryable.Where(e => e.OwnerId == userId
-                                                      && e.Status == status)
+                                               && e.Status == status)
             .OrderByDescending(m => m.CreatedDate)
             .Include(e => e.IdeaVersions).ThenInclude(e => e.IdeaVersionRequests).ThenInclude(e => e.Reviewer)
             .Include(e => e.IdeaVersions).ThenInclude(e => e.StageIdea)
@@ -69,7 +69,7 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
         var queryable = GetQueryable();
 
         var ideas = await queryable.Where(e => e.OwnerId == userId
-                                                      && e.Status == status
+                                               && e.Status == status
             )
             .OrderByDescending(m => m.CreatedDate)
             .ToListAsync();
@@ -82,10 +82,10 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
         var queryable = GetQueryable();
 
         var number = await queryable.Where(e => e.Status == IdeaStatus.Approved &&
-                                                       e.IsDeleted == false &&
-                                                       e.IdeaVersions.Any(iv =>
-                                                           iv.StageIdea != null &&
-                                                           iv.StageIdea.SemesterId == semesterId)).CountAsync();
+                                                e.IsDeleted == false &&
+                                                e.IdeaVersions.Any(iv =>
+                                                    iv.StageIdea != null &&
+                                                    iv.StageIdea.SemesterId == semesterId)).CountAsync();
         return number;
     }
 
@@ -131,7 +131,7 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
             .ThenInclude(iv => iv.IdeaVersionRequests)
             .ThenInclude(iv => iv.AnswerCriterias)
             .Where(i => i.IdeaVersions.Any(iv =>
-                iv.Version == i.IdeaVersions.Max(iv2 => iv2.Version) && 
+                iv.Version == i.IdeaVersions.Max(iv2 => iv2.Version) &&
                 iv.IdeaVersionRequests.Any(ivr =>
                     ivr.Status != null &&
                     ivr.Role != null &&
@@ -199,7 +199,7 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
         var queryable = GetQueryable();
 
         var number = await queryable.Where(e => e.IsDeleted == false &&
-                                                       (e.MentorId == userId || e.OwnerId == userId))
+                                                (e.MentorId == userId || e.OwnerId == userId))
             .CountAsync();
         return number;
     }
@@ -243,7 +243,7 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
     public async Task<List<Idea>> GetIdeasByIdeaCodes(string[] ideaCode)
     {
         var queryable = GetQueryable();
-        
+
         return await queryable
             .Include(x => x.IdeaVersions)
             .ThenInclude(x => x.Topic)
@@ -335,11 +335,11 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
         var queryable = GetQueryable();
 
         var ideas = queryable.Where(e => e.IsDeleted == false &&
-                                            e.MentorId == mentorId &&
-                                            e.SubMentorId == null &&
-                                            e.Status != IdeaStatus.Rejected)
-                                .Where(i => i.IdeaVersions != null &&
-                                    i.IdeaVersions.OrderByDescending(iv => iv.Version).FirstOrDefault() != null);
+                                         e.MentorId == mentorId &&
+                                         e.SubMentorId == null &&
+                                         e.Status != IdeaStatus.Rejected)
+            .Where(i => i.IdeaVersions != null &&
+                        i.IdeaVersions.OrderByDescending(iv => iv.Version).FirstOrDefault() != null);
 
         var result = ideas.Where(e => e.IdeaVersions.Any(e => e.StageIdea != null &&
                                                               e.StageIdea.SemesterId == semesterId))
@@ -353,10 +353,10 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
         var queryable = GetQueryable();
 
         var ideas = queryable.Where(e => e.IsDeleted == false &&
-                                            e.SubMentorId == subMentorId &&
-                                            e.Status != IdeaStatus.Rejected)
-                                .Where(i => i.IdeaVersions != null &&
-                                    i.IdeaVersions.OrderByDescending(iv => iv.Version).FirstOrDefault() != null);
+                                         e.SubMentorId == subMentorId &&
+                                         e.Status != IdeaStatus.Rejected)
+            .Where(i => i.IdeaVersions != null &&
+                        i.IdeaVersions.OrderByDescending(iv => iv.Version).FirstOrDefault() != null);
 
         var result = ideas.Where(e => e.IdeaVersions.Any(e => e.StageIdea != null &&
                                                               e.StageIdea.SemesterId == semesterId))
@@ -369,16 +369,15 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
     {
         var queryable = GetQueryable();
 
-        var idea = queryable.Where(e => e.IsDeleted == false &&
-                                        e.OwnerId == userId &&
-                                        e.Status != IdeaStatus.Rejected)
-                            .Where(i => i.IdeaVersions != null &&
-                                                        i.IdeaVersions.OrderByDescending(iv => iv.Version).FirstOrDefault() != null);
+        var idea = queryable.Include(m => m.IdeaVersions).Where(e => e.IsDeleted == false &&
+                                                                     e.OwnerId == userId &&
+                                                                     e.Status != IdeaStatus.Rejected)
+            .Where(i => i.IdeaVersions.OrderByDescending(iv => iv.Version).FirstOrDefault() != null);
 
         var result = await idea.Where(e => e.IdeaVersions.Any(e => e.StageIdea != null &&
-                                                                    e.StageIdea.SemesterId == semesterId))
-                                .Include(i => i.IdeaVersions)
-                                .SingleOrDefaultAsync();
+                                                                   e.StageIdea.SemesterId == semesterId))
+            .Include(i => i.IdeaVersions)
+            .SingleOrDefaultAsync();
 
         return result;
     }
@@ -388,13 +387,13 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
         var queryable = GetQueryable();
 
         var ideas = queryable.Where(e => e.IsDeleted == false &&
-                                        e.Status != IdeaStatus.Approved)
-                            .Where(e => e.IdeaVersions != null &&
-                                        e.IdeaVersions.OrderByDescending(iv => iv.Version).FirstOrDefault() != null);
+                                         e.Status != IdeaStatus.Approved)
+            .Where(e => e.IdeaVersions != null &&
+                        e.IdeaVersions.OrderByDescending(iv => iv.Version).FirstOrDefault() != null);
 
         var result = await ideas.Where(e => e.IdeaVersions.Any(e => e.StageIdea != null &&
                                                                     e.StageIdea.SemesterId == semesterId))
-                    .ToListAsync();
+            .ToListAsync();
 
         return result;
     }

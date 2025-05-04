@@ -29,4 +29,6 @@ public class ProjectResult : BaseResult
     public ICollection<InvitationResult> Invitations { get; set; } = new List<InvitationResult>();
 
     public ICollection<ReviewResult> Reviews { get; set; } = new List<ReviewResult>();
+    public ICollection<MentorTopicRequestResult> MentorTopicRequests { get; set; } = new List<MentorTopicRequestResult>();
+
 }

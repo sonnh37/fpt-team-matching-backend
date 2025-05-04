@@ -18,7 +18,7 @@ namespace FPT.TeamMatching.Domain.Models.Results
 
         public IdeaVersionResult? IdeaVersion { get; set; }
 
-        public ICollection<MentorTopicRequestResult> MentorTopicRequestResults { get; set; } = new List<MentorTopicRequestResult>();
+        public ICollection<MentorTopicRequestResult> MentorTopicRequests { get; set; } = new List<MentorTopicRequestResult>();
 
         public ICollection<TopicVersionResult> TopicVersions { get; set; } = new List<TopicVersionResult>();
 

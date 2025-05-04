@@ -174,8 +174,11 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
             }
 
             //check student co idea pending hay approve k
-            var haveIdea = await StudentHaveIdea(user.Id);
-            if (haveIdea)
+            var semesterUpComing = await _semesterRepository.GetUpComingSemester();
+            if (semesterUpComing == null)
+                return HandlerFail("Hệ thống chưa cập nhật.");
+            var idea = await _ideaRepository.GetIdeaNotRejectOfUserInSemester(user.Id, semesterUpComing.Id);
+            if (idea != null)
             {
                 return new ResponseBuilder()
                     .WithStatus(Const.FAIL_CODE)
@@ -240,6 +243,13 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
         try
         {
             //check sl trong team
+            var user = await GetUserAsync();
+            if (user == null)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("Không tìm thấy người dùng");
+            }
             bool members = await CheckCountMembersInTeam((Guid)command.ProjectId);
             if (!members)
             {
@@ -249,12 +259,15 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
             }
 
             //check student co idea pending hay approve k
-            var haveIdea = await StudentHaveIdea((Guid)command.ReceiverId);
-            if (haveIdea)
+            var semesterUpComing = await _semesterRepository.GetUpComingSemester();
+            if (semesterUpComing == null)
+                return HandlerFail("Hệ thống chưa cập nhật.");
+            var idea = await _ideaRepository.GetIdeaNotRejectOfUserInSemester(command.ReceiverId.Value, semesterUpComing.Id);
+            if (idea != null)
             {
                 return new ResponseBuilder()
                     .WithStatus(Const.FAIL_CODE)
-                    .WithMessage("Student has idea");
+                    .WithMessage("Người dùng đã có Idea");
             }
 
             //check student trong teammember in process OR pass
@@ -319,11 +332,11 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
             if (invitation == null) return HandlerFail("Không tìm thấy lời mời!");
 
             // check người gửi
-            var sender = await _invitationRepository.GetById(command.SenderId);
+            var sender = await _userRepository.GetById(command.SenderId);
             if (sender == null) return HandlerFail("Không tìm thấy người gửi!");
 
             // check người nhận
-            var receiver = await _invitationRepository.GetById(command.ReceiverId);
+            var receiver = await _userRepository.GetById(command.ReceiverId);
             if (receiver == null) return HandlerFail("Không tìm thấy người nhận!");
 
             //check dự án 
@@ -556,11 +569,11 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
             if (invitation == null) return HandlerFail("Không tìm thấy lời mời!");
 
             // check người gửi
-            var sender = await _invitationRepository.GetById(command.SenderId);
+            var sender = await _userRepository.GetById(command.SenderId);
             if (sender == null) return HandlerFail("Không tìm thấy người gửi!");
 
             // check người nhận
-            var receiver = await _invitationRepository.GetById(command.ReceiverId);
+            var receiver = await _userRepository.GetById(command.ReceiverId);
             if (receiver == null) return HandlerFail("Không tìm thấy người nhận!");
 
             //check dự án 
