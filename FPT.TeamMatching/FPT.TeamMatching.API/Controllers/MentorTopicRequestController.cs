@@ -83,7 +83,7 @@ namespace FPT.TeamMatching.API.Controllers
         [HttpPost("student-request-topic")]
         public async Task<IActionResult> StudentRequest([FromBody] StudentRequest request)
         {
-            var msg = await _service.StudentRequestIdea(request);
+            var msg = await _service.StudentRequestTopic(request);
             return Ok(msg);
         }
 

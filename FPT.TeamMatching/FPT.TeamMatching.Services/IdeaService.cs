@@ -163,7 +163,7 @@ public class IdeaService : BaseService<Idea>, IIdeaService
             return HandlerFail("Sinh viên có đề tài đang trong quá trình duyệt ở kì này");
         }
 
-        if (model.MentorId == null) return HandlerFail("Bat buoc phai nhap mentorId");
+        if (model.MentorId == null) return HandlerFail("Nhập field Mentor Id");
         // Check Mentor và sub
         var resBool = await _userService.CheckMentorAndSubMentorSlotAvailability(model.MentorId.Value,
             model.SubMentorId);
@@ -381,9 +381,9 @@ public class IdeaService : BaseService<Idea>, IIdeaService
         try
         {
             var userId = GetUserIdFromClaims();
-            if (userId == null) return HandlerError("User does not exist");
+            if (userId == null) return HandlerError("Không tìm thấy người dùng");
 
-            if (query.Status == null) return HandlerFail("Status cannot be null");
+            if (query.Status == null) return HandlerFail("Nhập field trạng thái");
 
             var ideas = await _ideaRepository.GetCurrentIdeaByUserIdAndStatus(userId.Value, query.Status.Value);
             var result = _mapper.Map<List<IdeaResult>>(ideas);
@@ -411,12 +411,12 @@ public class IdeaService : BaseService<Idea>, IIdeaService
         try
         {
             var userId = GetUserIdFromClaims();
-            if (userId == null) return HandlerError("User does not exist");
+            if (userId == null) return HandlerError("Không tìm thấy người dùng");
 
-            if (query.Status == null) return HandlerFail("Status cannot be null");
+            if (query.Status == null) return HandlerFail("Nhập field trạng thái");
 
             var currentStageIdea = await _stageIdeaRepositoty.GetCurrentStageIdea();
-            if (currentStageIdea == null) return HandlerFail("Current stage Idea does not exist");
+            if (currentStageIdea == null) return HandlerFail("Hiện tại chưa đến đợt duyệt");
             var ideas = await _ideaRepository.GetUserIdeasByStatusWithCurrentStageIdea(userId, query.Status,
                 currentStageIdea.Id);
             var result = _mapper.Map<List<IdeaResult>>(ideas);
@@ -445,7 +445,7 @@ public class IdeaService : BaseService<Idea>, IIdeaService
         {
             var userId = GetUserIdFromClaims();
             var project = await _projectRepository.GetProjectByUserIdLogin(userId.Value);
-            if (project == null) return HandlerFail("Not found project");
+            if (project == null) return HandlerFail("Không tìm thấy dự án");
 
             var command = _mapper.Map<Idea>(ideaUpdateCommand);
             await SetBaseEntityForUpdate(command);
@@ -474,7 +474,7 @@ public class IdeaService : BaseService<Idea>, IIdeaService
         try
         {
             var idea = await _ideaRepository.GetById(command.Id);
-            if (idea == null) return HandlerFail("Not found idea");
+            if (idea == null) return HandlerFail("Không tìm thấy ý tưởng");
             idea.Status = command.Status;
             _ideaRepository.Update(idea);
             var check = await _unitOfWork.SaveChanges();
@@ -856,7 +856,7 @@ public class IdeaService : BaseService<Idea>, IIdeaService
             var projectsWithTopic = await _projectRepository.GetPendingProjectsWithTopicStartingBySemesterId(semester.Id);
             if (projectsWithTopic != null)
             {
-                foreach (var project in projectsWithNoTopic)
+                foreach (var project in projectsWithTopic)
                 {
                     var ideaVersion = await _ideaVersionRepository.GetLastIdeaVersionByTopicId((Guid)project.TopicId);
                     if (ideaVersion != null)
@@ -874,6 +874,7 @@ public class IdeaService : BaseService<Idea>, IIdeaService
                         {
                             project.Status = ProjectStatus.Canceled;
                         }
+
                         //teamsize = voi teamsize cua nhom, project status => inprogress, teammember => inprogress
                         else
                         {

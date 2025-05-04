@@ -3,11 +3,6 @@ using FPT.TeamMatching.Domain.Contracts.Services;
 using FPT.TeamMatching.Domain.Contracts.UnitOfWorks;
 using FPT.TeamMatching.Domain.Entities;
 using FPT.TeamMatching.Services.Bases;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using FPT.TeamMatching.Domain.Contracts.Repositories;
 using FPT.TeamMatching.Domain.Models.Responses;
 using FPT.TeamMatching.Domain.Models.Results.Bases;
@@ -29,7 +24,7 @@ namespace FPT.TeamMatching.Services
             try
             {
                 var semester = await _unitOfWork.SemesterRepository.GetUpComingSemester();
-                if (semester == null) return HandlerFail("No semester found");
+                if (semester == null) return HandlerFail("Không tìm thấy kì");
 
                 var entity = await _stageIdeaRepositoty.GetByStageNumberAndSemester(number, semester.Id);
                 var result = _mapper.Map<TResult>(entity);

@@ -43,7 +43,7 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
         {
             bool hasSent = true;
             var user = await GetUserAsync();
-            if (user == null) return HandlerFail("Not logged in");
+            if (user == null) return HandlerFail("Bạn chưa đăng nhập");
             var i = await _invitationRepository.GetInvitationOfUserByProjectId(projectId, user.Id);
             if (i == null)
             {
@@ -127,10 +127,10 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
 
             var userId = userIdClaim.Value;
             var userInTeamMember = await _teamMemberRepository.GetTeamMemberActiveByUserId(userId);
-            if (userInTeamMember == null) return HandlerFail("You not in team member");
+            if (userInTeamMember == null) return HandlerFail("Bạn chưa có nhóm");
 
             var isLeader = userInTeamMember.Role == TeamMemberRole.Leader;
-            if (!isLeader) return HandlerFail("You do not have role leader team member");
+            if (!isLeader) return HandlerFail("Bạn không phải là trưởng nhóm");
             // get by type
             var (data, total) = await _invitationRepository.GetLeaderInvitationsByType(query, userId);
             var results = _mapper.Map<List<InvitationResult>>(data);
@@ -160,7 +160,7 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
             {
                 return new ResponseBuilder()
                     .WithStatus(Const.FAIL_CODE)
-                    .WithMessage("User do not exist");
+                    .WithMessage("Không tìm thấy người dùng");
             }
 
             var haveInvite =
@@ -169,7 +169,7 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
             {
                 return new ResponseBuilder()
                     .WithStatus(Const.FAIL_CODE)
-                    .WithMessage("Student has request join team");
+                    .WithMessage("Sinh viên đã gửi yêu cầu tham gia nhóm");
             }
 
             //check student co idea pending hay approve k
@@ -196,7 +196,7 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
             {
                 return new ResponseBuilder()
                     .WithStatus(Const.FAIL_CODE)
-                    .WithMessage("Project do not exist");
+                    .WithMessage("Không tìm thấy dự án");
             }
 
             invitation.Status = InvitationStatus.Pending;
@@ -528,20 +528,20 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
             var saveResult = await _unitOfWork.SaveChanges();
             if (!saveResult)
             {
-                return HandlerFail("Failed to save changes!");
+                return HandlerFail("Đã xảy ra lỗi khi cập nhật lời mời");
             }
 
             // Gửi thông báo
-            if (invitation.ProjectId == null) return HandlerFail("Not found project");
+            if (invitation.ProjectId == null) return HandlerFail("Không tìm thấy dự án");
             var project = await _projectRepository.GetById(invitation.ProjectId.Value);
-            if (project == null) return HandlerFail("Not found project");
+            if (project == null) return HandlerFail("Không tìm thấy dự án");
 
             var teamName = project.TeamName ?? "the team";
 
             var noti = new NotificationCreateForIndividual
             {
                 UserId = invitation.SenderId,
-                Description = $"Your invitation to join {teamName} has been rejected",
+                Description = $"Yêu cầu tham gia nhóm {teamName} của bạn đã bị từ chối!",
             };
             await _notificationService.CreateForUser(noti);
 
@@ -559,11 +559,14 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
     {
         try
         {
-            if (invitation.SenderId == null || invitation.ProjectId == null)
+            if (invitation.SenderId == null )
             {
-                return HandlerFail("SenderId and ProjectId not found");
+                return HandlerFail("Không có người gửi");
             }
-
+            if (invitation.ProjectId == null)
+            {
+                return HandlerFail("Không có nhóm gửi đến");
+            }
             // Kiểm tra thành viên đã tồn tại
             //var existingMember =
             //    await _teamMemberRepository.GetByUserAndProject(invitation.SenderId.Value, invitation.ProjectId.Value);
@@ -578,15 +581,10 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
             var project = await _projectRepository.GetById(invitation.ProjectId.Value, true);
             if (project == null)
             {
-                return HandlerFail("Project not found");
+                return HandlerFail("Không tìm thấy dự án");
             }
 
             // Tính toán available slots
-            //
-            //
-
-
-
             //int availableSlots = project.Idea == null
             //    ? 6 - project.TeamMembers.Count
             //    : (project.Idea.MaxTeamSize) - project.TeamMembers.Count;
@@ -614,10 +612,14 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
 
             // Chỉ xử lý tự động từ chối nếu đây là slot cuối cùng
             var invitationIncluded = await _invitationRepository.GetById(invitation.Id, true);
-            if (invitationIncluded == null) return HandlerFail("Error.");
-            if (invitationIncluded.SenderId == null || invitationIncluded.ProjectId == null)
+            if (invitationIncluded == null) return HandlerFail("Lỗi.");
+            if (invitation.SenderId == null)
             {
-                return HandlerFail("SenderId and ProjectId not found");
+                return HandlerFail("Không có người gửi");
+            }
+            if (invitation.ProjectId == null)
+            {
+                return HandlerFail("Không có nhóm gửi đến");
             }
 
             // 1. Lấy những status Pending có cùng ProjectId -> Auto Rejected
@@ -643,7 +645,7 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
             var saveResult = await _unitOfWork.SaveChanges();
             if (!saveResult)
             {
-                return HandlerFail("Failed to save changes!");
+                return HandlerFail("Đã xảy ra lỗi khi lưu dữ liệu");
             }
 
             // Gửi thông báo
@@ -675,7 +677,7 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
             await _notificationService.CreateForUser(new NotificationCreateForIndividual
             {
                 UserId = invitationIncluded.SenderId,
-                Description = $"Your invitation to join {invitationIncluded.Project?.TeamName} has been accepted"
+                Description = $"Yêu cầu tham gia nhóm {invitationIncluded.Project?.TeamName} đã được chấp nhận!"
             });
 
             return new ResponseBuilder()

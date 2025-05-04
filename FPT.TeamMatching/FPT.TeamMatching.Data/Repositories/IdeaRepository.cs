@@ -1,35 +1,32 @@
-﻿using AutoMapper;
-using FPT.TeamMatching.Data.Context;
+﻿using FPT.TeamMatching.Data.Context;
 using FPT.TeamMatching.Data.Repositories.Base;
 using FPT.TeamMatching.Domain.Contracts.Repositories;
 using FPT.TeamMatching.Domain.Entities;
 using FPT.TeamMatching.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
-using System.Text.RegularExpressions;
 using FPT.TeamMatching.Domain.Models;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Reviews;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Ideas;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.IdeaVersionRequest;
 using FPT.TeamMatching.Domain.Utilities.Filters;
 using MongoDB.Driver.Linq;
-using NetTopologySuite.Algorithm;
 
 namespace FPT.TeamMatching.Data.Repositories;
 
 public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
 {
-    private readonly FPTMatchingDbContext _dbContext;
     private readonly ISemesterRepository _semesterRepository;
 
     public IdeaRepository(FPTMatchingDbContext dbContext, ISemesterRepository semesterRepository) : base(dbContext)
     {
-        _dbContext = dbContext;
         _semesterRepository = semesterRepository;
     }
 
     public async Task<IList<Idea>> GetIdeasByUserId(Guid userId)
     {
-        var ideas = await _dbContext.Ideas.Where(e => e.OwnerId == userId)
+        var queryable = GetQueryable();
+
+        var ideas = await queryable.Where(e => e.OwnerId == userId)
             .Include(e => e.IdeaVersions).ThenInclude(e => e.IdeaVersionRequests).ThenInclude(e => e.Reviewer)
             .Include(e => e.IdeaVersions).ThenInclude(e => e.StageIdea)
             .ToListAsync();
@@ -38,7 +35,9 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
 
     public async Task<IList<Idea>> GetIdeasByTypeMentorAndEnterprise()
     {
-        var ideas = await _dbContext.Ideas.Where(e => e.Type == IdeaType.Enterprise || e.Type == IdeaType.Lecturer)
+        var queryable = GetQueryable();
+
+        var ideas = await queryable.Where(e => e.Type == IdeaType.Enterprise || e.Type == IdeaType.Lecturer)
             .Include(e => e.IdeaVersions).ThenInclude(e => e.IdeaVersionRequests).ThenInclude(e => e.Reviewer)
             .Include(e => e.IdeaVersions).ThenInclude(e => e.StageIdea)
             .ToListAsync();
@@ -47,7 +46,9 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
 
     public async Task<List<Idea>> GetCurrentIdeaByUserIdAndStatus(Guid userId, IdeaStatus status)
     {
-        var ideas = await _dbContext.Ideas.Where(e => e.OwnerId == userId
+        var queryable = GetQueryable();
+
+        var ideas = await queryable.Where(e => e.OwnerId == userId
                                                       && e.Status == status)
             .OrderByDescending(m => m.CreatedDate)
             .Include(e => e.IdeaVersions).ThenInclude(e => e.IdeaVersionRequests).ThenInclude(e => e.Reviewer)
@@ -65,14 +66,12 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
     public async Task<List<Idea>> GetUserIdeasByStatusWithCurrentStageIdea(Guid? userId, IdeaStatus? status,
         Guid? stageIdeaId)
     {
-        var ideas = await _dbContext.Ideas.Where(e => e.OwnerId == userId
+        var queryable = GetQueryable();
+
+        var ideas = await queryable.Where(e => e.OwnerId == userId
                                                       && e.Status == status
-            //sua db
-            //&& e.StageIdeaId == stageIdeaId
             )
             .OrderByDescending(m => m.CreatedDate)
-            //.Include(m => m.StageIdea)
-            //.Include(e => e.IdeaVersionRequests).ThenInclude(e => e.Reviewer)
             .ToListAsync();
 
         return ideas;
@@ -80,9 +79,10 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
 
     public async Task<int> NumberApprovedIdeasOfSemester(Guid? semesterId)
     {
-        var number = await _dbContext.Ideas.Where(e => e.Status == IdeaStatus.Approved &&
+        var queryable = GetQueryable();
+
+        var number = await queryable.Where(e => e.Status == IdeaStatus.Approved &&
                                                        e.IsDeleted == false &&
-                                                       //sua db
                                                        e.IdeaVersions.Any(iv =>
                                                            iv.StageIdea != null &&
                                                            iv.StageIdea.SemesterId == semesterId)).CountAsync();
@@ -96,10 +96,6 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
         // Chuyển sang UTC (VD: 23/4/2024 17:00:00 GMT+0 nếu bạn ở GMT+7)
         var todayUtcMidnight = todayLocalMidnight.ToUniversalTime();
         var ideas = await GetQueryable()
-            // .Include(e => e.Owner).ThenInclude(e => e.UserXRoles).ThenInclude(e => e.Role)
-            //sua db
-            // .Include(e => e.IdeaVersions).ThenInclude(m => m.StageIdea)
-            // .Include(e => e.).ThenInclude(m => m.StageIdea)
             .Where(e =>
                 e.IsDeleted == false &&
                 e.Status == IdeaStatus.Pending &&
@@ -153,11 +149,6 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
             queryable = queryable.Where(i => i.IdeaVersions.All(iv => iv.Topic == null));
         }
 
-        // if (query.Roles.Contains("Council"))
-        // {
-        //     queryable = queryable.Where(i => i.IdeaVersions.Any(iv => iv.Topic != null));
-        // }
-
         queryable = queryable.Where(m => m.Status == query.IdeaStatus);
 
         queryable = Sort(queryable, query);
@@ -172,7 +163,9 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
 
     public async Task<Idea?> GetIdeaPendingInStageIdeaOfUser(Guid? userId, Guid stageIdeaId)
     {
-        var idea = await _dbContext.Ideas
+        var queryable = GetQueryable();
+
+        var idea = await queryable
             .Include(i => i.IdeaVersions)
             .Where(e => e.IsDeleted == false &&
                         e.OwnerId == userId &&
@@ -185,7 +178,9 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
 
     public async Task<Idea?> GetIdeaApproveInSemesterOfUser(Guid? userId, Guid semesterId)
     {
-        var idea = await _dbContext.Ideas
+        var queryable = GetQueryable();
+
+        var idea = await queryable
             .Include(i => i.IdeaVersions)
             .ThenInclude(iv => iv.StageIdea)
             .Where(e => e.IsDeleted == false &&
@@ -201,7 +196,9 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
 
     public async Task<int> NumberOfIdeaMentorOrOwner(Guid userId)
     {
-        var number = await _dbContext.Ideas.Where(e => e.IsDeleted == false &&
+        var queryable = GetQueryable();
+
+        var number = await queryable.Where(e => e.IsDeleted == false &&
                                                        (e.MentorId == userId || e.OwnerId == userId))
             .CountAsync();
         return number;
@@ -245,8 +242,9 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
 
     public async Task<List<Idea>> GetIdeasByIdeaCodes(string[] ideaCode)
     {
-        //return await _dbContext.Ideas.Include(x => x.Project).Where(x => ideaCode.Contains(x.IdeaCode)).ToListAsync();
-        return await _dbContext.Ideas
+        var queryable = GetQueryable();
+        
+        return await queryable
             .Include(x => x.IdeaVersions)
             .ThenInclude(x => x.Topic)
             .ThenInclude(x => x.Project)

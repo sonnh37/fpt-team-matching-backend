@@ -53,7 +53,7 @@ namespace FPT.TeamMatching.Services
                 var semester = await _semesterRepository.GetSemesterByStageIdeaId(stageIdea.Id);
                 if (semester == null) return HandlerFail("Không có kì ứng với đợt duyệt hiện tại");
 
-                if (request.IdeaId == null) return HandlerFail("Nhap IdeaId");
+                if (request.IdeaId == null) return HandlerFail("Nhập field IdeaId");
 
                 var idea = await _ideaRepository.GetById((Guid)request.IdeaId);
                 if (idea == null) return HandlerNotFound();
