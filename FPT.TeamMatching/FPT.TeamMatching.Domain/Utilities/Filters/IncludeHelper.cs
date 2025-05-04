@@ -45,11 +45,11 @@ public static class IncludeHelper
     {
         queryable = queryable
             .Include(e => e.IdeaVersion)
-            .ThenInclude(e => e.Idea)
-            .ThenInclude(e => e.Mentor)
+                .ThenInclude(e => e.Idea)
+                .ThenInclude(e => e.Mentor)
             .Include(e => e.IdeaVersion)
-            .ThenInclude(e => e.Idea)
-            .ThenInclude(e => e.SubMentor);
+                .ThenInclude(e => e.Idea)
+                .ThenInclude(e => e.SubMentor);
         return queryable;
     }
 

@@ -15,6 +15,6 @@ namespace FPT.TeamMatching.Domain.Contracts.Repositories
             Guid userId);
         Task<(List<MentorTopicRequest>, int)> GetMentorMentorTopicRequests(MentorTopicRequestGetAllQuery query,
             Guid userId);
-        Task<List<MentorTopicRequest>?> GetByIdeaId(Guid ideaId);
+        Task<List<MentorTopicRequest>?> GetByTopicId(Guid topicId);
     }
 }

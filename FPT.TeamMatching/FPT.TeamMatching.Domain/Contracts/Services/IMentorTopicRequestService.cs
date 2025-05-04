@@ -12,7 +12,7 @@ namespace FPT.TeamMatching.Domain.Contracts.Services
 {
     public interface IMentorTopicRequestService: IBaseService
     {
-        Task<BusinessResult> StudentRequestIdea(StudentRequest request);
+        Task<BusinessResult> StudentRequestTopic(StudentRequest request);
 
         Task<BusinessResult> GetUserMentorTopicRequests(MentorTopicRequestGetAllQuery query);
         Task<BusinessResult> GetMentorMentorTopicRequests(MentorTopicRequestGetAllQuery query);

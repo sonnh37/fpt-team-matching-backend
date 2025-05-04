@@ -182,7 +182,7 @@ public class IdeaVersionRequestService : BaseService<IdeaVersionRequest>, IIdeaV
 
             var councils =
                 await _userRepository.GetCouncilsForIdeaVersionRequest(command.IdeaVersionId.Value, semester.Id);
-            if (councils.Count == 0) return HandlerFail("No available councils");
+            if (councils.Count == 0) return HandlerFail("Không có người dùng có thể tham gia hội đồng");
 
             var newIdeaVersionRequests = new List<IdeaVersionRequest>();
 
@@ -200,11 +200,11 @@ public class IdeaVersionRequestService : BaseService<IdeaVersionRequest>, IIdeaV
                 newIdeaVersionRequests.Add(ideaVersionRequest);
             }
 
-            if (newIdeaVersionRequests.Count == 0) return HandlerNotFound("No available councils");
+            if (newIdeaVersionRequests.Count == 0) return HandlerNotFound("Không có người dùng có thể tham gia hội đồng");
 
             _ideaVersionRequestRepository.AddRange(newIdeaVersionRequests);
             var saveChange = await _unitOfWork.SaveChanges();
-            if (!saveChange) return HandlerFail("Failed to create council requests");
+            if (!saveChange) return HandlerFail("Đã xảy ra lỗi khi tạo yêu cầu đến hội đồng");
 
             //send noti cho councils
             var request = new NotificationCreateForGroupUser

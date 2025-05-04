@@ -24,8 +24,6 @@ public class IdeaVersionRequestRepository : BaseRepository<IdeaVersionRequest>, 
     public async Task<(List<IdeaVersionRequest>, int)> GetData(IdeaVersionRequestGetAllQuery query)
     {
         var queryable = GetQueryable();
-        //sua db
-        //queryable = queryable.Include(m => m.Idea)
         queryable = queryable
             .Include(m => m.Reviewer);
 
@@ -80,7 +78,6 @@ public class IdeaVersionRequestRepository : BaseRepository<IdeaVersionRequest>, 
     public async Task<int> CountApprovedCouncilsForIdea(Guid ideaId)
     {
         return await GetQueryable()
-            //sua db
             .Where(ir => ir.IdeaVersion != null && ir.IdeaVersion.IdeaId == ideaId && ir.Role == "Council" &&
                          ir.Status == IdeaVersionRequestStatus.Approved)
             .CountAsync();
@@ -89,7 +86,6 @@ public class IdeaVersionRequestRepository : BaseRepository<IdeaVersionRequest>, 
     public async Task<int> CountCouncilsForIdea(Guid ideaId)
     {
         return await GetQueryable()
-            //sua db
             .Where(ir => ir.IdeaVersion != null && ir.IdeaVersion.IdeaId == ideaId && ir.Role == "Council")
             .CountAsync();
     }
@@ -97,7 +93,6 @@ public class IdeaVersionRequestRepository : BaseRepository<IdeaVersionRequest>, 
     public async Task<int> CountRejectedCouncilsForIdea(Guid ideaId)
     {
         return await GetQueryable()
-            //sua db
             .Include(m => m.IdeaVersion)
             .Where(ir => ir.IdeaVersion != null && ir.IdeaVersion.IdeaId == ideaId && ir.Role == "Council" &&
                          ir.Status == IdeaVersionRequestStatus.Rejected)
@@ -107,7 +102,6 @@ public class IdeaVersionRequestRepository : BaseRepository<IdeaVersionRequest>, 
     public async Task<int> CountConsiderCouncilsForIdea(Guid ideaId)
     {
         return await GetQueryable()
-            //sua db
             .Include(m => m.IdeaVersion)
             .Where(ir => ir.IdeaVersion != null && ir.IdeaVersion.IdeaId == ideaId && ir.Role == "Council" &&
                          ir.Status == IdeaVersionRequestStatus.Consider)
@@ -119,9 +113,7 @@ public class IdeaVersionRequestRepository : BaseRepository<IdeaVersionRequest>, 
         GetQueryableQuery query)
     {
         var queryable = GetQueryable();
-        //sua db
-        //queryable = queryable.Include(m => m.Idea)
-        //.Include(m => m.Reviewer);
+
         queryable = queryable.Where(m => m.ReviewerId == null);
 
         if (query.IsPagination)

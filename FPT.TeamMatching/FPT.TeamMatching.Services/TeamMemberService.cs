@@ -28,9 +28,9 @@ public class TeamMemberService : BaseService<TeamMember>, ITeamMemberService
         try
         {
             var userId = GetUserIdFromClaims();
-            if (userId == null) return HandlerFail("No user found");
+            if (userId == null) return HandlerFail("Không tìm thấy người dùng");
             var teamMemberCurrentUser = await _teamMemberRepository.GetMemberByUserId((Guid)userId.Value);
-            if (teamMemberCurrentUser == null) return HandlerFail("No user found in team members");
+            if (teamMemberCurrentUser == null) return HandlerFail("Người dùng chưa có nhóm");
 
             return new ResponseBuilder()
                 .WithData(teamMemberCurrentUser)
@@ -48,9 +48,9 @@ public class TeamMemberService : BaseService<TeamMember>, ITeamMemberService
         try
         {
             var userId = GetUserIdFromClaims();
-            if (userId == null) return HandlerFail("No user found");
+            if (userId == null) return HandlerFail("Không tìm thấy người dùng");
             var teamMemberCurrentUser = await _teamMemberRepository.GetTeamMemberActiveByUserId(userId.Value);
-            if (teamMemberCurrentUser == null) return HandlerFail("No user found in team members");
+            if (teamMemberCurrentUser == null) return HandlerFail("Người dùng chưa có nhóm");
 
             teamMemberCurrentUser.LeaveDate = DateTime.UtcNow;
             teamMemberCurrentUser.IsDeleted = true;
@@ -60,7 +60,7 @@ public class TeamMemberService : BaseService<TeamMember>, ITeamMemberService
 
             var saveChanges = await _unitOfWork.SaveChanges();
 
-            if (!saveChanges) return HandlerFail("No changes saved");
+            if (!saveChanges) return HandlerFail("Đã xảy ra lỗi khi lưu dữ liệu");
 
             return new ResponseBuilder()
                 .WithData(teamMemberCurrentUser)

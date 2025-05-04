@@ -227,19 +227,20 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
 
     public async Task<List<Project>> GetProjectBySemesterIdAndDefenseStage(Guid semesterId, int defenseStage)
     {
-        var project = await _context.Projects
-            .Include(x => x.CapstoneSchedules)
-            .Include(x => x.Topic)
-            .ThenInclude(x => x.IdeaVersion)
-            .ThenInclude(x => x.Idea)
-            .Where(e => e.IsDeleted == false &&
-                        e.DefenseStage == defenseStage &&
-                        e.Topic != null &&
-                        e.Topic.IdeaVersion != null &&
-                        e.Topic.IdeaVersion.StageIdea != null &&
-                        e.Topic.IdeaVersion.StageIdea.SemesterId == semesterId
-            )
-            .ToListAsync();
+        var queryable = GetQueryable();
+        var project = await queryable
+                        .Include(x => x.CapstoneSchedules)
+                        .Include(x => x.Topic)
+                        .ThenInclude(x => x.IdeaVersion)
+                        .ThenInclude(x => x.Idea)
+                        .Where(e => e.IsDeleted == false &&
+                                    e.DefenseStage == defenseStage &&
+                                    e.Topic != null &&
+                                    e.Topic.IdeaVersion != null &&
+                                    e.Topic.IdeaVersion.StageIdea != null &&
+                                    e.Topic.IdeaVersion.StageIdea.SemesterId == semesterId
+                        )
+                        .ToListAsync();
         return project;
     }
 
@@ -323,13 +324,16 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
 
     public async Task<Project?> GetProjectByTopicId(Guid topicId)
     {
-        var project = await _context.Projects.Where(e => e.IsDeleted == false &&
+        var queryable = GetQueryable();
+
+        var project = await queryable.Where(e => e.IsDeleted == false &&
                                                          e.TopicId == topicId)
             .Include(e => e.Topic)
             .ThenInclude(e => e.IdeaVersion)
             .ThenInclude(e => e.Idea)
             .ThenInclude(e => e.Mentor)
             .FirstOrDefaultAsync();
+
         return project;
     }
 
