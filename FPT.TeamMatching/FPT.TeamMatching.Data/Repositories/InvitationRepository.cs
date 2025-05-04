@@ -7,6 +7,7 @@ using FPT.TeamMatching.Domain.Enums;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Invitations;
 using FPT.TeamMatching.Domain.Utilities.Filters;
 using Microsoft.EntityFrameworkCore;
+using Pipelines.Sockets.Unofficial.Arenas;
 
 namespace FPT.TeamMatching.Data.Repositories;
 
@@ -158,7 +159,7 @@ public class InvitationRepository : BaseRepository<Invitation>, IInvitationRepos
         }
     }
 
-    public async Task<List<Invitation>> GetUserInvitationsByStatusAndProjectId(InvitationStatus status, Guid projectId)
+    public async Task<List<Invitation>> GetInvitationsByStatusAndProjectId(InvitationStatus status, Guid projectId)
     {
         var queryable = GetQueryable();
 
@@ -166,6 +167,18 @@ public class InvitationRepository : BaseRepository<Invitation>, IInvitationRepos
                                                     e.Status == status &&
                                                     e.ProjectId == projectId)
                                         .ToListAsync();      
+
+        return invitations;
+    }
+
+    public async Task<List<Invitation>?> GetInvitationsBySenderIdAndStatus(Guid senderId, InvitationStatus status)
+    {
+        var queryable = GetQueryable();
+
+        var invitations = await queryable.Where(e => e.IsDeleted == false &&
+                                                    e.Status == status &&
+                                                    e.SenderId == senderId)
+                                        .ToListAsync();
 
         return invitations;
     }

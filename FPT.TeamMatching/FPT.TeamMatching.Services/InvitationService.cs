@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using DocumentFormat.OpenXml.Drawing;
+using DocumentFormat.OpenXml.Spreadsheet;
 using FPT.TeamMatching.Domain.Contracts.Repositories;
 using FPT.TeamMatching.Domain.Contracts.Services;
 using FPT.TeamMatching.Domain.Contracts.UnitOfWorks;
@@ -308,141 +309,42 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
         }
     }
 
-    // phản hồi lời mời từ team bởi cá nhân
+    #region phản hồi lời mời từ team bởi cá nhân
     public async Task<BusinessResult> ApproveOrRejectInvitationFromTeamByMe(InvitationUpdateCommand command)
     {
         try
         {
-            var userIdFromClaim = GetUserIdFromClaims();
-            if (userIdFromClaim == null) return HandlerFailAuth();
-
-            var userId = userIdFromClaim.Value;
-
+            // check invitation
             var invitation = await _invitationRepository.GetById(command.Id);
-            if (invitation == null)
-            {
-                return new ResponseBuilder()
-                    .WithStatus(Const.FAIL_CODE)
-                    .WithMessage("Team chưa gửi lời mời!");
-            }
+            if (invitation == null) return HandlerFail("Không tìm thấy lời mời!");
 
-            var receiver = await _userRepository.GetById(invitation.ReceiverId);
-            var noti = new NotificationCreateForIndividual();
-            noti.UserId = invitation.SenderId;
+            // check người gửi
+            var sender = await _invitationRepository.GetById(command.SenderId);
+            if (sender == null) return HandlerFail("Không tìm thấy người gửi!");
 
-            //reject
+            // check người nhận
+            var receiver = await _invitationRepository.GetById(command.ReceiverId);
+            if (receiver == null) return HandlerFail("Không tìm thấy người nhận!");
+
+            //check dự án 
+            var project = await _projectRepository.GetById(invitation.ProjectId);
+            if (project == null) return HandlerFail("Không tìm thấy dự án");
+
+            //reject 
             if (command.Status == InvitationStatus.Rejected)
             {
-                invitation.Status = InvitationStatus.Rejected;
-                await SetBaseEntityForUpdate(invitation);
-                _invitationRepository.Update(invitation);
-                //noti từ chối lời mời vào nhóm
-                noti.Description = receiver?.Code + " đã từ chối lời mời tham gia nhóm của bạn";
-                //
+                await ProcessRejectionByStudent(invitation);
             }
 
             //accept
             if (command.Status == InvitationStatus.Accepted)
             {
-                invitation.Status = InvitationStatus.Accepted;
-                await SetBaseEntityForUpdate(invitation);
-                _invitationRepository.Update(invitation);
-                //noti từ chối lời mời vào nhóm
-                noti.Description = receiver?.Code + " đã đồng ý lời mời tham gia nhóm của bạn";
-                //
-
-                //tao team member
-                var teamMember = new TeamMember
-                {
-                    UserId = userId,
-                    ProjectId = invitation.ProjectId,
-                    Role = TeamMemberRole.Member,
-                    JoinDate = DateTime.UtcNow,
-                    LeaveDate = null,
-                    Status = TeamMemberStatus.Pending
-                };
-
-                await SetBaseEntityForCreation(teamMember);
-                _teamMemberRepository.Add(teamMember);
-
-
-                var upcomingSemester = await _semesterRepository.GetUpComingSemester();
-                if (upcomingSemester == null)
-                {
-                    return new ResponseBuilder()
-                   .WithStatus(Const.FAIL_CODE)
-                   .WithMessage("Không có kì sắp tới");
-                }
-                //get thanh vien cua team
-                var numOfMembers = 0;
-                var teamMembers = await _teamMemberRepository.GetMembersOfTeamByProjectId((Guid)invitation.ProjectId);
-                if (teamMembers != null)
-                {
-                    numOfMembers = teamMembers.Count();
-                }
-
-                //get idea (pending, consider, approve) cua sender
-                var idea = await _ideaRepository.GetIdeaNotRejectOfLeaderInSemester((Guid)invitation.SenderId, upcomingSemester.Id);
-
-                //get pending invitations
-                var invitationsPending = await _invitationRepository.GetUserInvitationsByStatusAndProjectId(InvitationStatus.Pending, (Guid)invitation.ProjectId);
-                var notiForMember = new NotificationCreateForIndividual();
-                if (idea == null)
-                {
-                    if (numOfMembers + 1 == 5)
-                    {
-                        if (invitationsPending != null)
-                        {
-                            //reject
-                            foreach (var i in invitationsPending)
-                            {
-                                i.Status = InvitationStatus.Rejected;
-                                await SetBaseEntityForUpdate(i);
-                                
-                                notiForMember.UserId = i.ReceiverId;
-                                notiForMember.Description = receiver?.Code + " đã từ chối lời mời tham gia nhóm của bạn";
-                                await _notificationService.CreateForIndividual(notiForMember);
-                            }
-                            _invitationRepository.UpdateRange(invitationsPending);
-                        }
-                    }
-                }
-                else
-                {
-                    if (numOfMembers == idea.IdeaVersions.FirstOrDefault().TeamSize)
-                    {
-                        if (invitationsPending != null)
-                        {
-                            foreach (var i in invitationsPending)
-                            {
-                                i.Status = InvitationStatus.Rejected;
-                                await SetBaseEntityForUpdate(i);
-
-                                notiForMember.UserId = i.ReceiverId;
-                                notiForMember.Description = receiver?.Code + " đã từ chối lời mời tham gia nhóm của bạn";
-                                await _notificationService.CreateForIndividual(notiForMember);
-                            }
-                            _invitationRepository.UpdateRange(invitationsPending);
-                        }
-                    }
-                }
-
-                //reject cac loi xin vao team con lai
-            }
-
-            
-
-            var saveChange_ = await _unitOfWork.SaveChanges();
-            if (!saveChange_)
-            {
-                return new ResponseBuilder()
-                   .WithStatus(Const.FAIL_CODE)
-                   .WithMessage(Const.FAIL_SAVE_MSG);
+                await ProcessApprovalByStudent(invitation);
             }
 
             return new ResponseBuilder()
-                .WithStatus(Const.SUCCESS_CODE)
-                .WithMessage(Const.SUCCESS_SAVE_MSG);
+                   .WithStatus(Const.FAIL_CODE)
+                   .WithMessage("Trạng thái phải là chấp nhận hoặc từ chối");
         }
         catch (Exception ex)
         {
@@ -453,60 +355,233 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
         }
     }
 
-    // phản hồi lời mời từ cá nhân bởi leader
+    private async Task<BusinessResult> ProcessRejectionByStudent(Invitation invitation)
+    {
+        try
+        {
+            // student là người gửi
+            var student = await _userRepository.GetById(invitation.SenderId);
+            // leader của nhóm là người nhận
+            var leader = await _userRepository.GetById(invitation.ReceiverId);
+
+            var noti = new NotificationCreateForIndividual();
+            noti.UserId = invitation.SenderId;
+
+            invitation.Status = InvitationStatus.Rejected;
+            await SetBaseEntityForUpdate(invitation);
+            _invitationRepository.Update(invitation);
+
+            var saveChange = await _unitOfWork.SaveChanges();
+            if (!saveChange)
+            {
+                return new ResponseBuilder()
+                   .WithStatus(Const.FAIL_CODE)
+                   .WithMessage("Đã xảy ra lỗi khi cập nhật lời mời");
+            }
+
+            //noti từ chối lời mời vào nhóm đến leader
+            noti.Description = student?.Code + " đã từ chối lời mời tham gia nhóm của bạn!";
+            //
+            await _notificationService.CreateForIndividual(noti);
+
+            return new ResponseBuilder()
+                .WithStatus(Const.SUCCESS_CODE)
+                .WithMessage(Const.SUCCESS_SAVE_MSG);
+        }
+        catch (Exception ex)
+        {
+            return HandlerFail($"An error occurred: {ex.Message}");
+        }
+    }
+
+    private async Task<BusinessResult> ProcessApprovalByStudent(Invitation invitation)
+    {
+        try
+        {
+            // Kiểm tra thành viên đã tồn tại trong nhom
+            var existingMember = await _teamMemberRepository.GetByUserAndProject((Guid)invitation.ReceiverId, (Guid)invitation.ProjectId);
+            if (existingMember != null)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("Người dùng đã là thành viên của nhóm!");
+            }
+
+            //nguoi gui
+            var leader = await _userRepository.GetById(invitation.SenderId);
+            //nguoi nhan
+            var student = await _userRepository.GetById(invitation.ReceiverId);
+
+            //check du an
+            var project = await _projectRepository.GetById(invitation.ProjectId);
+
+            var noti = new NotificationCreateForIndividual();
+            noti.UserId = invitation.SenderId;
+
+            #region Xu li student accept and noti => leader
+            invitation.Status = InvitationStatus.Accepted;
+            await SetBaseEntityForUpdate(invitation);
+            _invitationRepository.Update(invitation);
+
+            //tao team member
+            var teamMember = new TeamMember
+            {
+                UserId = student.Id,
+                ProjectId = project.Id,
+                Role = TeamMemberRole.Member,
+                JoinDate = DateTime.UtcNow,
+                Status = TeamMemberStatus.Pending
+            };
+
+            await SetBaseEntityForCreation(teamMember);
+            _teamMemberRepository.Add(teamMember);
+
+            var saveChange_ = await _unitOfWork.SaveChanges();
+            if (!saveChange_)
+            {
+                return new ResponseBuilder()
+                   .WithStatus(Const.FAIL_CODE)
+                   .WithMessage(Const.FAIL_SAVE_MSG);
+            }
+
+            //noti đồng ý lời mời vào nhóm đến leader
+            noti.Description = student?.Code + " đã đồng ý lời mời tham gia nhóm của bạn!";
+            //
+            await _notificationService.CreateForIndividual(noti);
+            #endregion
+
+            #region Xu li truong hop team du nguoi => Xu li cac loi moi va yeu cau vao nhom cua nhom
+            var upcomingSemester = await _semesterRepository.GetUpComingSemester();
+            if (upcomingSemester == null)
+            {
+                return new ResponseBuilder()
+               .WithStatus(Const.FAIL_CODE)
+               .WithMessage("Không có kì");
+            }
+
+            //get thanh vien cua team
+            var numOfMembers = 0;
+            var teamMembers = await _teamMemberRepository.GetMembersOfTeamByProjectId((Guid)invitation.ProjectId);
+            if (teamMembers != null)
+            {
+                numOfMembers = teamMembers.Count();
+            }
+
+            //get idea (pending, consider, approve) cua sender - leader
+            var idea = await _ideaRepository.GetIdeaNotRejectOfUserInSemester((Guid)invitation.SenderId, upcomingSemester.Id);
+
+            //get pending invitations
+            var invitationsPending = await _invitationRepository.GetInvitationsByStatusAndProjectId(InvitationStatus.Pending, (Guid)invitation.ProjectId);
+            var notiForMember = new NotificationCreateForIndividual();
+
+            //check team đủ người
+            var maxTeamSize = idea?.IdeaVersions.FirstOrDefault()?.TeamSize ?? 5;
+
+            if (numOfMembers == maxTeamSize && invitationsPending != null)
+            {
+                //update status invitation => reject
+                foreach (var i in invitationsPending)
+                {
+                    if (i.SenderId == invitation.SenderId)
+                    {
+                        i.Status = InvitationStatus.Cancel;
+                    }
+                    else
+                    {
+                        i.Status = InvitationStatus.Rejected;
+                    }
+                    await SetBaseEntityForUpdate(i);
+                }
+
+                _invitationRepository.UpdateRange(invitationsPending);
+                var saveChange1 = await _unitOfWork.SaveChanges();
+                if (!saveChange1)
+                {
+                    return new ResponseBuilder()
+                       .WithStatus(Const.FAIL_CODE)
+                       .WithMessage(Const.FAIL_SAVE_MSG);
+                }
+
+                //noti nếu sender != leader
+                foreach (var i in invitationsPending)
+                {
+                    if (i.SenderId != invitation.SenderId)
+                    {
+                        notiForMember.UserId = i.SenderId;
+                        notiForMember.Description = $"Yêu cầu tham gia nhóm {project.TeamCode} của bạn đã bị từ chối!";
+                        await _notificationService.CreateForIndividual(notiForMember);
+                    }
+                }
+            }
+            #endregion
+
+            #region Xử lí các yêu cầu vào nhóm của user
+            var pendingInvitationsOfSender = await _invitationRepository.GetInvitationsBySenderIdAndStatus(student.Id, InvitationStatus.Pending);
+            if (pendingInvitationsOfSender != null)
+            {
+                foreach (var i in pendingInvitationsOfSender)
+                {
+                    i.Status = InvitationStatus.Cancel;
+                    await SetBaseEntityForUpdate(i);
+                }
+            }
+
+            var saveChange = await _unitOfWork.SaveChanges();
+            if (!saveChange)
+            {
+                return new ResponseBuilder()
+                   .WithStatus(Const.FAIL_CODE)
+                   .WithMessage(Const.FAIL_SAVE_MSG);
+            }
+
+            return new ResponseBuilder()
+                .WithStatus(Const.SUCCESS_CODE)
+                .WithMessage(Const.SUCCESS_SAVE_MSG);
+            #endregion
+        }
+        catch (Exception ex)
+        {
+            return HandlerFail($"An error occurred: {ex.Message}");
+        }
+    }
+    #endregion
+
+    #region phản hồi lời mời từ cá nhân bởi leader
     public async Task<BusinessResult> ApproveOrRejectInvitationFromPersonalizeByLeader(InvitationUpdateCommand command)
     {
         try
         {
-            // Lấy invitation không include các navigation property để tránh lỗi tracking
+            // check invitation
             var invitation = await _invitationRepository.GetById(command.Id);
-            if (invitation == null)
-            {
-                return new ResponseBuilder()
-                    .WithStatus(Const.FAIL_CODE)
-                    .WithMessage("Invitation not found!");
-            }
+            if (invitation == null) return HandlerFail("Không tìm thấy lời mời!");
 
-            // Kiểm tra trạng thái hiện tại của invitation
-            if (invitation.Status != InvitationStatus.Pending)
-            {
-                return new ResponseBuilder()
-                    .WithStatus(Const.FAIL_CODE)
-                    .WithMessage("Invitation is already processed!");
-            }
+            // check người gửi
+            var sender = await _invitationRepository.GetById(command.SenderId);
+            if (sender == null) return HandlerFail("Không tìm thấy người gửi!");
 
-            //check sender id
-            if (invitation.SenderId == null)
-            {
-                return new ResponseBuilder()
-                    .WithStatus(Const.FAIL_CODE)
-                    .WithMessage("Fill sender id");
-            }
+            // check người nhận
+            var receiver = await _invitationRepository.GetById(command.ReceiverId);
+            if (receiver == null) return HandlerFail("Không tìm thấy người nhận!");
 
-            //check xem user co team -> neu co team thi tra thong bao voi status cancel
-            var hasTeam = await _teamMemberRepository.UserHasTeamNow((Guid)invitation.SenderId);
-            if (hasTeam)
-            {
-                invitation.Status = InvitationStatus.Cancel;
-                await SetBaseEntityForUpdate(invitation);
-                _invitationRepository.Update(invitation);
-                var isSuccess = await _unitOfWork.SaveChanges();
-                if (isSuccess)
-                {
-                    var user = await _userRepository.GetById((Guid)invitation.SenderId);
-                    return new ResponseBuilder()
-                    .WithStatus(Const.FAIL_CODE)
-                    .WithMessage(user.Code + " đã được nhóm khác chấp nhận trước đó và không còn trong trạng thái chờ duyệt.");
-                }
-            }
+            //check dự án 
+            var project = await _projectRepository.GetById(invitation.ProjectId);
+            if (project == null) return HandlerFail("Không tìm thấy dự án");
+
+            //reject
             if (command.Status == InvitationStatus.Rejected)
             {
-                return await ProcessRejection(invitation);
+                await ProcessRejectionByLeader(invitation);
             }
-            else
+
+            //accept
+            if (command.Status == InvitationStatus.Accepted)
             {
-                return await ProcessApproval(invitation);
+                await ProcessApprovalByLeader(invitation);
             }
+
+            return new ResponseBuilder()
+                   .WithStatus(Const.FAIL_CODE)
+                   .WithMessage("Trạng thái của lời mời phải là chấp nhận hoặc từ chối");
         }
         catch (Exception ex)
         {
@@ -517,13 +592,12 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
         }
     }
 
-    private async Task<BusinessResult> ProcessRejection(Invitation invitation)
+    private async Task<BusinessResult> ProcessRejectionByLeader(Invitation invitation)
     {
         try
         {
             invitation.Status = InvitationStatus.Rejected;
             _invitationRepository.Update(invitation);
-
 
             var saveResult = await _unitOfWork.SaveChanges();
             if (!saveResult)
@@ -532,17 +606,16 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
             }
 
             // Gửi thông báo
-            if (invitation.ProjectId == null) return HandlerFail("Không tìm thấy dự án");
-            var project = await _projectRepository.GetById(invitation.ProjectId.Value);
+            var project = await _projectRepository.GetById(invitation.ProjectId);
             if (project == null) return HandlerFail("Không tìm thấy dự án");
 
-            var teamName = project.TeamName ?? "the team";
-
+            //noti 
             var noti = new NotificationCreateForIndividual
             {
                 UserId = invitation.SenderId,
-                Description = $"Yêu cầu tham gia nhóm {teamName} của bạn đã bị từ chối!",
+                Description = $"Yêu cầu tham gia nhóm {project.TeamCode} của bạn đã bị từ chối!",
             };
+
             await _notificationService.CreateForUser(noti);
 
             return new ResponseBuilder()
@@ -555,34 +628,152 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
         }
     }
 
-    private async Task<BusinessResult> ProcessApproval(Invitation invitation)
+    private async Task<BusinessResult> ProcessApprovalByLeader(Invitation invitation)
     {
         try
         {
-            if (invitation.SenderId == null )
+            // Kiểm tra thành viên đã tồn tại trong nhom
+            var existingMember = await _teamMemberRepository.GetByUserAndProject(invitation.SenderId.Value, invitation.ProjectId.Value);
+            if (existingMember != null)
             {
-                return HandlerFail("Không có người gửi");
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("Người dùng đã là thành viên của nhóm!");
             }
-            if (invitation.ProjectId == null)
-            {
-                return HandlerFail("Không có nhóm gửi đến");
-            }
-            // Kiểm tra thành viên đã tồn tại
-            //var existingMember =
-            //    await _teamMemberRepository.GetByUserAndProject(invitation.SenderId.Value, invitation.ProjectId.Value);
-            //if (existingMember != null)
-            //{
-            //    return new ResponseBuilder()
-            //        .WithStatus(Const.FAIL_CODE)
-            //        .WithMessage("User is already a member of this team!");
-            //}
 
-            // Lấy thông tin project để kiểm tra số slot
-            var project = await _projectRepository.GetById(invitation.ProjectId.Value, true);
-            if (project == null)
+            // du an
+            var project = await _projectRepository.GetById(invitation.ProjectId);
+
+            //student là người gửi
+            var student = await _userRepository.GetById(invitation.SenderId);
+
+            //leader là người nhận
+            var leader = await _userRepository.GetById(invitation.ReceiverId);
+
+            var noti = new NotificationCreateForIndividual();
+            noti.UserId = invitation.SenderId;
+
+            #region Xu li leader accept and noti => student
+            // Cập nhật invitation
+            invitation.Status = InvitationStatus.Accepted;
+            await SetBaseEntityForUpdate(invitation);
+            _invitationRepository.Update(invitation);
+
+            // Thêm thành viên mới
+            var teamMember = new TeamMember
             {
-                return HandlerFail("Không tìm thấy dự án");
+                UserId = student.Id,
+                ProjectId = project.Id,
+                Role = TeamMemberRole.Member,
+                JoinDate = DateTime.UtcNow,
+                Status = TeamMemberStatus.Pending
+            };
+            await SetBaseEntityForCreation(teamMember);
+            _teamMemberRepository.Add(teamMember);
+
+            var saveChange_ = await _unitOfWork.SaveChanges();
+            if (!saveChange_)
+            {
+                return new ResponseBuilder()
+                   .WithStatus(Const.FAIL_CODE)
+                   .WithMessage(Const.FAIL_SAVE_MSG);
             }
+
+            //noti đồng ý lời mời vào nhóm đến student
+            noti.Description = $"Yêu cầu tham gia nhóm {project.TeamCode} của bạn đã được chấp nhận!";
+            //
+
+            await _notificationService.CreateForIndividual(noti);
+            #endregion
+
+            #region Xu li truong hop team du nguoi => Xu li cac loi moi va yeu cau vao nhom cua nhom
+            var upcomingSemester = await _semesterRepository.GetUpComingSemester();
+            if (upcomingSemester == null)
+            {
+                return new ResponseBuilder()
+               .WithStatus(Const.FAIL_CODE)
+               .WithMessage("Không có kì");
+            }
+
+            //get thanh vien cua team
+            var numOfMembers = 0;
+            var teamMembers = await _teamMemberRepository.GetMembersOfTeamByProjectId((Guid)invitation.ProjectId);
+            if (teamMembers != null)
+            {
+                numOfMembers = teamMembers.Count();
+            }
+
+            //get idea (pending, consider, approve) cua sender - leader
+            var idea = await _ideaRepository.GetIdeaNotRejectOfUserInSemester((Guid)invitation.SenderId, upcomingSemester.Id);
+
+            //get pending invitations
+            var invitationsPending = await _invitationRepository.GetInvitationsByStatusAndProjectId(InvitationStatus.Pending, (Guid)invitation.ProjectId);
+            var notiForMember = new NotificationCreateForIndividual();
+
+            //check team đủ người
+            var maxTeamSize = idea?.IdeaVersions.FirstOrDefault()?.TeamSize ?? 5;
+
+            if (numOfMembers == maxTeamSize && invitationsPending != null)
+            {
+                //update status invitation => reject
+                foreach (var i in invitationsPending)
+                {
+                    if (i.SenderId == invitation.ReceiverId)
+                    {
+                        i.Status = InvitationStatus.Cancel;
+                    }
+                    else
+                    {
+                        i.Status = InvitationStatus.Rejected;
+                    }
+                    await SetBaseEntityForUpdate(i);
+                }
+
+                _invitationRepository.UpdateRange(invitationsPending);
+                var saveChange1 = await _unitOfWork.SaveChanges();
+                if (!saveChange1)
+                {
+                    return new ResponseBuilder()
+                       .WithStatus(Const.FAIL_CODE)
+                       .WithMessage(Const.FAIL_SAVE_MSG);
+                }
+
+                //noti nếu sender != leader
+                foreach (var i in invitationsPending)
+                {
+                    if (i.SenderId != invitation.ReceiverId)
+                    {
+                        notiForMember.UserId = i.SenderId;
+                        notiForMember.Description = $"Yêu cầu tham gia nhóm {project.TeamCode} của bạn đã bị từ chối!";
+                        await _notificationService.CreateForIndividual(notiForMember);
+                    }
+                }
+            }
+            #endregion
+
+            #region Xử lí các yêu cầu vào nhóm của user
+            var pendingInvitationsOfSender = await _invitationRepository.GetInvitationsBySenderIdAndStatus(student.Id, InvitationStatus.Pending);
+            if (pendingInvitationsOfSender != null)
+            {
+                foreach (var i in pendingInvitationsOfSender)
+                {
+                    i.Status = InvitationStatus.Cancel;
+                    await SetBaseEntityForUpdate(i);
+                }
+            }
+
+            var saveChange = await _unitOfWork.SaveChanges();
+            if (!saveChange)
+            {
+                return new ResponseBuilder()
+                   .WithStatus(Const.FAIL_CODE)
+                   .WithMessage(Const.FAIL_SAVE_MSG);
+            }
+
+            return new ResponseBuilder()
+                .WithStatus(Const.SUCCESS_CODE)
+                .WithMessage(Const.SUCCESS_SAVE_MSG);
+            #endregion
 
             // Tính toán available slots
             //int availableSlots = project.Idea == null
@@ -593,34 +784,17 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
             //bool isEndSlot = availableSlots <= 0;
             //if (isEndSlot) return HandlerFail("Project has no slot.");
 
-            // Thêm thành viên mới
-            var teamMember = new TeamMember
-            {
-                UserId = invitation.SenderId,
-                ProjectId = invitation.ProjectId,
-                Role = TeamMemberRole.Member,
-                JoinDate = DateTime.UtcNow,
-                Status = TeamMemberStatus.Pending
-            };
-            await SetBaseEntityForCreation(teamMember);
-            _teamMemberRepository.Add(teamMember);
-
-            // Cập nhật invitation
-            invitation.Status = InvitationStatus.Accepted;
-            await SetBaseEntityForUpdate(invitation);
-            _invitationRepository.Update(invitation);
-
             // Chỉ xử lý tự động từ chối nếu đây là slot cuối cùng
-            var invitationIncluded = await _invitationRepository.GetById(invitation.Id, true);
-            if (invitationIncluded == null) return HandlerFail("Lỗi.");
-            if (invitation.SenderId == null)
-            {
-                return HandlerFail("Không có người gửi");
-            }
-            if (invitation.ProjectId == null)
-            {
-                return HandlerFail("Không có nhóm gửi đến");
-            }
+            //var invitationIncluded = await _invitationRepository.GetById(invitation.Id, true);
+            //if (invitationIncluded == null) return HandlerFail("Lỗi.");
+            //if (invitation.SenderId == null)
+            //{
+            //    return HandlerFail("Không có người gửi");
+            //}
+            //if (invitation.ProjectId == null)
+            //{
+            //    return HandlerFail("Không có nhóm gửi đến");
+            //}
 
             // 1. Lấy những status Pending có cùng ProjectId -> Auto Rejected
             // 2. Lấy những status Pending có cùng SenderId -> Auto Rejected
@@ -642,11 +816,11 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
             // }
 
             // Lưu tất cả thay đổi
-            var saveResult = await _unitOfWork.SaveChanges();
-            if (!saveResult)
-            {
-                return HandlerFail("Đã xảy ra lỗi khi lưu dữ liệu");
-            }
+            //var saveResult = await _unitOfWork.SaveChanges();
+            //if (!saveResult)
+            //{
+            //    return HandlerFail("Đã xảy ra lỗi khi lưu dữ liệu");
+            //}
 
             // Gửi thông báo
             // if (isLastSlot)
@@ -668,28 +842,28 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
             //     }
             // }
 
-            await _notificationService.CreateForTeam(new NotificationCreateForTeam
-            {
-                ProjectId = invitationIncluded.ProjectId,
-                Description = $"{invitationIncluded.Sender?.Code} has joined your team"
-            });
+            //await _notificationService.CreateForTeam(new NotificationCreateForTeam
+            //{
+            //    ProjectId = invitationIncluded.ProjectId,
+            //    Description = $"{invitationIncluded.Sender?.Code} has joined your team"
+            //});
 
-            await _notificationService.CreateForUser(new NotificationCreateForIndividual
-            {
-                UserId = invitationIncluded.SenderId,
-                Description = $"Yêu cầu tham gia nhóm {invitationIncluded.Project?.TeamName} đã được chấp nhận!"
-            });
+            //await _notificationService.CreateForUser(new NotificationCreateForIndividual
+            //{
+            //    UserId = invitationIncluded.SenderId,
+            //    Description = $"Yêu cầu tham gia nhóm {invitationIncluded.Project?.TeamName} đã được chấp nhận!"
+            //});
 
-            return new ResponseBuilder()
-                .WithStatus(Const.SUCCESS_CODE)
-                .WithMessage(Const.SUCCESS_SAVE_MSG);
+            //return new ResponseBuilder()
+            //    .WithStatus(Const.SUCCESS_CODE)
+            //    .WithMessage(Const.SUCCESS_SAVE_MSG);
         }
         catch (Exception ex)
         {
             return HandlerFail($"An error occurred: {ex.Message}");
         }
     }
-
+    #endregion
 
     public async Task<BusinessResult> DeletePermanentInvitation(Guid projectId)
     {
