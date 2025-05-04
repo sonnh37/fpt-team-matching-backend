@@ -28,7 +28,15 @@ public class IdeaVersionRequestController : ControllerBase
         var msg = await _service.GetAll<IdeaVersionRequestResult>(query);
         return Ok(msg);
     }
-    
+
+
+    [HttpGet("by-status-different-pending")]
+    public async Task<IActionResult> GetAllExceptPending([FromQuery] IdeaVersionRequestGetAllQuery query)
+    {
+        var msg = await _service.GetAllExceptPending<IdeaVersionRequestResult>(query);
+        return Ok(msg);
+    }
+
     [HttpGet("me/by-status-and-roles")]
     public async Task<IActionResult> GetIdeaVersionRequestsCurrentByStatusAndRoles([FromQuery] IdeaGetListByStatusAndRoleQuery query)
     {
