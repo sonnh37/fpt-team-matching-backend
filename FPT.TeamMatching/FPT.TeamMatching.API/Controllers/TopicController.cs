@@ -1,5 +1,6 @@
 ﻿using FPT.TeamMatching.Domain.Contracts.Services;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Topics;
+using FPT.TeamMatching.Domain.Models.Requests.Queries.Ideas;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Projects;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Topics;
 using FPT.TeamMatching.Domain.Models.Results;
@@ -72,6 +73,13 @@ namespace FPT.TeamMatching.API.Controllers
         {
             var businessResult = await _service.GetTopicsForMentor(query);
             return Ok(businessResult);
+        }
+        
+        [HttpGet("supervisors")]
+        public async Task<IActionResult> GetTopicOfSupervisors([FromQuery] TopicGetListOfSupervisorsQuery query)
+        {
+            var msg = await _service.GetTopicsOfSupervisors<TopicResult>(query);
+            return Ok(msg);
         }
 
     }
