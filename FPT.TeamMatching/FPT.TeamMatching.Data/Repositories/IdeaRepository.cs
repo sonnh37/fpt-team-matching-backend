@@ -365,12 +365,12 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
         return result;
     }
 
-    public async Task<Idea?> GetIdeaNotRejectOfLeaderInSemester(Guid leaderId, Guid semesterId)
+    public async Task<Idea?> GetIdeaNotRejectOfUserInSemester(Guid userId, Guid semesterId)
     {
         var queryable = GetQueryable();
 
         var idea = queryable.Where(e => e.IsDeleted == false &&
-                                        e.OwnerId == leaderId &&
+                                        e.OwnerId == userId &&
                                         e.Status != IdeaStatus.Rejected)
                             .Where(i => i.IdeaVersions != null &&
                                                         i.IdeaVersions.OrderByDescending(iv => iv.Version).FirstOrDefault() != null);
