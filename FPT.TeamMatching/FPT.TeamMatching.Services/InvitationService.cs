@@ -442,7 +442,7 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
                 //check team đủ người
                 var maxTeamSize = idea?.IdeaVersions.FirstOrDefault()?.TeamSize ?? 5;
 
-                if (numOfMembers == maxTeamSize && invitationsPending != null)
+                if (numOfMembers == maxTeamSize && invitationsPending.Count > 0)
                 {
                     //update status invitation => reject
                     foreach (var i in invitationsPending)
@@ -482,21 +482,22 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
 
                 #region Xử lí các yêu cầu vào nhóm của user
                 var pendingInvitationsOfSender = await _invitationRepository.GetInvitationsBySenderIdAndStatus(student.Id, InvitationStatus.Pending);
-                if (pendingInvitationsOfSender != null)
+                if (pendingInvitationsOfSender != null && pendingInvitationsOfSender.Count != 0)
                 {
                     foreach (var i in pendingInvitationsOfSender)
                     {
                         i.Status = InvitationStatus.Cancel;
                         await SetBaseEntityForUpdate(i);
                     }
-                }
-
-                var saveChange = await _unitOfWork.SaveChanges();
-                if (!saveChange)
-                {
-                    return new ResponseBuilder()
-                       .WithStatus(Const.FAIL_CODE)
-                       .WithMessage(Const.FAIL_SAVE_MSG);
+                    _invitationRepository.UpdateRange(pendingInvitationsOfSender);
+                    
+                    var saveChange = await _unitOfWork.SaveChanges();
+                    if (!saveChange)
+                    {
+                        return new ResponseBuilder()
+                            .WithStatus(Const.FAIL_CODE)
+                            .WithMessage(Const.FAIL_SAVE_MSG);
+                    }
                 }
 
                 return new ResponseBuilder()
