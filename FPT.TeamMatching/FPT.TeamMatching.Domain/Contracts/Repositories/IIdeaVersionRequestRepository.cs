@@ -13,6 +13,9 @@ namespace FPT.TeamMatching.Domain.Contracts.Repositories
     public interface IIdeaVersionRequestRepository : IBaseRepository<IdeaVersionRequest>
     {
         Task<(List<IdeaVersionRequest>, int)> GetData(IdeaVersionRequestGetAllQuery query);
+
+        Task<(List<IdeaVersionRequest>, int)> GetDataExceptPending(IdeaVersionRequestGetAllQuery query);
+
         Task<(List<IdeaVersionRequest>, int)> GetDataUnassignedReviewer(GetQueryableQuery query);
 
         Task<(List<IdeaVersionRequest>, int)> GetIdeaVersionRequestsForCurrentReviewerByRolesAndStatus(
