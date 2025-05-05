@@ -36,10 +36,11 @@ public class HangfireController : ControllerBase
         return Ok();
     }
 
-    [HttpGet("/RecurringJob/${jobId:int}")]
-    public ActionResult CreateRecurringJob(int jobId)
+    [HttpGet("/RecurringJob/save-chat")]
+    public ActionResult CreateRecurringJob()
     {
-        _recurringJobManager.AddOrUpdate(jobId.ToString(), () => _jobHangfireService.ReccuringJob(), Cron.Minutely);
+        var timeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+        _recurringJobManager.AddOrUpdate("save-chat", () => _jobHangfireService.ReccuringJob(), "0 3 * * *", timeZone);
         return Ok();
     }
 
@@ -73,7 +74,7 @@ public class HangfireController : ControllerBase
     public ActionResult TriggerNow([FromQuery] string jobId)
     {
         _recurringJobManager.Trigger(jobId);
-        _recurringJobManager.RemoveIfExists(jobId);
+        // _recurringJobManager.RemoveIfExists(jobId);
         return Ok("Triggered create-reviews job successfully!");
     }
 }
