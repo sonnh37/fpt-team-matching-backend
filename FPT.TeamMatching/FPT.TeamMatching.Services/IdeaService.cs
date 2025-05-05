@@ -897,6 +897,18 @@ public class IdeaService : BaseService<Idea>, IIdeaService
             var isSuccess = await _unitOfWork.SaveChanges();
             if (isSuccess)
             {
+                var notiSystemForStudent = new NotificationCreateForRoleBased
+                {
+                    Description = "Hôm nay là ngày bắt đầu kì học. Tất cả đề tài chưa duyệt và nhóm thiếu thành viên đã bị tự động hủy. Vui lòng kiểm tra!",
+                    Role = "Student"
+                };
+                await _notificationService.CreateForRoleBased(notiSystemForStudent);
+                var notiSystemForLecturer = new NotificationCreateForRoleBased
+                {
+                    Description = "Hôm nay là ngày bắt đầu kì học. Tất cả đề tài chưa duyệt và nhóm thiếu thành viên đã bị tự động hủy. Vui lòng kiểm tra!",
+                    Role = "Lecturer"
+                };
+                await _notificationService.CreateForRoleBased(notiSystemForLecturer);
                 return new ResponseBuilder()
                         .WithStatus(Const.SUCCESS_CODE)
                         .WithMessage("Cập nhật các dự án đến ngày bắt đầu thành công");
