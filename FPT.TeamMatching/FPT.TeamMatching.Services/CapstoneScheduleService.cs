@@ -36,6 +36,7 @@ namespace FPT.TeamMatching.Services
         private  readonly INotificationService _notificationService;
         public CapstoneScheduleService(IMapper mapper, IUnitOfWork unitOfWork, INotificationService notificationService) : base(mapper, unitOfWork)
         {
+            _notificationService = notificationService;
             _capstoneScheduleRepository = _unitOfWork.CapstoneScheduleRepository;
         }
 
@@ -276,7 +277,7 @@ namespace FPT.TeamMatching.Services
                     notifications.Add(new NotificationCreateForTeam
                     {
                         ProjectId = capstoneSchedule.ProjectId,
-                        Description = $"Lịch bảo vệ lần ${stage} của nhóm đã có"
+                        Description = $"Lịch bảo vệ lần {stage} của nhóm đã có"
                     });
                 }
                 

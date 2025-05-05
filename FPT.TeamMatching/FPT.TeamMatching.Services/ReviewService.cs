@@ -401,7 +401,7 @@ public class ReviewService : BaseService<Review>, IReviewService
                             {
 
                                 var latestReview = latestStageReview.FirstOrDefault(x =>
-                                    x.ProjectId == project.ProjectId && x.Number == reviewNumber - 1);
+                                    x.ProjectId == project.Review.ProjectId && x.Number == reviewNumber - 1);
                                 if (latestReview == null)
                                 {
                                     listReviewFail.Add(new ReviewExcelModels
@@ -472,7 +472,7 @@ public class ReviewService : BaseService<Review>, IReviewService
                 notifications.Add(new NotificationCreateForTeam
                 {
                     ProjectId = review.ProjectId,
-                    Description = $"Đề tài của nhóm đã có lịch review ${reviewNumber}",
+                    Description = $"Đề tài của nhóm đã có lịch review {reviewNumber}",
                 });
             }
             await _notificationService.CreateMultiNotificationForTeam(notifications);
