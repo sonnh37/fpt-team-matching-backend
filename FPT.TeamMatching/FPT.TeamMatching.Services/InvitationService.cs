@@ -24,6 +24,7 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
     private readonly ITeamMemberRepository _teamMemberRepository;
     private readonly IUserRepository _userRepository;
     private readonly ISemesterRepository _semesterRepository;
+    private readonly IStageIdeaRepositoty _stageIdeaRepositoty;
     private readonly INotificationService _notificationService;
 
     public InvitationService(IMapper mapper, IUnitOfWork unitOfWork, INotificationService notificationService) : base(
@@ -35,6 +36,7 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
         _teamMemberRepository = unitOfWork.TeamMemberRepository;
         _userRepository = unitOfWork.UserRepository;
         _semesterRepository = unitOfWork.SemesterRepository;
+        _stageIdeaRepositoty = unitOfWork.StageIdeaRepository;
         _notificationService = notificationService;
     }
 
@@ -242,7 +244,15 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
     {
         try
         {
-            //check sl trong team
+            //lay ra stageIdea hien tai
+            var stageIdea = await _stageIdeaRepositoty.GetCurrentStageIdea();
+            if (stageIdea == null) return HandlerFail("Không có đợt duyệt ứng với ngày hiện tại!");
+
+            //ki cua stage idea
+            var semester = await _semesterRepository.GetSemesterByStageIdeaId(stageIdea.Id);
+            if (semester == null) return HandlerFail("Không có kì ứng với đợt duyệt hiện tại!");
+
+            //check nguoi nhan
             var user = await GetUserAsync();
             if (user == null)
             {
@@ -250,6 +260,15 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
                     .WithStatus(Const.FAIL_CODE)
                     .WithMessage("Không tìm thấy người dùng");
             }
+            //check người nhận là student
+            var isStudent = await _userRepository.CheckRoleOfUserInSemester(user.Id, "Student",semester.Id);
+            if (!isStudent)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("Người nhận không phải là sinh viên");
+            }
+            //check sl trong team
             bool members = await CheckCountMembersInTeam((Guid)command.ProjectId);
             if (!members)
             {
