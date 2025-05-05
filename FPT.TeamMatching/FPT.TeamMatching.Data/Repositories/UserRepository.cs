@@ -445,4 +445,19 @@ public class UserRepository : BaseRepository<User>, IUserRepository
             .ToListAsync();
         return result;
     }
+
+    public async Task<bool> CheckRoleOfUserInSemester(Guid userId, string role, Guid semesterId)
+    {
+        var queryable = GetQueryable();
+
+        var user = await queryable.AnyAsync(e => e.IsDeleted == false &&
+                                                e.Id == userId &&
+                                                e.UserXRoles.Any(e => e.IsDeleted == false &&
+                                                                    e.Role != null &&
+                                                                    e.Role.RoleName == role &&
+                                                                    e.Semester != null &&
+                                                                    e.Semester.Id == semesterId));
+
+        return user;
+    }
 }
