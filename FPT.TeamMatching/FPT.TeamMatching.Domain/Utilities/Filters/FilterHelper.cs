@@ -387,6 +387,12 @@ public static class FilterHelper
                 m.Status == query.Status);
         }
 
+        if (!string.IsNullOrEmpty(query.CreatedBy))
+        {
+            queryable = queryable.Where(m =>
+                m.CreatedBy != null && m.CreatedBy.Contains(query.CreatedBy.Trim().ToLower()));
+        }
+
         queryable = BaseFilterHelper.Base(queryable, query);
 
         return queryable;

@@ -124,10 +124,10 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
             
             var userId = userIdClaim.Value;
             var userInTeamMember = await _teamMemberRepository.GetTeamMemberActiveByUserId(userId);
-            if (userInTeamMember == null) return HandlerFail("You not in team member");
+            if (userInTeamMember == null) return HandlerFail("Bạn không nằm trong nhóm này");
             
             var isLeader = userInTeamMember.Role == TeamMemberRole.Leader;
-            if (!isLeader) return HandlerFail("You do not have role leader team member");
+            if (!isLeader) return HandlerFail("Bạn không đủ quuyền hạn trong nhóm");
             // get by type
             var (data, total) = await _invitationRepository.GetLeaderInvitationsByType(query, userId);
             var results = _mapper.Map<List<InvitationResult>>(data);
@@ -166,7 +166,7 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
             {
                 return new ResponseBuilder()
                     .WithStatus(Const.FAIL_CODE)
-                    .WithMessage("Student has request join team");
+                    .WithMessage("Sinh viên đã yêu cầu vào nhóm");
             }
 
             //check student co idea pending hay approve k
@@ -193,7 +193,7 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
             {
                 return new ResponseBuilder()
                     .WithStatus(Const.FAIL_CODE)
-                    .WithMessage("Project do not exist");
+                    .WithMessage("Dự án không tồn tại");
             }
 
             invitation.Status = InvitationStatus.Pending;
@@ -241,7 +241,7 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
             {
                 return new ResponseBuilder()
                     .WithStatus(Const.FAIL_CODE)
-                    .WithMessage("Project has maximum members");
+                    .WithMessage("Dự án đã đủ thành viên");
             }
 
             //check student co idea pending hay approve k
@@ -250,7 +250,7 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
             {
                 return new ResponseBuilder()
                     .WithStatus(Const.FAIL_CODE)
-                    .WithMessage("Student has idea");
+                    .WithMessage("Sinh viên đã có idea");
             }
 
             //check student trong teammember in process OR pass
@@ -259,7 +259,7 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
             {
                 return new ResponseBuilder()
                     .WithStatus(Const.FAIL_CODE)
-                    .WithMessage("Student is in team now");
+                    .WithMessage("Sinh viên đã vào nhóm hiện tại");
             }
 
             bool isSucess = await TeamCreateAsync(command);
