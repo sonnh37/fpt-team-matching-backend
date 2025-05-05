@@ -180,6 +180,14 @@ public class ProjectService : BaseService<Project>, IProjectService
             await SetBaseEntityForCreation(project);
             _projectRepository.Add(project);
 
+            var isSuccess = await _unitOfWork.SaveChanges();
+            if (!isSuccess)
+            {
+                return new ResponseBuilder()
+                .WithStatus(Const.SUCCESS_CODE)
+                .WithMessage("Đã xảy ra lỗi khi tạo nhóm thành công!");
+            }
+
             // Create TeamMember
             var teamMember = new TeamMember
             {
@@ -192,7 +200,7 @@ public class ProjectService : BaseService<Project>, IProjectService
             await SetBaseEntityForCreation(teamMember);
             _teamMemberRepository.Add(teamMember);
 
-            var isSuccess = await _unitOfWork.SaveChanges();
+            isSuccess = await _unitOfWork.SaveChanges();
             if (isSuccess)
             {
                 return new ResponseBuilder()
