@@ -244,7 +244,7 @@ namespace FPT.TeamMatching.Services
                                               "  đã duyệt yêu cầu sử dụng đề tài của nhóm bạn. Hãy kiểm tra!",
                                 ProjectId = project.Id
                             };
-                            
+
                             await _notificationService.CreateForTeam(noti2);
                         }
                     }
@@ -259,7 +259,10 @@ namespace FPT.TeamMatching.Services
                     var semester = await _unitOfWork.SemesterRepository.GetUpComingSemester();
                     if (semester != null)
                     {
-                        project.TeamCode = await _semesterService.GenerateNewTeamCode(semester.Id);
+                        if (string.IsNullOrEmpty(project.TeamCode))
+                        {
+                            project.TeamCode = await _semesterService.GenerateNewTeamCode(semester.Id);
+                        }
                     }
 
                     //gan topicId vao project
