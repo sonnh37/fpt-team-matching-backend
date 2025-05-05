@@ -110,6 +110,16 @@ namespace FPT.TeamMatching.Data.Repositories
             return (results, query.IsPagination ? total : results.Count);
         }
 
+        public async Task<Topic> GetByTopicId(Guid topicId)
+        {
+            var result = await _context.Topics
+                .Include(x => x.IdeaVersion)
+                .ThenInclude(x => x.Idea)
+                .Include(x => x.Project)
+                .FirstOrDefaultAsync(x => x.Id == topicId);
+            return result;
+        }
+
         public async Task<List<Topic>> GetAllTopicsByTopicCode(string[] topicCodes)
         {
             var result = await _context.Topics

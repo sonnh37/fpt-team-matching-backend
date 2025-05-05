@@ -20,12 +20,14 @@ namespace FPT.TeamMatching.API.Controllers
         private readonly IIdeaService _ideaService;
         private readonly IReviewService _reviewService;
         private readonly IRecurringJobManager _recurringJobManager;
+        private readonly IBackgroundJobClient _backgroundJobClient;
         public SemesterController(
             ISemesterService __service,
             IConfiguration configuration,
             IIdeaService ideaService,
             IReviewService reviewService,
-            IRecurringJobManager recurringJobManager
+            IRecurringJobManager recurringJobManager,
+            IBackgroundJobClient backgroundJobClient
             )
         {
             _service = __service;
@@ -33,6 +35,7 @@ namespace FPT.TeamMatching.API.Controllers
             _ideaService = ideaService;
             _reviewService = reviewService;
             _recurringJobManager = recurringJobManager;
+            _backgroundJobClient = backgroundJobClient;
         }
 
         [HttpGet]
@@ -82,7 +85,7 @@ namespace FPT.TeamMatching.API.Controllers
                 var timeUpdateProject = Utils.ToCronExpression(request.StartDate.Value);
                 _recurringJobManager.AddOrUpdate("auto-update-project-inprogress-"+request.SemesterCode, () => _ideaService.UpdateWhenSemesterStart(), timeUpdateProject, new RecurringJobOptions { QueueName = name.Value, TimeZone = timeZone});
                 // create review hangfire
-                var timeCreateReview = Utils.ToCronExpression(request.StartDate.Value, false, 5); // deplay for 5 minutes for project updated
+                var timeCreateReview = Utils.ToCronExpression(request.StartDate.Value); // deplay for 5 minutes for project updated
                 _recurringJobManager.AddOrUpdate("auto-create-review-"+request.SemesterCode, () => _reviewService.CreateReviewsForActiveProject(),timeCreateReview , new RecurringJobOptions { QueueName = name.Value, TimeZone = timeZone });
                 
                 // auto update idea status 
@@ -98,18 +101,20 @@ namespace FPT.TeamMatching.API.Controllers
         public async Task<IActionResult> Update([FromBody] SemesterUpdateCommand request)
         {
             var businessResult = await _service.CreateOrUpdate<SemesterResult>(request);
-            
+            var timeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
             var name = _configuration.GetSection("HANGFIRE_SERVER_LOCAL");
            
-            var timeUpdateProject = Utils.ToCronExpression(request.StartDate.Value.AddHours(23));
-            _recurringJobManager.AddOrUpdate("auto-update-project-inprogress-"+request.SemesterCode, () => _ideaService.UpdateWhenSemesterStart(), timeUpdateProject, new RecurringJobOptions { QueueName = name.Value });
+            var timeUpdateProject = Utils.ToCronExpression(request.StartDate.Value.LocalDateTime);
+            _recurringJobManager.AddOrUpdate("auto-update-project-inprogress-"+request.SemesterCode, () => _ideaService.UpdateWhenSemesterStart(), timeUpdateProject, new RecurringJobOptions { QueueName = name.Value, TimeZone = timeZone});
             // create review hangfire
+            // _backgroundJobClient.Schedule(() => _ideaService.UpdateWhenSemesterStart(),
+            //     request.StartDate.Value.LocalDateTime.AddHours(23) - DateTimeOffset.Now);
            
-            var timeCreateReview = Utils.ToCronExpression(request.StartDate.Value.AddHours(23), false, 5); // deplay for 5 minutes for project updated
-            _recurringJobManager.AddOrUpdate("auto-create-review-"+request.SemesterCode, () => _reviewService.CreateReviewsForActiveProject(),timeCreateReview , new RecurringJobOptions { QueueName = name.Value });
+            var timeCreateReview = Utils.ToCronExpression(request.StartDate.Value); // deplay for 5 minutes for project updated
+            _recurringJobManager.AddOrUpdate("auto-create-review-"+request.SemesterCode, () => _reviewService.CreateReviewsForActiveProject(),timeCreateReview , new RecurringJobOptions { QueueName = name.Value, TimeZone = timeZone });
            
-            var timePublicIdeaResult = Utils.ToCronExpression(request.PublicTopicDate.Value.AddHours(23));
-            _recurringJobManager.AddOrUpdate("auto-update-result-"+request.SemesterCode, () => _ideaService.AutoUpdateIdeaStatus(), timePublicIdeaResult, new RecurringJobOptions { QueueName = name.Value });
+            var timePublicIdeaResult = Utils.ToCronExpression(request.PublicTopicDate.Value);
+            _recurringJobManager.AddOrUpdate("auto-update-result-"+request.SemesterCode, () => _ideaService.AutoUpdateIdeaStatus(), timePublicIdeaResult, new RecurringJobOptions { QueueName = name.Value, TimeZone = timeZone });
             return Ok(businessResult);
         }
 
