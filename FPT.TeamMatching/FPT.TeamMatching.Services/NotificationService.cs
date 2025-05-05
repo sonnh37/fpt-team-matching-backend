@@ -667,6 +667,7 @@ public class NotificationService : BaseService<Notification>, INotificationServi
             var noti = new Notification();
             noti.Id = Guid.NewGuid();
             noti.IsRead = false;
+            noti.Description = notificationCreateForTeam.Description;
             noti.ProjectId = notificationCreateForTeam.ProjectId;
             noti.Type = NotificationType.Team;
             await SetBaseEntityForCreation(noti);
