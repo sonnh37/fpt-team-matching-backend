@@ -27,8 +27,8 @@ namespace FPT.TeamMatching.Services;
 public class ProjectService : BaseService<Project>, IProjectService
 {
     private readonly IProjectRepository _projectRepository;
-    private readonly ITeamMemberService _serviceTeam;
     private readonly ITeamMemberRepository _teamMemberRepository;
+    private readonly ITeamMemberService _serviceTeam;
     private readonly ISemesterRepository _semesterRepository;
     private readonly IReviewRepository _reviewRepository;
     private readonly ISemesterService _semesterService;
@@ -38,9 +38,9 @@ public class ProjectService : BaseService<Project>, IProjectService
         unitOfWork)
     {
         _projectRepository = unitOfWork.ProjectRepository;
-        _serviceTeam = teamMemberService;
         _teamMemberRepository = unitOfWork.TeamMemberRepository;
         _semesterRepository = unitOfWork.SemesterRepository;
+        _serviceTeam = teamMemberService;
         _reviewRepository = unitOfWork.ReviewRepository;
         _semesterService = semesterService;
         _stageIdeaRepositoty = unitOfWork.StageIdeaRepository;
@@ -151,49 +151,57 @@ public class ProjectService : BaseService<Project>, IProjectService
         }
     }
 
-    public async Task<BusinessResult> CreateProjectAndTeammember(TeamCreateCommand project)
+    public async Task<BusinessResult> CreateProjectAndTeamMember(TeamCreateCommand command)
     {
         try
         {
+            //lay ra stageIdea hien tai
+            var stageIdea = await _stageIdeaRepositoty.GetCurrentStageIdea();
+            if (stageIdea == null) return HandlerFail("Không có đợt duyệt ứng với ngày hiện tại!");
+
+            //ki cua stage idea
+            var semester = await _semesterRepository.GetSemesterByStageIdeaId(stageIdea.Id);
+            if (semester == null) return HandlerFail("Không có kì ứng với đợt duyệt hiện tại!");
+
+            var newTeamCode = await _semesterService.GenerateNewTeamCode(stageIdea.SemesterId);
+
+            var codeExist = await _projectRepository.IsExistedTeamCode(newTeamCode);
+            if (codeExist) return HandlerFail("Trùng mã nhóm!");
+
             // Create project
-            var command = new ProjectCreateCommand
+            var project = new Project
             {
+                TeamCode = newTeamCode,
                 LeaderId = GetUserIdFromClaims(),
-                TeamName = project.TeamName,
-                TeamSize = project.TeamSize,
+                TeamName = command.TeamName,
+                TeamSize = command.TeamSize,
                 Status = ProjectStatus.Pending
             };
-            var entity = await CreateOrUpdateEntity(command);
-            var result = _mapper.Map<ProjectResult>(entity);
-            if (result == null)
-                return new ResponseBuilder()
-                    .WithStatus(Const.FAIL_CODE)
-                    .WithMessage(Const.FAIL_SAVE_MSG);
+            await SetBaseEntityForCreation(project);
+            _projectRepository.Add(project);
 
-
-            // Create team
-            var team = new TeamMemberCreateCommand
+            // Create TeamMember
+            var teamMember = new TeamMember
             {
-                UserId = result.LeaderId,
-                ProjectId = result.Id,
+                UserId = project.LeaderId,
+                ProjectId = project.Id,
                 Role = Domain.Enums.TeamMemberRole.Leader,
                 JoinDate = DateTime.UtcNow,
                 Status = TeamMemberStatus.Pending
             };
+            await SetBaseEntityForCreation(teamMember);
+            _teamMemberRepository.Add(teamMember);
 
-
-            var teamresult = await _serviceTeam.CreateOrUpdate<TeamMemberResult>(team);
-
-
-            if (teamresult.Status != 1) return teamresult;
-
-
-            var msg = new ResponseBuilder()
-                .WithData(result)
+            var isSuccess = await _unitOfWork.SaveChanges();
+            if (isSuccess)
+            {
+                return new ResponseBuilder()
                 .WithStatus(Const.SUCCESS_CODE)
-                .WithMessage(Const.SUCCESS_SAVE_MSG);
-
-            return msg;
+                .WithMessage("Tạo nhóm thành công!");
+            }
+            return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage("Đã xảy ra lỗi khi tạo nhóm");
         }
         catch (Exception ex)
         {
@@ -492,47 +500,6 @@ public class ProjectService : BaseService<Project>, IProjectService
                 .WithStatus(Const.SUCCESS_CODE)
                 .WithData(result)
                 .WithMessage(Const.SUCCESS_READ_MSG);
-        }
-        catch (Exception e)
-        {
-            return new ResponseBuilder()
-                .WithStatus(Const.FAIL_CODE)
-                .WithMessage(e.Message);
-        }
-    }
-
-    public async Task<BusinessResult> CreateProject(ProjectCreateCommand command)
-    {
-        try
-        {
-            //lay ra stageIdea hien tai
-            var stageIdea = await _stageIdeaRepositoty.GetCurrentStageIdea();
-            if (stageIdea == null) return HandlerFail("Không có đợt duyệt ứng với ngày hiện tại!");
-
-            //ki cua stage idea
-            var semester = await _semesterRepository.GetSemesterByStageIdeaId(stageIdea.Id);
-            if (semester == null) return HandlerFail("Không có kì ứng với đợt duyệt hiện tại!");
-
-            var project = _mapper.Map<Project>(command);
-
-            var newTeamCode = await _semesterService.GenerateNewTeamCode(stageIdea.SemesterId);
-
-            var codeExist = await _projectRepository.IsExistedTeamCode(newTeamCode);
-            if (codeExist) return HandlerFail("Trùng mã nhóm!");
-
-            project.TeamCode = newTeamCode;
-            await SetBaseEntityForCreation(project);
-            _projectRepository.Add(project);
-            var isSuccess = await _unitOfWork.SaveChanges();
-            if (isSuccess)
-            {
-                return new ResponseBuilder()
-                .WithStatus(Const.SUCCESS_CODE)
-                .WithMessage("Tạo nhóm thành công!");
-            }
-            return new ResponseBuilder()
-                .WithStatus(Const.FAIL_CODE)
-                .WithMessage("Đã xảy ra lỗi khi tạo nhóm!");
         }
         catch (Exception e)
         {

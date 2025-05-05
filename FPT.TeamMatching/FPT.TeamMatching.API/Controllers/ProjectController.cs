@@ -53,14 +53,14 @@ public class ProjectController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] ProjectCreateCommand request)
     {
-        var msg = await _service.CreateProject(request);
+        var msg = await _service.CreateOrUpdate<ProjectResult>(request);
         return Ok(msg);
     }
 
     [HttpPost("create-project-with-teammember")]
-    public async Task<IActionResult> CreateProjectAndTeammember([FromBody] TeamCreateCommand request)
+    public async Task<IActionResult> CreateProjectAndTeamMember([FromBody] TeamCreateCommand request)
     {
-        var msg = await _service.CreateProjectAndTeammember(request);
+        var msg = await _service.CreateProjectAndTeamMember(request);
         return Ok(msg);
     }
 
