@@ -26,5 +26,5 @@ public interface IProjectRepository : IBaseRepository<Project>
 
     Task<List<Project>?> GetPendingProjectsWithTopicStartingBySemesterId(Guid semesterId);
 
-
+    Task<bool> IsExistedTeamCode(string teamCode);
 }

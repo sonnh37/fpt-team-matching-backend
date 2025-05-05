@@ -251,8 +251,9 @@ public class IdeaVersionRequestService : BaseService<IdeaVersionRequest>, IIdeaV
                     .WithMessage(Const.SUCCESS_READ_MSG);
 
             var newTopicCode = await _semesterService.GenerateNewTopicCode(stageIdea.SemesterId);
+
             var codeExist = _topicRepository.IsExistedTopicCode(newTopicCode);
-            if (codeExist) return HandlerFail("Trùng topic code");
+            if (codeExist) return HandlerFail("Trùng mã đề tài!");
 
             var topicCreateCommand = new TopicCreateCommand
             {
