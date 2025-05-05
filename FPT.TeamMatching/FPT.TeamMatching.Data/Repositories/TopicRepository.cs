@@ -34,12 +34,12 @@ namespace FPT.TeamMatching.Data.Repositories
 
         public int NumberOfTopicBySemesterId(Guid semesterId)
         {
-            var numberOfTopic = _context.Topics.Where(e => e.IsDeleted == false &&
-                                                           e.IdeaVersion != null &&
-                                                           e.IdeaVersion.StageIdea != null &&
-                                                           e.IdeaVersion.StageIdea.Semester != null &&
-                                                           e.IdeaVersion.StageIdea.Semester.Id == semesterId)
-                .Count();
+            var numberOfTopic = _context.Topics
+                .Count(e => e.IsDeleted == false &&
+                            e.IdeaVersion != null &&
+                            e.IdeaVersion.StageIdea != null &&
+                            e.IdeaVersion.StageIdea.Semester != null &&
+                            e.IdeaVersion.StageIdea.Semester.Id == semesterId);
             return numberOfTopic;
         }
 
