@@ -29,5 +29,16 @@ namespace FPT.TeamMatching.Data.Repositories
             return ideaVersions;
         }
 
+        public async Task<IdeaVersion?> GetLastIdeaVersionByTopicId(Guid topicId)
+        {
+            var queryable = GetQueryable();
+
+            var ideaVersion = await queryable.Where(e => e.IsDeleted == false &&
+                                                        e.Topic != null &&
+                                                        e.Topic.Id == topicId)
+                                            .FirstOrDefaultAsync();
+
+            return ideaVersion;
+        }
     }
 }

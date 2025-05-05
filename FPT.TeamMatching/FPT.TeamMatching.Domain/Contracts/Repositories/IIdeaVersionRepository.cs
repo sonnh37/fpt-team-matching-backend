@@ -11,5 +11,7 @@ namespace FPT.TeamMatching.Domain.Contracts.Repositories
     public interface IIdeaVersionRepository: IBaseRepository<IdeaVersion>
     {
         Task<List<IdeaVersion>> GetIdeaVersionsByIdeaId(Guid ideaId);
+
+        Task<IdeaVersion?> GetLastIdeaVersionByTopicId(Guid topicId);
     }
 }

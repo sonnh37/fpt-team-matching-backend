@@ -104,9 +104,7 @@ public class IdeaService : BaseService<Idea>, IIdeaService
         }
     }
 
-
     #region Create-by-student
-
     public async Task<BusinessResult> CreatePendingByStudent(IdeaStudentCreatePendingCommand ideaCreateModel)
     {
         try
@@ -141,7 +139,7 @@ public class IdeaService : BaseService<Idea>, IIdeaService
 
             return new ResponseBuilder()
                 .WithStatus(Const.SUCCESS_CODE)
-                .WithMessage(Const.SUCCESS_SAVE_MSG);
+                .WithMessage("Bạn đã tạo ý tưởng thành công");
         }
         catch (Exception ex)
         {
@@ -149,9 +147,7 @@ public class IdeaService : BaseService<Idea>, IIdeaService
         }
     }
 
-// Helper methods
-
-
+    #region Helper methods
     private async Task<BusinessResult> ValidateStudentIdeas(IdeaStudentCreatePendingCommand model, Guid stageIdeaId,
         Guid semesterId)
     {
@@ -167,7 +163,7 @@ public class IdeaService : BaseService<Idea>, IIdeaService
             return HandlerFail("Sinh viên có đề tài đang trong quá trình duyệt ở kì này");
         }
 
-        if (model.MentorId == null) return HandlerFail("Bat buoc phai nhap mentorId");
+        if (model.MentorId == null) return HandlerFail("Nhập field Mentor Id");
         // Check Mentor và sub
         var resBool = await _userService.CheckMentorAndSubMentorSlotAvailability(model.MentorId.Value,
             model.SubMentorId);
@@ -221,6 +217,8 @@ public class IdeaService : BaseService<Idea>, IIdeaService
         _ideaVersionRepository.Add(ideaVersion);
         return ideaVersion;
     }
+
+    #endregion
     #endregion
 
     #region Create-by-lecturer
@@ -260,7 +258,7 @@ public class IdeaService : BaseService<Idea>, IIdeaService
 
             return new ResponseBuilder()
                 .WithStatus(Const.SUCCESS_CODE)
-                .WithMessage(Const.SUCCESS_SAVE_MSG);
+                .WithMessage("Bạn đã tạo ý tưởng thành công");
         }
         catch (Exception ex)
         {
@@ -348,7 +346,7 @@ public class IdeaService : BaseService<Idea>, IIdeaService
         return ideaVersion;
     }
 
-    
+
     #endregion
 
     private async Task<(StageIdea? stageIdea, Semester? semester)> GetCurrentStageAndSemester()
@@ -378,15 +376,14 @@ public class IdeaService : BaseService<Idea>, IIdeaService
         }
     }
 
-
     public async Task<BusinessResult> GetUserIdeasByStatus(IdeaGetListForUserByStatus query)
     {
         try
         {
             var userId = GetUserIdFromClaims();
-            if (userId == null) return HandlerError("User does not exist");
+            if (userId == null) return HandlerError("Không tìm thấy người dùng");
 
-            if (query.Status == null) return HandlerFail("Status cannot be null");
+            if (query.Status == null) return HandlerFail("Nhập field trạng thái");
 
             var ideas = await _ideaRepository.GetCurrentIdeaByUserIdAndStatus(userId.Value, query.Status.Value);
             var result = _mapper.Map<List<IdeaResult>>(ideas);
@@ -414,12 +411,12 @@ public class IdeaService : BaseService<Idea>, IIdeaService
         try
         {
             var userId = GetUserIdFromClaims();
-            if (userId == null) return HandlerError("User does not exist");
+            if (userId == null) return HandlerError("Không tìm thấy người dùng");
 
-            if (query.Status == null) return HandlerFail("Status cannot be null");
+            if (query.Status == null) return HandlerFail("Nhập field trạng thái");
 
             var currentStageIdea = await _stageIdeaRepositoty.GetCurrentStageIdea();
-            if (currentStageIdea == null) return HandlerFail("Current stage Idea does not exist");
+            if (currentStageIdea == null) return HandlerFail("Hiện tại chưa đến đợt duyệt");
             var ideas = await _ideaRepository.GetUserIdeasByStatusWithCurrentStageIdea(userId, query.Status,
                 currentStageIdea.Id);
             var result = _mapper.Map<List<IdeaResult>>(ideas);
@@ -448,22 +445,10 @@ public class IdeaService : BaseService<Idea>, IIdeaService
         {
             var userId = GetUserIdFromClaims();
             var project = await _projectRepository.GetProjectByUserIdLogin(userId.Value);
-            //sua db
-            //if (project == null || project.Idea == null) return HandlerFail("Not found project");
-
-            //ideaUpdateCommand.OwnerId = project.Idea.OwnerId;
-            //ideaUpdateCommand.MentorId = project.Idea.MentorId;
-            //ideaUpdateCommand.SubMentorId = project.Idea.SubMentorId;
-            //ideaUpdateCommand.IdeaCode = project.Idea.IdeaCode;
-            //ideaUpdateCommand.SpecialtyId = project.Idea.SpecialtyId;
-            //ideaUpdateCommand.IsExistedTeam = project.Idea.IsExistedTeam;
-            //ideaUpdateCommand.IsEnterpriseTopic = project.Idea.IsEnterpriseTopic;
-            //ideaUpdateCommand.EnterpriseName = project.Idea.EnterpriseName;
-            //ideaUpdateCommand.MaxTeamSize = project.Idea.MaxTeamSize;
+            if (project == null) return HandlerFail("Không tìm thấy dự án");
 
             var command = _mapper.Map<Idea>(ideaUpdateCommand);
-            //sua db
-            //command.Id = project.Idea.Id;
+            await SetBaseEntityForUpdate(command);
             _ideaRepository.Update(command);
             var check = await _unitOfWork.SaveChanges();
 
@@ -489,7 +474,7 @@ public class IdeaService : BaseService<Idea>, IIdeaService
         try
         {
             var idea = await _ideaRepository.GetById(command.Id);
-            if (idea == null) return HandlerFail("Not found idea");
+            if (idea == null) return HandlerFail("Không tìm thấy ý tưởng");
             idea.Status = command.Status;
             _ideaRepository.Update(idea);
             var check = await _unitOfWork.SaveChanges();
@@ -547,7 +532,7 @@ public class IdeaService : BaseService<Idea>, IIdeaService
     private const int RANDOM_SUFFIX_MAX = 9999;
     private const int MAX_TEAMNAME_LENGTH = 15;
 
-    public async Task AutoUpdateIdeaStatus()
+    public async Task<BusinessResult> AutoUpdateIdeaStatus()
     {
         try
         {
@@ -561,11 +546,17 @@ public class IdeaService : BaseService<Idea>, IIdeaService
                     await EvaluateIdeaByAverageScore(idea, stageCurrent);
                 }
             }
+
+            return new ResponseBuilder()
+                    .WithStatus(Const.SUCCESS_CODE)
+                    .WithMessage(Const.SUCCESS_READ_MSG);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error in AutoUpdateIdeaStatus");
-            throw;
+            var errorMessage = $"An error occurred in {typeof(IdeaResult).Name}: {ex.Message}";
+            return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage(errorMessage);
         }
     }
 
@@ -621,9 +612,6 @@ public class IdeaService : BaseService<Idea>, IIdeaService
 
     private async Task HandleApprovedIdea(Idea idea, IdeaVersion ideaVersion, StageIdea stageIdea)
     {
-        if (idea.Owner?.UserXRoles?.Any(e => e.Role?.RoleName == "Student") != true)
-            return;
-
         var ideaVersionsOfIdea = await _ideaVersionRepository.GetIdeaVersionsByIdeaId(ideaVersion.IdeaId.Value);
         var ideaVersionListId = ideaVersionsOfIdea.Select(m => m.Id).ToList().ConvertAll<Guid?>(x => x);
         var existingTopics = await _unitOfWork.TopicRepository.GetTopicByIdeaVersionId(ideaVersionListId);
@@ -635,7 +623,6 @@ public class IdeaService : BaseService<Idea>, IIdeaService
             _unitOfWork.TopicRepository.Update(topic);
             await _unitOfWork.SaveChanges();
         }
-
 
         // Kiểm tra xem IdeaVersion đã có Topic chưa
         var existingTopic = await _topicRepository.GetQueryable()
@@ -664,6 +651,16 @@ public class IdeaService : BaseService<Idea>, IIdeaService
                 TopicCode = existingTopic.TopicCode
             };
         }
+
+        // Mentor return
+        var owner = await _unitOfWork.UserRepository.GetQueryable(m => m.Id == idea.OwnerId)
+            .Include(e => e.UserXRoles).ThenInclude(e => e.Role).SingleOrDefaultAsync();
+        var semesterGetUpComing = await _semesterRepository.GetUpComingSemester();
+
+        // Nếu như kì sắp tới mà mentor chưa đc role student thì return
+        if (owner?.UserXRoles?.Any(e => e.Role?.RoleName == "Mentor" && semesterGetUpComing?.Id == e.SemesterId) ==
+            true)
+            return;
 
         var existedProject = await _projectRepository.GetProjectByLeaderId(idea.OwnerId);
 
@@ -806,59 +803,127 @@ public class IdeaService : BaseService<Idea>, IIdeaService
         }
     }
 
-    public async Task AutoUpdateProjectInProgress()
+    public async Task<BusinessResult> UpdateWhenSemesterStart()
     {
         try
         {
-            //get projects cua ki den ngay bat dau inprogress - ngay khoa
-            var projects = await _projectRepository.GetProjectsStartingNow();
-            //update project
-            foreach (var project in projects)
+            //get projects cua ki den ngay bat dau ki - ngay khoa
+            var semester = await _semesterRepository.GetSemesterStartToday();
+            if (semester == null)
             {
-                //sua db
-                //var semester = project.Idea.StageIdea.Semester;
-                //var semester = project.Topic.Idea.StageIdea.Semester;
-                var semester = project.Topic.IdeaVersion.StageIdea.Semester;
-                //update status
-                project.Status = ProjectStatus.InProgress;
-                //update teamCode
-                //get so luong project InProgress cua ki
-                var numberOfProjects = await _projectRepository.NumberOfInProgressProjectInSemester(semester.Id);
-                // Tạo số thứ tự tiếp theo
-                int nextNumber = numberOfProjects + 1;
-                string semesterCode = semester.SemesterCode;
-                //Tạo mã nhóm
-                string newTeamCode = $"{semesterCode}SE{nextNumber:D3}";
-                //sua db
-                //project.Idea = null;
-                project.Topic.IdeaVersion = null;
-                await SetBaseEntityForUpdate(project);
-                _projectRepository.Update(project);
-                var isSuccess = await _unitOfWork.SaveChanges();
-                if (!isSuccess)
-                {
-                    return;
-                }
+                return new ResponseBuilder()
+                                .WithStatus(Const.FAIL_CODE)
+                                .WithMessage("Không có kì bắt đầu ở ngày hiện tại");
+            }
 
-                //update status cua teammember
-                var teamMembers = await _teamMemberRepository.GetMembersOfTeamByProjectId(project.Id);
-                foreach (var teamMember in teamMembers)
+            //get idea của kì với status khác approve => reject
+            var ideas = await _ideaRepository.GetIdeaNotApproveInSemester(semester.Id);
+            if (ideas != null)
+            {
+                foreach (var idea in ideas)
                 {
-                    await SetBaseEntityForUpdate(teamMember);
-                    teamMember.Status = TeamMemberStatus.InProgress;
+                    idea.Status = IdeaStatus.Rejected;
+                    await SetBaseEntityForUpdate(idea);
                 }
+                _ideaRepository.UpdateRange(ideas);
 
-                _teamMemberRepository.UpdateRange(teamMembers);
-                isSuccess = await _unitOfWork.SaveChanges();
-                if (!isSuccess)
+                //get idea version request (role mentor) của kì với status khác approve => reject
+                var ideaVersionRequests = await _ideaVersionRequestRepository.GetRoleMentorNotApproveInSemester(semester.Id);
+                if (ideaVersionRequests != null)
                 {
-                    return;
+                    foreach (var ideaVersionRequest in ideaVersionRequests)
+                    {
+                        ideaVersionRequest.Status = IdeaVersionRequestStatus.Rejected;
+                        await SetBaseEntityForUpdate(ideaVersionRequest);
+                    }
+                    _ideaVersionRequestRepository.UpdateRange(ideaVersionRequests);
                 }
             }
+
+            //project k co topic => canceled
+            var projectsWithNoTopic = await _projectRepository.GetPendingProjectsWithNoTopicStartingBySemesterId(semester.Id);
+            if (projectsWithNoTopic != null)
+            {
+                foreach (var project in projectsWithNoTopic)
+                {
+                    project.Status = ProjectStatus.Canceled;
+                    await SetBaseEntityForUpdate(project);
+                }
+                _projectRepository.UpdateRange(projectsWithNoTopic);
+            }
+
+            //get project của kì với status pending check xem idea approve có team size = với teamsize của nhóm k
+            var projectsWithTopic = await _projectRepository.GetPendingProjectsWithTopicStartingBySemesterId(semester.Id);
+            if (projectsWithTopic != null)
+            {
+                foreach (var project in projectsWithTopic)
+                {
+                    var ideaVersion = await _ideaVersionRepository.GetLastIdeaVersionByTopicId((Guid)project.TopicId);
+                    if (ideaVersion != null)
+                    {
+                        //get team members
+                        var members = await _teamMemberRepository.GetMembersOfTeamByProjectId(project.Id);
+                        var numOfMembers = 0;
+                        if (members != null)
+                        {
+                            numOfMembers = members.Count();
+                        }
+
+                        //teamsize != voi teamsize cua nhom, project status => canceled
+                        if (ideaVersion.TeamSize != numOfMembers)
+                        {
+                            project.Status = ProjectStatus.Canceled;
+                        }
+
+                        //teamsize = voi teamsize cua nhom, project status => inprogress, teammember => inprogress
+                        else
+                        {
+                            project.Status = ProjectStatus.InProgress;
+
+                            foreach (var member in members)
+                            {
+                                member.Status = TeamMemberStatus.InProgress;
+                                await SetBaseEntityForUpdate(member);
+                            }
+                            _teamMemberRepository.UpdateRange(members);
+                        }
+                        await SetBaseEntityForUpdate(project);
+                    }
+                }
+
+                _projectRepository.UpdateRange(projectsWithTopic);
+            }
+
+            var isSuccess = await _unitOfWork.SaveChanges();
+            if (isSuccess)
+            {
+                var notiSystemForStudent = new NotificationCreateForRoleBased
+                {
+                    Description = "Hôm nay là ngày bắt đầu kì học. Tất cả đề tài chưa duyệt và nhóm thiếu thành viên đã bị tự động hủy. Vui lòng kiểm tra!",
+                    Role = "Student"
+                };
+                await _notificationService.CreateForRoleBased(notiSystemForStudent);
+                var notiSystemForLecturer = new NotificationCreateForRoleBased
+                {
+                    Description = "Hôm nay là ngày bắt đầu kì học. Tất cả đề tài chưa duyệt và nhóm thiếu thành viên đã bị tự động hủy. Vui lòng kiểm tra!",
+                    Role = "Lecturer"
+                };
+                await _notificationService.CreateForRoleBased(notiSystemForLecturer);
+                return new ResponseBuilder()
+                        .WithStatus(Const.SUCCESS_CODE)
+                        .WithMessage("Cập nhật các dự án đến ngày bắt đầu thành công");
+            }
+            return new ResponseBuilder()
+                        .WithStatus(Const.SUCCESS_CODE)
+                        .WithMessage("Đã xảy ra lỗi khi cập nhật các dự án đến ngày bắt đầu");
+
         }
         catch (Exception ex)
         {
-            return;
+            var errorMessage = $"An error occurred in {typeof(IdeaResult).Name}: {ex.Message}";
+            return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage(errorMessage);
         }
     }
 }

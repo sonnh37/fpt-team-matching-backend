@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using DocumentFormat.OpenXml.Drawing.Diagrams;
+using DocumentFormat.OpenXml.Office2016.Excel;
 using FPT.TeamMatching.Domain.Contracts.Repositories;
 using FPT.TeamMatching.Domain.Contracts.Services;
 using FPT.TeamMatching.Domain.Contracts.UnitOfWorks;
@@ -16,11 +17,15 @@ public class TeamMemberService : BaseService<TeamMember>, ITeamMemberService
 {
     private readonly ITeamMemberRepository _teamMemberRepository;
     private readonly IProjectRepository _projectRepository;
+    private readonly IMentorFeedbackRepository _mentorFeedbackRepository;
+    private readonly IReviewRepository _reviewRepository;
 
     public TeamMemberService(IMapper mapper, IUnitOfWork unitOfWork) : base(mapper, unitOfWork)
     {
-        _teamMemberRepository = _unitOfWork.TeamMemberRepository;
-        _projectRepository = _unitOfWork.ProjectRepository;
+        _teamMemberRepository = unitOfWork.TeamMemberRepository;
+        _projectRepository = unitOfWork.ProjectRepository;
+        _mentorFeedbackRepository = unitOfWork.MentorFeedbackRepository;
+        _reviewRepository = unitOfWork.ReviewRepository;
     }
 
     public async Task<BusinessResult> GetTeamMemberByUserId()
@@ -28,9 +33,9 @@ public class TeamMemberService : BaseService<TeamMember>, ITeamMemberService
         try
         {
             var userId = GetUserIdFromClaims();
-            if (userId == null) return HandlerFail("No user found");
+            if (userId == null) return HandlerFail("Không tìm thấy người dùng");
             var teamMemberCurrentUser = await _teamMemberRepository.GetMemberByUserId((Guid)userId.Value);
-            if (teamMemberCurrentUser == null) return HandlerFail("No user found in team members");
+            if (teamMemberCurrentUser == null) return HandlerFail("Người dùng chưa có nhóm");
 
             return new ResponseBuilder()
                 .WithData(teamMemberCurrentUser)
@@ -48,9 +53,9 @@ public class TeamMemberService : BaseService<TeamMember>, ITeamMemberService
         try
         {
             var userId = GetUserIdFromClaims();
-            if (userId == null) return HandlerFail("No user found");
+            if (userId == null) return HandlerFail("Không tìm thấy người dùng");
             var teamMemberCurrentUser = await _teamMemberRepository.GetTeamMemberActiveByUserId(userId.Value);
-            if (teamMemberCurrentUser == null) return HandlerFail("No user found in team members");
+            if (teamMemberCurrentUser == null) return HandlerFail("Người dùng chưa có nhóm");
 
             teamMemberCurrentUser.LeaveDate = DateTime.UtcNow;
             teamMemberCurrentUser.IsDeleted = true;
@@ -60,7 +65,7 @@ public class TeamMemberService : BaseService<TeamMember>, ITeamMemberService
 
             var saveChanges = await _unitOfWork.SaveChanges();
 
-            if (!saveChanges) return HandlerFail("No changes saved");
+            if (!saveChanges) return HandlerFail("Đã xảy ra lỗi khi lưu dữ liệu");
 
             return new ResponseBuilder()
                 .WithData(teamMemberCurrentUser)
@@ -235,6 +240,40 @@ public class TeamMemberService : BaseService<TeamMember>, ITeamMemberService
     {
         try
         {
+            // check date review 3
+            var tm = await _teamMemberRepository.GetById(requests[0].Id);
+            if (tm == null)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(Const.NOT_FOUND_CODE)
+                    .WithMessage("Không tìm thấy thành viên");
+            }
+
+            var project = await _projectRepository.GetById(tm.ProjectId);
+            if (project == null)
+            {
+                return new ResponseBuilder()
+                     .WithStatus(Const.FAIL_CODE)
+                     .WithMessage("Không tìm thấy dự án");
+            }
+
+            var review3 = await _reviewRepository.GetReviewByProjectIdAndNumber(project.Id, 3);
+            if (review3 == null)
+            {
+                return new ResponseBuilder()
+                     .WithStatus(Const.FAIL_CODE)
+                     .WithMessage("Không tìm thấy review 3 của dự án");
+            }
+
+            var today = DateTime.UtcNow.Date;
+            if (review3.ReviewDate.Value.Date < today || today > review3.ReviewDate.Value.Date.AddDays(7))
+            {
+                return new ResponseBuilder()
+                     .WithStatus(Const.FAIL_CODE)
+                     .WithMessage("Chưa đến ngày đánh giá");
+            }
+            //
+
             foreach (var request in requests)
             {
                 var teamMember = await _teamMemberRepository.GetById(request.Id);
@@ -242,7 +281,7 @@ public class TeamMemberService : BaseService<TeamMember>, ITeamMemberService
                 {
                     return new ResponseBuilder()
                     .WithStatus(Const.NOT_FOUND_CODE)
-                    .WithMessage(Const.NOT_FOUND_MSG);
+                    .WithMessage("Không tìm thấy thành viên");
                 }
                 teamMember.MentorConclusion = request.MentorConclusion;
                 teamMember.Attitude = request.Attitude;

@@ -16,6 +16,7 @@ using FPT.TeamMatching.Domain.Models.Requests.Queries.Likes;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Notifications;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Projects;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.StageIdeas;
+using FPT.TeamMatching.Domain.Models.Requests.Queries.Topics;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Users;
 
 namespace FPT.TeamMatching.Domain.Utilities.Filters;
@@ -37,6 +38,7 @@ public static class FilterHelper
                 AnswerCriteria((queryable as IQueryable<AnswerCriteria>)!, AnswerCriteriaQuery) as IQueryable<TEntity>,
             CommentGetAllQuery commentQuery =>
                 Comment((queryable as IQueryable<Comment>)!, commentQuery) as IQueryable<TEntity>,
+            TopicGetAllQuery TopicQuery => Topic((queryable as IQueryable<Topic>)!, TopicQuery) as IQueryable<TEntity>,
             IdeaVersionRequestGetAllQuery ideaVersionRequestQuery =>
                 IdeaVersionRequest((queryable as IQueryable<IdeaVersionRequest>)!, ideaVersionRequestQuery) as
                     IQueryable<TEntity>,
@@ -125,6 +127,19 @@ public static class FilterHelper
         {
             queryable = queryable.Where(m =>
                 m.SemesterId != null && m.SemesterId == query.SemesterId);
+        }
+
+        queryable = BaseFilterHelper.Base(queryable, query);
+
+        return queryable;
+    }
+
+    private static IQueryable<Topic>? Topic(IQueryable<Topic> queryable, TopicGetAllQuery query)
+    {
+        if (query.IdeaVersionId != null)
+        {
+            queryable = queryable.Where(e =>
+                e.IdeaVersion != null);
         }
 
         queryable = BaseFilterHelper.Base(queryable, query);
@@ -302,32 +317,10 @@ public static class FilterHelper
 
     private static IQueryable<Idea>? Idea(IQueryable<Idea> queryable, IdeaGetAllQuery query)
     {
-        //sua db
-        //if (query.IsExistedTeam != null) queryable = queryable.Where(m => query.IsExistedTeam.Value == m.IsExistedTeam);
-
-        //if (!string.IsNullOrEmpty(query.EnglishName))
-        //{
-        //    queryable = queryable.Where(m =>
-        //        m.EnglishName != null && m.EnglishName.ToLower().Trim().Contains(query.EnglishName.ToLower().Trim()));
-        //}
-
-        //if (query.SpecialtyId != null)
-        //{
-        //    queryable = queryable.Where(m => m.SpecialtyId == query.SpecialtyId);
-        //}
-
-        //if (query.ProfessionId != null)
-        //{
-        //    queryable = queryable.Where(m =>
-        //        m.Specialty != null && m.Specialty.Profession != null &&
-        //        m.Specialty.Profession.Id == query.ProfessionId);
-        //}
-
-        //if (query.Types.Count > 0)
-        //{
-        //    queryable = queryable.Where(m =>
-        //        m.Type != null && query.Types.Contains(m.Type.Value));
-        //}
+        if (query.SpecialtyId != null)
+        {
+            queryable = queryable.Where(m => m.SpecialtyId == query.SpecialtyId);
+        }
 
         if (query.Status != null)
         {

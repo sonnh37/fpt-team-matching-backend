@@ -45,7 +45,7 @@ public class ReviewController : ControllerBase
     [HttpPut]
     public async Task<IActionResult> Update([FromBody] ReviewUpdateCommand request)
     {
-        var businessResult = await _service.CreateOrUpdate<ReviewResult>(request);
+        var businessResult = await _service.UpdateReview(request);
 
         return Ok(businessResult);
     }
@@ -91,7 +91,7 @@ public class ReviewController : ControllerBase
     [HttpPut("upload-file-url-review")]
     public async Task<IActionResult> UploadFile(UploadFileUrl request)
     {
-        var result = await _service.UpdateFilerReview(request);
+        var result = await _service.UpdateFilterReview(request);
         return Ok(result);
     }
 

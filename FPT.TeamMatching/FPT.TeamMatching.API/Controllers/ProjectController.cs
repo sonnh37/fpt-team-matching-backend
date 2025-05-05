@@ -53,7 +53,7 @@ public class ProjectController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] ProjectCreateCommand request)
     {
-        var msg = await _service.CreateOrUpdate<ProjectResult>(request);
+        var msg = await _service.CreateProject(request);
         return Ok(msg);
     }
 

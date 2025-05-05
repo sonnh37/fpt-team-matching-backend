@@ -26,12 +26,10 @@ namespace FPT.TeamMatching.Data.Repositories
             _dbContext = dbContext;
         }
 
-        public async Task<List<MentorTopicRequest>?> GetByIdeaId(Guid ideaId)
+        public async Task<List<MentorTopicRequest>?> GetByTopicId(Guid topicId)
         {
             var requests = await _dbContext.MentorTopicRequests.Where(e => e.IsDeleted == false &&
-                                                                           //sua db
-                                                                           //e.IdeaId == ideaId)
-                                                                           e.TopicId == ideaId)
+                                                                           e.TopicId == topicId)
                 .ToListAsync();
             return requests;
         }
@@ -97,7 +95,6 @@ namespace FPT.TeamMatching.Data.Repositories
                 .Select(m => m.Id).ToListAsync();
 
             queryable = queryable.Where(m =>
-                //sua db
                 m.Topic != null &&
                 m.Topic.IdeaVersion != null &&
                 m.Topic.IdeaVersion.IdeaId.HasValue &&

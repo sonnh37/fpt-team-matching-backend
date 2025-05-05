@@ -15,7 +15,6 @@ public interface IProjectRepository : IBaseRepository<Project>
     Task<List<Project>?> GetInProgressProjectBySemesterId(Guid semesterId);
     Task<Project?> GetProjectByLeaderId(Guid? leaderId);
     Task<List<Project>> GetProjectBySemesterIdAndDefenseStage(Guid semesterId, int defenseStage);
-    //Task<List<Project>?> GetProjectsInFourthWeekByToday();
 
     Task<Project?> GetProjectByTopicId(Guid topicId);
 
@@ -23,5 +22,9 @@ public interface IProjectRepository : IBaseRepository<Project>
     
     Task<(List<Project>, int)> SearchProjects(ProjectSearchQuery query);
 
+    Task<List<Project>?> GetPendingProjectsWithNoTopicStartingBySemesterId(Guid semesterId);
 
+    Task<List<Project>?> GetPendingProjectsWithTopicStartingBySemesterId(Guid semesterId);
+
+    Task<bool> IsExistedTeamCode(string teamCode);
 }

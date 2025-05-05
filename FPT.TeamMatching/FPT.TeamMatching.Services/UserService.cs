@@ -5,7 +5,6 @@ using FPT.TeamMatching.Domain.Contracts.Services;
 using FPT.TeamMatching.Domain.Contracts.UnitOfWorks;
 using FPT.TeamMatching.Domain.Entities;
 using FPT.TeamMatching.Domain.Enums;
-using FPT.TeamMatching.Domain.Models.Requests.Commands.Base;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Users;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Users;
 using FPT.TeamMatching.Domain.Models.Responses;
@@ -240,6 +239,32 @@ public class UserService : BaseService<User>, IUserService
         }
     }
 
+    public async Task<BusinessResult> GetAll<TResult>(UserGetAllQuery query) where TResult : BaseResult
+    {
+        try
+        {
+            List<TResult>? results;
+
+            var (data, total) = await _userRepository.GetData(query);
+
+            results = _mapper.Map<List<TResult>>(data);
+
+            var response = new QueryResult(query, results, total);
+
+            return new ResponseBuilder()
+                .WithData(response)
+                .WithStatus(Const.SUCCESS_CODE)
+                .WithMessage(Const.SUCCESS_READ_MSG);
+        }
+        catch (Exception ex)
+        {
+            var errorMessage = $"An error occurred in {typeof(TResult).Name}: {ex.Message}";
+            return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage(errorMessage);
+        }
+    }
+
     public async Task<BusinessResult> GetStudentsNoTeam(UserGetAllQuery query)
     {
         try
@@ -400,7 +425,8 @@ public class UserService : BaseService<User>, IUserService
 
     public async Task<BusinessResult> GetAllReviewer()
     {
-        var result = await _userRepository.GetAllReviewerIdAndUsername();
+        var currentSemester = await _semesterRepository.GetCurrentSemester();
+        var result = await _userRepository.GetAllReviewerIdAndUsername(currentSemester.Id);
         return new ResponseBuilder()
             .WithData(result)
             .WithStatus(Const.SUCCESS_CODE)

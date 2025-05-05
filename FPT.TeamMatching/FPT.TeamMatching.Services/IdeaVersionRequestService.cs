@@ -53,7 +53,8 @@ public class IdeaVersionRequestService : BaseService<IdeaVersionRequest>, IIdeaV
 
     public async Task CreateVersionRequests(Idea idea, Guid versionId, Guid criteriaFormId)
     {
-        var mentor = await GetUserByRole("Mentor");
+        var semesterUpComing = await _semesterRepository.GetUpComingSemester();
+        var mentor = await GetUserByRole("Mentor", semesterUpComing?.Id);
         // Mentor request
         var mentorRequest = new IdeaVersionRequest
         {
@@ -206,7 +207,7 @@ public class IdeaVersionRequestService : BaseService<IdeaVersionRequest>, IIdeaV
 
             var councils =
                 await _userRepository.GetCouncilsForIdeaVersionRequest(command.IdeaVersionId.Value, semester.Id);
-            if (councils.Count == 0) return HandlerFail("No available councils");
+            if (councils.Count == 0) return HandlerFail("Không có người dùng có thể tham gia hội đồng");
 
             var newIdeaVersionRequests = new List<IdeaVersionRequest>();
 
@@ -224,11 +225,11 @@ public class IdeaVersionRequestService : BaseService<IdeaVersionRequest>, IIdeaV
                 newIdeaVersionRequests.Add(ideaVersionRequest);
             }
 
-            if (newIdeaVersionRequests.Count == 0) return HandlerNotFound("No available councils");
+            if (newIdeaVersionRequests.Count == 0) return HandlerNotFound("Không có người dùng có thể tham gia hội đồng");
 
             _ideaVersionRequestRepository.AddRange(newIdeaVersionRequests);
             var saveChange = await _unitOfWork.SaveChanges();
-            if (!saveChange) return HandlerFail("Failed to create council requests");
+            if (!saveChange) return HandlerFail("Đã xảy ra lỗi khi tạo yêu cầu đến hội đồng");
 
             //send noti cho councils
             var request = new NotificationCreateForGroupUser
@@ -250,8 +251,9 @@ public class IdeaVersionRequestService : BaseService<IdeaVersionRequest>, IIdeaV
                     .WithMessage(Const.SUCCESS_READ_MSG);
 
             var newTopicCode = await _semesterService.GenerateNewTopicCode(stageIdea.SemesterId);
+
             var codeExist = _topicRepository.IsExistedTopicCode(newTopicCode);
-            if (codeExist) return HandlerFail("Trùng topic code");
+            if (codeExist) return HandlerFail("Trùng mã đề tài!");
 
             var topicCreateCommand = new TopicCreateCommand
             {
@@ -284,6 +286,7 @@ public class IdeaVersionRequestService : BaseService<IdeaVersionRequest>, IIdeaV
 
             ideaVersionRequest.Status = command.Status;
             ideaVersionRequest.ProcessDate = DateTime.UtcNow;
+            ideaVersionRequest.Note = command.Note;
 
             await SetBaseEntityForUpdate(ideaVersionRequest);
             _ideaVersionRequestRepository.Update(ideaVersionRequest);
@@ -295,21 +298,24 @@ public class IdeaVersionRequestService : BaseService<IdeaVersionRequest>, IIdeaV
                     .WithMessage(Const.FAIL_SAVE_MSG);
             }
 
-            var answerCriteriaList = _mapper.Map<List<AnswerCriteria>>(command.AnswerCriteriaList);
-            foreach (var answerCriteria in answerCriteriaList)
+            if (ideaVersionRequest.Role != "SubMentor")
             {
-                answerCriteria.IdeaVersionRequestId = ideaVersionRequest.Id;
-                await SetBaseEntityForCreation(answerCriteria);
-            }
+                var answerCriteriaList = _mapper.Map<List<AnswerCriteria>>(command.AnswerCriteriaList);
+                foreach (var answerCriteria in answerCriteriaList)
+                {
+                    answerCriteria.IdeaVersionRequestId = ideaVersionRequest.Id;
+                    await SetBaseEntityForCreation(answerCriteria);
+                }
 
-            _answerCriteriaRepository.AddRange(answerCriteriaList);
-            saveChange = await _unitOfWork.SaveChanges();
-            if (!saveChange)
-            {
-                return new ResponseBuilder()
-                    .WithStatus(Const.FAIL_CODE)
-                    .WithMessage(Const.FAIL_SAVE_MSG);
+                _answerCriteriaRepository.AddRange(answerCriteriaList);
+                if (!await _unitOfWork.SaveChanges())
+                {
+                    return new ResponseBuilder()
+                        .WithStatus(Const.FAIL_CODE)
+                        .WithMessage(Const.FAIL_SAVE_MSG);
+                }
             }
+            
 
             if (ideaVersionRequest.IdeaVersion == null)
             {

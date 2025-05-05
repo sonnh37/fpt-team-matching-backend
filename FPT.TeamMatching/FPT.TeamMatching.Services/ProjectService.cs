@@ -30,7 +30,9 @@ public class ProjectService : BaseService<Project>, IProjectService
     private readonly ITeamMemberService _serviceTeam;
     private readonly ITeamMemberRepository _teamMemberRepository;
     private readonly ISemesterRepository _semesterRepository;
+    private readonly IReviewRepository _reviewRepository;
     private readonly ISemesterService _semesterService;
+    private readonly IStageIdeaRepositoty _stageIdeaRepositoty;
 
     public ProjectService(IMapper mapper, IUnitOfWork unitOfWork, ITeamMemberService teamMemberService, ISemesterService semesterService) : base(mapper,
         unitOfWork)
@@ -39,7 +41,9 @@ public class ProjectService : BaseService<Project>, IProjectService
         _serviceTeam = teamMemberService;
         _teamMemberRepository = unitOfWork.TeamMemberRepository;
         _semesterRepository = unitOfWork.SemesterRepository;
+        _reviewRepository = unitOfWork.ReviewRepository;
         _semesterService = semesterService;
+        _stageIdeaRepositoty = unitOfWork.StageIdeaRepository;
     }
 
     public async Task<BusinessResult> GetProjectsForMentor(ProjectGetListForMentorQuery query)
@@ -199,7 +203,7 @@ public class ProjectService : BaseService<Project>, IProjectService
                 .WithMessage(errorMessage);
         }
     }
-    
+
     public async Task<BusinessResult> CreateProjectAndTeammemberForAuto(ProjectCreateCommand project)
     {
         try
@@ -430,13 +434,32 @@ public class ProjectService : BaseService<Project>, IProjectService
     {
         try
         {
+            // check date review 3
             var project = await _projectRepository.GetById(command.Id);
             if (project == null)
             {
                 return new ResponseBuilder()
-                .WithStatus(Const.NOT_FOUND_CODE)
-                .WithMessage(Const.NOT_FOUND_MSG);
+                     .WithStatus(Const.FAIL_CODE)
+                     .WithMessage("Không tìm thấy dự án");
             }
+
+            var review3 = await _reviewRepository.GetReviewByProjectIdAndNumber(project.Id, 3);
+            if (review3 == null)
+            {
+                return new ResponseBuilder()
+                     .WithStatus(Const.FAIL_CODE)
+                     .WithMessage("Không tìm thấy review 3 của dự án");
+            }
+
+            var today = DateTime.UtcNow.Date;
+            if (review3.ReviewDate.Value.Date < today || today > review3.ReviewDate.Value.Date.AddDays(7))
+            {
+                return new ResponseBuilder()
+                     .WithStatus(Const.FAIL_CODE)
+                     .WithMessage("Chưa đến ngày đánh giá");
+            }
+            //
+
             project.DefenseStage = command.DefenseStage;
             await SetBaseEntityForUpdate(project);
             _projectRepository.Update(project);
@@ -469,6 +492,47 @@ public class ProjectService : BaseService<Project>, IProjectService
                 .WithStatus(Const.SUCCESS_CODE)
                 .WithData(result)
                 .WithMessage(Const.SUCCESS_READ_MSG);
+        }
+        catch (Exception e)
+        {
+            return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage(e.Message);
+        }
+    }
+
+    public async Task<BusinessResult> CreateProject(ProjectCreateCommand command)
+    {
+        try
+        {
+            //lay ra stageIdea hien tai
+            var stageIdea = await _stageIdeaRepositoty.GetCurrentStageIdea();
+            if (stageIdea == null) return HandlerFail("Không có đợt duyệt ứng với ngày hiện tại!");
+
+            //ki cua stage idea
+            var semester = await _semesterRepository.GetSemesterByStageIdeaId(stageIdea.Id);
+            if (semester == null) return HandlerFail("Không có kì ứng với đợt duyệt hiện tại!");
+
+            var project = _mapper.Map<Project>(command);
+
+            var newTeamCode = await _semesterService.GenerateNewTeamCode(stageIdea.SemesterId);
+
+            var codeExist = await _projectRepository.IsExistedTeamCode(newTeamCode);
+            if (codeExist) return HandlerFail("Trùng mã nhóm!");
+
+            project.TeamCode = newTeamCode;
+            await SetBaseEntityForCreation(project);
+            _projectRepository.Add(project);
+            var isSuccess = await _unitOfWork.SaveChanges();
+            if (isSuccess)
+            {
+                return new ResponseBuilder()
+                .WithStatus(Const.SUCCESS_CODE)
+                .WithMessage("Tạo nhóm thành công!");
+            }
+            return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage("Đã xảy ra lỗi khi tạo nhóm!");
         }
         catch (Exception e)
         {
