@@ -21,13 +21,14 @@ public class IdeaVersionRequestRepository : BaseRepository<IdeaVersionRequest>, 
         _ideaRepository = ideaRepository;
     }
 
+
     public async Task<(List<IdeaVersionRequest>, int)> GetData(IdeaVersionRequestGetAllQuery query)
     {
         var queryable = GetQueryable();
         queryable = queryable
             .Include(m => m.Reviewer);
         queryable = queryable
-       .Include(m => m.CriteriaForm);
+            .Include(m => m.CriteriaForm);
 
 
         if (query.Status.HasValue)
@@ -63,11 +64,11 @@ public class IdeaVersionRequestRepository : BaseRepository<IdeaVersionRequest>, 
         queryable = queryable
             .Include(m => m.Reviewer);
         queryable = queryable
-       .Include(m => m.CriteriaForm);
+            .Include(m => m.CriteriaForm);
 
-            queryable = queryable.Where(m => m.Status != IdeaVersionRequestStatus.Pending
-              );
-        
+        queryable = queryable.Where(m => m.Status != IdeaVersionRequestStatus.Pending
+        );
+
 
         if (query.IsPagination)
         {
@@ -110,39 +111,20 @@ public class IdeaVersionRequestRepository : BaseRepository<IdeaVersionRequest>, 
         return (results, query.IsPagination ? total : results.Count);
     }
 
-    public async Task<int> CountApprovedCouncilsForIdea(Guid ideaId)
+    public async Task<int> CountStatusCouncilsForIdea(Guid ideaId, IdeaVersionRequestStatus status)
     {
-        return await GetQueryable()
+        return await GetQueryable().Include(m => m.IdeaVersion)
             .Where(ir => ir.IdeaVersion != null && ir.IdeaVersion.IdeaId == ideaId && ir.Role == "Council" &&
-                         ir.Status == IdeaVersionRequestStatus.Approved)
+                         ir.Status == status)
             .CountAsync();
     }
 
     public async Task<int> CountCouncilsForIdea(Guid ideaId)
     {
-        return await GetQueryable()
+        return await GetQueryable().Include(m => m.IdeaVersion)
             .Where(ir => ir.IdeaVersion != null && ir.IdeaVersion.IdeaId == ideaId && ir.Role == "Council")
             .CountAsync();
     }
-
-    public async Task<int> CountRejectedCouncilsForIdea(Guid ideaId)
-    {
-        return await GetQueryable()
-            .Include(m => m.IdeaVersion)
-            .Where(ir => ir.IdeaVersion != null && ir.IdeaVersion.IdeaId == ideaId && ir.Role == "Council" &&
-                         ir.Status == IdeaVersionRequestStatus.Rejected)
-            .CountAsync();
-    }
-
-    public async Task<int> CountConsiderCouncilsForIdea(Guid ideaId)
-    {
-        return await GetQueryable()
-            .Include(m => m.IdeaVersion)
-            .Where(ir => ir.IdeaVersion != null && ir.IdeaVersion.IdeaId == ideaId && ir.Role == "Council" &&
-                         ir.Status == IdeaVersionRequestStatus.Consider)
-            .CountAsync();
-    }
-
 
     public async Task<(List<IdeaVersionRequest>, int)> GetDataUnassignedReviewer(
         GetQueryableQuery query)
@@ -175,13 +157,13 @@ public class IdeaVersionRequestRepository : BaseRepository<IdeaVersionRequest>, 
         var queryable = GetQueryable();
 
         var ideaVersionRequests = await queryable.Where(e => e.IsDeleted == false &&
-                                                            e.Role == "Mentor" &&
-                                                            e.Status != IdeaVersionRequestStatus.Approved &&
-                                                            e.IdeaVersion != null && 
-                                                            e.IdeaVersion.StageIdea != null &&
-                                                            e.IdeaVersion.StageIdea.Semester != null &&
-                                                            e.IdeaVersion.StageIdea.Semester.Id == semesterId)
-                                                .ToListAsync();
+                                                             e.Role == "Mentor" &&
+                                                             e.Status != IdeaVersionRequestStatus.Approved &&
+                                                             e.IdeaVersion != null &&
+                                                             e.IdeaVersion.StageIdea != null &&
+                                                             e.IdeaVersion.StageIdea.Semester != null &&
+                                                             e.IdeaVersion.StageIdea.Semester.Id == semesterId)
+            .ToListAsync();
 
         return ideaVersionRequests;
     }

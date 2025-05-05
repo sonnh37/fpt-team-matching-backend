@@ -105,6 +105,7 @@ public class IdeaService : BaseService<Idea>, IIdeaService
     }
 
     #region Create-by-student
+
     public async Task<BusinessResult> CreatePendingByStudent(IdeaStudentCreatePendingCommand ideaCreateModel)
     {
         try
@@ -148,6 +149,7 @@ public class IdeaService : BaseService<Idea>, IIdeaService
     }
 
     #region Helper methods
+
     private async Task<BusinessResult> ValidateStudentIdeas(IdeaStudentCreatePendingCommand model, Guid stageIdeaId,
         Guid semesterId)
     {
@@ -219,6 +221,7 @@ public class IdeaService : BaseService<Idea>, IIdeaService
     }
 
     #endregion
+
     #endregion
 
     #region Create-by-lecturer
@@ -345,7 +348,6 @@ public class IdeaService : BaseService<Idea>, IIdeaService
         _ideaVersionRepository.Add(ideaVersion);
         return ideaVersion;
     }
-
 
     #endregion
 
@@ -548,8 +550,8 @@ public class IdeaService : BaseService<Idea>, IIdeaService
             }
 
             return new ResponseBuilder()
-                    .WithStatus(Const.SUCCESS_CODE)
-                    .WithMessage(Const.SUCCESS_READ_MSG);
+                .WithStatus(Const.SUCCESS_CODE)
+                .WithMessage(Const.SUCCESS_READ_MSG);
         }
         catch (Exception ex)
         {
@@ -568,9 +570,20 @@ public class IdeaService : BaseService<Idea>, IIdeaService
         if (totalCouncils < requiredReviewers)
             return;
 
-        var totalApproved = await _ideaVersionRequestRepository.CountApprovedCouncilsForIdea(idea.Id);
-        var totalRejected = await _ideaVersionRequestRepository.CountRejectedCouncilsForIdea(idea.Id);
-        var totalConsider = await _ideaVersionRequestRepository.CountConsiderCouncilsForIdea(idea.Id);
+        var totalPending =
+            await _ideaVersionRequestRepository.CountStatusCouncilsForIdea(idea.Id, IdeaVersionRequestStatus.Pending);
+        var totalApproved =
+            await _ideaVersionRequestRepository.CountStatusCouncilsForIdea(idea.Id, IdeaVersionRequestStatus.Approved);
+        var totalRejected =
+            await _ideaVersionRequestRepository.CountStatusCouncilsForIdea(idea.Id, IdeaVersionRequestStatus.Rejected);
+        var totalConsider =
+            await _ideaVersionRequestRepository.CountStatusCouncilsForIdea(idea.Id, IdeaVersionRequestStatus.Consider);
+
+        if (totalPending > 0)
+        {
+            await UpdatePendingToRejected(idea.Id);
+        }
+
 
         var totalScore = (totalApproved * 1.0) + (totalConsider * 0.5);
         var averageScore = totalScore / totalCouncils;
@@ -583,6 +596,23 @@ public class IdeaService : BaseService<Idea>, IIdeaService
         };
 
         await UpdateIdeaStatus(idea, stageIdea, status);
+    }
+
+    private async Task UpdatePendingToRejected(Guid ideaId)
+    {
+        var pendingRequests = await _ideaVersionRequestRepository.GetQueryable().Include(m => m.IdeaVersion)
+            .Where(x => x.IdeaVersion != null && x.IdeaVersion.IdeaId == ideaId && x.Role == "Council" &&
+                        x.Status == IdeaVersionRequestStatus.Pending)
+            .ToListAsync();
+
+        foreach (var request in pendingRequests)
+        {
+            request.IdeaVersion = null;
+            request.Status = IdeaVersionRequestStatus.Rejected;
+            await SetBaseEntityForUpdate(request);
+        }
+
+        await _unitOfWork.SaveChanges();
     }
 
     private async Task UpdateIdeaStatus(Idea idea, StageIdea stageIdeaCurrent, IdeaStatus status)
@@ -812,8 +842,8 @@ public class IdeaService : BaseService<Idea>, IIdeaService
             if (semester == null)
             {
                 return new ResponseBuilder()
-                                .WithStatus(Const.FAIL_CODE)
-                                .WithMessage("Không có kì bắt đầu ở ngày hiện tại");
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("Không có kì bắt đầu ở ngày hiện tại");
             }
 
             //get idea của kì với status khác approve => reject
@@ -825,10 +855,12 @@ public class IdeaService : BaseService<Idea>, IIdeaService
                     idea.Status = IdeaStatus.Rejected;
                     await SetBaseEntityForUpdate(idea);
                 }
+
                 _ideaRepository.UpdateRange(ideas);
 
                 //get idea version request (role mentor) của kì với status khác approve => reject
-                var ideaVersionRequests = await _ideaVersionRequestRepository.GetRoleMentorNotApproveInSemester(semester.Id);
+                var ideaVersionRequests =
+                    await _ideaVersionRequestRepository.GetRoleMentorNotApproveInSemester(semester.Id);
                 if (ideaVersionRequests != null)
                 {
                     foreach (var ideaVersionRequest in ideaVersionRequests)
@@ -836,12 +868,14 @@ public class IdeaService : BaseService<Idea>, IIdeaService
                         ideaVersionRequest.Status = IdeaVersionRequestStatus.Rejected;
                         await SetBaseEntityForUpdate(ideaVersionRequest);
                     }
+
                     _ideaVersionRequestRepository.UpdateRange(ideaVersionRequests);
                 }
             }
 
             //project k co topic => canceled
-            var projectsWithNoTopic = await _projectRepository.GetPendingProjectsWithNoTopicStartingBySemesterId(semester.Id);
+            var projectsWithNoTopic =
+                await _projectRepository.GetPendingProjectsWithNoTopicStartingBySemesterId(semester.Id);
             if (projectsWithNoTopic != null)
             {
                 foreach (var project in projectsWithNoTopic)
@@ -849,11 +883,13 @@ public class IdeaService : BaseService<Idea>, IIdeaService
                     project.Status = ProjectStatus.Canceled;
                     await SetBaseEntityForUpdate(project);
                 }
+
                 _projectRepository.UpdateRange(projectsWithNoTopic);
             }
 
             //get project của kì với status pending check xem idea approve có team size = với teamsize của nhóm k
-            var projectsWithTopic = await _projectRepository.GetPendingProjectsWithTopicStartingBySemesterId(semester.Id);
+            var projectsWithTopic =
+                await _projectRepository.GetPendingProjectsWithTopicStartingBySemesterId(semester.Id);
             if (projectsWithTopic != null)
             {
                 foreach (var project in projectsWithTopic)
@@ -885,8 +921,10 @@ public class IdeaService : BaseService<Idea>, IIdeaService
                                 member.Status = TeamMemberStatus.InProgress;
                                 await SetBaseEntityForUpdate(member);
                             }
+
                             _teamMemberRepository.UpdateRange(members);
                         }
+
                         await SetBaseEntityForUpdate(project);
                     }
                 }
@@ -899,24 +937,26 @@ public class IdeaService : BaseService<Idea>, IIdeaService
             {
                 var notiSystemForStudent = new NotificationCreateForRoleBased
                 {
-                    Description = "Hôm nay là ngày bắt đầu kì học. Tất cả đề tài chưa duyệt và nhóm thiếu thành viên đã bị tự động hủy. Vui lòng kiểm tra!",
+                    Description =
+                        "Hôm nay là ngày bắt đầu kì học. Tất cả đề tài chưa duyệt và nhóm thiếu thành viên đã bị tự động hủy. Vui lòng kiểm tra!",
                     Role = "Student"
                 };
                 await _notificationService.CreateForRoleBased(notiSystemForStudent);
                 var notiSystemForLecturer = new NotificationCreateForRoleBased
                 {
-                    Description = "Hôm nay là ngày bắt đầu kì học. Tất cả đề tài chưa duyệt và nhóm thiếu thành viên đã bị tự động hủy. Vui lòng kiểm tra!",
+                    Description =
+                        "Hôm nay là ngày bắt đầu kì học. Tất cả đề tài chưa duyệt và nhóm thiếu thành viên đã bị tự động hủy. Vui lòng kiểm tra!",
                     Role = "Lecturer"
                 };
                 await _notificationService.CreateForRoleBased(notiSystemForLecturer);
                 return new ResponseBuilder()
-                        .WithStatus(Const.SUCCESS_CODE)
-                        .WithMessage("Cập nhật các dự án đến ngày bắt đầu thành công");
+                    .WithStatus(Const.SUCCESS_CODE)
+                    .WithMessage("Cập nhật các dự án đến ngày bắt đầu thành công");
             }
-            return new ResponseBuilder()
-                        .WithStatus(Const.SUCCESS_CODE)
-                        .WithMessage("Đã xảy ra lỗi khi cập nhật các dự án đến ngày bắt đầu");
 
+            return new ResponseBuilder()
+                .WithStatus(Const.SUCCESS_CODE)
+                .WithMessage("Đã xảy ra lỗi khi cập nhật các dự án đến ngày bắt đầu");
         }
         catch (Exception ex)
         {
