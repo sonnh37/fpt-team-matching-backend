@@ -9,7 +9,6 @@ namespace FPT.TeamMatching.Domain.Models.Requests.Commands.MentorTopicRequests
 {
     public class StudentRequest: CreateCommand
     {
-        public Guid ProjectId { get; set; }
         public Guid TopicId { get; set; }
     }
 }
