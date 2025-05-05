@@ -11,6 +11,6 @@ namespace FPT.TeamMatching.Domain.Contracts.Services
 {
     public interface IMentorFeedbackService: IBaseService
     {
-        Task<BusinessResult> UpdateMentorFeedbackAfterReview3(MentorFeedbackUpdateCommand command);
+        Task<BusinessResult> CreateMentorFeedbackAfterReview3(MentorFeedbackCreateCommand command);
     }
 }
