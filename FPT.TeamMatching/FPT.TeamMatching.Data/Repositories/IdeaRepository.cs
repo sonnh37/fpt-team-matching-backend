@@ -122,7 +122,7 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
         }
 
         var queryable = GetQueryable()
-            .Include(i => i.Owner)
+            .Include(i => i.Owner).ThenInclude(m => m.Projects)
             .Include(i => i.Mentor)
             .Include(i => i.SubMentor)
             .Include(i => i.Specialty)

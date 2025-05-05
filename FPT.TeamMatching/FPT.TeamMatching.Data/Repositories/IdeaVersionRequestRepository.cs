@@ -113,7 +113,7 @@ public class IdeaVersionRequestRepository : BaseRepository<IdeaVersionRequest>, 
 
     public async Task<int> CountStatusCouncilsForIdea(Guid ideaId, IdeaVersionRequestStatus status)
     {
-        return await GetQueryable().Include(m => m.IdeaVersion)
+        return await GetQueryable()
             .Where(ir => ir.IdeaVersion != null && ir.IdeaVersion.IdeaId == ideaId && ir.Role == "Council" &&
                          ir.Status == status)
             .CountAsync();
@@ -121,7 +121,7 @@ public class IdeaVersionRequestRepository : BaseRepository<IdeaVersionRequest>, 
 
     public async Task<int> CountCouncilsForIdea(Guid ideaId)
     {
-        return await GetQueryable().Include(m => m.IdeaVersion)
+        return await GetQueryable()
             .Where(ir => ir.IdeaVersion != null && ir.IdeaVersion.IdeaId == ideaId && ir.Role == "Council")
             .CountAsync();
     }

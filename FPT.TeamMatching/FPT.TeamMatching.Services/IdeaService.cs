@@ -607,7 +607,6 @@ public class IdeaService : BaseService<Idea>, IIdeaService
 
         foreach (var request in pendingRequests)
         {
-            request.IdeaVersion = null;
             request.Status = IdeaVersionRequestStatus.Rejected;
             await SetBaseEntityForUpdate(request);
         }
@@ -791,9 +790,11 @@ public class IdeaService : BaseService<Idea>, IIdeaService
     {
         try
         {
-            var newTeamCode = await _semesterService.GenerateNewTeamCode(stageIdea.SemesterId);
             existingProject.TopicId = topicResult.Id;
-            existingProject.TeamCode = newTeamCode;
+            if (string.IsNullOrEmpty(existingProject.TeamCode))
+            {
+                existingProject.TeamCode = await _semesterService.GenerateNewTeamCode(stageIdea.SemesterId);
+            }
             existingProject.Status = ProjectStatus.Pending;
             await SetBaseEntityForUpdate(existingProject);
             _projectRepository.Update(existingProject);
