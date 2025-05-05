@@ -658,6 +658,41 @@ public class NotificationService : BaseService<Notification>, INotificationServi
                 .WithMessage(errorMessage);
         }
     }
+
+    public async Task<BusinessResult> CreateMultiNotificationForTeam(List<NotificationCreateForTeam> createCommand)
+    {
+        List<Notification> notifications = new List<Notification>();
+        foreach (var notificationCreateForTeam in createCommand)
+        {
+            var noti = new Notification();
+            noti.Id = Guid.NewGuid();
+            noti.IsRead = false;
+            noti.Description = notificationCreateForTeam.Description;
+            noti.ProjectId = notificationCreateForTeam.ProjectId;
+            noti.Type = NotificationType.Team;
+            await SetBaseEntityForCreation(noti);
+            
+            notifications.Add(noti);
+        }
+        
+        _notificationRepository.AddRange(notifications);
+        var saveChanges = await _unitOfWork.SaveChanges();
+        if (!saveChanges)
+        {
+            return new ResponseBuilder().WithStatus(Const.FAIL_CODE).WithMessage(Const.FAIL_SAVE_MSG);
+        }
+       
+        foreach (var notification in notifications)
+        {
+            if (notification.ProjectId.HasValue)
+            {
+                await SendNotificationTeamBased(notification, notification.ProjectId.Value);
+            }
+        }
+        return new ResponseBuilder()
+            .WithStatus(Const.SUCCESS_CODE)
+            .WithMessage(Const.SUCCESS_SAVE_MSG);
+    }
     
     public async Task SendNotificationSystemWide(object data)
     {

@@ -9,5 +9,6 @@ public interface IReviewRepository : IBaseRepository<Review>
     Task<Review?> GetReviewByProjectIdAndNumber(Guid projectId, int number);
     Task<List<Review>?> GetReviewByReviewNumberAndSemesterIdPaging(int number, Guid semesterId);
     Task<List<Review>> GetReviewByReviewerId(Guid reviewerId);
+    
 
 }

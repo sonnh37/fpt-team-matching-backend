@@ -97,7 +97,7 @@ namespace FPT.TeamMatching.Services
         {
             try
             {
-                var semester = await _semesterRepository.GetById(semesterId.Value);
+                var semester = await _semesterRepository.GetById(semesterId);
                 if (semester == null) return string.Empty;
                 var semesterCode = semester.SemesterCode;
                 var semesterPrefix = semester.SemesterPrefixName;
@@ -124,7 +124,7 @@ namespace FPT.TeamMatching.Services
         {
             try
             {
-                var semester = await _semesterRepository.GetById(semesterId.Value);
+                var semester = await _semesterRepository.GetById(semesterId);
                 if (semester == null) return string.Empty;
                 var numberOfProjects = await _unitOfWork.ProjectRepository.NumberOfInProgressProjectInSemester(semester.Id);
                 // Tạo số thứ tự tiếp theo

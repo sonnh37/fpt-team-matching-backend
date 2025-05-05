@@ -16,6 +16,7 @@ using Microsoft.AspNetCore.Http;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.CapstoneSchedules;
 using FPT.TeamMatching.Domain.Contracts.Repositories;
 using FPT.TeamMatching.Domain.Models;
+using FPT.TeamMatching.Domain.Models.Requests.Commands.Notifications;
 using FPT.TeamMatching.Domain.Models.Results;
 
 namespace FPT.TeamMatching.Services
@@ -32,8 +33,10 @@ namespace FPT.TeamMatching.Services
     public class CapstoneScheduleService : BaseService<CapstoneSchedule>, ICapstoneScheduleService
     {
         private readonly ICapstoneScheduleRepository _capstoneScheduleRepository;
-        public CapstoneScheduleService(IMapper mapper, IUnitOfWork unitOfWork) : base(mapper, unitOfWork)
+        private  readonly INotificationService _notificationService;
+        public CapstoneScheduleService(IMapper mapper, IUnitOfWork unitOfWork, INotificationService notificationService) : base(mapper, unitOfWork)
         {
+            _notificationService = notificationService;
             _capstoneScheduleRepository = _unitOfWork.CapstoneScheduleRepository;
         }
 
@@ -260,8 +263,26 @@ namespace FPT.TeamMatching.Services
                     }
                 }
                 _unitOfWork.CapstoneScheduleRepository.AddRange(capstones);
-                await _unitOfWork.SaveChanges();
-
+                var saveChange = await _unitOfWork.SaveChanges();
+                if (!saveChange)
+                {
+                    return new ResponseBuilder()
+                        .WithStatus(Const.FAIL_CODE)
+                        .WithMessage(Const.FAIL_SAVE_MSG);
+                }
+                
+                List<NotificationCreateForTeam> notifications = new List<NotificationCreateForTeam>();
+                foreach (var capstoneSchedule in capstones)
+                {
+                    notifications.Add(new NotificationCreateForTeam
+                    {
+                        ProjectId = capstoneSchedule.ProjectId,
+                        Description = $"Lịch bảo vệ lần {stage} của nhóm đã có"
+                    });
+                }
+                
+                await _notificationService.CreateMultiNotificationForTeam(notifications);
+                
                 return new ResponseBuilder()
                     .WithStatus(Const.SUCCESS_CODE)
                     .WithMessage(Const.SUCCESS_SAVE_MSG)

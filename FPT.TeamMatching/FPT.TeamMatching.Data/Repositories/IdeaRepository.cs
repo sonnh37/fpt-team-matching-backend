@@ -16,10 +16,12 @@ namespace FPT.TeamMatching.Data.Repositories;
 public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
 {
     private readonly ISemesterRepository _semesterRepository;
+    private readonly FPTMatchingDbContext _dbContext;
 
     public IdeaRepository(FPTMatchingDbContext dbContext, ISemesterRepository semesterRepository) : base(dbContext)
     {
         _semesterRepository = semesterRepository;
+        _dbContext = dbContext;
     }
 
     public async Task<IList<Idea>> GetIdeasByUserId(Guid userId)
@@ -207,7 +209,7 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
     public async Task<List<CustomIdeaResultModel>> GetCustomIdea(Guid semesterId, int reviewNumber)
     {
         // Use async query execution and optimize the LINQ query
-        return await GetQueryable()
+        var query = await _dbContext.Ideas
             .Include(x => x.IdeaVersions)
             .ThenInclude(x => x.StageIdea)
             .Include(x => x.IdeaVersions)
@@ -218,7 +220,9 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
                 iv.StageIdea.SemesterId == semesterId &&
                 iv.Topic.Project.Reviews.Any(r => r.Number == reviewNumber)
             ))
-            .Select(y => new CustomIdeaResultModel
+            
+            .ToListAsync();
+            var result = query.Select(y => new CustomIdeaResultModel
             {
                 IdeaId = y.Id,
                 TeamCode = y.IdeaVersions.FirstOrDefault().Topic.Project.TeamCode,
@@ -233,11 +237,11 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
                         Reviewer1Id = review.Reviewer1Id,
                         Reviewer2Id = review.Reviewer2Id,
                         FileUpload = review.FileUpload,
-                        ProjectId = review.ProjectId,
+                        ProjectId = review.ProjectId.Value,
                     })
                     .FirstOrDefault()
-            })
-            .ToListAsync();
+            }).ToList();
+        return result;
     }
 
     public async Task<List<Idea>> GetIdeasByIdeaCodes(string[] ideaCode)

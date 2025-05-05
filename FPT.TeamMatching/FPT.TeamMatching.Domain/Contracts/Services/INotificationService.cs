@@ -27,4 +27,5 @@ public interface INotificationService : IBaseService
     Task<BusinessResult> CreateForIndividual(NotificationCreateForIndividual createCommand);
     Task<BusinessResult> MarkAsReadAsync(Guid id);
     Task<BusinessResult> MarkAllAsReadAsync();
+    Task<BusinessResult> CreateMultiNotificationForTeam(List<NotificationCreateForTeam> createCommand);
 }
