@@ -1,4 +1,5 @@
 ﻿using FPT.TeamMatching.Domain.Contracts.Services;
+using FPT.TeamMatching.Domain.Entities;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.MentorFeedbacks;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.MentorFeedbacks;
 using FPT.TeamMatching.Domain.Models.Results;
@@ -38,14 +39,14 @@ namespace FPT.TeamMatching.API.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] MentorFeedbackCreateCommand request)
         {
-            var msg = await _service.CreateOrUpdate<MentorFeedbackResult>(request);
+            var msg = await _service.CreateMentorFeedbackAfterReview3(request);
             return Ok(msg);
         }
 
         [HttpPut]
         public async Task<IActionResult> Update([FromBody] MentorFeedbackUpdateCommand request)
         {
-            var businessResult = await _service.UpdateMentorFeedbackAfterReview3(request);
+            var businessResult = await _service.CreateOrUpdate<MentorFeedbackResult>(request);
 
             return Ok(businessResult);
         }

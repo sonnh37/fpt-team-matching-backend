@@ -33,19 +33,12 @@ namespace FPT.TeamMatching.Services
             _reviewRepository = unitOfWork.ReviewRepository;
         }
 
-        public async Task<BusinessResult> UpdateMentorFeedbackAfterReview3(MentorFeedbackUpdateCommand command)
+        public async Task<BusinessResult> CreateMentorFeedbackAfterReview3(MentorFeedbackCreateCommand command)
         {
             try
             {
                 // check date review 3
-                var mentorFeedback = await _mentorFeedbackRepository.GetById(command.Id);
-                if (mentorFeedback == null)
-                {
-                    return new ResponseBuilder()
-                         .WithStatus(Const.FAIL_CODE)
-                         .WithMessage("Không tìm thấy đánh giá của Mentor");
-                }
-                _mapper.Map(command, mentorFeedback);
+                var mentorFeedback = _mapper.Map<MentorFeedback>(command);
 
                 var project = await _projectRepository.GetById(command.ProjectId);
                 if (project == null)
@@ -71,8 +64,8 @@ namespace FPT.TeamMatching.Services
                          .WithMessage("Chưa đến ngày đánh giá");
                 }
                 //
-                await SetBaseEntityForUpdate(mentorFeedback);
-                _mentorFeedbackRepository.Update(mentorFeedback);
+                await SetBaseEntityForCreation(mentorFeedback);
+                _mentorFeedbackRepository.Add(mentorFeedback);
 
                 var isSuccess = await _unitOfWork.SaveChanges();
                 if (isSuccess)

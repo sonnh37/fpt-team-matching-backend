@@ -182,7 +182,7 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
             {
                 return new ResponseBuilder()
                     .WithStatus(Const.FAIL_CODE)
-                    .WithMessage("Người dùng đã có Idea");
+                    .WithMessage("Người dùng đã nộp ý tưởng");
             }
 
             //check student trong teammember in process OR pass
@@ -255,7 +255,7 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
             {
                 return new ResponseBuilder()
                     .WithStatus(Const.FAIL_CODE)
-                    .WithMessage("Project has maximum members");
+                    .WithMessage("Nhóm đã đủ thành viên");
             }
 
             //check student co idea pending hay approve k
@@ -267,7 +267,7 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
             {
                 return new ResponseBuilder()
                     .WithStatus(Const.FAIL_CODE)
-                    .WithMessage("Người dùng đã có Idea");
+                    .WithMessage("Người dùng đã nộp ý tưởng");
             }
 
             //check student trong teammember in process OR pass
@@ -276,7 +276,7 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
             {
                 return new ResponseBuilder()
                     .WithStatus(Const.FAIL_CODE)
-                    .WithMessage("Student is in team now");
+                    .WithMessage("Sinh viên đã có nhóm");
             }
 
             bool isSucess = await TeamCreateAsync(command);
@@ -288,7 +288,7 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
                 {
                     return new ResponseBuilder()
                         .WithStatus(Const.FAIL_CODE)
-                        .WithMessage("Không tìm thấy project");
+                        .WithMessage("Không tìm thấy nhóm");
                 }
 
                 var teamName = "";
@@ -683,6 +683,7 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
                         i.Status = InvitationStatus.Cancel;
                         await SetBaseEntityForUpdate(i);
                     }
+                    _invitationRepository.UpdateRange(pendingInvitationsOfSender);
                 }
 
                 var saveChange = await _unitOfWork.SaveChanges();
