@@ -130,7 +130,7 @@ namespace FPT.TeamMatching.Services
                 // Tạo số thứ tự tiếp theo
                 int nextNumber = numberOfProjects + 1;
                 string semesterCode = semester.SemesterCode;
-                //Tạo mã nhóm
+                // Tạo mã nhóm
                 string newTeamCode = $"{semesterCode}SE{nextNumber:D3}";
 
                 return newTeamCode;

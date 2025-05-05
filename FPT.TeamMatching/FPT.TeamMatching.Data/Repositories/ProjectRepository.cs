@@ -374,4 +374,12 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
                                     .ToListAsync();
         return project;
     }
+
+    public async Task<bool> IsExistedTeamCode(string teamCode)
+    {
+        var isExist = await _context.Projects.Where(e => e.IsDeleted == false &&
+                                                    e.TeamCode == teamCode).AnyAsync();
+
+        return isExist;
+    }
 }
