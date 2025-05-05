@@ -16,6 +16,8 @@ using Microsoft.AspNetCore.Mvc;
 using Pipelines.Sockets.Unofficial.Arenas;
 using System.Data;
 using DocumentFormat.OpenXml.Office2010.ExcelAc;
+using FPT.TeamMatching.Domain.Enums;
+using FPT.TeamMatching.Domain.Models.Requests.Commands.Notifications;
 
 namespace FPT.TeamMatching.Services;
 
@@ -26,14 +28,16 @@ public class ReviewService : BaseService<Review>, IReviewService
     private readonly IProjectRepository _projectRepository;
     private readonly ISemesterRepository _semesterRepository;
     private readonly IIdeaRepository _ideaRepository;
+    private readonly INotificationService _notificationService;
 
-    public ReviewService(IMapper mapper, IUnitOfWork unitOfWork) : base(mapper, unitOfWork)
+    public ReviewService(IMapper mapper, IUnitOfWork unitOfWork, INotificationService notificationService) : base(mapper, unitOfWork)
     {
         _reviewRepository = unitOfWork.ReviewRepository;
         _userRepository = unitOfWork.UserRepository;
         _projectRepository = unitOfWork.ProjectRepository;
         _semesterRepository = unitOfWork.SemesterRepository;
         _ideaRepository = unitOfWork.IdeaRepository;
+        _notificationService = notificationService;
     }
 
     public async Task<BusinessResult> AssignReviewers(CouncilAssignReviewers request)
@@ -205,6 +209,11 @@ public class ReviewService : BaseService<Review>, IReviewService
             var reviewList = await _userRepository.GetAllReviewerIdAndUsername(currentSemester.Id);
             var reviewUsernameList = reviewList.Select(x => x.Code).ToList();
             var customIdeaModel = await _ideaRepository.GetCustomIdea(semesterId, reviewNumber);
+            var latestStageReview = new List<Review>();
+            if (reviewNumber != 1)
+            {
+                latestStageReview = await _reviewRepository.GetReviewByReviewNumberAndSemesterIdPaging(reviewNumber - 1, currentSemester.Id);
+            }
             var reviews = new List<Review>();
             var listReviewFail = new List<ReviewExcelModels>();
             using (var stream = File.Open(filePath, FileMode.Open, FileAccess.Read))
@@ -388,6 +397,47 @@ public class ReviewService : BaseService<Review>, IReviewService
                                 continue;
                             }
 
+                            if (reviewNumber != 1)
+                            {
+
+                                var latestReview = latestStageReview.FirstOrDefault(x =>
+                                    x.ProjectId == project.ProjectId && x.Number == reviewNumber - 1);
+                                if (latestReview == null)
+                                {
+                                    listReviewFail.Add(new ReviewExcelModels
+                                    {
+                                        STT = STT,
+                                        TopicCode = project.IdeaCode ?? null,
+                                        Reason = $"Không thể tìm thấy review {reviewNumber - 1} của nhóm"
+                                    });
+                                    continue;
+                                }
+
+                                if (latestReview.Reviewer1Id == null || latestReview.Reviewer2Id == null ||
+                                    latestReview.ReviewDate == null || latestReview.Room == null ||
+                                    latestReview.Slot == null)
+                                {
+                                    listReviewFail.Add(new ReviewExcelModels
+                                    {
+                                        STT = STT,
+                                        TopicCode = project.IdeaCode ?? null,
+                                        Reason = $"Vui lòng hoàn tất review {reviewNumber - 1} của nhóm."
+                                    });
+                                    continue;
+                                }
+
+                                if (date.ToUniversalTime() <= latestReview.ReviewDate )
+                                {
+                                    listReviewFail.Add(new ReviewExcelModels
+                                    {
+                                        STT = STT,
+                                        TopicCode = project.IdeaCode ?? null,
+                                        Reason = $"Ngày của review {reviewNumber} không thể nhỏ hơn hoặc bằng ngày của review {reviewNumber - 1}."
+                                    });
+                                    continue;
+                                }
+                            }
+
                             //get review
                             var review = project.Review;
                             if (review == null)
@@ -407,10 +457,29 @@ public class ReviewService : BaseService<Review>, IReviewService
                 }
             }
             _reviewRepository.UpdateRange(reviews);
-            await _unitOfWork.SaveChanges();
+            var saveChanges = await _unitOfWork.SaveChanges();
+            if (!saveChanges)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage(Const.FAIL_SAVE_MSG)
+                    .WithData(listReviewFail);
+            }
+            
+            List<NotificationCreateForTeam> notifications = new List<NotificationCreateForTeam>();
+            foreach (var review in reviews)
+            {
+                notifications.Add(new NotificationCreateForTeam
+                {
+                    ProjectId = review.ProjectId,
+                    Description = $"Đề tài của nhóm đã có lịch review ${reviewNumber}",
+                });
+            }
+            await _notificationService.CreateMultiNotificationForTeam(notifications);
+            
             return new ResponseBuilder()
                 .WithStatus(Const.SUCCESS_CODE)
-                .WithMessage("Import file success")
+                .WithMessage("Thêm review thành công")
                 .WithData(listReviewFail);
         }
         catch (Exception ex)
@@ -735,6 +804,59 @@ public class ReviewService : BaseService<Review>, IReviewService
                 .WithStatus(Const.SUCCESS_CODE)
                 .WithMessage(Const.SUCCESS_READ_MSG)
                 .WithData(result);
+        }
+        catch (Exception e)
+        {
+            return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage(e.Message);
+        }
+    }
+
+    public async Task<BusinessResult> UpdateReview(ReviewUpdateCommand request)
+    {
+        try
+        {
+            if (request.Number != 1)
+            {
+                var latestReview = await _reviewRepository.GetReviewByProjectIdAndNumber(request.ProjectId.Value, request.Number-1);
+                if (latestReview == null)
+                {
+                    return new ResponseBuilder()
+                        .WithStatus(Const.FAIL_CODE)
+                        .WithMessage($"Review {request.Number - 1} của nhóm chưa có dữ liệu");
+                }
+
+                if (latestReview.Reviewer1Id == null || latestReview.Reviewer2Id == null || latestReview.ReviewDate == null  || latestReview.Room == null || latestReview.Slot == null)
+                {
+                    return new ResponseBuilder()
+                        .WithStatus(Const.FAIL_CODE)
+                        .WithMessage($"Review {request.Number - 1} của nhóm chưa đầy đủ dữ liệu");
+                }
+
+                if (request.ReviewDate <= latestReview.ReviewDate)
+                {
+                    return new ResponseBuilder()
+                        .WithStatus(Const.FAIL_CODE)
+                        .WithMessage(
+                            $"Ngày review {request.Number} không thể nhỏ hơn hoặc bằng ngày của review {request.Number - 1}");
+                }
+            }
+            
+            var entity = _mapper.Map<Review>(request);
+            await SetBaseEntityForUpdate(entity);
+            _reviewRepository.Update(entity);
+            var saveChange = await _unitOfWork.SaveChanges();
+            if (!saveChange)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage(Const.FAIL_SAVE_MSG);
+            }
+
+            return new ResponseBuilder()
+                .WithStatus(Const.SUCCESS_CODE)
+                .WithMessage(Const.SUCCESS_SAVE_MSG);
         }
         catch (Exception e)
         {

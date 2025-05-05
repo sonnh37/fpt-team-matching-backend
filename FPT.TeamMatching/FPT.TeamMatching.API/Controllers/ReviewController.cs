@@ -45,7 +45,7 @@ public class ReviewController : ControllerBase
     [HttpPut]
     public async Task<IActionResult> Update([FromBody] ReviewUpdateCommand request)
     {
-        var businessResult = await _service.CreateOrUpdate<ReviewResult>(request);
+        var businessResult = await _service.UpdateReview(request);
 
         return Ok(businessResult);
     }

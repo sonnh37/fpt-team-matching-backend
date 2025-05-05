@@ -166,18 +166,21 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
 
     public async Task<List<Project>?> GetProjectsStartingNow()
     {
-        var today = DateTime.UtcNow.Date;
+        var today = DateTime.UtcNow.AddHours(7).Date;
+        var tomorrow = today.AddDays(1);
         var project = await _context.Projects
             .Include(e => e.Topic)
                 .ThenInclude(e => e.IdeaVersion)
                     .ThenInclude(e => e.Idea)
             .Where(p => p.IsDeleted == false &&
+                        p.Status == ProjectStatus.InProgress &&
                         p.Topic != null &&
                         p.Topic.IdeaVersion != null &&
                         p.Topic.IdeaVersion.StageIdea != null &&
                         p.Topic.IdeaVersion.StageIdea.Semester != null &&
                         p.Topic.IdeaVersion.StageIdea.Semester.StartDate != null &&
-                        p.Topic.IdeaVersion.StageIdea.Semester.StartDate.Value.Day == DateTime.UtcNow.Day
+                        p.Topic.IdeaVersion.StageIdea.Semester.StartDate.Value.AddHours(7) >= today && p.Topic.IdeaVersion.StageIdea.Semester.StartDate.Value.AddHours(7) < tomorrow
+                        // p.Topic.IdeaVersion.StageIdea.Semester.StartDate.Value.Day == DateTime.UtcNow.Day
             )
             .ToListAsync();
         return project;
@@ -361,7 +364,8 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
     {
         var queryable = GetQueryable();
 
-        var today = DateTime.UtcNow.Day;
+        var today = DateTime.UtcNow.AddHours(7).Date;
+        var tomorrow = today.AddDays(1);
 
         var project = await queryable.Where(p => p.IsDeleted == false &&
                                                 p.Topic != null &&
@@ -370,7 +374,9 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
                                                 p.Topic.IdeaVersion.StageIdea != null &&
                                                 p.Topic.IdeaVersion.StageIdea.Semester != null &&
                                                 p.Topic.IdeaVersion.StageIdea.Semester.StartDate != null &&
-                                                p.Topic.IdeaVersion.StageIdea.Semester.StartDate.Value.Day == today)
+                                                p.Topic.IdeaVersion.StageIdea.Semester.StartDate.Value.AddHours(7) >= today && p.Topic.IdeaVersion.StageIdea.Semester.StartDate.Value.AddHours(7) < tomorrow
+                                                // p.Topic.IdeaVersion.StageIdea.Semester.StartDate.Value.Day == today
+                                                )
                                     .ToListAsync();
         return project;
     }
