@@ -15,7 +15,7 @@ public interface IProjectService : IBaseService
     Task<BusinessResult> SearchProjects(ProjectSearchQuery query);
 
     Task<BusinessResult> GetProjectByUserIdLogin();
-    Task<BusinessResult> CreateProjectAndTeammember(TeamCreateCommand command);
+    Task<BusinessResult> CreateProjectAndTeamMember(TeamCreateCommand command);
 
     Task<BusinessResult> GetProjectsForMentor(ProjectGetListForMentorQuery query);
     Task<BusinessResult> GetProjectOfUserLogin();
@@ -27,5 +27,4 @@ public interface IProjectService : IBaseService
     Task<BusinessResult> GetProjectBySemesterAndStage(Guid semester, int stage);
 
     Task<BusinessResult> GetProjectInSemesterCurrentByUserIdLogin();
-    Task<BusinessResult> CreateProject(ProjectCreateCommand command);
 }
