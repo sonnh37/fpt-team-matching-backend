@@ -70,11 +70,11 @@ public class HangfireController : ControllerBase
         return Ok();
     }
 
-    [HttpGet("/trigger-now")]
+    [HttpGet("trigger-now")]
     public ActionResult TriggerNow([FromQuery] string jobId)
     {
         _recurringJobManager.Trigger(jobId);
         // _recurringJobManager.RemoveIfExists(jobId);
-        return Ok("Triggered create-reviews job successfully!");
+        return Ok($"Triggered {jobId} job successfully!");
     }
 }
