@@ -9,4 +9,7 @@ public interface IBlogService : IBaseService
 {
     Task<BusinessResult> CreateBlog(BlogCreateCommand createOrUpdateCommand);
     Task<BusinessResult> GetBlogFindMemberInCurrentSemester();
+    Task<BusinessResult> ChangeStatusBlog(Guid id);
+
+
 }
