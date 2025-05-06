@@ -76,6 +76,14 @@ namespace FPT.TeamMatching.Services
                     .WithStatus(Const.FAIL_CODE)
                     .WithMessage("Đề tài không tồn tại");
                 }
+
+                var currentReview = await _reviewRepository.GetReviewByProjectIdAndNumber(topic.Project.Id, request.ReviewStage);
+                if (currentReview == null)
+                {
+                    return new ResponseBuilder()
+                        .WithStatus(Const.FAIL_CODE)
+                        .WithMessage($"Không tìm thấy review của giai đoạn {request.ReviewStage}");
+                }
                 //Kiểm tra ngày nộp có trước review stage tiếp theo hay không
                 var nextReview = await _reviewRepository.GetReviewByProjectIdAndNumber(topic.Project.Id, request.ReviewStage + 1);
                 if (nextReview == null)
@@ -90,6 +98,14 @@ namespace FPT.TeamMatching.Services
                     return new ResponseBuilder()
                         .WithStatus(Const.FAIL_CODE)
                         .WithMessage("Đề tài đã qua review tiếp theo không thể cập nhât");
+                }
+
+                if (DateTime.UtcNow.ToLocalTime() < currentReview.ReviewDate.Value.LocalDateTime)
+                {
+                    return new ResponseBuilder()
+                        .WithStatus(Const.FAIL_CODE)
+                        .WithMessage("Chưa tới thời gian để yêu cầu chỉnh sửa");
+                    
                 }
                 //tao TopicVersion
                 var topicVersion = new TopicVersion
