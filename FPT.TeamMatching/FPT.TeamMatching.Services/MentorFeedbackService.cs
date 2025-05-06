@@ -57,12 +57,14 @@ namespace FPT.TeamMatching.Services
                 }
 
                 var today = DateTime.UtcNow.Date;
-                if (review3.ReviewDate.Value.Date < today || today > review3.ReviewDate.Value.Date.AddDays(7))
+                if (review3.ReviewDate.Value.Date > today)
                 {
                     return new ResponseBuilder()
                          .WithStatus(Const.FAIL_CODE)
                          .WithMessage("Chưa đến ngày đánh giá");
                 }
+
+                if (today > review3.ReviewDate.Value.Date.AddDays(7)) return HandlerFail("Quá hạn đánh giá");
                 //
                 await SetBaseEntityForCreation(mentorFeedback);
                 _mentorFeedbackRepository.Add(mentorFeedback);

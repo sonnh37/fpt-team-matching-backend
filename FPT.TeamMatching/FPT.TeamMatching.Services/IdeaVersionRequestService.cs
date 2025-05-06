@@ -68,19 +68,19 @@ public class IdeaVersionRequestService : BaseService<IdeaVersionRequest>, IIdeaV
         _ideaVersionRequestRepository.Add(mentorRequest);
 
         // Submentor request if exists
-        if (idea.SubMentorId.HasValue)
-        {
-            var subMentorRequest = new IdeaVersionRequest
-            {
-                IdeaVersionId = versionId,
-                ReviewerId = idea.SubMentorId.Value,
-                CriteriaFormId = criteriaFormId,
-                Status = IdeaVersionRequestStatus.Pending,
-                Role = "SubMentor",
-            };
-            await SetBaseEntityForCreation(subMentorRequest);
-            _ideaVersionRequestRepository.Add(subMentorRequest);
-        }
+        // if (idea.SubMentorId.HasValue)
+        // {
+        //     var subMentorRequest = new IdeaVersionRequest
+        //     {
+        //         IdeaVersionId = versionId,
+        //         ReviewerId = idea.SubMentorId.Value,
+        //         CriteriaFormId = criteriaFormId,
+        //         Status = IdeaVersionRequestStatus.Pending,
+        //         Role = "SubMentor",
+        //     };
+        //     await SetBaseEntityForCreation(subMentorRequest);
+        //     _ideaVersionRequestRepository.Add(subMentorRequest);
+        // }
     }
 
     public async Task<BusinessResult>
@@ -377,10 +377,23 @@ public class IdeaVersionRequestService : BaseService<IdeaVersionRequest>, IIdeaV
                 var noti = new NotificationCreateForIndividual
                 {
                     UserId = ideaInclude?.OwnerId,
-                    Description = "Đề tài " + ideaVersionRequest.IdeaVersion.Abbreviations + " đã được " +
-                                  ideaInclude?.Mentor?.Code + " (Mentor) duyệt. Hãy kiểm tra kết quả!",
                 };
-                await _notificationService.CreateForUser(noti);
+                if (ideaVersionRequest.Role == "Mentor")
+                {
+                    noti.Description = "Đề tài " + ideaVersionRequest.IdeaVersion.Abbreviations + " đã được " +
+                                       ideaInclude?.Mentor?.Code + " (Mentor) duyệt. Hãy kiểm tra kết quả!";
+                    await _notificationService.CreateForUser(noti);
+                }
+                
+                if (ideaVersionRequest.Role == "SubMentor")
+                {
+                    noti.Description = "Đề tài " + ideaVersionRequest.IdeaVersion.Abbreviations + " đã được " +
+                                       ideaInclude?.SubMentor?.Code + " (SubMentor) duyệt. Hãy kiểm tra kết quả!";
+                    await _notificationService.CreateForUser(noti);
+                }
+                
+                
+                
             }
 
             return new ResponseBuilder()

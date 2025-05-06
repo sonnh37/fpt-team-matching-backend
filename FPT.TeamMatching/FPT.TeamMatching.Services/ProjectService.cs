@@ -104,11 +104,10 @@ public class ProjectService : BaseService<Project>, IProjectService
             var userId = GetUserIdFromClaims();
             if (userId == null) return HandlerFailAuth();
 
-            var project = await _projectRepository.GetProjectByUserIdLogin(userId.Value);
+            var project = await _projectRepository.GetProjectByUserIdLoginFollowNewest(userId.Value);
             if (project == null) return HandlerFail("Người dùng không có project đang tồn tại");
 
-            if (project.Status == ProjectStatus.Canceled ||
-                project.Status == ProjectStatus.Completed)
+            if (project.Status == ProjectStatus.Canceled)
                 return HandlerFail("Người dùng không có project đang tồn tại trong kì này");
 
             var result = _mapper.Map<ProjectResult>(project);
@@ -131,11 +130,10 @@ public class ProjectService : BaseService<Project>, IProjectService
             var userId = GetUserIdFromClaims();
             if (userId == null) return HandlerFailAuth();
 
-            var project = await _projectRepository.GetProjectInSemesterCurrentByUserIdLogin(userId.Value);
+            var project = await _projectRepository.GetProjectInSemesterCurrentByUserIdLoginFollowNewest(userId.Value);
             if (project == null) return HandlerFail("Người dùng không có project đang tồn tại");
 
-            if (project.Status == ProjectStatus.Canceled ||
-                project.Status == ProjectStatus.Completed)
+            if (project.Status == ProjectStatus.Canceled)
                 return HandlerFail("Người dùng không có project đang tồn tại trong kì này");
 
             var result = _mapper.Map<ProjectResult>(project);
@@ -468,12 +466,14 @@ public class ProjectService : BaseService<Project>, IProjectService
             }
 
             var today = DateTime.UtcNow.Date;
-            if (review3.ReviewDate.Value.Date < today || today > review3.ReviewDate.Value.Date.AddDays(7))
+            if (review3.ReviewDate.Value.Date > today)
             {
                 return new ResponseBuilder()
-                     .WithStatus(Const.FAIL_CODE)
-                     .WithMessage("Chưa đến ngày đánh giá");
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("Chưa đến ngày đánh giá");
             }
+
+            if (today > review3.ReviewDate.Value.Date.AddDays(7)) return HandlerFail("Quá hạn đánh giá");
             //
 
             project.DefenseStage = command.DefenseStage;

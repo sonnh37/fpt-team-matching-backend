@@ -85,23 +85,26 @@ public class TeamMemberService : BaseService<TeamMember>, ITeamMemberService
             if (requests.updateList == null)
             {
                 return new ResponseBuilder()
-                        .WithStatus(Const.FAIL_CODE)
-                        .WithMessage("Nhập danh sách thành viên cần cập nhật");
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("Nhập danh sách thành viên cần cập nhật");
             }
+
             var teamMember1 = await _teamMemberRepository.GetById(requests.updateList[0].Id);
             var project = await _projectRepository.GetById((Guid)teamMember1.ProjectId);
             if (requests.defenseNumber == 1)
             {
                 //check status cua cac thanh vien
-                var isStatusOfDefense2 = requests.updateList.Where(e => e.Status == Domain.Enums.TeamMemberStatus.Fail2 ||
-                                                                        e.Status == Domain.Enums.TeamMemberStatus.Pass2)
-                                                            .Any();
+                var isStatusOfDefense2 = requests.updateList.Where(e =>
+                        e.Status == Domain.Enums.TeamMemberStatus.Fail2 ||
+                        e.Status == Domain.Enums.TeamMemberStatus.Pass2)
+                    .Any();
                 if (isStatusOfDefense2)
                 {
                     return new ResponseBuilder()
-                    .WithStatus(Const.FAIL_CODE)
-                    .WithMessage("Status của các thành viên không được là status của defense 2");
+                        .WithStatus(Const.FAIL_CODE)
+                        .WithMessage("Status của các thành viên không được là status của defense 2");
                 }
+
                 //
                 foreach (var request in requests.updateList)
                 {
@@ -109,33 +112,35 @@ public class TeamMemberService : BaseService<TeamMember>, ITeamMemberService
                     if (teamMember == null)
                     {
                         return new ResponseBuilder()
-                        .WithStatus(Const.NOT_FOUND_CODE)
-                        .WithMessage(Const.NOT_FOUND_MSG);
+                            .WithStatus(Const.NOT_FOUND_CODE)
+                            .WithMessage(Const.NOT_FOUND_MSG);
                     }
+
                     teamMember.Status = request.Status;
                     teamMember.CommentDefense1 = request.CommentDefense;
                     await SetBaseEntityForUpdate(teamMember);
                     _teamMemberRepository.Update(teamMember);
                 }
+
                 var isSuccess = await _unitOfWork.SaveChanges();
                 if (!isSuccess)
                 {
                     return new ResponseBuilder()
-                    .WithStatus(Const.FAIL_CODE)
-                    .WithMessage(Const.FAIL_SAVE_MSG);
+                        .WithStatus(Const.FAIL_CODE)
+                        .WithMessage(Const.FAIL_SAVE_MSG);
                 }
 
                 if (project == null)
                 {
                     return new ResponseBuilder()
-                    .WithStatus(Const.NOT_FOUND_CODE)
-                    .WithMessage(Const.NOT_FOUND_MSG);
+                        .WithStatus(Const.NOT_FOUND_CODE)
+                        .WithMessage(Const.NOT_FOUND_MSG);
                 }
+
                 //check nếu team có fail1 thì đổi defenseStage sang 2
                 var hasFail1 = requests.updateList.Any(e => e.Status == Domain.Enums.TeamMemberStatus.Fail1);
                 if (hasFail1)
                 {
-                    
                     project.DefenseStage = 2;
                     await SetBaseEntityForUpdate(project);
                     _projectRepository.Update(project);
@@ -143,12 +148,13 @@ public class TeamMemberService : BaseService<TeamMember>, ITeamMemberService
                     if (!isSuccess)
                     {
                         return new ResponseBuilder()
-                        .WithStatus(Const.FAIL_CODE)
-                        .WithMessage(Const.FAIL_SAVE_MSG);
+                            .WithStatus(Const.FAIL_CODE)
+                            .WithMessage(Const.FAIL_SAVE_MSG);
                     }
+
                     return new ResponseBuilder()
-                    .WithStatus(Const.SUCCESS_CODE)
-                    .WithMessage(Const.SUCCESS_SAVE_MSG);
+                        .WithStatus(Const.SUCCESS_CODE)
+                        .WithMessage(Const.SUCCESS_SAVE_MSG);
                 }
 
                 //check all pass
@@ -163,44 +169,47 @@ public class TeamMemberService : BaseService<TeamMember>, ITeamMemberService
                     if (!isSuccess)
                     {
                         return new ResponseBuilder()
-                        .WithStatus(Const.FAIL_CODE)
-                        .WithMessage(Const.FAIL_SAVE_MSG);
+                            .WithStatus(Const.FAIL_CODE)
+                            .WithMessage(Const.FAIL_SAVE_MSG);
                     }
-
                 }
             }
             else if (requests.defenseNumber == 2)
             {
                 //check status cua cac thanh vien
-                var isStatusOfDefense1 = requests.updateList.Where(e => e.Status == Domain.Enums.TeamMemberStatus.Fail1 ||
-                                                                        e.Status == Domain.Enums.TeamMemberStatus.Pass1)
-                                                            .Any();
+                var isStatusOfDefense1 = requests.updateList.Where(e =>
+                        e.Status == Domain.Enums.TeamMemberStatus.Fail1 ||
+                        e.Status == Domain.Enums.TeamMemberStatus.Pass1)
+                    .Any();
                 if (isStatusOfDefense1)
                 {
                     return new ResponseBuilder()
-                    .WithStatus(Const.FAIL_CODE)
-                    .WithMessage("Status của các thành viên không được là status của defense 1");
+                        .WithStatus(Const.FAIL_CODE)
+                        .WithMessage("Status của các thành viên không được là status của defense 1");
                 }
+
                 foreach (var request in requests.updateList)
                 {
                     var teamMember = await _teamMemberRepository.GetById(request.Id);
                     if (teamMember == null)
                     {
                         return new ResponseBuilder()
-                        .WithStatus(Const.NOT_FOUND_CODE)
-                        .WithMessage(Const.NOT_FOUND_MSG);
+                            .WithStatus(Const.NOT_FOUND_CODE)
+                            .WithMessage(Const.NOT_FOUND_MSG);
                     }
+
                     teamMember.Status = request.Status;
                     teamMember.CommentDefense2 = request.CommentDefense;
                     await SetBaseEntityForUpdate(teamMember);
                     _teamMemberRepository.Update(teamMember);
                 }
+
                 var isSuccess = await _unitOfWork.SaveChanges();
                 if (!isSuccess)
                 {
                     return new ResponseBuilder()
-                    .WithStatus(Const.FAIL_CODE)
-                    .WithMessage(Const.FAIL_SAVE_MSG);
+                        .WithStatus(Const.FAIL_CODE)
+                        .WithMessage(Const.FAIL_SAVE_MSG);
                 }
 
                 project.Status = Domain.Enums.ProjectStatus.Completed;
@@ -211,8 +220,8 @@ public class TeamMemberService : BaseService<TeamMember>, ITeamMemberService
                 if (!isSuccess)
                 {
                     return new ResponseBuilder()
-                    .WithStatus(Const.FAIL_CODE)
-                    .WithMessage(Const.FAIL_SAVE_MSG);
+                        .WithStatus(Const.FAIL_CODE)
+                        .WithMessage(Const.FAIL_SAVE_MSG);
                 }
 
                 return new ResponseBuilder()
@@ -222,8 +231,8 @@ public class TeamMemberService : BaseService<TeamMember>, ITeamMemberService
             else
             {
                 return new ResponseBuilder()
-                        .WithStatus(Const.FAIL_CODE)
-                        .WithMessage("Lần bảo vệ đồ án phải là 1 hoặc 2");
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("Lần bảo vệ đồ án phải là 1 hoặc 2");
             }
 
             return new ResponseBuilder()
@@ -253,25 +262,27 @@ public class TeamMemberService : BaseService<TeamMember>, ITeamMemberService
             if (project == null)
             {
                 return new ResponseBuilder()
-                     .WithStatus(Const.FAIL_CODE)
-                     .WithMessage("Không tìm thấy dự án");
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("Không tìm thấy dự án");
             }
 
             var review3 = await _reviewRepository.GetReviewByProjectIdAndNumber(project.Id, 3);
             if (review3 == null)
             {
                 return new ResponseBuilder()
-                     .WithStatus(Const.FAIL_CODE)
-                     .WithMessage("Không tìm thấy review 3 của dự án");
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("Không tìm thấy review 3 của dự án");
             }
 
             var today = DateTime.UtcNow.Date;
-            if (review3.ReviewDate.Value.Date < today || today > review3.ReviewDate.Value.Date.AddDays(7))
+            if (review3.ReviewDate.Value.Date > today)
             {
                 return new ResponseBuilder()
-                     .WithStatus(Const.FAIL_CODE)
-                     .WithMessage("Chưa đến ngày đánh giá");
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("Chưa đến ngày đánh giá");
             }
+
+            if (today > review3.ReviewDate.Value.Date.AddDays(7)) return HandlerFail("Quá hạn đánh giá");
             //
 
             foreach (var request in requests)
@@ -280,22 +291,25 @@ public class TeamMemberService : BaseService<TeamMember>, ITeamMemberService
                 if (teamMember == null)
                 {
                     return new ResponseBuilder()
-                    .WithStatus(Const.NOT_FOUND_CODE)
-                    .WithMessage("Không tìm thấy thành viên");
+                        .WithStatus(Const.NOT_FOUND_CODE)
+                        .WithMessage("Không tìm thấy thành viên");
                 }
+
                 teamMember.MentorConclusion = request.MentorConclusion;
                 teamMember.Attitude = request.Attitude;
                 teamMember.Note = request.Note;
                 await SetBaseEntityForUpdate(teamMember);
                 _teamMemberRepository.Update(teamMember);
             }
+
             var isSuccess = await _unitOfWork.SaveChanges();
             if (!isSuccess)
             {
                 return new ResponseBuilder()
-                .WithStatus(Const.FAIL_CODE)
-                .WithMessage(Const.FAIL_SAVE_MSG);
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage(Const.FAIL_SAVE_MSG);
             }
+
             return new ResponseBuilder()
                 .WithStatus(Const.SUCCESS_CODE)
                 .WithMessage(Const.SUCCESS_SAVE_MSG);
