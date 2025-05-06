@@ -64,11 +64,21 @@ public class IdeaVersionRequestRepository : BaseRepository<IdeaVersionRequest>, 
         queryable = queryable
             .Include(m => m.Reviewer);
         queryable = queryable
-            .Include(m => m.CriteriaForm);
+       .Include(m => m.CriteriaForm);
+        if (!string.IsNullOrEmpty(query.CreatedBy))
+        {
+            queryable = queryable.Where(m =>
+                m.CreatedBy != null && m.CreatedBy.Contains(query.CreatedBy.Trim().ToLower()));
+        }
+        if (query.ReviewerId != null)
+        {
+            queryable = queryable.Where(m => m.ReviewerId == query.ReviewerId);
+        }
+
 
         queryable = queryable.Where(m => m.Status != IdeaVersionRequestStatus.Pending
-        );
-
+              );
+        
 
         if (query.IsPagination)
         {

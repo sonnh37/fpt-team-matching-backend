@@ -66,6 +66,14 @@ public class BlogController : ControllerBase
         return Ok(businessResult);
     }
 
+    [HttpPut("change-status-blog")]
+    public async Task<IActionResult> ChangeStatusBlog(Guid id)
+    {
+        var businessResult = await _service.ChangeStatusBlog(id);
+
+        return Ok(businessResult);
+    }
+
     [HttpGet("find-member-in-current-semester")]
     public async Task<IActionResult> GetBlogFindMemberInCurrentSemester()
     {

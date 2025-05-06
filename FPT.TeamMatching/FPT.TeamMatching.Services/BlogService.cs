@@ -10,6 +10,7 @@ using FPT.TeamMatching.Domain.Utilities;
 using FPT.TeamMatching.Services.Bases;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 using System.Numerics;
+using FPT.TeamMatching.Domain.Enums;
 
 namespace FPT.TeamMatching.Services;
 
@@ -22,6 +23,39 @@ public class BlogService : BaseService<Blog>, IBlogService
     {
         _blogrepository = _unitOfWork.BlogRepository;
         _semesterRepository = _unitOfWork.SemesterRepository;
+    }
+
+    public async Task<BusinessResult> ChangeStatusBlog(Guid id)
+    {
+       var blog = await _blogrepository.GetById(id);
+       if (blog == null)
+        {
+            return new ResponseBuilder()
+                          .WithStatus(Const.NOT_FOUND_CODE)
+                          .WithMessage(Const.NOT_FOUND_MSG);
+        }
+        else
+        {
+            blog.Status = BlogStatus.Close;
+            await SetBaseEntityForUpdate(blog);
+            _blogrepository.Update(blog);
+            bool saveChange = await _unitOfWork.SaveChanges();
+
+            if (saveChange)
+            {
+                return new ResponseBuilder()
+                               .WithStatus(Const.SUCCESS_CODE)
+                               .WithMessage(Const.SUCCESS_SAVE_MSG);
+            }
+            else
+            {
+                return new ResponseBuilder()
+                              .WithStatus(Const.FAIL_CODE)
+                              .WithMessage(Const.FAIL_SAVE_MSG);
+            }
+        }
+      
+
     }
 
     public async  Task<BusinessResult> CreateBlog(BlogCreateCommand createOrUpdateCommand)
