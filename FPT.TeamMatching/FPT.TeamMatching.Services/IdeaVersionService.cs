@@ -103,13 +103,20 @@ namespace FPT.TeamMatching.Services
 
                 if (student != null)
                 {
+                    
                     var command = new NotificationCreateForIndividual
                     {
                         UserId = idea.MentorId,
                         Description = "Đề tài " + ideaVersion.Abbreviations +
                                       "(resubmit) đang chờ bạn duyệt với vai trò Mentor",
                     };
-                    await _notificationService.CreateForUser(command);
+                    
+                    if (idea.MentorId != null )
+                    {
+                        command.Description = "Đề tài " + ideaVersion.Abbreviations +
+                                              "(resubmit) đang chờ bạn duyệt với vai trò SubMentor";
+                        await _notificationService.CreateForUser(command);
+                    }
                 }
 
                 idea.Status = IdeaStatus.Pending;
@@ -123,7 +130,7 @@ namespace FPT.TeamMatching.Services
 
                 return new ResponseBuilder()
                     .WithStatus(Const.SUCCESS_CODE)
-                    .WithMessage(Const.SUCCESS_SAVE_MSG);
+                    .WithMessage("Đã nộp thành công");
             }
             catch (Exception ex)
             {

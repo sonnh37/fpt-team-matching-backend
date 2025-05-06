@@ -24,9 +24,43 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
 
     public async Task<Project?> GetProjectByUserIdLogin(Guid userId)
     {
+        var semesterCurrent = await _semesterRepository.GetCurrentSemester();
+        if (semesterCurrent == null) return null;
         var teamMember = await _context.TeamMembers.Where(e => e.UserId == userId &&
                                                                e.LeaveDate == null &&
                                                                (e.Status != TeamMemberStatus.Fail2) &&
+                                                               e.IsDeleted == false)
+            .OrderByDescending(m => m.CreatedDate)
+            .FirstOrDefaultAsync();
+        if (teamMember == null) return null;
+
+        var queryable = GetQueryable().Where(e => e.Id == teamMember.ProjectId);
+
+        queryable = queryable
+            .Include(e => e.MentorTopicRequests)
+            .Include(e => e.TeamMembers)
+            .ThenInclude(e => e.User)
+            .Include(e => e.Invitations)
+            .Include(x => x.Reviews)
+            .Include(x => x.Topic).ThenInclude(m => m.IdeaVersion)
+            .Include(x => x.Topic).ThenInclude(m => m.IdeaVersion).ThenInclude(m => m.StageIdea)
+            .Include(x => x.Topic).ThenInclude(m => m.IdeaVersion).ThenInclude(m => m.Idea)
+            .Include(x => x.Topic).ThenInclude(m => m.IdeaVersion).ThenInclude(m => m.Idea)
+            .ThenInclude(m => m.Specialty)
+            .Include(x => x.Topic).ThenInclude(m => m.IdeaVersion).ThenInclude(m => m.Idea)
+            .ThenInclude(m => m.Specialty).ThenInclude(m => m.Profession);
+
+        return queryable.FirstOrDefault();
+    }
+    
+    
+    public async Task<Project?> GetProjectByUserIdLoginFollowNewest(Guid userId)
+    {
+        var semesterCurrent = await _semesterRepository.GetCurrentSemester();
+        if (semesterCurrent == null) return null;
+        var teamMember = await _context.TeamMembers.Where(e => e.UserId == userId &&
+                                                               e.LeaveDate == null &&
+                                                               // (e.Status != TeamMemberStatus.Fail2) &&
                                                                e.IsDeleted == false)
             .OrderByDescending(m => m.CreatedDate)
             .FirstOrDefaultAsync();
@@ -66,11 +100,45 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
     {
         var teamMember = await _context.TeamMembers.Where(e => e.UserId == userId &&
                                                                e.LeaveDate == null &&
-                                                               (e.Status == TeamMemberStatus.Fail1 ||
-                                                                e.Status == TeamMemberStatus.Pass1 ||
-                                                                e.Status == TeamMemberStatus.Pass2 ||
-                                                                e.Status == TeamMemberStatus.InProgress ||
-                                                                e.Status == TeamMemberStatus.Pending) &&
+                                                               (e.Status != TeamMemberStatus.Fail2) &&
+                                                               e.IsDeleted == false)
+            .OrderByDescending(m => m.CreatedDate)
+            .FirstOrDefaultAsync();
+        if (teamMember == null) return null;
+
+        var semesterCurrent = await _semesterRepository.GetCurrentSemester();
+        if (semesterCurrent == null) return null;
+
+        var queryable = GetQueryable().Where(e => e.Id == teamMember.ProjectId);
+
+        queryable = queryable.Include(e => e.TeamMembers)
+            .ThenInclude(e => e.User)
+            .Include(e => e.Invitations)
+            .Include(x => x.Reviews)
+            .Include(x => x.Topic).ThenInclude(m => m.IdeaVersion)
+            .Include(x => x.Topic).ThenInclude(m => m.IdeaVersion).ThenInclude(m => m.StageIdea)
+            .Include(x => x.Topic).ThenInclude(m => m.IdeaVersion).ThenInclude(m => m.Idea)
+            .Include(x => x.Topic).ThenInclude(m => m.IdeaVersion).ThenInclude(m => m.Idea)
+            .ThenInclude(m => m.Specialty)
+            .Include(x => x.Topic).ThenInclude(m => m.IdeaVersion).ThenInclude(m => m.Idea)
+            .ThenInclude(m => m.Specialty).ThenInclude(m => m.Profession);
+
+        queryable = queryable.Where(m => m.Topic != null &&
+                                         m.Topic.IdeaVersion != null &&
+                                         m.Topic.IdeaVersion.StageIdea != null &&
+                                         m.Topic.IdeaVersion.StageIdea.SemesterId == semesterCurrent.Id
+        );
+
+
+        return queryable.FirstOrDefault();
+    }
+    
+    
+    public async Task<Project?> GetProjectInSemesterCurrentByUserIdLoginFollowNewest(Guid userId)
+    {
+        var teamMember = await _context.TeamMembers.Where(e => e.UserId == userId &&
+                                                               e.LeaveDate == null &&
+                                                               // (e.Status != TeamMemberStatus.Fail2) &&
                                                                e.IsDeleted == false)
             .OrderByDescending(m => m.CreatedDate)
             .FirstOrDefaultAsync();

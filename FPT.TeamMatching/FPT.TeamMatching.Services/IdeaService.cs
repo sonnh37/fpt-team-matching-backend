@@ -826,6 +826,14 @@ public class IdeaService : BaseService<Idea>, IIdeaService
             await SetBaseEntityForUpdate(idea);
             _ideaRepository.Update(idea);
             await _unitOfWork.SaveChanges();
+            
+            var noti = new NotificationCreateForIndividual()
+            {
+                UserId = idea.OwnerId,
+                Description = "Kết quả đề tài đã được công bố. Hãy kiểm tra kết quả!"
+            };
+            await _notificationService.CreateForUser(noti);
+
         }
         catch (Exception ex)
         {

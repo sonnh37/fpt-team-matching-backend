@@ -174,7 +174,7 @@ namespace FPT.TeamMatching.Services
 
                 return new ResponseBuilder()
                     .WithStatus(Const.SUCCESS_CODE)
-                    .WithMessage(Const.SUCCESS_SAVE_MSG);
+                    .WithMessage("Phản hồi chỉnh sửa đề tài thành công");
 
             }
             catch (Exception ex)

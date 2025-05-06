@@ -15,6 +15,7 @@ using FPT.TeamMatching.Domain.Models.Requests.Queries.Invitations;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Likes;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Notifications;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Projects;
+using FPT.TeamMatching.Domain.Models.Requests.Queries.Semester;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.StageIdeas;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Topics;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Users;
@@ -30,6 +31,8 @@ public static class FilterHelper
         {
             UserGetAllQuery userQuery =>
                 User((queryable as IQueryable<User>)!, userQuery) as IQueryable<TEntity>,
+            SemesterGetAllQuery semesterQuery =>
+                Semester((queryable as IQueryable<Semester>)!, semesterQuery) as IQueryable<TEntity>,
             StageIdeaGetAllQuery stageIdeaQuery =>
                 StageIdea((queryable as IQueryable<StageIdea>)!, stageIdeaQuery) as IQueryable<TEntity>,
             ProjectGetAllQuery ProjectQuery =>
@@ -147,6 +150,20 @@ public static class FilterHelper
         return queryable;
     }
 
+    private static IQueryable<Semester>? Semester(IQueryable<Semester> queryable, SemesterGetAllQuery query)
+    {
+        if (query.SemesterName != null)
+        {
+            queryable = queryable.Where(e =>
+                e.SemesterName != null &&
+                e.SemesterName.ToLower().Trim().Contains(query.SemesterName.ToLower().Trim()));
+        }
+
+        queryable = BaseFilterHelper.Base(queryable, query);
+
+        return queryable;
+    }
+
     private static IQueryable<CriteriaXCriteriaForm>? CriteriaXCriteriaForm(IQueryable<CriteriaXCriteriaForm> queryable,
         CriteriaXCriteriaFormGetAllQuery query)
     {
@@ -208,21 +225,25 @@ public static class FilterHelper
             queryable = queryable.Where(m =>
                 m.Type != null && m.Type == query.Type);
         }
+
         if (query.ReceiverId != null)
         {
             queryable = queryable.Where(m =>
                 m.ReceiverId != null && m.ReceiverId == query.ReceiverId);
         }
+
         if (query.ProjectId != null)
         {
             queryable = queryable.Where(m =>
                 m.ProjectId != null && m.ProjectId == query.ProjectId);
         }
+
         if (query.SenderId != null)
         {
             queryable = queryable.Where(m =>
                 m.SenderId != null && m.SenderId == query.SenderId);
         }
+
         if (query.Status != null)
         {
             queryable = queryable.Where(m => m.Status == query.Status);
@@ -285,7 +306,6 @@ public static class FilterHelper
         }
 
 
-
         queryable = BaseFilterHelper.Base(queryable, query);
 
         return queryable;
@@ -317,6 +337,7 @@ public static class FilterHelper
             queryable = queryable.Where(m =>
                 m.BlogId == query.BlogId);
         }
+
         if (query.UserId != null)
         {
             queryable = queryable.Where(m =>
@@ -337,6 +358,7 @@ public static class FilterHelper
         {
             queryable = queryable.Where(m => m.Status == query.Status);
         }
+
         if (query.IsExistedTeam != null)
         {
             queryable = queryable.Where(m => m.IsExistedTeam == query.IsExistedTeam);
