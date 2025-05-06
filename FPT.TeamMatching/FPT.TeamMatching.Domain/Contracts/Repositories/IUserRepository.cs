@@ -28,5 +28,5 @@ public interface IUserRepository : IBaseRepository<User>
     Task<(List<User>, int)> GetAllByCouncilWithIdeaVersionRequestPending(UserGetAllQuery query);
     Task<List<EmailSuggestionModels>> GetAllEmailSuggestions(string email);
     Task<(List<User>, int)> GetUsersInSemester(UserGetAllInSemesterQuery query);
-    Task<bool> CheckRoleOfUserInSemester(Guid userId, string role, Guid semesterId);
+    Task<bool> CheckRoleOfUserInSemester(Guid? userId, string role, Guid? semesterId);
 }

@@ -446,7 +446,7 @@ public class UserRepository : BaseRepository<User>, IUserRepository
         return result;
     }
 
-    public async Task<bool> CheckRoleOfUserInSemester(Guid userId, string role, Guid semesterId)
+    public async Task<bool> CheckRoleOfUserInSemester(Guid? userId, string role, Guid? semesterId)
     {
         var queryable = GetQueryable();
 
