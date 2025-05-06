@@ -401,4 +401,13 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
 
         return result;
     }
+
+    public async Task<Idea> GetIdeaByProjectId(Guid projectId)
+    {
+        var queryable = await GetQueryable().Include(x => x.IdeaVersions)
+            .ThenInclude(x => x.Topic)
+            .ThenInclude(x => x.Project)
+            .FirstOrDefaultAsync(x => x.IdeaVersions.FirstOrDefault(y => y.Version == x.IdeaVersions.Max(z => z.Version)).Topic.Project.Id == projectId);
+        return queryable;
+    }
 }
