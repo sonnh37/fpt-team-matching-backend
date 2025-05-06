@@ -433,7 +433,7 @@ public class UserService : BaseService<User>, IUserService
             .WithMessage(Const.SUCCESS_READ_MSG);
     }
 
-    public async Task<BusinessResult> ImportStudents(IFormFile file)
+    public async Task<BusinessResult> ImportStudents(IFormFile file, Guid semesterId)
     {
         try
         {
@@ -447,12 +447,19 @@ public class UserService : BaseService<User>, IUserService
                 userDictionary.Add(user.Email, user);
             }
 
-            var upComingSemester = await _unitOfWork.SemesterRepository.GetUpComingSemester();
-            if (upComingSemester == null)
+            // var upComingSemester = await _unitOfWork.SemesterRepository.GetUpComingSemester();
+            // if (upComingSemester == null)
+            // {
+            //     return new ResponseBuilder()
+            //         .WithStatus(Const.FAIL_CODE)
+            //         .WithMessage("No upcoming semester!");
+            // }
+            var semester = await _unitOfWork.SemesterRepository.GetById(semesterId);
+            if (semester == null)
             {
                 return new ResponseBuilder()
                     .WithStatus(Const.FAIL_CODE)
-                    .WithMessage("No upcoming semester!");
+                    .WithMessage("Không tìm thấy kì");
             }
 
             var roleStudent = await _unitOfWork.RoleRepository.GetByRoleName("Student");
@@ -522,7 +529,7 @@ public class UserService : BaseService<User>, IUserService
                                 ProfileStudent = new ProfileStudent
                                 {
                                     UserId = null,
-                                    SemesterId = upComingSemester.Id,
+                                    SemesterId = semester.Id,
                                 },
                                 UserXRoles = new List<UserXRole>()
                                 {
@@ -530,6 +537,11 @@ public class UserService : BaseService<User>, IUserService
                                     {
                                         UserId = null,
                                         RoleId = roleStudent.Id,
+                                        SemesterId = semester.Id,
+                                        IsPrimary = true,
+                                        IsDeleted = false,
+                                        CreatedDate = DateTime.UtcNow,
+                                        UpdatedDate = DateTime.UtcNow,
                                     }
                                 }
                             };
@@ -587,12 +599,20 @@ public class UserService : BaseService<User>, IUserService
                     .WithMessage("Tài khoản này đã tồn tại. Bạn có muốn cập nhật lại tài khoản này không ?");
             }
 
-            var upComingSemester = await _unitOfWork.SemesterRepository.GetUpComingSemester();
-            if (upComingSemester == null)
+            // var upComingSemester = await _unitOfWork.SemesterRepository.GetUpComingSemester();
+            // if (upComingSemester == null)
+            // {
+            //     return new ResponseBuilder()
+            //         .WithStatus(Const.FAIL_CODE)
+            //         .WithMessage("No upcoming semester!");
+            // }
+            
+            var semester = await _unitOfWork.SemesterRepository.GetById(command.SemesterId);
+            if (semester == null)
             {
                 return new ResponseBuilder()
                     .WithStatus(Const.FAIL_CODE)
-                    .WithMessage("No upcoming semester!");
+                    .WithMessage("Không tìm thấy kì");
             }
 
             var roleStudent = await _unitOfWork.RoleRepository.GetByRoleName("Student");
@@ -615,7 +635,7 @@ public class UserService : BaseService<User>, IUserService
                 ProfileStudent = new ProfileStudent
                 {
                     UserId = null,
-                    SemesterId = upComingSemester.Id,
+                    SemesterId = semester.Id,
                 },
                 UserXRoles = new List<UserXRole>()
                 {
@@ -623,6 +643,11 @@ public class UserService : BaseService<User>, IUserService
                     {
                         UserId = null,
                         RoleId = roleStudent.Id,
+                        SemesterId =  semester.Id,
+                        IsPrimary = true,
+                        IsDeleted = false,
+                        CreatedDate = DateTime.UtcNow,
+                        UpdatedDate = DateTime.UtcNow,
                     }
                 }
             };
@@ -648,16 +673,23 @@ public class UserService : BaseService<User>, IUserService
         }
     }
 
-    public async Task<BusinessResult> UpdateStudentExistedRange(UserResult[] users)
+    public async Task<BusinessResult> UpdateStudentExistedRange(UserResult[] users, Guid semesterId)
     {
         try
         {
-            var upComingSemester = await _unitOfWork.SemesterRepository.GetUpComingSemester();
-            if (upComingSemester == null)
+            // var upComingSemester = await _unitOfWork.SemesterRepository.GetUpComingSemester();
+            // if (upComingSemester == null)
+            // {
+            //     return new ResponseBuilder()
+            //         .WithStatus(Const.FAIL_CODE)
+            //         .WithMessage("No upcoming semester!");
+            // }
+            var semester = await _unitOfWork.SemesterRepository.GetById(semesterId);
+            if (semester == null)
             {
                 return new ResponseBuilder()
                     .WithStatus(Const.FAIL_CODE)
-                    .WithMessage("No upcoming semester!");
+                    .WithMessage("Không tìm thấy kì");
             }
 
             var roleStudent = await _unitOfWork.RoleRepository.GetByRoleName("Student");
@@ -671,26 +703,32 @@ public class UserService : BaseService<User>, IUserService
             var listEntity = _mapper.Map<List<User>>(users);
             var userIds = listEntity.Select(x => x.Id).ToList();
             var profileStudents = await _unitOfWork.ProfileStudentRepository.GetProfileByUserIds(userIds);
-            List<UserXRole> userXRoles = new List<UserXRole>();
             foreach (var user in listEntity)
             {
                 user.ProfileStudent = profileStudents.FirstOrDefault(x => x.UserId == user.Id);
                 user.ProfileStudent ??= new ProfileStudent();
-                user.ProfileStudent.SemesterId = upComingSemester.Id;
-                userXRoles.Add(new UserXRole
+                user.ProfileStudent.SemesterId = semester.Id;
+                var roleUser = await _userXRoleRepository.GetByUserId(user.Id);
+                var studentRole = roleUser.FirstOrDefault(x => x.RoleId == roleStudent.Id);
+                if (studentRole == null)
                 {
-                    UserId = user.Id,
-                    SemesterId = upComingSemester.Id,
-                    RoleId = roleStudent.Id,
-                    IsPrimary = true,
-                    IsDeleted = false,
-                    CreatedDate = DateTime.Now,
-                    UpdatedDate = DateTime.Now,
-                });
+                    _userXRoleRepository.Add(new UserXRole
+                    {
+                        UserId = user.Id,
+                        RoleId = roleStudent.Id,
+                        SemesterId =  semester.Id,
+                        IsPrimary = true,
+                        IsDeleted = false,
+                        CreatedDate = DateTime.UtcNow,
+                        UpdatedDate = DateTime.UtcNow,
+                    });
+                }
+                studentRole.SemesterId = semester.Id;
+                _userXRoleRepository.Update(studentRole);
+                // user.UserXRoles.FirstOrDefault(x => x.RoleId == roleStudent.Id).SemesterId = semester.Id;
             }
 
             _userRepository.UpdateRange(listEntity);
-            _userXRoleRepository.AddRange(userXRoles);
             var saveChange = await _unitOfWork.SaveChanges();
             if (!saveChange)
             {

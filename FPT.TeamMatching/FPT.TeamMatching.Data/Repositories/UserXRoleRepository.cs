@@ -4,6 +4,7 @@ using FPT.TeamMatching.Data.Repositories.Base;
 using FPT.TeamMatching.Domain.Contracts.Repositories;
 using FPT.TeamMatching.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
+using MongoDB.Driver.Linq;
 
 namespace FPT.TeamMatching.Data.Repositories;
 
@@ -22,5 +23,11 @@ public class UserXRoleRepository : BaseRepository<UserXRole>, IUserXRoleReposito
                                                     e.Role != null &&
                                                     e.Role.RoleName == role);
         return isRole;
+    }
+
+    public async Task<List<UserXRole>> GetByUserId(Guid userId)
+    {
+        var queryable = GetQueryable();
+        return await queryable.Where(e => e.UserId == userId).ToListAsync();
     }
 }
