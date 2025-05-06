@@ -50,6 +50,17 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
 
         return queryable.FirstOrDefault();
     }
+    
+    public async Task<Project?> GetByIdForCheckMember(Guid? id)
+    {
+        var queryable = GetQueryable(x => x.Id == id);
+        queryable = queryable.Include(m => m.TeamMembers)
+            .Include(m => m.Topic)
+            .ThenInclude(m => m.IdeaVersion);
+        var entity = await queryable.FirstOrDefaultAsync();
+
+        return entity;
+    }
 
     public async Task<Project?> GetProjectInSemesterCurrentByUserIdLogin(Guid userId)
     {

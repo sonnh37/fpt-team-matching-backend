@@ -254,23 +254,27 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
 
             //check nguoi nhan
             var user = await GetUserAsync();
-            if (user == null)
-            {
-                return new ResponseBuilder()
-                    .WithStatus(Const.FAIL_CODE)
-                    .WithMessage("Không tìm thấy người dùng");
-            }
+            if (user == null) return HandlerFailAuth();
             //check người nhận là student
-            var isStudent = await _userRepository.CheckRoleOfUserInSemester(user.Id, "Student",semester.Id);
+            var isStudent = await _userRepository.CheckRoleOfUserInSemester(command.ReceiverId, "Student",semester.Id);
             if (!isStudent)
             {
                 return new ResponseBuilder()
                     .WithStatus(Const.FAIL_CODE)
                     .WithMessage("Người nhận không phải là sinh viên");
             }
+            
+            var project = await _projectRepository.GetByIdForCheckMember(command.ProjectId);
+            if (project == null)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("Không tìm thấy nhóm");
+            }
             //check sl trong team
-            bool members = await CheckCountMembersInTeam((Guid)command.ProjectId);
-            if (!members)
+            var teamSizeCurrent = project.TeamMembers.Count(x => x.IsDeleted = false);
+            var teamSizeRequired = project.Topic != null ? project.Topic?.IdeaVersion?.TeamSize : 5;
+            if (teamSizeCurrent >= teamSizeRequired)
             {
                 return new ResponseBuilder()
                     .WithStatus(Const.FAIL_CODE)
@@ -302,13 +306,7 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
             if (isSucess)
             {
                 //noti lời mời vào nhóm
-                var project = await _projectRepository.GetById((Guid)command.ProjectId);
-                if (project == null)
-                {
-                    return new ResponseBuilder()
-                        .WithStatus(Const.FAIL_CODE)
-                        .WithMessage("Không tìm thấy nhóm");
-                }
+               
 
                 var teamName = "";
                 if (project.TeamName != null)
@@ -582,6 +580,22 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
                     .WithStatus(Const.SUCCESS_CODE)
                     .WithMessage(Const.SUCCESS_SAVE_MSG);
             }
+            
+            if (command.Status == InvitationStatus.Cancel)
+            {
+                invitation.Status = InvitationStatus.Cancel;
+                _invitationRepository.Update(invitation);
+
+                var saveResult = await _unitOfWork.SaveChanges();
+                if (!saveResult)
+                {
+                    return HandlerFail("Đã xảy ra lỗi khi cập nhật lời mời");
+                }
+
+                return new ResponseBuilder()
+                    .WithStatus(Const.SUCCESS_CODE)
+                    .WithMessage("Bạn đã hủy lời mời");
+            }
 
             //accept
             if (command.Status == InvitationStatus.Accepted)
@@ -839,12 +853,8 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
     private async Task<bool> CheckCountMembersInTeam(Guid projectId)
     {
         var teammember = await _projectRepository.GetById(projectId);
-        var count = teammember.TeamMembers.Where(x => x.IsDeleted = false).Count();
-        if (count <= teammember.TeamSize)
-        {
-            return true;
-        }
-
-        return false;
+        if (teammember == null) return false;
+        var count = teammember.TeamMembers.Count(x => x.IsDeleted = false);
+        return count <= teammember.TeamSize;
     }
 }

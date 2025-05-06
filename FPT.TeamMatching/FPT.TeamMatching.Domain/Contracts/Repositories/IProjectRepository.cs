@@ -7,6 +7,7 @@ namespace FPT.TeamMatching.Domain.Contracts.Repositories;
 public interface IProjectRepository : IBaseRepository<Project>
 {
     Task<Project?> GetProjectByUserIdLogin(Guid userId);
+    Task<Project?> GetByIdForCheckMember(Guid? id);
     Task<(List<Project>, int)> GetProjectsForMentor(ProjectGetListForMentorQuery query, Guid userId);
     Task<List<Project>?> GetProjectsStartingNow();
     Task<Project?> GetProjectByCode(string code);
