@@ -157,19 +157,35 @@ public class ReviewService : BaseService<Review>, IReviewService
                 .WithStatus(Const.NOT_FOUND_CODE)
                 .WithMessage(Const.NOT_FOUND_MSG);
             }
+            var foundProject = await _projectRepository.GetById(entities.ProjectId);
+            if (foundProject == null)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(Const.NOT_FOUND_CODE)
+                    .WithMessage(Const.NOT_FOUND_MSG);
+            }
+            
+            var idea = await _ideaRepository.GetIdeaByProjectId(entities.ProjectId.Value);
             entities.FileUpload = request.FileUpload;
             await SetBaseEntityForUpdate(entities);
             _reviewRepository.Update(entities);
             bool saveChange = await _unitOfWork.SaveChanges();
-            if (saveChange)
+            if (!saveChange)
             {
                 return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage(Const.FAIL_SAVE_MSG);
+            }
+            await _notificationService.CreateForIndividual(new NotificationCreateForIndividual
+            {
+                UserId = idea.MentorId,
+                Description = $"{foundProject.TeamName} đã nộp file checklist cho review ${entities.Number}"
+            });
+            
+            return new ResponseBuilder()
                 .WithStatus(Const.SUCCESS_CODE)
                 .WithMessage(Const.SUCCESS_SAVE_MSG);
-            }
-            return new ResponseBuilder()
-                .WithStatus(Const.FAIL_CODE)
-                .WithMessage(Const.FAIL_SAVE_MSG);
+       
         }
         catch (Exception ex)
         {

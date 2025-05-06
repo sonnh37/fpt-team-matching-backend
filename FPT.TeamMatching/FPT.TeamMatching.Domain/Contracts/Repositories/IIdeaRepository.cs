@@ -42,4 +42,6 @@ public interface IIdeaRepository : IBaseRepository<Idea>
     Task<Idea?> GetIdeaNotRejectOfUserInSemester(Guid userId, Guid semesterId);
 
     Task<List<Idea>?> GetIdeaNotApproveInSemester(Guid semesterId);
+    
+    Task<Idea> GetIdeaByProjectId(Guid projectId);
 }
