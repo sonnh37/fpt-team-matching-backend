@@ -385,7 +385,7 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
 
                 return new ResponseBuilder()
                     .WithStatus(Const.SUCCESS_CODE)
-                    .WithMessage(Const.SUCCESS_SAVE_MSG);
+                    .WithMessage("Bạn đã từ chối lời mời tham gia nhóm!");
             }
 
             //accept
@@ -519,7 +519,7 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
 
                 return new ResponseBuilder()
                     .WithStatus(Const.SUCCESS_CODE)
-                    .WithMessage(Const.SUCCESS_SAVE_MSG);
+                    .WithMessage("Bạn đã đồng ý lời mời tham gia nhóm");
                 #endregion
             }
             return new ResponseBuilder()
@@ -578,7 +578,7 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
 
                 return new ResponseBuilder()
                     .WithStatus(Const.SUCCESS_CODE)
-                    .WithMessage(Const.SUCCESS_SAVE_MSG);
+                    .WithMessage("Bạn đã từ chối yêu cầu tham gia nhóm!");
             }
             
             if (command.Status == InvitationStatus.Cancel)
@@ -729,7 +729,7 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
 
                 return new ResponseBuilder()
                     .WithStatus(Const.SUCCESS_CODE)
-                    .WithMessage(Const.SUCCESS_SAVE_MSG);
+                    .WithMessage("Bạn đã đồng ý yêu cầu tham gia nhóm!");
                 #endregion
             }
             return new ResponseBuilder()

@@ -12,6 +12,7 @@ public class CreateByManagerCommand : CreateCommand
     public string Username { get; set; }
     public Department? Department { get; set; } = Enums.Department.HoChiMinh;
     public string? Phone { get; set; }
+    public Guid? SemesterId { get; set; }
 }
 
 // var user = new User

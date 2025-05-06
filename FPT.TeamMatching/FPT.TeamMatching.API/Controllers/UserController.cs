@@ -129,7 +129,7 @@ public class UserController : ControllerBase
     [HttpPost("import/students/many")]
     public async Task<IActionResult> ImportStudents([FromForm] ImportUserModel file)
     {
-        var msg = await _userService.ImportStudents(file.file);
+        var msg = await _userService.ImportStudents(file.file, file.semesterId);
         return Ok(msg);
     }
 
@@ -155,9 +155,9 @@ public class UserController : ControllerBase
     }
 
     [HttpPut("import/students/update-existed")]
-    public async Task<IActionResult> UpdateStudentExistedRange([FromBody] UserResult[] userResults)
+    public async Task<IActionResult> UpdateStudentExistedRange([FromBody] UserResult[] userResults, [FromQuery] Guid semesterId)
     {
-        var msg = await _userService.UpdateStudentExistedRange(userResults);
+        var msg = await _userService.UpdateStudentExistedRange(userResults, semesterId);
         return Ok(msg);
     }
 
