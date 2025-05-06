@@ -256,6 +256,12 @@ public static class FilterHelper
                 m.Type != null && m.Type == query.Type);
         }
 
+        if (query.Status != null)
+        {
+            queryable = queryable.Where(m =>
+                m.Status != null && m.Status == query.Status);
+        }
+
         if (query.ProjectId != null)
         {
             queryable = queryable.Where(m =>
@@ -270,9 +276,14 @@ public static class FilterHelper
 
         if (!string.IsNullOrWhiteSpace(query.Title))
         {
-            queryable = queryable.Where(m =>
-                m.Title.ToLower().StartsWith(query.Title.ToLower()));
+            var keywords = query.Title.ToLower().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+            foreach (var keyword in keywords)
+            {
+                queryable = queryable.Where(m => m.Title.ToLower().Contains(keyword));
+            }
         }
+
 
 
         queryable = BaseFilterHelper.Base(queryable, query);
