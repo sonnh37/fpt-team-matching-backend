@@ -34,10 +34,12 @@ namespace FPT.TeamMatching.Services
     {
         private readonly ICapstoneScheduleRepository _capstoneScheduleRepository;
         private  readonly INotificationService _notificationService;
+        private readonly ISemesterRepository _semesterRepository;
         public CapstoneScheduleService(IMapper mapper, IUnitOfWork unitOfWork, INotificationService notificationService) : base(mapper, unitOfWork)
         {
             _notificationService = notificationService;
             _capstoneScheduleRepository = _unitOfWork.CapstoneScheduleRepository;
+            _semesterRepository = _unitOfWork.SemesterRepository;
         }
 
         public async Task<BusinessResult> GetByProjectId(Guid projectId)
@@ -112,7 +114,15 @@ namespace FPT.TeamMatching.Services
                 var filePath = Path.Combine(uploadsFolder, file.Name);
 
                 // Unique key := date.slot.room
-                
+                var currentSemester = await _semesterRepository.GetCurrentSemester();
+                if (currentSemester == null)
+                {
+                    return new ResponseBuilder()
+                        .WithStatus(Const.FAIL_CODE)
+                        .WithMessage("Không tìm thấy kì hiện tại");
+                }
+             
+                var capstoneSchedules1 = await _capstoneScheduleRepository.GetBySemesterIdAndStage(currentSemester.Id, 1);    
                 var listCapstoneSchedule = await _capstoneScheduleRepository.GetAll();
                 var existingKeys = listCapstoneSchedule
                     .Select(x => $"{x.Date.Value.AddHours(7):yyyy-MM-dd}.{x.Time.Trim().ToLower()}.{x.HallName.Trim().ToLower()}")
@@ -139,6 +149,17 @@ namespace FPT.TeamMatching.Services
                                 var ideaCode = reader.GetValue(1).ToString();
                                 var date = reader.GetValue(3).ToString();
                                 if (string.IsNullOrWhiteSpace(date))
+                                {
+                                    failList.Add(new CapstoneScheduleExcelModel
+                                    {
+                                        STT = stt,
+                                        TopicCode = ideaCode,
+                                        Reason = "Ngày không hợp lệ"
+                                    });
+                                    continue;
+                                }
+
+                                if (DateTime.Parse(date).ToLocalTime().Date < DateTime.Today.ToLocalTime())
                                 {
                                     failList.Add(new CapstoneScheduleExcelModel
                                     {
@@ -184,6 +205,24 @@ namespace FPT.TeamMatching.Services
                                         Reason = "Hội trường không thể là rỗng"
                                     });
                                     continue;
+                                }
+
+                                if (stage == 2)
+                                {
+                                    var foundDefense1 = capstoneSchedules1.FirstOrDefault(x => x.Project.Topic.TopicCode == ideaCode);
+                                    if (foundDefense1 != null)
+                                    {
+                                        if (foundDefense1.Date.Value.ToLocalTime() > DateTime.Parse(date).ToLocalTime())
+                                        {
+                                            failList.Add(new CapstoneScheduleExcelModel
+                                            {
+                                                STT = stt,
+                                                TopicCode = ideaCode,
+                                                Reason = "Ngày ở defense 2 không được nhỏ hơn ngày ở defense 1"
+                                            });
+                                            continue;
+                                        }
+                                    }
                                 }
                                 capStoneReaders.Add(new CapStoneReader
                                 {
@@ -268,7 +307,8 @@ namespace FPT.TeamMatching.Services
                 {
                     return new ResponseBuilder()
                         .WithStatus(Const.FAIL_CODE)
-                        .WithMessage(Const.FAIL_SAVE_MSG);
+                        .WithMessage(Const.FAIL_SAVE_MSG)
+                        .WithData(failList);
                 }
                 
                 List<NotificationCreateForTeam> notifications = new List<NotificationCreateForTeam>();
@@ -311,7 +351,7 @@ namespace FPT.TeamMatching.Services
                     .ToHashSet();
                 if (existingKeys.Contains(uniqueKey))
                 {
-                    return new ResponseBuilder().WithStatus(Const.FAIL_CODE).WithMessage("Phòng đã nhóm");
+                    return new ResponseBuilder().WithStatus(Const.FAIL_CODE).WithMessage("Phòng đã có nhóm");
                 }
 
                 if (listCapstoneSchedule.Any(x => x.ProjectId == command.ProjectId && x.Stage == command.Stage))
@@ -319,6 +359,25 @@ namespace FPT.TeamMatching.Services
                     return new ResponseBuilder()
                         .WithStatus(Const.FAIL_CODE)
                         .WithMessage("Lịch bảo vệ của nhóm đã tồn tại");
+                }
+
+                if (command.Date.Value.LocalDateTime.Date <= DateTime.Now.ToLocalTime().Date)
+                {
+                    return new ResponseBuilder()
+                        .WithStatus(Const.FAIL_CODE)
+                        .WithMessage("Ngày không hợp lệ");
+                }
+                var listDefense = await _capstoneScheduleRepository.GetByProjectId(command.ProjectId.Value);
+                var defense1 = listDefense.FirstOrDefault(x => x.Stage == 1);
+
+                if (defense1 != null && command.Stage == 2)
+                {
+                    if (defense1.Date.Value.ToLocalTime() > command.Date.Value.LocalDateTime)
+                    {
+                        return new ResponseBuilder()
+                            .WithStatus(Const.FAIL_CODE)
+                            .WithMessage("Lịch bảo vệ lần 2 không thể nhỏ hơn lần 1");
+                    }
                 }
 
                 var entities = _mapper.Map<CapstoneSchedule>(command);
@@ -363,6 +422,19 @@ namespace FPT.TeamMatching.Services
                 if (existingKeys.Contains(uniqueKey))
                 {
                     return new ResponseBuilder().WithStatus(Const.FAIL_CODE).WithMessage("Phòng đã nhóm");
+                }
+                
+                var listDefense = await _capstoneScheduleRepository.GetByProjectId(command.ProjectId.Value);
+                var defense1 = listDefense.FirstOrDefault(x => x.Stage == 1);
+
+                if (defense1 != null && command.Stage == 2)
+                {
+                    if (defense1.Date.Value.ToLocalTime() > command.Date.Value.LocalDateTime)
+                    {
+                        return new ResponseBuilder()
+                            .WithStatus(Const.FAIL_CODE)
+                            .WithMessage("Lịch bảo vệ lần 2 không thể nhỏ hơn lần 1");
+                    }
                 }
 
                 currentCapstoneSchedule.Time = command.Time;
