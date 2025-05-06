@@ -49,10 +49,10 @@ public interface IUserService : IBaseService
 
     Task<BusinessResult> GetStudentDoNotHaveTeam();
     Task<BusinessResult> GetAllReviewer();
-    Task<BusinessResult> ImportStudents(IFormFile file);
+    Task<BusinessResult> ImportStudents(IFormFile file, Guid semesterId);
     Task<BusinessResult> ImportStudent(CreateByManagerCommand command);
     Task<BusinessResult> ImportLecturers(IFormFile file);
     Task<BusinessResult> ImportLecturer(CreateByManagerCommand command);
-    Task<BusinessResult> UpdateStudentExistedRange(UserResult[] users);
+    Task<BusinessResult> UpdateStudentExistedRange(UserResult[] users, Guid semesterId);
     Task<BusinessResult> GetSuggestionByEmail(string email);
 }
