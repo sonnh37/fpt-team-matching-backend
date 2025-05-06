@@ -211,6 +211,16 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
         return null;
     }
 
+    public async Task<int> NumberOfProjectInSemester(Guid semesterId)
+    {
+        var number = await _context.Projects.Where(e =>
+                e.IsDeleted == false &&
+                e.Leader != null &&
+                e.Leader.UserXRoles.Any(m => m.SemesterId == semesterId))
+            .CountAsync();
+        return number;
+    }
+
     public async Task<int> NumberOfInProgressProjectInSemester(Guid semesterId)
     {
         var number = await _context.Projects.Where(e => e.Status == ProjectStatus.InProgress &&

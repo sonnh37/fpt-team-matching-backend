@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using FPT.TeamMatching.Domain.Enums;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Base;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.IdeaVersionRequest;
 
@@ -18,16 +19,12 @@ namespace FPT.TeamMatching.Domain.Contracts.Repositories
 
         Task<(List<IdeaVersionRequest>, int)> GetDataUnassignedReviewer(GetQueryableQuery query);
 
+        Task<int> CountStatusCouncilsForIdea(Guid ideaId, IdeaVersionRequestStatus status);
+
         Task<(List<IdeaVersionRequest>, int)> GetIdeaVersionRequestsForCurrentReviewerByRolesAndStatus(
             IdeaGetListByStatusAndRoleQuery query, Guid userId);
 
-        Task<int> CountApprovedCouncilsForIdea(Guid ideaId);
-
-        Task<int> CountRejectedCouncilsForIdea(Guid ideaId);
-
         Task<int> CountCouncilsForIdea(Guid ideaId);
-
-        Task<int> CountConsiderCouncilsForIdea(Guid ideaId);
 
         Task<List<IdeaVersionRequest>?> GetRoleMentorNotApproveInSemester(Guid semesterId);
     }

@@ -122,7 +122,7 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
         }
 
         var queryable = GetQueryable()
-            .Include(i => i.Owner)
+            .Include(i => i.Owner).ThenInclude(m => m.Projects)
             .Include(i => i.Mentor)
             .Include(i => i.SubMentor)
             .Include(i => i.Specialty)
@@ -225,9 +225,9 @@ public class IdeaRepository : BaseRepository<Idea>, IIdeaRepository
             var result = query.Select(y => new CustomIdeaResultModel
             {
                 IdeaId = y.Id,
-                TeamCode = y.IdeaVersions.FirstOrDefault().Topic.Project.TeamCode,
-                IdeaCode = y.IdeaVersions.FirstOrDefault().Topic.TopicCode,
-                Review = y.IdeaVersions.FirstOrDefault().Topic.Project.Reviews
+                TeamCode = y.IdeaVersions.FirstOrDefault(x => x.Version == y.IdeaVersions.Max(x => x.Version)).Topic.Project.TeamCode,
+                IdeaCode = y.IdeaVersions.FirstOrDefault(x => x.Version == y.IdeaVersions.Max(x => x.Version)).Topic.TopicCode,
+                Review = y.IdeaVersions.FirstOrDefault(x => x.Version == y.IdeaVersions.Max(x => x.Version)).Topic.Project.Reviews
                     .Where(review => review.Number == reviewNumber)
                     .Select(review => new ReviewUpdateCommand
                     {

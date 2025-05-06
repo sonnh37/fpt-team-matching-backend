@@ -126,7 +126,7 @@ namespace FPT.TeamMatching.Services
             {
                 var semester = await _semesterRepository.GetById(semesterId);
                 if (semester == null) return string.Empty;
-                var numberOfProjects = await _unitOfWork.ProjectRepository.NumberOfInProgressProjectInSemester(semester.Id);
+                var numberOfProjects = await _unitOfWork.ProjectRepository.NumberOfProjectInSemester(semester.Id);
                 // Tạo số thứ tự tiếp theo
                 int nextNumber = numberOfProjects + 1;
                 string semesterCode = semester.SemesterCode;

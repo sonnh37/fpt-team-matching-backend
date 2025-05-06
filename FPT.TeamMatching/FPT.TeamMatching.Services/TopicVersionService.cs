@@ -16,6 +16,7 @@ using System.Threading.Tasks;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Notifications;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.TopicVersions;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.TopicVersionRequests;
+using Microsoft.EntityFrameworkCore;
 
 namespace FPT.TeamMatching.Services
 {
@@ -25,6 +26,7 @@ namespace FPT.TeamMatching.Services
         private readonly IIdeaRepository _ideaRepository;
         private readonly ITopicRepository _topicRepository;
         private readonly ITopicVersionRequestRepository _topicVersionRequestRepository;
+        private readonly IReviewRepository _reviewRepository;
         private readonly INotificationService _notificationService;
         public TopicVersionService(IMapper mapper, IUnitOfWork unitOfWork, INotificationService notificationService) : base(mapper, unitOfWork)
         {
@@ -32,6 +34,7 @@ namespace FPT.TeamMatching.Services
             _topicVersionRequestRepository = unitOfWork.TopicVersionRequestRepository;
             _ideaRepository = unitOfWork.IdeaRepository;
             _topicRepository = unitOfWork.TopicRepository;
+            _reviewRepository = unitOfWork.ReviewRepository;
             _notificationService = notificationService;
         }
 
@@ -66,12 +69,43 @@ namespace FPT.TeamMatching.Services
                     .WithStatus(Const.FAIL_CODE)
                     .WithMessage("Nhập đề tài");
                 }
-                var topic = await _topicRepository.GetById((Guid)request.TopicId, true);
+                var topic = await _topicRepository.GetByTopicId(request.TopicId.Value);
                 if (topic == null)
                 {
                     return new ResponseBuilder()
                     .WithStatus(Const.FAIL_CODE)
                     .WithMessage("Đề tài không tồn tại");
+                }
+
+                var currentReview = await _reviewRepository.GetReviewByProjectIdAndNumber(topic.Project.Id, request.ReviewStage);
+                if (currentReview == null)
+                {
+                    return new ResponseBuilder()
+                        .WithStatus(Const.FAIL_CODE)
+                        .WithMessage($"Không tìm thấy review của giai đoạn {request.ReviewStage}");
+                }
+                //Kiểm tra ngày nộp có trước review stage tiếp theo hay không
+                var nextReview = await _reviewRepository.GetReviewByProjectIdAndNumber(topic.Project.Id, request.ReviewStage + 1);
+                if (nextReview == null)
+                {
+                    return new ResponseBuilder()
+                        .WithStatus(Const.FAIL_CODE)
+                        .WithMessage("Đề tài không có review tiếp theo");
+                }
+
+                if (nextReview.ReviewDate != null && nextReview.ReviewDate.Value.LocalDateTime >= DateTime.UtcNow.ToLocalTime())
+                {
+                    return new ResponseBuilder()
+                        .WithStatus(Const.FAIL_CODE)
+                        .WithMessage("Đề tài đã qua review tiếp theo không thể cập nhât");
+                }
+
+                if (DateTime.UtcNow.ToLocalTime() < currentReview.ReviewDate.Value.LocalDateTime)
+                {
+                    return new ResponseBuilder()
+                        .WithStatus(Const.FAIL_CODE)
+                        .WithMessage("Chưa tới thời gian để yêu cầu chỉnh sửa");
+                    
                 }
                 //tao TopicVersion
                 var topicVersion = new TopicVersion

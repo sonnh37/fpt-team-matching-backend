@@ -34,12 +34,12 @@ namespace FPT.TeamMatching.Data.Repositories
 
         public int NumberOfTopicBySemesterId(Guid semesterId)
         {
-            var numberOfTopic = _context.Topics.Where(e => e.IsDeleted == false &&
-                                                           e.IdeaVersion != null &&
-                                                           e.IdeaVersion.StageIdea != null &&
-                                                           e.IdeaVersion.StageIdea.Semester != null &&
-                                                           e.IdeaVersion.StageIdea.Semester.Id == semesterId)
-                .Count();
+            var numberOfTopic = _context.Topics
+                .Count(e => e.IsDeleted == false &&
+                            e.IdeaVersion != null &&
+                            e.IdeaVersion.StageIdea != null &&
+                            e.IdeaVersion.StageIdea.Semester != null &&
+                            e.IdeaVersion.StageIdea.Semester.Id == semesterId);
             return numberOfTopic;
         }
 
@@ -108,6 +108,16 @@ namespace FPT.TeamMatching.Data.Repositories
                 : await queryable.ToListAsync();
 
             return (results, query.IsPagination ? total : results.Count);
+        }
+
+        public async Task<Topic> GetByTopicId(Guid topicId)
+        {
+            var result = await _context.Topics
+                .Include(x => x.IdeaVersion)
+                .ThenInclude(x => x.Idea)
+                .Include(x => x.Project)
+                .FirstOrDefaultAsync(x => x.Id == topicId);
+            return result;
         }
 
         public async Task<List<Topic>> GetAllTopicsByTopicCode(string[] topicCodes)
