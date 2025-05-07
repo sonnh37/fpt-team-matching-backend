@@ -83,14 +83,14 @@ namespace FPT.TeamMatching.API.Controllers
                 // auto-update-when-semester-start
                 var name = _configuration.GetSection("HANGFIRE_SERVER_LOCAL");
                 var timeUpdateProject = Utils.ToCronExpression(request.StartDate.Value);
-                _recurringJobManager.AddOrUpdate("auto-update-project-inprogress-"+request.SemesterCode, () => _ideaService.UpdateWhenSemesterStart(), timeUpdateProject, new RecurringJobOptions { QueueName = name.Value, TimeZone = timeZone});
+                _recurringJobManager.AddOrUpdate("auto-update-project-inprogress-"+request.SemesterCode, () => _ideaService.UpdateWhenSemesterStart(), timeUpdateProject, new RecurringJobOptions {  TimeZone = timeZone});
                 // create review hangfire
                 var timeCreateReview = Utils.ToCronExpression(request.StartDate.Value); // deplay for 5 minutes for project updated
-                _recurringJobManager.AddOrUpdate("auto-create-review-"+request.SemesterCode, () => _reviewService.CreateReviewsForActiveProject(),timeCreateReview , new RecurringJobOptions { QueueName = name.Value, TimeZone = timeZone });
+                _recurringJobManager.AddOrUpdate("auto-create-review-"+request.SemesterCode, () => _reviewService.CreateReviewsForActiveProject(),timeCreateReview , new RecurringJobOptions { TimeZone = timeZone });
                 
                 // auto update idea status 
                 var timePublicIdeaResult = Utils.ToCronExpression(request.PublicTopicDate.Value);
-                _recurringJobManager.AddOrUpdate("auto-update-result-"+request.SemesterCode, () => _ideaService.AutoUpdateIdeaStatus(), timePublicIdeaResult, new RecurringJobOptions { QueueName = name.Value, TimeZone = timeZone });
+                _recurringJobManager.AddOrUpdate("auto-update-result-"+request.SemesterCode, () => _ideaService.AutoUpdateIdeaStatus(), timePublicIdeaResult, new RecurringJobOptions { TimeZone = timeZone });
                 
             }
           
@@ -105,16 +105,16 @@ namespace FPT.TeamMatching.API.Controllers
             var name = _configuration.GetSection("HANGFIRE_SERVER_LOCAL");
            
             var timeUpdateProject = Utils.ToCronExpression(request.StartDate.Value.LocalDateTime);
-            _recurringJobManager.AddOrUpdate("auto-update-project-inprogress-"+request.SemesterCode, () => _ideaService.UpdateWhenSemesterStart(), timeUpdateProject, new RecurringJobOptions { QueueName = name.Value, TimeZone = timeZone});
+            _recurringJobManager.AddOrUpdate("auto-update-project-inprogress-"+request.SemesterCode, () => _ideaService.UpdateWhenSemesterStart(), timeUpdateProject, new RecurringJobOptions {  TimeZone = timeZone});
             // create review hangfire
             // _backgroundJobClient.Schedule(() => _ideaService.UpdateWhenSemesterStart(),
             //     request.StartDate.Value.LocalDateTime.AddHours(23) - DateTimeOffset.Now);
            
             var timeCreateReview = Utils.ToCronExpression(request.StartDate.Value); // deplay for 5 minutes for project updated
-            _recurringJobManager.AddOrUpdate("auto-create-review-"+request.SemesterCode, () => _reviewService.CreateReviewsForActiveProject(),timeCreateReview , new RecurringJobOptions { QueueName = name.Value, TimeZone = timeZone });
+            _recurringJobManager.AddOrUpdate("auto-create-review-"+request.SemesterCode, () => _reviewService.CreateReviewsForActiveProject(),timeCreateReview , new RecurringJobOptions { TimeZone = timeZone });
            
             var timePublicIdeaResult = Utils.ToCronExpression(request.PublicTopicDate.Value);
-            _recurringJobManager.AddOrUpdate("auto-update-result-"+request.SemesterCode, () => _ideaService.AutoUpdateIdeaStatus(), timePublicIdeaResult, new RecurringJobOptions { QueueName = name.Value, TimeZone = timeZone });
+            _recurringJobManager.AddOrUpdate("auto-update-result-"+request.SemesterCode, () => _ideaService.AutoUpdateIdeaStatus(), timePublicIdeaResult, new RecurringJobOptions { TimeZone = timeZone });
             return Ok(businessResult);
         }
 
