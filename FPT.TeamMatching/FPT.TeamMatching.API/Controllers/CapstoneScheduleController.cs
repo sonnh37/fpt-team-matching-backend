@@ -88,5 +88,12 @@ namespace FPT.TeamMatching.API.Controllers
             var msg = await _service.GetByProjectId(projectId);
             return Ok(msg);
         }
+
+        [HttpPut("update-demo")]
+        public async Task<IActionResult> UpdateDemo([FromQuery] Guid capstoneScheduleId)
+        {
+            var msg = await _service.UpdateCapstoneScheduleDemo(capstoneScheduleId);
+            return Ok(msg);
+        }
     }
 }

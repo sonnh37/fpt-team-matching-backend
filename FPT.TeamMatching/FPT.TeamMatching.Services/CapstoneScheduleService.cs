@@ -460,5 +460,30 @@ namespace FPT.TeamMatching.Services
                     .WithMessage(e.Message);
             }
         }
+
+        public async Task<BusinessResult> UpdateCapstoneScheduleDemo(Guid capstoneScheduleId)
+        {
+            var capstoneSchedule = await _capstoneScheduleRepository.GetById(capstoneScheduleId);
+            if (capstoneSchedule == null)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage(Const.NOT_FOUND_MSG);
+            }
+            
+            capstoneSchedule.Date = DateTime.UtcNow;
+            _capstoneScheduleRepository.Update(capstoneSchedule);
+            var saveChange = await _unitOfWork.SaveChanges();
+            if (!saveChange)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage(Const.FAIL_SAVE_MSG);
+            }
+            
+            return new ResponseBuilder()
+                .WithStatus(Const.SUCCESS_CODE)
+                .WithMessage(Const.SUCCESS_SAVE_MSG);
+        }
     }
 }

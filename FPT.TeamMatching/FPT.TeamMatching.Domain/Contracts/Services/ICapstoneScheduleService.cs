@@ -18,5 +18,6 @@ namespace FPT.TeamMatching.Domain.Contracts.Services
         Task<BusinessResult> GetByProjectId(Guid projectId);
        Task<BusinessResult> AddCapstoneSchedule(CapstoneScheduleCreateCommand command);
        Task<BusinessResult> UpdateCapstoneSchedule(CapstoneScheduleUpdateCommand command);
+       Task<BusinessResult> UpdateCapstoneScheduleDemo(Guid capstoneScheduleId);
     }
 }
