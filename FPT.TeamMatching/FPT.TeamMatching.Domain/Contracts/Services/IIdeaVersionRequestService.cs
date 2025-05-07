@@ -13,6 +13,7 @@ namespace FPT.TeamMatching.Domain.Contracts.Services
         Task<BusinessResult> RespondByMentorOrCouncil(IdeaVersionRequestLecturerOrCouncilResponseCommand command);
 
         Task CreateVersionRequests(Idea idea, Guid versionId, Guid criteriaFormId);
+        Task CreateVersionRequesForFirstCreateIdea(Idea idea, Guid versionId, Guid criteriaFormId);
 
         Task<BusinessResult> GetAll<TResult>(IdeaVersionRequestGetAllQuery query) where TResult : BaseResult;
 

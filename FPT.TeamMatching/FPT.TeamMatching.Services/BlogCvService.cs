@@ -49,6 +49,7 @@ public class BlogCvService : BaseService<BlogCv>, IBlogCvService
             }
             var blogCv = _mapper.Map<BlogCv>(command);
             _blogCvRepository.Add(blogCv);
+            await SetBaseEntityForCreation(blogCv);
             var isSuccess = await _unitOfWork.SaveChanges();
             if (isSuccess)
             {
