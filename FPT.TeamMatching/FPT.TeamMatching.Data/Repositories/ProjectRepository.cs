@@ -24,8 +24,6 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
 
     public async Task<Project?> GetProjectByUserIdLogin(Guid userId)
     {
-        var semesterCurrent = await _semesterRepository.GetCurrentSemester();
-        if (semesterCurrent == null) return null;
         var teamMember = await _context.TeamMembers.Where(e => e.UserId == userId &&
                                                                e.LeaveDate == null &&
                                                                (e.Status != TeamMemberStatus.Fail2) &&
@@ -56,8 +54,6 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
     
     public async Task<Project?> GetProjectByUserIdLoginFollowNewest(Guid userId)
     {
-        var semesterCurrent = await _semesterRepository.GetCurrentSemester();
-        if (semesterCurrent == null) return null;
         var teamMember = await _context.TeamMembers.Where(e => e.UserId == userId &&
                                                                e.LeaveDate == null &&
                                                                // (e.Status != TeamMemberStatus.Fail2) &&

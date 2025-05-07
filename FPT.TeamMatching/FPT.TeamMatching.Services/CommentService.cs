@@ -54,6 +54,7 @@ public class CommentService : BaseService<Comment>, ICommentService
             }
             var comment = _mapper.Map<Comment>(command);
             _commentRepository.Add(comment);
+            await SetBaseEntityForCreation(comment);
             var isSuccess = await _unitOfWork.SaveChanges();
             if (isSuccess)
             {

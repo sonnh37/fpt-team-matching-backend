@@ -134,7 +134,7 @@ public class IdeaService : BaseService<Idea>, IIdeaService
 
 
             // 5. Create requests and notifications
-            await _ideaVersionRequestService.CreateVersionRequests(idea, ideaVersion.Id, semester.CriteriaFormId.Value);
+            await _ideaVersionRequestService.CreateVersionRequesForFirstCreateIdea(idea, ideaVersion.Id, semester.CriteriaFormId.Value);
             if (!await _unitOfWork.SaveChanges()) return HandlerFail("Lưu không thành công idea version request");
             await SendNotifications(idea, ideaVersion.Abbreviations);
 

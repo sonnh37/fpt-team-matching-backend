@@ -82,6 +82,38 @@ public class IdeaVersionRequestService : BaseService<IdeaVersionRequest>, IIdeaV
         //     _ideaVersionRequestRepository.Add(subMentorRequest);
         // }
     }
+    
+    public async Task CreateVersionRequesForFirstCreateIdea(Idea idea, Guid versionId, Guid criteriaFormId)
+    {
+        var semesterUpComing = await _semesterRepository.GetUpComingSemester();
+        var mentor = await GetUserByRole("Mentor", semesterUpComing?.Id);
+        // Mentor request
+        var mentorRequest = new IdeaVersionRequest
+        {
+            IdeaVersionId = versionId,
+            ReviewerId = idea.MentorId,
+            CriteriaFormId = criteriaFormId,
+            Status = mentor != null ? IdeaVersionRequestStatus.Approved : IdeaVersionRequestStatus.Pending,
+            Role = "Mentor",
+        };
+        await SetBaseEntityForCreation(mentorRequest);
+        _ideaVersionRequestRepository.Add(mentorRequest);
+
+        // Submentor request if exists
+        if (idea.SubMentorId.HasValue)
+        {
+            var subMentorRequest = new IdeaVersionRequest
+            {
+                IdeaVersionId = versionId,
+                ReviewerId = idea.SubMentorId.Value,
+                CriteriaFormId = criteriaFormId,
+                Status = IdeaVersionRequestStatus.Pending,
+                Role = "SubMentor",
+            };
+            await SetBaseEntityForCreation(subMentorRequest);
+            _ideaVersionRequestRepository.Add(subMentorRequest);
+        }
+    }
 
     public async Task<BusinessResult>
         GetAll<TResult>(IdeaVersionRequestGetAllQuery query) where TResult : BaseResult
