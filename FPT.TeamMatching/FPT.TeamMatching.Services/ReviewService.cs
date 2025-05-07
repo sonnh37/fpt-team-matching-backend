@@ -870,6 +870,12 @@ public class ReviewService : BaseService<Review>, IReviewService
                     .WithMessage(Const.FAIL_SAVE_MSG);
             }
 
+            await _notificationService.CreateForTeam(new NotificationCreateForTeam
+            {
+                ProjectId = request.ProjectId.Value,
+                Description = $"Đề tài của nhóm đã có lịch review {request.Number}"
+            });
+
             return new ResponseBuilder()
                 .WithStatus(Const.SUCCESS_CODE)
                 .WithMessage(Const.SUCCESS_SAVE_MSG);

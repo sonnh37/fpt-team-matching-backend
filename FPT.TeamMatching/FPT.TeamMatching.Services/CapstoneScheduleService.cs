@@ -449,6 +449,12 @@ namespace FPT.TeamMatching.Services
                         .WithMessage("Save change fail");
                 }
 
+                await _notificationService.CreateForTeam(new NotificationCreateForTeam
+                {
+                    ProjectId = command.ProjectId.Value,
+                    Description = $"Lịch bảo vệ lần {command.Stage} của nhóm đã có"
+                });
+
                 return new ResponseBuilder()
                     .WithStatus(Const.SUCCESS_CODE)
                     .WithMessage(Const.SUCCESS_SAVE_MSG);
