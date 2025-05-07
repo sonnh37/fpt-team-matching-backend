@@ -624,7 +624,7 @@ public class NotificationService : BaseService<Notification>, INotificationServi
             var noti = _mapper.Map<Notification>(createCommand);
             noti.Id = Guid.NewGuid();
             noti.IsRead = false;
-            noti.Type = NotificationType.RoleBased;
+            noti.Type = NotificationType.Individual;
             await SetBaseEntityForCreation(noti);
             _notificationRepository.Add(noti);
             var isSuccess = await _unitOfWork.SaveChanges();
