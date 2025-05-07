@@ -19,4 +19,5 @@ public interface IReviewService : IBaseService
     Task<BusinessResult> ExportExcelForReviews();
     Task<BusinessResult> GetReviewByReviewerId(Guid reviewerId);
     Task<BusinessResult> UpdateReview(ReviewUpdateCommand request);
+    Task<BusinessResult> UpdateReviewDemo(Guid reviewId);
 }

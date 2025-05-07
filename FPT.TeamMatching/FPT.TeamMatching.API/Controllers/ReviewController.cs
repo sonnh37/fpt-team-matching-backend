@@ -118,6 +118,13 @@ public class ReviewController : ControllerBase
         var result = await _service.GetReviewByReviewerId(reviewerId);
         return Ok(result);
     }
+
+    [HttpPut("update-demo")]
+    public async Task<IActionResult> UpdateDemo([FromQuery] Guid reviewId)
+    {
+        var result = await _service.UpdateReviewDemo(reviewId);
+        return Ok(result);
+    }
     //[HttpPut("council-assign-reviewers")]
     //public async Task<IActionResult> CouncilAssignReviewers([FromBody] CouncilAssignReviewers request)
     //{

@@ -881,7 +881,7 @@ public class ReviewService : BaseService<Review>, IReviewService
                 .WithMessage(e.Message);
         }
     }
-
+    
     private async Task<DataTable> GetProjectInProgress()
     {
         DataTable dt = new DataTable();
@@ -927,4 +927,37 @@ public class ReviewService : BaseService<Review>, IReviewService
         dt.Columns.Add("Room", typeof(string));
         return dt;
     }
+    public async Task<BusinessResult> UpdateReviewDemo(Guid reviewId)
+    {
+        try
+        {
+            var review = await _reviewRepository.GetById(reviewId);
+            if (review == null)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage(Const.NOT_FOUND_MSG);
+            }
+
+            review.ReviewDate = DateTime.UtcNow;
+            _reviewRepository.Update(review);
+            var saveChange = await _unitOfWork.SaveChanges();
+            if (!saveChange)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage(Const.FAIL_SAVE_MSG);
+            }
+            
+            return new ResponseBuilder()
+                .WithStatus(Const.SUCCESS_CODE)
+                .WithMessage(Const.SUCCESS_SAVE_MSG);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+    }
+
 }
