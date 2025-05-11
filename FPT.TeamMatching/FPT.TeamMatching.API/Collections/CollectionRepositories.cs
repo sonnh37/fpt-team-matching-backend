@@ -54,5 +54,6 @@ public static class CollectionRepositories
         services.AddScoped<ICriteriaFormRepository, CriteriaFormRepository>();
         services.AddScoped<ICriteriaXCriteriaFormRepository, CriteriaXCriteriaFormRepository>();
         services.AddScoped<IAnswerCriteriaRepository, AnswerCriteriaRepository>();
+        services.AddScoped<INotificationXUserRepository, NotificationXUserRepository>();
     }
 }

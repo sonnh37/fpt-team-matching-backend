@@ -162,7 +162,8 @@ public static class IncludeHelper
 
     private static IQueryable<Notification>? Notification(IQueryable<Notification> queryable)
     {
-        queryable = queryable.Include(m => m.User);
+        queryable = queryable.Include(m => m.User)
+            .Include(x => x.NotificationXUsers);
 
         return queryable;
     }
