@@ -23,6 +23,8 @@ public partial class FPTMatchingDbContext : BaseDbContext
 
     public virtual DbSet<Notification> Notifications { get; set; } //
 
+    public virtual DbSet<NotificationXUser> NotificationXUsers { get; set; } //
+
     public virtual DbSet<Profession> Professions { get; set; } //
 
     public virtual DbSet<Specialty> Specialties { get; set; } //
@@ -50,12 +52,6 @@ public partial class FPTMatchingDbContext : BaseDbContext
     public virtual DbSet<IdeaVersion> IdeaVersions { get; set; } //
 
     public virtual DbSet<IdeaVersionRequest> IdeaVersionRequests { get; set; } //
-
-    // public virtual DbSet<Conversation> Conversations { get; set; } //
-    //
-    // public virtual DbSet<ConversationMember> ConversationMembers { get; set; } //
-    //
-    // public virtual DbSet<Message> Messages { get; set; } //
 
     public virtual DbSet<UserXRole> UserXRoles { get; set; } //
 
@@ -185,6 +181,22 @@ public partial class FPTMatchingDbContext : BaseDbContext
 
             entity.HasOne(d => d.Project).WithMany(p => p.Notifications)
                 .HasForeignKey(d => d.ProjectId);
+        });
+
+        modelBuilder.Entity<NotificationXUser>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            entity.ToTable("NotificationXUser");
+
+            entity.Property(e => e.Id).ValueGeneratedOnAdd()
+                .HasDefaultValueSql("gen_random_uuid()");
+
+            entity.HasOne(d => d.User).WithMany(p => p.NotificationXUsers)
+                .HasForeignKey(d => d.UserId);
+
+            entity.HasOne(d => d.Notification).WithMany(p => p.NotificationXUsers)
+                .HasForeignKey(d => d.NotificationId);
         });
 
         modelBuilder.Entity<ProfileStudent>(entity =>

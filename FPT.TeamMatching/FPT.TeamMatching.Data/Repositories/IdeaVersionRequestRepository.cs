@@ -59,8 +59,7 @@ public class IdeaVersionRequestRepository : BaseRepository<IdeaVersionRequest>, 
     public async Task<(List<IdeaVersionRequest>, int)> GetDataExceptPending(IdeaVersionRequestGetAllQuery query)
     {
         var queryable = GetQueryable();
-        //sua db
-        //queryable = queryable.Include(m => m.Idea)
+
         queryable = queryable
             .Include(m => m.Reviewer);
         queryable = queryable

@@ -40,10 +40,10 @@ public class NotificationRepository : BaseRepository<Notification>, INotificatio
             
 
         // Điều kiện filter chính
-        queryable = queryable.Where(x => 
+        queryable = queryable.Where(x =>
                 // Thông báo cá nhân (Individual)
                 (x.Type == NotificationType.Individual && x.UserId == userId) ||
-        
+
                 // Thông báo hệ thống (SystemWide) - cho tất cả user
                 (x.Type == NotificationType.SystemWide) ||
         
@@ -51,12 +51,6 @@ public class NotificationRepository : BaseRepository<Notification>, INotificatio
                 (x.Type == NotificationType.Team && x.ProjectId == projectId) 
         
         );
-
-        // Filter theo trạng thái đọc
-        if (query.IsRead.HasValue)
-        {
-            queryable = queryable.Where(m => m.IsRead == query.IsRead.Value);
-        }
 
         // Xử lý phân trang
         if (query.IsPagination)
