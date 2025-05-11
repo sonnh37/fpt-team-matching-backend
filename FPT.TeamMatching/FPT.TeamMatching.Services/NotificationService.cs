@@ -241,26 +241,28 @@ public class NotificationService : BaseService<Notification>, INotificationServi
                 return HandlerFail("Not logged in");
             var userId = userIdClaim.Value;
 
-            var notifications = await _notificationRepository.GetQueryable(n => n.UserId == userId)
-                .ToListAsync();
+            // var notifications = await _notificationRepository.GetQueryable(n => n.UserId == userId)
+            //     .ToListAsync();
+            //
+            // if (!notifications.Any())
+            //     return new ResponseBuilder()
+            //         .WithStatus(Const.SUCCESS_CODE)
+            //         .WithMessage(Const.SUCCESS_READ_MSG);
+            //
+            // foreach (var notification in notifications)
+            // {
+            //     await SetBaseEntityForUpdate(notification);
+            // }
+            
 
-            if (!notifications.Any())
-                return new ResponseBuilder()
-                    .WithStatus(Const.SUCCESS_CODE)
-                    .WithMessage(Const.SUCCESS_READ_MSG);
+            // var isSaveChanges = await _unitOfWork.SaveChanges();
+            // if (!isSaveChanges)
+            //     return HandlerFail("Save error.");
 
-            foreach (var notification in notifications)
-            {
-                await SetBaseEntityForUpdate(notification);
-            }
-
-            var isSaveChanges = await _unitOfWork.SaveChanges();
-            if (!isSaveChanges)
-                return HandlerFail("Save error.");
-
-            return new ResponseBuilder()
-                .WithStatus(Const.SUCCESS_CODE)
-                .WithMessage($"Marked {notifications.Count} notifications as read");
+            // return new ResponseBuilder()
+            //     .WithStatus(Const.SUCCESS_CODE)
+            //     .WithMessage($"Marked {notifications.Count} notifications as read");
+            throw null;
         }
         catch (Exception e)
         {
@@ -363,6 +365,15 @@ public class NotificationService : BaseService<Notification>, INotificationServi
             var noti = _mapper.Map<Notification>(createCommand);
             noti.Id = Guid.NewGuid();
             noti.Type = NotificationType.Individual;
+            noti.NotificationXUsers = new List<NotificationXUser>
+            {
+                new NotificationXUser
+                {
+                    UserId = user.Id,
+                    NotificationId = noti.Id,
+                    IsRead = false
+                }
+            };
             await SetBaseEntityForCreation(noti);
             _notificationRepository.Add(noti);
             var isSuccess = await _unitOfWork.SaveChanges();
@@ -431,6 +442,17 @@ public class NotificationService : BaseService<Notification>, INotificationServi
             noti.Id = Guid.NewGuid();
             noti.ProjectId = createCommand.ProjectId;
             noti.Type = NotificationType.Team;
+            var listNotiMembers = new List<NotificationXUser>();
+            foreach (var teamMember in teamMembers)
+            {
+                listNotiMembers.Add(new NotificationXUser
+                {
+                    UserId = teamMember.Id,
+                    NotificationId = noti.Id,
+                    IsRead = false
+                });
+            }
+            noti.NotificationXUsers = listNotiMembers;
             await SetBaseEntityForCreation(noti);
             _notificationRepository.Add(noti);
             var isSuccess = await _unitOfWork.SaveChanges();
