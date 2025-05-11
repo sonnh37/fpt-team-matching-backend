@@ -216,10 +216,6 @@ public class NotificationService : BaseService<Notification>, INotificationServi
             if (notification.UserId != userIdClaim)
                 return HandlerFail("Unauthorized to mark this notification as read");
 
-            if (notification.IsRead)
-                return HandlerFail("Notification is already read");
-
-            notification.IsRead = true;
             await SetBaseEntityForUpdate(notification);
             _notificationRepository.Update(notification);
             var isSaveChanges = await _unitOfWork.SaveChanges();
@@ -245,7 +241,7 @@ public class NotificationService : BaseService<Notification>, INotificationServi
                 return HandlerFail("Not logged in");
             var userId = userIdClaim.Value;
 
-            var notifications = await _notificationRepository.GetQueryable(n => n.UserId == userId && !n.IsRead)
+            var notifications = await _notificationRepository.GetQueryable(n => n.UserId == userId)
                 .ToListAsync();
 
             if (!notifications.Any())
@@ -255,7 +251,6 @@ public class NotificationService : BaseService<Notification>, INotificationServi
 
             foreach (var notification in notifications)
             {
-                notification.IsRead = true;
                 await SetBaseEntityForUpdate(notification);
             }
 
@@ -306,7 +301,6 @@ public class NotificationService : BaseService<Notification>, INotificationServi
                 //2. Tạo thông báo
                 var noti = _mapper.Map<Notification>(createCommand);
                 noti.Id = Guid.NewGuid();
-                noti.IsRead = false;
                 noti.UserId = userId;
                 noti.Type = NotificationType.Individual;
                 await SetBaseEntityForCreation(noti);
@@ -368,7 +362,6 @@ public class NotificationService : BaseService<Notification>, INotificationServi
             //2. Tạo thông báo
             var noti = _mapper.Map<Notification>(createCommand);
             noti.Id = Guid.NewGuid();
-            noti.IsRead = false;
             noti.Type = NotificationType.Individual;
             await SetBaseEntityForCreation(noti);
             _notificationRepository.Add(noti);
@@ -436,7 +429,6 @@ public class NotificationService : BaseService<Notification>, INotificationServi
             //1. Tạo thông báo
             var noti = _mapper.Map<Notification>(createCommand);
             noti.Id = Guid.NewGuid();
-            noti.IsRead = false;
             noti.ProjectId = createCommand.ProjectId;
             noti.Type = NotificationType.Team;
             await SetBaseEntityForCreation(noti);
@@ -490,7 +482,6 @@ public class NotificationService : BaseService<Notification>, INotificationServi
             //1. Tạo thông báo
             var noti = _mapper.Map<Notification>(createCommand);
             noti.Id = Guid.NewGuid();
-            noti.IsRead = false;
             noti.Type = NotificationType.SystemWide;
             await SetBaseEntityForCreation(noti);
             _notificationRepository.Add(noti);
@@ -559,7 +550,6 @@ public class NotificationService : BaseService<Notification>, INotificationServi
             //1. Tạo thông báo
             var noti = _mapper.Map<Notification>(createCommand);
             noti.Id = Guid.NewGuid();
-            noti.IsRead = false;
             noti.Type = NotificationType.RoleBased;
             await SetBaseEntityForCreation(noti);
             _notificationRepository.Add(noti);
@@ -623,7 +613,6 @@ public class NotificationService : BaseService<Notification>, INotificationServi
             //1. Tạo thông báo
             var noti = _mapper.Map<Notification>(createCommand);
             noti.Id = Guid.NewGuid();
-            noti.IsRead = false;
             noti.Type = NotificationType.Individual;
             await SetBaseEntityForCreation(noti);
             _notificationRepository.Add(noti);
@@ -666,7 +655,6 @@ public class NotificationService : BaseService<Notification>, INotificationServi
         {
             var noti = new Notification();
             noti.Id = Guid.NewGuid();
-            noti.IsRead = false;
             noti.Description = notificationCreateForTeam.Description;
             noti.ProjectId = notificationCreateForTeam.ProjectId;
             noti.Type = NotificationType.Team;

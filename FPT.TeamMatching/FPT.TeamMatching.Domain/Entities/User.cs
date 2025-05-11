@@ -57,8 +57,6 @@ public class User : BaseEntity
 
     public virtual ICollection<Like> Likes { get; set; } = new List<Like>();
 
-    public virtual ICollection<Notification> Notifications { get; set; } = new List<Notification>();
-
     public virtual ICollection<Project> Projects { get; set; } = new List<Project>();
 
     public virtual ICollection<Project> ProjectOfLeaders { get; set; } = new List<Project>();
@@ -72,4 +70,8 @@ public class User : BaseEntity
     public virtual ICollection<Review> Reviewer1s { get; set; } = new List<Review>();
 
     public virtual ICollection<Review> Reviewer2s { get; set; } = new List<Review>();
+
+    public virtual ICollection<Notification> Notifications { get; set; } = new List<Notification>();
+
+    public virtual ICollection<NotificationXUser> NotificationXUsers { get; set; } = new List<NotificationXUser>();
 }
