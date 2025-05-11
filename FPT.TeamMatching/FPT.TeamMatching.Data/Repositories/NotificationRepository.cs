@@ -36,7 +36,8 @@ public class NotificationRepository : BaseRepository<Notification>, INotificatio
     {
         var queryable = GetQueryable();
         queryable = queryable.Include(m => m.User)
-            .Include(m => m.Project);
+            .Include(m => m.Project)
+            .Include(x => x.NotificationXUsers);
             
 
         // Điều kiện filter chính

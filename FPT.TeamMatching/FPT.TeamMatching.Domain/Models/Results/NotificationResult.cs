@@ -21,4 +21,5 @@ public class NotificationResult : BaseResult
     public UserResult? User { get; set; }
 
     public ProjectResult? Project { get; set; }
+    public ICollection<NotificationXUser>? NotificationXUsers { get; set; }
 }

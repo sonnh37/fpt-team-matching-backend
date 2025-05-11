@@ -112,6 +112,7 @@ public class NotificationService : BaseService<Notification>, INotificationServi
             // get lại lấy include userId
             return await _unitOfWork.NotificationRepository.GetById(entity.Id);
         }
+        
 
         return null;
     }
@@ -205,19 +206,34 @@ public class NotificationService : BaseService<Notification>, INotificationServi
         {
             var userIdClaim = GetUserIdFromClaims();
             if (userIdClaim == null)
-                return HandlerFail("Not logged in");
+                return HandlerFail("Vui lòng đăng nhập");
             var userId = userIdClaim.Value;
 
             var notification = await _notificationRepository.GetById(id);
 
             if (notification == null)
-                return HandlerFail("Notification not found");
+                return HandlerFail("Không tìm thấy thông báo");
 
             if (notification.UserId != userIdClaim)
                 return HandlerFail("Unauthorized to mark this notification as read");
-
-            await SetBaseEntityForUpdate(notification);
-            _notificationRepository.Update(notification);
+            var notificationXUser = await _unitOfWork.NotificationXUserRepository.GetByUserIdAndNotiId(notification.UserId.Value, notification.Id);
+            if (notificationXUser == null)
+            {
+                // system noti 
+                _unitOfWork.NotificationXUserRepository.Add(new NotificationXUser
+                {
+                    NotificationId = notification.Id,
+                    UserId = notification.UserId.Value,
+                    IsRead = true
+                });
+            }
+            else
+            {
+                notificationXUser.IsRead = true;
+                _unitOfWork.NotificationXUserRepository.Update(notificationXUser);
+            }
+            // await SetBaseEntityForUpdate(notification);
+            // _notificationRepository.Update(notification);
             var isSaveChanges = await _unitOfWork.SaveChanges();
             if (!isSaveChanges)
                 return HandlerFail("Save error.");
@@ -241,6 +257,48 @@ public class NotificationService : BaseService<Notification>, INotificationServi
                 return HandlerFail("Not logged in");
             var userId = userIdClaim.Value;
 
+            var userNoti = await _unitOfWork.NotificationXUserRepository.GetUnreadByUserId(userId);
+            if (userNoti == null)
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("Không tìm thấy noti");
+            
+            userNoti.ForEach(x => x.IsRead = true);
+            _unitOfWork.NotificationXUserRepository.UpdateRange(userNoti);
+            
+            
+            // Xử lý tin nhắn hệ thống
+            var systemNoti = await _notificationRepository.GetSystemNotification();
+            var allnoti = await _unitOfWork.NotificationXUserRepository.GetAllByUserId(userId);
+            var existingNotificationIds = allnoti.Select(n => n.NotificationId).ToHashSet();
+            List<NotificationXUser> notificationXUsers = new List<NotificationXUser>();
+            var newSystemNotis = systemNoti
+                .Where(n => !existingNotificationIds.Contains(n.Id))
+                .ToList();
+            
+            foreach (var newSystemNoti in newSystemNotis)
+            {
+                notificationXUsers.Add(new NotificationXUser
+                {
+                    UserId = userId,
+                    NotificationId = newSystemNoti.Id,
+                    IsRead = true,
+                    CreatedDate = DateTime.UtcNow,
+                });
+            }
+            _unitOfWork.NotificationXUserRepository.AddRange(notificationXUsers);
+            var saveChange = await _unitOfWork.SaveChanges();
+            if (!saveChange)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage(Const.FAIL_SAVE_MSG);
+            }
+            
+            return new ResponseBuilder()
+                .WithStatus(Const.SUCCESS_CODE)
+                .WithMessage(Const.SUCCESS_READ_MSG);
+            
             // var notifications = await _notificationRepository.GetQueryable(n => n.UserId == userId)
             //     .ToListAsync();
             //
@@ -262,7 +320,7 @@ public class NotificationService : BaseService<Notification>, INotificationServi
             // return new ResponseBuilder()
             //     .WithStatus(Const.SUCCESS_CODE)
             //     .WithMessage($"Marked {notifications.Count} notifications as read");
-            throw null;
+            
         }
         catch (Exception e)
         {
@@ -275,55 +333,56 @@ public class NotificationService : BaseService<Notification>, INotificationServi
     {
         try
         {
-            if (createCommand.Description?.Trim() == null)
-            {
-                return new ResponseBuilder()
-                    .WithStatus(Const.FAIL_CODE)
-                    .WithMessage("Miêu tả của thông báo không thể bỏ trống");
-            }
+            // if (createCommand.Description?.Trim() == null)
+            // {
+            //     return new ResponseBuilder()
+            //         .WithStatus(Const.FAIL_CODE)
+            //         .WithMessage("Miêu tả của thông báo không thể bỏ trống");
+            // }
+            //
+            // if (userIds.Count == 0)
+            // {
+            //     return new ResponseBuilder()
+            //         .WithStatus(Const.FAIL_CODE)
+            //         .WithMessage("Nhập danh sách user id");
+            // }
+            //
+            // foreach (var userId in userIds)
+            // {
+            //     //1. Kiểm tra user có tồn tại trong hệ thống
+            //     var user = await _unitOfWork.UserRepository.GetById(userId);
+            //     if (user == null || user.IsDeleted)
+            //     {
+            //         return new ResponseBuilder()
+            //             .WithStatus(Const.FAIL_CODE)
+            //             .WithMessage("Không tìm thấy user");
+            //     }
+            //
+            //     //2. Tạo thông báo
+            //     var noti = _mapper.Map<Notification>(createCommand);
+            //     noti.Id = Guid.NewGuid();
+            //     noti.UserId = userId;
+            //     noti.Type = NotificationType.Individual;
+            //     await SetBaseEntityForCreation(noti);
+            //     _notificationRepository.Add(noti);
+            //     var isSuccess = await _unitOfWork.SaveChanges();
+            //     if (isSuccess)
+            //     {
+            //         var rs = await _notificationRepository.GetById(noti.Id);
+            //         if (rs != null)
+            //         {
+            //             //3. Push notification
+            //             await SendNotification(userId.ToString(), rs);
+            //         }
+            //     }
+            // }
+            //
+            // var msg = new ResponseBuilder()
+            //     .WithStatus(Const.SUCCESS_CODE)
+            //     .WithMessage(Const.SUCCESS_SAVE_MSG);
 
-            if (userIds.Count == 0)
-            {
-                return new ResponseBuilder()
-                    .WithStatus(Const.FAIL_CODE)
-                    .WithMessage("Nhập danh sách user id");
-            }
-
-            foreach (var userId in userIds)
-            {
-                //1. Kiểm tra user có tồn tại trong hệ thống
-                var user = await _unitOfWork.UserRepository.GetById(userId);
-                if (user == null || user.IsDeleted)
-                {
-                    return new ResponseBuilder()
-                        .WithStatus(Const.FAIL_CODE)
-                        .WithMessage("Không tìm thấy user");
-                }
-
-                //2. Tạo thông báo
-                var noti = _mapper.Map<Notification>(createCommand);
-                noti.Id = Guid.NewGuid();
-                noti.UserId = userId;
-                noti.Type = NotificationType.Individual;
-                await SetBaseEntityForCreation(noti);
-                _notificationRepository.Add(noti);
-                var isSuccess = await _unitOfWork.SaveChanges();
-                if (isSuccess)
-                {
-                    var rs = await _notificationRepository.GetById(noti.Id);
-                    if (rs != null)
-                    {
-                        //3. Push notification
-                        await SendNotification(userId.ToString(), rs);
-                    }
-                }
-            }
-
-            var msg = new ResponseBuilder()
-                .WithStatus(Const.SUCCESS_CODE)
-                .WithMessage(Const.SUCCESS_SAVE_MSG);
-
-            return msg;
+            // return msg;
+            return null;
         }
         catch (Exception ex)
         {
@@ -376,6 +435,12 @@ public class NotificationService : BaseService<Notification>, INotificationServi
             };
             await SetBaseEntityForCreation(noti);
             _notificationRepository.Add(noti);
+            _unitOfWork.NotificationXUserRepository.Add(new NotificationXUser
+            {
+                UserId = user.Id,
+                NotificationId = noti.Id,
+                IsRead = false
+            });
             var isSuccess = await _unitOfWork.SaveChanges();
             if (isSuccess)
             {
@@ -638,6 +703,11 @@ public class NotificationService : BaseService<Notification>, INotificationServi
             noti.Type = NotificationType.Individual;
             await SetBaseEntityForCreation(noti);
             _notificationRepository.Add(noti);
+            _unitOfWork.NotificationXUserRepository.Add(new NotificationXUser
+            {
+                UserId = user.Id,
+                NotificationId = noti.Id,
+            });
             var isSuccess = await _unitOfWork.SaveChanges();
             if (isSuccess)
             {
