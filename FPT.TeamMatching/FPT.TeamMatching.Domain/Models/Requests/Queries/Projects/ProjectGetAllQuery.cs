@@ -25,5 +25,10 @@ public class ProjectGetAllQuery : GetQueryableQuery
     public Guid? SpecialtyId { get; set; }
     public Guid? ProfessionId { get; set; }
     public string? EnglishName { get; set; }
+    
+    public List<string> Roles { get; set; } = new List<string>();
+    public string? LeaderEmail { get; set; }
+    public string? TopicName { get; set; }
+
 
 }

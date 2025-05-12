@@ -81,6 +81,23 @@ public static class FilterHelper
 
     private static IQueryable<Project>? Project(IQueryable<Project> queryable, ProjectGetAllQuery query)
     {
+        if (query.Roles.Contains("Mentor"))
+        {
+            queryable = queryable.Where(m =>
+                m.Topic != null &&
+                m.Topic.IdeaVersion != null &&
+                m.Topic.IdeaVersion.Idea != null &&
+                m.Topic.IdeaVersion.Idea.SubMentorId == null);
+        }
+        else if (query.Roles.Contains("SubMentor"))
+        {
+            queryable = queryable.Where(m =>
+                m.Topic != null &&
+                m.Topic.IdeaVersion != null &&
+                m.Topic.IdeaVersion.Idea != null &&
+                m.Topic.IdeaVersion.Idea.SubMentorId != null);
+        }
+
         if (query.IsHasTeam)
         {
             queryable = queryable.Where(m => m.TeamMembers.Count > 0);
@@ -93,6 +110,32 @@ public static class FilterHelper
                 m.Topic.IdeaVersion.Idea != null &&
                 m.Topic.IdeaVersion.Idea.SpecialtyId == query.SpecialtyId);
         }
+
+        if (query.TeamCode != null)
+        {
+            queryable = queryable.Where(m =>
+                m.TeamCode != null && m.TeamCode.ToLower().Trim().Contains(query.TeamCode.ToLower().Trim()));
+        }
+
+        if (query.TeamName != null)
+        {
+            queryable = queryable.Where(m =>
+                m.TeamName != null && m.TeamName.ToLower().Trim().Contains(query.TeamName.ToLower().Trim()));
+        }
+
+        if (query.LeaderEmail != null)
+        {
+            queryable = queryable.Where(m =>
+                m.Leader != null && m.Leader.Email != null &&
+                m.Leader.Email.ToLower().Trim().Contains(query.LeaderEmail.ToLower().Trim()));
+        }
+
+        // if (query.TopicName != null)
+        // {
+        //     queryable = queryable.Where(m =>
+        //         m.Topic != null && m.Topic. != null &&
+        //         m.Leader.Email.ToLower().Trim().Contains(query.LeaderEmail.ToLower().Trim()));
+        // }
 
         if (query.ProfessionId != null)
         {
