@@ -42,4 +42,5 @@ public interface IUnitOfWork : IBaseUnitOfWork
     ICriteriaFormRepository CriteriaFormRepository { get; }
     ICriteriaXCriteriaFormRepository CriteriaXCriteriaFormRepository { get; }
     IAnswerCriteriaRepository AnswerCriteriaRepository { get; }
+    INotificationXUserRepository NotificationXUserRepository { get; }
 }

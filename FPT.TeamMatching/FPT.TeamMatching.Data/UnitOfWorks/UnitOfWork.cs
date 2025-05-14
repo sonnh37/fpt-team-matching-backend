@@ -47,4 +47,5 @@ public class UnitOfWork : BaseUnitOfWork<FPTMatchingDbContext>, IUnitOfWork
     public ITopicRequestRepository TopicRequestRepository => GetRepository<ITopicRequestRepository>();
 
     public IMentorFeedbackRepository MentorFeedbackRepository => GetRepository<IMentorFeedbackRepository>();
+    public INotificationXUserRepository NotificationXUserRepository => GetRepository<INotificationXUserRepository>();
 }

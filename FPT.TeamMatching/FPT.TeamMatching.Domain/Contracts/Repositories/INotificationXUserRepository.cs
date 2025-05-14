@@ -10,5 +10,8 @@ namespace FPT.TeamMatching.Domain.Contracts.Repositories
 {
     public interface INotificationXUserRepository: IBaseRepository<NotificationXUser>
     {
+        Task<List<NotificationXUser>> GetUnreadByUserId(Guid userId);
+        Task<List<NotificationXUser>> GetAllByUserId(Guid userId);
+        Task<NotificationXUser> GetByUserIdAndNotiId(Guid userId, Guid notificationId);
     }
 }
