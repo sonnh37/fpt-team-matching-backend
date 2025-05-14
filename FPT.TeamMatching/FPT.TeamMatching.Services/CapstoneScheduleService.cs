@@ -241,7 +241,7 @@ namespace FPT.TeamMatching.Services
                 
                 var topicCode = capStoneReaders.Select(x => x.IdeaCode).Distinct().ToArray();
                 
-                var topics = await _unitOfWork.TopicRepository.GetAllTopicsByTopicCode(topicCode);
+                var topics = await _unitOfWork.TopicRepository.GetTopicsByTopicCodes(topicCode);
                 List<CapstoneSchedule> capstones = new List<CapstoneSchedule>();
 
                 //Quy hoach dong

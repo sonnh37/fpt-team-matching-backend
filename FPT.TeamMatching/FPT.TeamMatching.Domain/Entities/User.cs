@@ -35,15 +35,15 @@ public class User : BaseEntity
 
     public virtual ICollection<Blog> Blogs { get; set; } = new List<Blog>();
 
-    public virtual ICollection<IdeaVersionRequest> IdeaVersionRequestOfReviewers { get; set; } = new List<IdeaVersionRequest>();
+    public virtual ICollection<TopicRequest> TopicRequestOfReviewers { get; set; } = new List<TopicRequest>();
 
-    public virtual ICollection<Idea> IdeaOfOwners { get; set; } = new List<Idea>();
+    public virtual ICollection<Topic> TopicOfOwners { get; set; } = new List<Topic>();
 
-    public virtual ICollection<Idea> IdeaOfMentors { get; set; } = new List<Idea>();
+    public virtual ICollection<Topic> TopicOfMentors { get; set; } = new List<Topic>();
 
-    public virtual ICollection<Idea> IdeaOfSubMentors { get; set; } = new List<Idea>();
+    public virtual ICollection<Topic> TopicOfSubMentors { get; set; } = new List<Topic>();
 
-    public virtual ICollection<TopicVersionRequest> TopicVersionReviewers { get; set; } = new List<TopicVersionRequest>();
+    public virtual ICollection<TopicVersionRequest> TopicVersionRequestOfReviewers { get; set; } = new List<TopicVersionRequest>();
 
     public virtual ICollection<UserXRole> UserXRoles { get; set; } = new List<UserXRole>();
 
@@ -58,8 +58,6 @@ public class User : BaseEntity
     public virtual ICollection<Like> Likes { get; set; } = new List<Like>();
 
     public virtual ICollection<Project> Projects { get; set; } = new List<Project>();
-
-    public virtual ICollection<Project> ProjectOfLeaders { get; set; } = new List<Project>();
 
     public virtual ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
 

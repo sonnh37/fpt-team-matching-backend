@@ -47,17 +47,13 @@ public partial class FPTMatchingDbContext : BaseDbContext
 
     public virtual DbSet<Semester> Semesters { get; set; } //
 
-    public virtual DbSet<Idea> Ideas { get; set; } //
-
-    public virtual DbSet<IdeaVersion> IdeaVersions { get; set; } //
-
-    public virtual DbSet<IdeaVersionRequest> IdeaVersionRequests { get; set; } //
-
     public virtual DbSet<UserXRole> UserXRoles { get; set; } //
 
     public virtual DbSet<Role> Roles { get; set; } //
 
     public virtual DbSet<Topic> Topics { get; set; } //
+
+    public virtual DbSet<TopicRequest> TopicRequests { get; set; } //
 
     public virtual DbSet<TopicVersion> TopicVersions { get; set; } //
 
@@ -65,13 +61,11 @@ public partial class FPTMatchingDbContext : BaseDbContext
 
     public virtual DbSet<CapstoneSchedule> CapstoneSchedules { get; set; } //
 
-    public virtual DbSet<StageIdea> StageIdeas { get; set; } //
+    public virtual DbSet<StageTopic> StageTopics { get; set; } //
 
     public virtual DbSet<MentorTopicRequest> MentorTopicRequests { get; set; } //
 
     public virtual DbSet<MentorFeedback> MentorFeedbacks { get; set; } //
-
-    public virtual DbSet<Timeline> Timelines { get; set; } //
 
     public virtual DbSet<Criteria> Criterias { get; set; } //
 
@@ -389,64 +383,6 @@ public partial class FPTMatchingDbContext : BaseDbContext
                 .HasForeignKey(d => d.CriteriaFormId);
         });
 
-        modelBuilder.Entity<Idea>(entity =>
-        {
-            entity.HasKey(e => e.Id);
-
-            entity.ToTable("Idea");
-
-            entity.Property(e => e.Id).ValueGeneratedOnAdd()
-                .HasDefaultValueSql("gen_random_uuid()");
-
-            entity.HasOne(d => d.Owner).WithMany(p => p.IdeaOfOwners)
-                .HasForeignKey(d => d.OwnerId);
-
-            entity.HasOne(d => d.Mentor).WithMany(p => p.IdeaOfMentors)
-                .HasForeignKey(d => d.MentorId);
-
-            entity.HasOne(d => d.SubMentor).WithMany(p => p.IdeaOfSubMentors)
-                .HasForeignKey(d => d.SubMentorId);
-
-            entity.HasOne(d => d.Specialty).WithMany(p => p.Ideas)
-                .HasForeignKey(d => d.SpecialtyId);
-        });
-
-        modelBuilder.Entity<IdeaVersion>(entity =>
-        {
-            entity.HasKey(e => e.Id);
-
-            entity.ToTable("IdeaVersion");
-
-            entity.Property(e => e.Id).ValueGeneratedOnAdd()
-                .HasDefaultValueSql("gen_random_uuid()");
-
-            entity.HasOne(d => d.Idea).WithMany(p => p.IdeaVersions)
-                .HasForeignKey(d => d.IdeaId)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            entity.HasOne(d => d.StageIdea).WithMany(p => p.IdeaVersions)
-                .HasForeignKey(d => d.StageIdeaId);
-        });
-
-        modelBuilder.Entity<IdeaVersionRequest>(entity =>
-        {
-            entity.HasKey(e => e.Id);
-
-            entity.ToTable("IdeaVersionRequest");
-
-            entity.Property(e => e.Id).ValueGeneratedOnAdd()
-                .HasDefaultValueSql("gen_random_uuid()");
-
-            entity.HasOne(d => d.IdeaVersion).WithMany(p => p.IdeaVersionRequests)
-                .HasForeignKey(d => d.IdeaVersionId).OnDelete(DeleteBehavior.Cascade);
-
-            entity.HasOne(d => d.Reviewer).WithMany(p => p.IdeaVersionRequestOfReviewers)
-                .HasForeignKey(d => d.ReviewerId);
-
-            entity.HasOne(d => d.CriteriaForm).WithMany(p => p.IdeaVersionRequests)
-                .HasForeignKey(d => d.CriteriaFormId);
-        });
-
         modelBuilder.Entity<Topic>(entity =>
         {
             entity.HasKey(e => e.Id);
@@ -456,8 +392,39 @@ public partial class FPTMatchingDbContext : BaseDbContext
             entity.Property(e => e.Id).ValueGeneratedOnAdd()
                 .HasDefaultValueSql("gen_random_uuid()");
 
-            entity.HasOne(d => d.IdeaVersion).WithOne(p => p.Topic)
-                .HasForeignKey<Topic>(d => d.IdeaVersionId);
+            entity.HasOne(d => d.Owner).WithMany(p => p.TopicOfOwners)
+                .HasForeignKey(d => d.OwnerId);
+
+            entity.HasOne(d => d.Mentor).WithMany(p => p.TopicOfMentors)
+                .HasForeignKey(d => d.MentorId);
+
+            entity.HasOne(d => d.SubMentor).WithMany(p => p.TopicOfSubMentors)
+                .HasForeignKey(d => d.SubMentorId);
+
+            entity.HasOne(d => d.Specialty).WithMany(p => p.Topics)
+                .HasForeignKey(d => d.SpecialtyId);
+
+            entity.HasOne(d => d.StageTopic).WithMany(p => p.Topics)
+                .HasForeignKey(d => d.StageTopicId);
+        });
+
+        modelBuilder.Entity<TopicRequest>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            entity.ToTable("TopicRequest");
+
+            entity.Property(e => e.Id).ValueGeneratedOnAdd()
+                .HasDefaultValueSql("gen_random_uuid()");
+
+            entity.HasOne(d => d.Topic).WithMany(p => p.TopicRequests)
+                .HasForeignKey(d => d.TopicId).OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(d => d.Reviewer).WithMany(p => p.TopicRequestOfReviewers)
+                .HasForeignKey(d => d.ReviewerId);
+
+            entity.HasOne(d => d.CriteriaForm).WithMany(p => p.TopicRequests)
+                .HasForeignKey(d => d.CriteriaFormId);
         });
 
         modelBuilder.Entity<TopicVersion>(entity =>
@@ -485,7 +452,7 @@ public partial class FPTMatchingDbContext : BaseDbContext
             entity.HasOne(d => d.TopicVersion).WithMany(p => p.TopicVersionRequests)
                 .HasForeignKey(d => d.TopicVersionId);
 
-            entity.HasOne(d => d.Reviewer).WithMany(p => p.TopicVersionReviewers)
+            entity.HasOne(d => d.Reviewer).WithMany(p => p.TopicVersionRequestOfReviewers)
                 .HasForeignKey(d => d.ReviewerId);
         });
 
@@ -525,16 +492,16 @@ public partial class FPTMatchingDbContext : BaseDbContext
                 .HasForeignKey(d => d.ProjectId);
         });
 
-        modelBuilder.Entity<StageIdea>(entity =>
+        modelBuilder.Entity<StageTopic>(entity =>
         {
             entity.HasKey(e => e.Id);
 
-            entity.ToTable("StageIdea");
+            entity.ToTable("StageTopic");
 
             entity.Property(e => e.Id).ValueGeneratedOnAdd()
                 .HasDefaultValueSql("gen_random_uuid()");
 
-            entity.HasOne(d => d.Semester).WithMany(p => p.StageIdeas)
+            entity.HasOne(d => d.Semester).WithMany(p => p.StageTopics)
                 .HasForeignKey(d => d.SemesterId);
         });
 
@@ -567,18 +534,18 @@ public partial class FPTMatchingDbContext : BaseDbContext
                 .HasForeignKey<MentorFeedback>(d => d.ProjectId);
         });
 
-        modelBuilder.Entity<Timeline>(entity =>
-        {
-            entity.HasKey(e => e.Id);
+        //modelBuilder.Entity<Timeline>(entity =>
+        //{
+        //    entity.HasKey(e => e.Id);
 
-            entity.ToTable("Timeline");
+        //    entity.ToTable("Timeline");
 
-            entity.Property(e => e.Id).ValueGeneratedOnAdd()
-                .HasDefaultValueSql("gen_random_uuid()");
+        //    entity.Property(e => e.Id).ValueGeneratedOnAdd()
+        //        .HasDefaultValueSql("gen_random_uuid()");
 
-            entity.HasOne(d => d.Semester).WithMany(p => p.Timelines)
-                .HasForeignKey(d => d.SemesterId);
-        });
+        //    entity.HasOne(d => d.Semester).WithMany(p => p.Timelines)
+        //        .HasForeignKey(d => d.SemesterId);
+        //});
 
         modelBuilder.Entity<Criteria>(entity =>
         {
@@ -625,8 +592,8 @@ public partial class FPTMatchingDbContext : BaseDbContext
             entity.Property(e => e.Id).ValueGeneratedOnAdd()
                 .HasDefaultValueSql("gen_random_uuid()");
 
-            entity.HasOne(d => d.IdeaVersionRequest).WithMany(p => p.AnswerCriterias)
-                .HasForeignKey(d => d.IdeaVersionRequestId).OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(d => d.TopicRequest).WithMany(p => p.AnswerCriterias)
+                .HasForeignKey(d => d.TopicRequestId);
 
             entity.HasOne(d => d.Criteria).WithMany(p => p.AnswerCriterias)
                 .HasForeignKey(d => d.CriteriaId);

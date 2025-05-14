@@ -40,16 +40,14 @@ public class ReviewRepository : BaseRepository<Review>, IReviewRepository
         var query = await GetQueryable().Where(e =>
                                     e.IsDeleted == false &&
                                     e.Number == number &&
-                                    e.Project != null 
-                                    &&
-                                    e.Project.Topic.IdeaVersion.StageIdea.SemesterId == semesterId
+                                    e.Project != null &&
+                                    e.Project.Topic.StageTopic.SemesterId == semesterId
                                     )
                                     .Include(x => x.Reviewer1)
                                     .Include(x => x.Reviewer2)
                                     .Include(x => x.Project)
                                     .ThenInclude(x => x.Topic)
-                                    .ThenInclude(x => x.IdeaVersion)
-                                    .ThenInclude(x => x.Idea)
+                                    .ThenInclude(x => x)
                                     .ToListAsync();
 
         return query;
@@ -60,8 +58,7 @@ public class ReviewRepository : BaseRepository<Review>, IReviewRepository
         var queryable = GetQueryable()
             .Include(x => x.Project)
             .ThenInclude(x => x.Topic)
-            .ThenInclude(x => x.IdeaVersion)
-            .ThenInclude(x => x.Idea)
+            .ThenInclude(x => x)
             .Where(x => (x.Reviewer1Id == reviewerId || x.Reviewer2Id == reviewerId) && x.ReviewDate.HasValue);
 
         return await queryable.ToListAsync();

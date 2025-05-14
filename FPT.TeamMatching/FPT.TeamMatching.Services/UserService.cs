@@ -25,7 +25,7 @@ public class UserService : BaseService<User>, IUserService
     private readonly IUserRepository _userRepository;
     private readonly IUserXRoleRepository _userXRoleRepository;
     private readonly ISemesterRepository _semesterRepository;
-    private readonly IIdeaRepository _ideaRepository;
+    private readonly ITopicRepository _topicRepository;
 
     public UserService(IMapper mapper,
         IUnitOfWork unitOfWork)
@@ -35,7 +35,7 @@ public class UserService : BaseService<User>, IUserService
         _roleRepository = _unitOfWork.RoleRepository;
         _userXRoleRepository = _unitOfWork.UserXRoleRepository;
         _semesterRepository = _unitOfWork.SemesterRepository;
-        _ideaRepository = _unitOfWork.IdeaRepository;
+        _topicRepository = _unitOfWork.TopicRepository;
     }
 
     public async Task<BusinessResult> GetByEmail<TResult>(string email) where TResult : BaseResult
@@ -109,7 +109,7 @@ public class UserService : BaseService<User>, IUserService
             if (subMentorId == null)
             {
                 //check idea(chi co mentor) cua mentor in semester 
-                var ideas = _ideaRepository.GetIdeasOnlyMentorOfUserInSemester(mentorId, upcomingSemester.Id);
+                var ideas = _topicRepository.GetTopicsOnlyMentorOfUserInSemester(mentorId, upcomingSemester.Id);
                 //
                 if (ideas == null || ideas.Count() < upcomingSemester.LimitTopicMentorOnly)
                 {
@@ -138,7 +138,7 @@ public class UserService : BaseService<User>, IUserService
             }
 
             var ideasBeSubMentor =
-                _ideaRepository.GetIdeasBeSubMentorOfUserInSemester((Guid)subMentorId, upcomingSemester.Id);
+                _topicRepository.GetTopicsBeSubMentorOfUserInSemester((Guid)subMentorId, upcomingSemester.Id);
             if (ideasBeSubMentor == null || ideasBeSubMentor.Count() < upcomingSemester.LimitTopicSubMentor)
             {
                 return new ResponseBuilder()
@@ -221,7 +221,7 @@ public class UserService : BaseService<User>, IUserService
     {
         try
         {
-            var (data, total) = await _userRepository.GetAllByCouncilWithIdeaVersionRequestPending(query);
+            var (data, total) = await _userRepository.GetAllByCouncilWithTopicVersionRequestPending(query);
             var results = _mapper.Map<List<UserResult>>(data);
             var response = new QueryResult(query, results, total);
 

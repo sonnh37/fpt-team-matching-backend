@@ -13,7 +13,7 @@ namespace FPT.TeamMatching.Domain.Entities
 
         public virtual ICollection<CriteriaXCriteriaForm> CriteriaXCriteriaForms { get; set; } = new List<CriteriaXCriteriaForm>();
 
-        public virtual ICollection<IdeaVersionRequest> IdeaVersionRequests { get; set; } = new List<IdeaVersionRequest>();
+        public virtual ICollection<TopicRequest> TopicRequests { get; set; } = new List<TopicRequest>();
         
         public virtual ICollection<Semester> Semesters { get; set; } = new List<Semester>();
 

@@ -77,11 +77,15 @@ public static class Const
 
     public const string API_RATES = $"{BaseApi}/rates";
 
-    public const string API_IDEAS = $"{BaseApi}/ideas";
+    public const string API_TOPICS = $"{BaseApi}/topics";
 
-    public const string API_IDEA_VERSIONS = $"{BaseApi}/idea-versions";
+    //public const string API_TOPIC_REGISTERS = $"{BaseApi}/topic-registers";
 
-    public const string API_IDEA_VERSION_REQUESTS = $"{BaseApi}/idea-version-requests";
+    public const string API_TOPIC_REQUESTS = $"{BaseApi}/topic-requests";
+
+    public const string API_TOPIC_VERSIONS = $"{BaseApi}/topic-versions";
+
+    public const string API_TOPIC_VERSION_REQUESTS = $"{BaseApi}/topic-version-requests";
 
     public const string API_TEAM_MEMBERS = $"{BaseApi}/team-members";
 
@@ -89,7 +93,7 @@ public static class Const
 
     public const string API_PROFILE_STUDENTS = $"{BaseApi}/profile-students";
 
-    public const string API_SKILLPROFILES = $"{BaseApi}/skill-profiles";
+    public const string API_SKILL_PROFILES = $"{BaseApi}/skill-profiles";
 
     public const string API_MESSAGE = $"{BaseApi}/message";
 
@@ -101,21 +105,15 @@ public static class Const
 
     public const string API_SEMESTERS = $"{BaseApi}/semesters";
 
-    public const string API_STAGE_IDEAS = $"{BaseApi}/stage-ideas";
+    public const string API_STAGE_TOPICS = $"{BaseApi}/stage-topics";
 
     public const string API_CAPSTONE_SCHEDULES = $"{BaseApi}/capstone-schedules";
 
     public const string API_MENTOR_TOPIC_REQUESTS = $"{BaseApi}/mentor-topic-requests";
 
-    public const string API_TOPICS = $"{BaseApi}/topics";
-
-    public const string API_TOPIC_VERSIONS = $"{BaseApi}/topic-versions";
-
-    public const string API_TOPIC_VERSION_REQUESTS = $"{BaseApi}/topic-version-requests";
-
     public const string API_MENTOR_FEEDBACKS = $"{BaseApi}/mentor-feedbacks";
 
-    public const string API_TIMELINES = $"{BaseApi}/timelines";
+    //public const string API_TIMELINES = $"{BaseApi}/timelines";
 
     public const string API_CRITERIAS = $"{BaseApi}/criterias";
 

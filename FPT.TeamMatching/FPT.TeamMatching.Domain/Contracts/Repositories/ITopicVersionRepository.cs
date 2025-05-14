@@ -10,6 +10,6 @@ namespace FPT.TeamMatching.Domain.Contracts.Repositories
 {
     public interface ITopicVersionRepository: IBaseRepository<TopicVersion>
     {
-        Task<List<TopicVersion>> GetAllByIdeaId(Guid ideaId);
+        Task<List<TopicVersion>> GetAllByTopicId(Guid topicId);
     }
 }

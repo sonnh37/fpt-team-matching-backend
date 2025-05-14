@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace FPT.TeamMatching.Domain.Models.Requests.Commands.Topics
 {
-    public class TopicDeleteCommand: DeleteCommand
+    public class TopicDeleteCommand : DeleteCommand
     {
     }
 }

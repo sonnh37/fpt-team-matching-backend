@@ -12,11 +12,10 @@ public static class IncludeHelper
     {
         return (queryable switch
         {
-            IQueryable<Idea> ideas => Idea(ideas) as IQueryable<TEntity>,
             IQueryable<Topic> topics => Topic(topics) as IQueryable<TEntity>,
             IQueryable<TopicVersion> topicVersions => TopicVersion(topicVersions) as IQueryable<TEntity>,
-            IQueryable<IdeaVersionRequest> ideaVersionRequests =>
-                IdeaVersionRequest(ideaVersionRequests) as IQueryable<TEntity>,
+            IQueryable<TopicRequest> ideaVersionRequests =>
+                TopicVersionRequest(ideaVersionRequests) as IQueryable<TEntity>,
             IQueryable<Semester> semesters => Semester(semesters) as IQueryable<TEntity>,
             IQueryable<Project> projects => Project(projects) as IQueryable<TEntity>,
             IQueryable<Profession> professions => Profession(professions) as IQueryable<TEntity>,
@@ -37,19 +36,30 @@ public static class IncludeHelper
 
     private static IQueryable<Semester> Semester(IQueryable<Semester> queryable)
     {
-        queryable = queryable.Include(m => m.StageIdeas);
+        queryable = queryable.Include(m => m.StageTopics);
         return queryable;
     }
 
     private static IQueryable<Topic> Topic(IQueryable<Topic> queryable)
     {
         queryable = queryable
-            .Include(e => e.IdeaVersion)
-            .ThenInclude(e => e.Idea)
-            .ThenInclude(e => e.Mentor)
-            .Include(e => e.IdeaVersion)
-            .ThenInclude(e => e.Idea)
-            .ThenInclude(e => e.SubMentor);
+            .Include(e => e.Owner)
+            .Include(e => e.Mentor)
+            .Include(e => e.SubMentor)
+            .Include(e => e.TopicRequests)
+            .ThenInclude(e => e.Reviewer)
+            .Include(e => e.StageTopic).ThenInclude(m => m.Semester)
+            .Include(e => e.TopicRequests)
+            .ThenInclude(iv => iv.AnswerCriterias)
+            .Include(m => m.Owner)
+            .ThenInclude(u => u.UserXRoles)
+            .ThenInclude(ur => ur.Role)
+            .Include(e => e.TopicVersions)
+            .ThenInclude(m => m.Topic)
+            .Include(m => m.Mentor)
+            .Include(m => m.SubMentor)
+            .Include(m => m.Specialty)
+            .ThenInclude(m => m.Profession);
         return queryable;
     }
 
@@ -57,23 +67,17 @@ public static class IncludeHelper
     {
         queryable = queryable
             .Include(e => e.Topic)
-            .ThenInclude(e => e.IdeaVersion)
-            .ThenInclude(e => e.Idea)
             .ThenInclude(e => e.Mentor)
             .Include(e => e.Topic)
-            .ThenInclude(e => e.IdeaVersion)
-            .ThenInclude(e => e.Idea)
             .ThenInclude(e => e.SubMentor)
             .Include(e => e.Topic)
             .ThenInclude(e => e.Project);
         return queryable;
     }
 
-    private static IQueryable<IdeaVersionRequest> IdeaVersionRequest(IQueryable<IdeaVersionRequest> queryable)
+    private static IQueryable<TopicRequest> TopicVersionRequest(IQueryable<TopicRequest> queryable)
     {
         queryable = queryable
-            .Include(m => m.IdeaVersion)
-            // .ThenInclude(e => e.Idea).ThenInclude(e => e.Mentor)
             .Include(e => e.AnswerCriterias)
             .Include(e => e.CriteriaForm)
             .Include(m => m.Reviewer);
@@ -115,42 +119,17 @@ public static class IncludeHelper
     {
         queryable = queryable.Include(m => m.Project)
             .ThenInclude(e => e.Topic)
-            .ThenInclude(e => e.IdeaVersion)
-            .ThenInclude(e => e.Idea)
-            .ThenInclude(e => e.SubMentor)
+                .ThenInclude(e => e.SubMentor)
             .Include(m => m.Project)
-            .ThenInclude(e => e.Topic)
-            .ThenInclude(e => e.IdeaVersion)
-            .ThenInclude(e => e.Idea)
-            .ThenInclude(e => e.Mentor);
+                .ThenInclude(e => e.Topic)
+                .ThenInclude(e => e.Mentor);
         queryable = queryable.Include(m => m.Sender);
         queryable = queryable.Include(m => m.Receiver);
 
         return queryable;
     }
 
-    private static IQueryable<Idea> Idea(IQueryable<Idea> queryable)
-    {
-        queryable = queryable
-            .Include(e => e.IdeaVersions)
-            .ThenInclude(e => e.IdeaVersionRequests)
-            .ThenInclude(e => e.Reviewer)
-            .Include(e => e.IdeaVersions)
-            .ThenInclude(e => e.StageIdea).ThenInclude(m => m.Semester)
-            .Include(e => e.IdeaVersions)
-            .ThenInclude(e => e.IdeaVersionRequests)
-            .ThenInclude(iv => iv.AnswerCriterias)
-            .Include(m => m.Owner)
-            .ThenInclude(u => u.UserXRoles)
-            .ThenInclude(ur => ur.Role)
-            .Include(e => e.IdeaVersions)
-            .ThenInclude(m => m.Topic)
-            .Include(m => m.Mentor)
-            .Include(m => m.SubMentor)
-            .Include(m => m.Specialty)
-            .ThenInclude(m => m.Profession);
-        return queryable;
-    }
+    
 
 
     private static IQueryable<Profession> Profession(IQueryable<Profession> queryable)
@@ -197,20 +176,12 @@ public static class IncludeHelper
             .ThenInclude(e => e.ProfileStudent)
             .ThenInclude(e => e.Specialty)
             .Include(e => e.Topic)
-            .ThenInclude(e => e.IdeaVersion)
-            .ThenInclude(e => e.Idea)
             .ThenInclude(e => e.Specialty)
             .ThenInclude(e => e.Profession)
             .Include(m => m.Topic)
-            .ThenInclude(e => e.IdeaVersion)
-            .ThenInclude(e => e.Idea)
             .ThenInclude(m => m.Owner)
             .Include(x => x.Reviews)
-            .Include(x => x.Topic)
-            .ThenInclude(x => x.IdeaVersion)
-            .ThenInclude(x => x.Idea)
-            .Include(m => m.Leader)
-            .Include(m => m.MentorFeedback);
+            .Include(x => x.MentorFeedback);
 
         return queryable;
     }
@@ -221,12 +192,10 @@ public static class IncludeHelper
             .Include(d => d.Reviewer1)
             .Include(d => d.Reviewer2)
             .Include(x => x.Project)
-            .ThenInclude(y => y.Topic)
-            .ThenInclude(e => e.IdeaVersion)
-            .ThenInclude(y => y.Idea)
+                .ThenInclude(y => y.Topic)
             .Include(x => x.Project)
-            .ThenInclude(y => y.Topic)
-            .ThenInclude(e => e.TopicVersions);
+                .ThenInclude(y => y.Topic)
+                .ThenInclude(e => e.TopicVersions);
 
 
         return queryable;
@@ -237,8 +206,6 @@ public static class IncludeHelper
         queryable = queryable
             .Include(x => x.Project)
             .ThenInclude(y => y.Topic)
-            .ThenInclude(x => x.IdeaVersion)
-            .ThenInclude(y => y.Idea)
             .Include(x => x.Project)
             .ThenInclude(x => x.TeamMembers)
             .ThenInclude(y => y.User);

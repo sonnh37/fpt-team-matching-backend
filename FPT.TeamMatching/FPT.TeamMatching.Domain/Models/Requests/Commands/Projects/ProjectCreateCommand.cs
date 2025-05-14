@@ -8,6 +8,8 @@ public class ProjectCreateCommand : CreateCommand
 {
     public Guid? LeaderId { get; set; }
 
+    public Guid? SemesterId { get; set; }
+
     public Guid? TopicId { get; set; }
 
     public string? TeamCode { get; set; }

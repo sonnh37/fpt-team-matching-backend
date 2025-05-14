@@ -23,7 +23,6 @@ namespace FPT.TeamMatching.Services
     public class TopicVersionService : BaseService<TopicVersion>, ITopicVersionService
     {
         private readonly ITopicVersionRepository _topicVersionRepository;
-        private readonly IIdeaRepository _ideaRepository;
         private readonly ITopicRepository _topicRepository;
         private readonly ITopicVersionRequestRepository _topicVersionRequestRepository;
         private readonly IReviewRepository _reviewRepository;
@@ -32,7 +31,6 @@ namespace FPT.TeamMatching.Services
         {
             _topicVersionRepository = unitOfWork.TopicVersionRepository;
             _topicVersionRequestRepository = unitOfWork.TopicVersionRequestRepository;
-            _ideaRepository = unitOfWork.IdeaRepository;
             _topicRepository = unitOfWork.TopicRepository;
             _reviewRepository = unitOfWork.ReviewRepository;
             _notificationService = notificationService;
@@ -40,11 +38,11 @@ namespace FPT.TeamMatching.Services
 
         
 
-        public async Task<BusinessResult> GetAllTopicVersionByIdeaId(Guid ideaId)
+        public async Task<BusinessResult> GetAllTopicVersionByIdeaId(Guid topicId)
         {
             try
             {
-                var result = await _topicVersionRepository.GetAllByIdeaId(ideaId);
+                var result = await _topicVersionRepository.GetAllByTopicId(topicId);
                 return new ResponseBuilder()
                     .WithStatus(Const.SUCCESS_CODE)
                     .WithData(result)
@@ -69,7 +67,7 @@ namespace FPT.TeamMatching.Services
                     .WithStatus(Const.FAIL_CODE)
                     .WithMessage("Nhập đề tài");
                 }
-                var topic = await _topicRepository.GetByTopicId(request.TopicId.Value);
+                var topic = await _topicRepository.GetById(request.TopicId.Value);
                 if (topic == null)
                 {
                     return new ResponseBuilder()
@@ -131,7 +129,7 @@ namespace FPT.TeamMatching.Services
                 var topicVersionRequest = new TopicVersionRequest
                 {
                     TopicVersionId = topicVersion.Id,
-                    ReviewerId = topic.IdeaVersion.Idea.MentorId,
+                    ReviewerId = topic.MentorId,
                     Status = TopicVersionRequestStatus.Pending,
                     Role = "Mentor"
                 };
@@ -149,8 +147,8 @@ namespace FPT.TeamMatching.Services
                 //noti chỉnh sửa đề tài cho mentor
                 var noti = new NotificationCreateForIndividual
                 {
-                    UserId = topic.IdeaVersion.Idea.MentorId,
-                    Description = "Đề tài " + topic.IdeaVersion.Abbreviations + " gửi yêu cầu chỉnh sửa sau review " + topicVersion.ReviewStage,
+                    UserId = topic.MentorId,
+                    Description = "Đề tài " + topic.Abbreviation + " gửi yêu cầu chỉnh sửa sau review " + topicVersion.ReviewStage,
                 };
                 await _notificationService.CreateForUser(noti);
                 //

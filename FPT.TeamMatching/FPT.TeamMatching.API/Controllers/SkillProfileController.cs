@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace FPT.TeamMatching.API.Controllers;
 
-[Route(Const.API_SKILLPROFILES)]
+[Route(Const.API_SKILL_PROFILES)]
 [ApiController]
 [Authorize]
 public class SkillProfileController : ControllerBase

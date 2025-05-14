@@ -9,14 +9,14 @@ using FPT.TeamMatching.Domain.Models.Requests.Queries.Comments;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.CriteriaForms;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Criterias;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.CriteriaXCriteriaForms;
-using FPT.TeamMatching.Domain.Models.Requests.Queries.Ideas;
-using FPT.TeamMatching.Domain.Models.Requests.Queries.IdeaVersionRequest;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Invitations;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Likes;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Notifications;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Projects;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Semester;
-using FPT.TeamMatching.Domain.Models.Requests.Queries.StageIdeas;
+using FPT.TeamMatching.Domain.Models.Requests.Queries.StageTopics;
+using FPT.TeamMatching.Domain.Models.Requests.Queries.TopicOld;
+using FPT.TeamMatching.Domain.Models.Requests.Queries.TopicRequest;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Topics;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Users;
 
@@ -33,20 +33,20 @@ public static class FilterHelper
                 User((queryable as IQueryable<User>)!, userQuery) as IQueryable<TEntity>,
             SemesterGetAllQuery semesterQuery =>
                 Semester((queryable as IQueryable<Semester>)!, semesterQuery) as IQueryable<TEntity>,
-            StageIdeaGetAllQuery stageIdeaQuery =>
-                StageIdea((queryable as IQueryable<StageIdea>)!, stageIdeaQuery) as IQueryable<TEntity>,
+            StageTopicGetAllQuery stageTopicQuery =>
+                StageTopic((queryable as IQueryable<StageTopic>)!, stageTopicQuery) as IQueryable<TEntity>,
             ProjectGetAllQuery ProjectQuery =>
                 Project((queryable as IQueryable<Project>)!, ProjectQuery) as IQueryable<TEntity>,
             AnswerCriteriaGetAllQuery AnswerCriteriaQuery =>
                 AnswerCriteria((queryable as IQueryable<AnswerCriteria>)!, AnswerCriteriaQuery) as IQueryable<TEntity>,
             CommentGetAllQuery commentQuery =>
                 Comment((queryable as IQueryable<Comment>)!, commentQuery) as IQueryable<TEntity>,
-            TopicGetAllQuery TopicQuery => Topic((queryable as IQueryable<Topic>)!, TopicQuery) as IQueryable<TEntity>,
-            IdeaVersionRequestGetAllQuery ideaVersionRequestQuery =>
-                IdeaVersionRequest((queryable as IQueryable<IdeaVersionRequest>)!, ideaVersionRequestQuery) as
+            TopicOldGetAllQuery TopicQuery => Topic((queryable as IQueryable<Topic>)!, TopicQuery) as IQueryable<TEntity>,
+            TopicRequestGetAllQuery ideaVersionRequestQuery =>
+                TopicVersionRequest((queryable as IQueryable<TopicRequest>)!, ideaVersionRequestQuery) as
                     IQueryable<TEntity>,
-            IdeaGetAllQuery ideaQuery =>
-                Idea((queryable as IQueryable<Idea>)!, ideaQuery) as IQueryable<TEntity>,
+            TopicGetAllQuery ideaQuery =>
+                Topic((queryable as IQueryable<Topic>)!, ideaQuery) as IQueryable<TEntity>,
             InvitationGetAllQuery invitationQuery =>
                 Invitation((queryable as IQueryable<Invitation>)!, invitationQuery) as IQueryable<TEntity>,
             BlogGetAllQuery blogQuery =>
@@ -69,10 +69,11 @@ public static class FilterHelper
     private static IQueryable<BaseEntity> AnswerCriteria(IQueryable<AnswerCriteria> queryable,
         AnswerCriteriaGetAllQuery query)
     {
-        if (query.IdeaVersionRequestId != null)
-        {
-            queryable = queryable.Where(m => m.IdeaVersionRequestId == query.IdeaVersionRequestId);
-        }
+        //sua db
+        //if (query.TopicVersionRequestId != null)
+        //{
+        //    queryable = queryable.Where(m => m.TopicVersionRequestId == query.TopicVersionRequestId);
+        //}
 
         queryable = BaseFilterHelper.Base(queryable, query);
 
@@ -85,17 +86,13 @@ public static class FilterHelper
         {
             queryable = queryable.Where(m =>
                 m.Topic != null &&
-                m.Topic.IdeaVersion != null &&
-                m.Topic.IdeaVersion.Idea != null &&
-                m.Topic.IdeaVersion.Idea.SubMentorId == null);
+                m.Topic.SubMentorId == null);
         }
         else if (query.Roles.Contains("SubMentor"))
         {
             queryable = queryable.Where(m =>
                 m.Topic != null &&
-                m.Topic.IdeaVersion != null &&
-                m.Topic.IdeaVersion.Idea != null &&
-                m.Topic.IdeaVersion.Idea.SubMentorId != null);
+                m.Topic.SubMentorId != null);
         }
 
         if (query.IsHasTeam)
@@ -106,9 +103,8 @@ public static class FilterHelper
         if (query.SpecialtyId != null)
         {
             queryable = queryable.Where(m =>
-                m.Topic != null && m.Topic.IdeaVersion != null &&
-                m.Topic.IdeaVersion.Idea != null &&
-                m.Topic.IdeaVersion.Idea.SpecialtyId == query.SpecialtyId);
+                m.Topic != null && 
+                m.Topic.SpecialtyId == query.SpecialtyId);
         }
 
         if (query.TeamCode != null)
@@ -141,19 +137,16 @@ public static class FilterHelper
         {
             queryable = queryable.Where(m =>
                 m.Topic != null &&
-                m.Topic.IdeaVersion != null &&
-                m.Topic.IdeaVersion.Idea != null &&
-                m.Topic.IdeaVersion.Idea.Specialty != null &&
-                m.Topic.IdeaVersion.Idea.Specialty.ProfessionId == query.ProfessionId);
+                m.Topic.Specialty != null &&
+                m.Topic.Specialty.ProfessionId == query.ProfessionId);
         }
 
         if (!string.IsNullOrEmpty(query.EnglishName))
         {
             queryable = queryable.Where(m =>
                 m.Topic != null &&
-                m.Topic.IdeaVersion != null &&
-                m.Topic.IdeaVersion.EnglishName != null &&
-                m.Topic.IdeaVersion.EnglishName.ToLower().Trim()
+                m.Topic.EnglishName != null &&
+                m.Topic.EnglishName.ToLower().Trim()
                     .Contains(query.EnglishName.ToLower().Trim()));
         }
 
@@ -167,7 +160,7 @@ public static class FilterHelper
         return queryable;
     }
 
-    private static IQueryable<StageIdea>? StageIdea(IQueryable<StageIdea> queryable, StageIdeaGetAllQuery query)
+    private static IQueryable<StageTopic>? StageTopic(IQueryable<StageTopic> queryable, StageTopicGetAllQuery query)
     {
         if (query.SemesterId != null)
         {
@@ -180,13 +173,14 @@ public static class FilterHelper
         return queryable;
     }
 
-    private static IQueryable<Topic>? Topic(IQueryable<Topic> queryable, TopicGetAllQuery query)
+    private static IQueryable<Topic>? Topic(IQueryable<Topic> queryable, TopicOldGetAllQuery query)
     {
-        if (query.IdeaVersionId != null)
-        {
-            queryable = queryable.Where(e =>
-                e.IdeaVersion != null);
-        }
+        //sua db
+        //if (query.TopicVersionId != null)
+        //{
+        //    queryable = queryable.Where(e =>
+        //        e.TopicVersion != null);
+        //}
 
         queryable = BaseFilterHelper.Base(queryable, query);
 
@@ -390,7 +384,7 @@ public static class FilterHelper
         return queryable;
     }
 
-    private static IQueryable<Idea>? Idea(IQueryable<Idea> queryable, IdeaGetAllQuery query)
+    private static IQueryable<Topic>? Topic(IQueryable<Topic> queryable, TopicGetAllQuery query)
     {
         if (query.SpecialtyId != null)
         {
@@ -447,8 +441,8 @@ public static class FilterHelper
         return queryable;
     }
 
-    private static IQueryable<IdeaVersionRequest>? IdeaVersionRequest(IQueryable<IdeaVersionRequest> queryable,
-        IdeaVersionRequestGetAllQuery query)
+    private static IQueryable<TopicRequest>? TopicVersionRequest(IQueryable<TopicRequest> queryable,
+        TopicRequestGetAllQuery query)
     {
         if (query.Status.HasValue)
         {

@@ -36,17 +36,14 @@ public static class CollectionRepositories
         services.AddScoped<ISpecialtyRepository, SpecialtyRepository>();
 
         services.AddScoped<ISemesterRepository, SemesterRepository>();
-        services.AddScoped<ITimelineRepository, TimelineRepository>();
-        services.AddScoped<IStageIdeaRepositoty, StageIdeaRepository>();
+        services.AddScoped<IStageTopicRepository, StageTopicRepository>();
         services.AddScoped<ICapstoneScheduleRepository, CapstoneScheduleRepository>();
         services.AddScoped<IMentorTopicRequestRepository, MentorTopicRequestRepository>();
         services.AddScoped<IMentorFeedbackRepository, MentorFeedbackRepository>();
 
-        services.AddScoped<IIdeaRepository, IdeaRepository>();
-        services.AddScoped<IIdeaVersionRepository, IdeaVersionRepository>();
-        services.AddScoped<IIdeaVersionRequestRepository, IdeaVersionRequestRepository>();
-
         services.AddScoped<ITopicRepository, TopicRepository>();
+        services.AddScoped<ITopicRequestRepository, TopicRequestRepository>();
+
         services.AddScoped<ITopicVersionRepository, TopicVersionRepository>();
         services.AddScoped<ITopicVersionRequestRepository, TopicVersionRequestRepository>();
 

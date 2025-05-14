@@ -38,10 +38,10 @@ public class BlogRepository : BaseRepository<Blog>, IBlogRepository
                                                 e.Type == Domain.Enums.BlogType.Recruit &&
                                                 e.Project != null &&
                                                 e.Project.Topic != null &&
-                                                e.Project.Topic.IdeaVersion != null &&
-                                                e.Project.Topic.IdeaVersion.StageIdea != null &&
-                                                e.Project.Topic.IdeaVersion.StageIdea.Semester != null &&
-                                                e.Project.Topic.IdeaVersion.StageIdea.Semester.Id == id
+                                                e.Project.Topic != null &&
+                                                e.Project.Topic.StageTopic != null &&
+                                                e.Project.Topic.StageTopic.Semester != null &&
+                                                e.Project.Topic.StageTopic.Semester.Id == id
                                                 )
                                                 .ToListAsync();
         return blogs;

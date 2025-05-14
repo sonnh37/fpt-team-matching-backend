@@ -101,9 +101,11 @@ namespace FPT.TeamMatching.Services
                 if (semester == null) return string.Empty;
                 var semesterCode = semester.SemesterCode;
                 var semesterPrefix = semester.SemesterPrefixName;
-                    
+
                 //get so luong idea dc duyet approve cua ki
-                var numberOfTopics = _unitOfWork.TopicRepository.NumberOfTopicBySemesterId(semester.Id);
+                //sua db
+                //var numberOfTopics = _unitOfWork.TopicRepository.NumberOfTopicBySemesterId(semester.Id);
+                var numberOfTopics = 0;
 
                 // Tạo số thứ tự tiếp theo
                 int nextNumberTopic = numberOfTopics + 1;

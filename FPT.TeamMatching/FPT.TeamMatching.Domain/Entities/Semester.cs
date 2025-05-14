@@ -1,4 +1,5 @@
 ﻿using FPT.TeamMatching.Domain.Entities.Base;
+using FPT.TeamMatching.Domain.Enums;
 
 namespace FPT.TeamMatching.Domain.Entities;
 
@@ -12,11 +13,21 @@ public class Semester : BaseEntity
 
     public string? SemesterPrefixName { get; set; }
 
-    public DateTimeOffset? PublicTopicDate { get; set; }
-
     public DateTimeOffset? StartDate { get; set; }
 
     public DateTimeOffset? EndDate { get; set; }
+
+    public DateTimeOffset? OnGoingDate { get; set; }
+
+    public DateTimeOffset? PublicTopicDate { get; set; }
+
+    public SemesterStatus Status { get; set; }
+
+    public int MaxTeamSize { get; set; }
+
+    public int MinTeamSize { get; set; }
+
+    public int NumberOfTeam { get; set; }
 
     public int LimitTopicMentorOnly { get; set; }
 
@@ -26,10 +37,10 @@ public class Semester : BaseEntity
 
     public virtual ICollection<ProfileStudent> ProfileStudents { get; set; } = new List<ProfileStudent>();
     
-    public virtual ICollection<StageIdea> StageIdeas { get; set; } = new List<StageIdea>();
+    public virtual ICollection<StageTopic> StageTopics { get; set; } = new List<StageTopic>();
 
-    public virtual ICollection<Timeline> Timelines { get; set; } = new List<Timeline>();
-    
     public virtual ICollection<UserXRole> UserXRoles { get; set; } = new List<UserXRole>();
+
+    public virtual ICollection<Project> Projects { get; set; } = new List<Project>();
 
 }
