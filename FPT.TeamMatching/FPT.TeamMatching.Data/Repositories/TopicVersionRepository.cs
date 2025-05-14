@@ -19,13 +19,13 @@ namespace FPT.TeamMatching.Data.Repositories
             _dbContext = dbContext;
         }
 
-        public async Task<List<TopicVersion>> GetAllByIdeaId(Guid ideaId)
+        public async Task<List<TopicVersion>> GetAllByTopicId(Guid topicId)
         {
            //return await GetQueryable().Where(h => h.IdeaId == ideaId).ToListAsync();
            return await GetQueryable()
                .Include(x => x.TopicVersionRequests)
                .Include(x => x.Topic)
-               .Where(h => h.Topic.IdeaVersionId == ideaId).ToListAsync();
+               .Where(h => h.TopicId == topicId).ToListAsync();
         }
     }
 }

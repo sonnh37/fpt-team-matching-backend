@@ -9,13 +9,13 @@ namespace FPT.TeamMatching.Domain.Entities
 {
     public class AnswerCriteria: BaseEntity
     {
-        public Guid? IdeaVersionRequestId { get; set; }
+        public Guid? TopicRequestId { get; set; }
 
         public Guid? CriteriaId { get; set; }
 
         public string? Value { get; set; }
 
-        public virtual IdeaVersionRequest? IdeaVersionRequest { get; set; }
+        public virtual TopicRequest? TopicRequest { get; set; }
 
         public virtual Criteria? Criteria { get; set; }
     }

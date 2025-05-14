@@ -7,6 +7,8 @@ public class ProjectSearchQuery : GetQueryableQuery
 {
     public Guid? LeaderId { get; set; }
 
+    public Guid? SemesterId { get; set; }
+
     public Guid? TopicId { get; set; }
 
     public string? TeamCode { get; set; }
@@ -18,7 +20,7 @@ public class ProjectSearchQuery : GetQueryableQuery
     public int? TeamSize { get; set; }
 
     public int? DefenseStage { get; set; }
-    
+
     public bool IsHasTeam { get; set; }
     
     public Guid? SpecialtyId { get; set; }

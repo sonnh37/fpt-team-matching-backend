@@ -12,7 +12,7 @@ public interface IUnitOfWork : IBaseUnitOfWork
     IBlogRepository BlogRepository { get; }
     ILikeRepository LikeRepository { get; }
     ICommentRepository CommentRepository { get; }
-
+    IBlogCvRepository BlogCvRepository { get; }
 
     IRateRepository RateRepository { get; }
     ITeamMemberRepository TeamMemberRepository { get; }
@@ -22,23 +22,18 @@ public interface IUnitOfWork : IBaseUnitOfWork
     IReviewRepository ReviewRepository { get; }
     IProfileStudentRepository ProfileStudentRepository { get; }
     ISkillProfileRepository SkillProfileRepository { get; }
-    IBlogCvRepository BlogCvRepository { get; }
     
     IProfessionRepository ProfessionRepository { get; }
     ISpecialtyRepository SpecialtyRepository { get; }
     ISemesterRepository SemesterRepository { get; }
-    ITimelineRepository TimelineRepository { get; }
-    IStageIdeaRepositoty StageIdeaRepository { get; }
+    IStageTopicRepository StageTopicRepository { get; }
     ICapstoneScheduleRepository CapstoneScheduleRepository { get; }
     INotificationRepository NotificationRepository { get; }
 
     ITopicRepository TopicRepository { get; }
     ITopicVersionRepository TopicVersionRepository { get; }
     ITopicVersionRequestRepository TopicVersionRequestRepository { get; }
-
-    IIdeaRepository IdeaRepository { get; }
-    IIdeaVersionRepository IdeaVersionRepository { get; }
-    IIdeaVersionRequestRepository IdeaVersionRequestRepository { get; }
+    ITopicRequestRepository TopicRequestRepository { get; }
 
     IMentorTopicRequestRepository MentorTopicRequestRepository { get; }
     IMentorFeedbackRepository MentorFeedbackRepository { get; }

@@ -10,7 +10,7 @@ namespace FPT.TeamMatching.Domain.Models.Results
         
         public ProfessionResult? Profession { get; set; }
 
-        public ICollection<IdeaResult> Ideas { get; set; } = new List<IdeaResult>();
+        public ICollection<TopicResult> Topics { get; set; } = new List<TopicResult>();
 
         public ICollection<ProfileStudentResult> ProfileStudents { get; set; } = new List<ProfileStudentResult>();
     }

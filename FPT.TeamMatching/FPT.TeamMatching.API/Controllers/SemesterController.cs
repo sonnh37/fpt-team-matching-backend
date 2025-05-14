@@ -17,14 +17,14 @@ namespace FPT.TeamMatching.API.Controllers
     {
         private readonly ISemesterService _service;
         private readonly IConfiguration _configuration;
-        private readonly IIdeaService _ideaService;
+        private readonly ITopicService _ideaService;
         private readonly IReviewService _reviewService;
         private readonly IRecurringJobManager _recurringJobManager;
         private readonly IBackgroundJobClient _backgroundJobClient;
         public SemesterController(
             ISemesterService __service,
             IConfiguration configuration,
-            IIdeaService ideaService,
+            ITopicService ideaService,
             IReviewService reviewService,
             IRecurringJobManager recurringJobManager,
             IBackgroundJobClient backgroundJobClient
@@ -90,7 +90,8 @@ namespace FPT.TeamMatching.API.Controllers
                 
                 // auto update idea status 
                 var timePublicIdeaResult = Utils.ToCronExpression(request.PublicTopicDate.Value);
-                _recurringJobManager.AddOrUpdate("auto-update-result-"+request.SemesterCode, () => _ideaService.AutoUpdateIdeaStatus(), timePublicIdeaResult, new RecurringJobOptions { TimeZone = timeZone });
+                //sua db
+                //_recurringJobManager.AddOrUpdate("auto-update-result-"+request.SemesterCode, () => _ideaService.AutoUpdateIdeaStatus(), timePublicIdeaResult, new RecurringJobOptions { TimeZone = timeZone });
                 
             }
           
@@ -114,7 +115,8 @@ namespace FPT.TeamMatching.API.Controllers
             _recurringJobManager.AddOrUpdate("auto-create-review-"+request.SemesterCode, () => _reviewService.CreateReviewsForActiveProject(),timeCreateReview , new RecurringJobOptions {  TimeZone = timeZone });
            
             var timePublicIdeaResult = Utils.ToCronExpression(request.PublicTopicDate.Value);
-            _recurringJobManager.AddOrUpdate("auto-update-result-"+request.SemesterCode, () => _ideaService.AutoUpdateIdeaStatus(), timePublicIdeaResult, new RecurringJobOptions {  TimeZone = timeZone });
+            //sua db
+            //_recurringJobManager.AddOrUpdate("auto-update-result-"+request.SemesterCode, () => _ideaService.AutoUpdateIdeaStatus(), timePublicIdeaResult, new RecurringJobOptions {  TimeZone = timeZone });
             return Ok(businessResult);
         }
 

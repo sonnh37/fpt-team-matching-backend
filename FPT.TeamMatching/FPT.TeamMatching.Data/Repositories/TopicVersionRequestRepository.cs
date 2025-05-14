@@ -23,8 +23,6 @@ namespace FPT.TeamMatching.Data.Repositories
             var queryable = await GetQueryable()
                 .Include(x => x.TopicVersion)
                 .ThenInclude(x => x.Topic)
-                .ThenInclude(x => x.IdeaVersion)
-                .ThenInclude(x => x.Idea)
                 .Where(x => x.Role == role).ToListAsync();
             return queryable;
         }

@@ -22,53 +22,52 @@ public class UserRepository : BaseRepository<User>, IUserRepository
         _semesterRepository = semesterRepository;
     }
 
+    //sua db
+    //public async Task<(List<User>, int)> GetAllByCouncilWithIdeaVersionRequestPending(UserGetAllQuery query)
+    //{
+    //    var queryable = GetQueryable();
+    //    queryable = queryable.Include(m => m.UserXRoles).ThenInclude(m => m.Role)
+    //            .Include(m => m.IdeaVersionRequestOfReviewers)
+    //            .ThenInclude(m => m.IdeaVersion).ThenInclude(m => m.Idea)
+    //            .Include(m => m.IdeaVersionRequestOfReviewers)
+    //            .ThenInclude(m => m.IdeaVersion).ThenInclude(m => m.Topic)
+    //            .Include(m => m.IdeaVersionRequestOfReviewers)
+    //            .ThenInclude(m => m.IdeaVersion).ThenInclude(m => m.StageIdea).ThenInclude(m => m.Semester)
+    //        ;
 
-    public async Task<(List<User>, int)> GetAllByCouncilWithIdeaVersionRequestPending(UserGetAllQuery query)
-    {
-        var queryable = GetQueryable();
-        queryable = queryable.Include(m => m.UserXRoles).ThenInclude(m => m.Role)
-                .Include(m => m.IdeaVersionRequestOfReviewers)
-                .ThenInclude(m => m.IdeaVersion).ThenInclude(m => m.Idea)
-                .Include(m => m.IdeaVersionRequestOfReviewers)
-                .ThenInclude(m => m.IdeaVersion).ThenInclude(m => m.Topic)
-                .Include(m => m.IdeaVersionRequestOfReviewers)
-                .ThenInclude(m => m.IdeaVersion).ThenInclude(m => m.StageIdea).ThenInclude(m => m.Semester)
-            ;
+    //    queryable = queryable.Where(m =>
+    //        m.UserXRoles.Any(uxr => uxr.Role != null && uxr.Role.RoleName == "Council"));
 
-        queryable = queryable.Where(m =>
-            m.UserXRoles.Any(uxr => uxr.Role != null && uxr.Role.RoleName == "Council"));
+    //    queryable = queryable
+    //        .Where(m => m.IdeaVersionRequestOfReviewers.Any(n => n.Status == IdeaVersionRequestStatus.Pending))
+    //        .Include(m => m.IdeaVersionRequestOfReviewers
+    //            .Where(n => n.Status == IdeaVersionRequestStatus.Pending));
 
-        queryable = queryable
-            .Where(m => m.IdeaVersionRequestOfReviewers.Any(n => n.Status == IdeaVersionRequestStatus.Pending))
-            .Include(m => m.IdeaVersionRequestOfReviewers
-                .Where(n => n.Status == IdeaVersionRequestStatus.Pending));
+    //    if (query.Department.HasValue)
+    //    {
+    //        queryable = queryable.Where(m =>
+    //            m.Department == query.Department);
+    //    }
 
-        if (query.Department.HasValue)
-        {
-            queryable = queryable.Where(m =>
-                m.Department == query.Department);
-        }
+    //    if (!string.IsNullOrEmpty(query.EmailOrFullname))
+    //    {
+    //        queryable = queryable.Where(m =>
+    //            m.LastName != null && m.FirstName != null &&
+    //            ((m.Email != null && m.Email.Contains(query.EmailOrFullname.Trim().ToLower())) ||
+    //             (m.LastName.Trim().ToLower() + " " + m.FirstName.Trim().ToLower()).Contains(query.EmailOrFullname
+    //                 .Trim().ToLower()))
+    //        );
+    //    }
 
-        if (!string.IsNullOrEmpty(query.EmailOrFullname))
-        {
-            queryable = queryable.Where(m =>
-                m.LastName != null && m.FirstName != null &&
-                ((m.Email != null && m.Email.Contains(query.EmailOrFullname.Trim().ToLower())) ||
-                 (m.LastName.Trim().ToLower() + " " + m.FirstName.Trim().ToLower()).Contains(query.EmailOrFullname
-                     .Trim().ToLower()))
-            );
-        }
+    //    queryable = Sort(queryable, query);
 
-        queryable = Sort(queryable, query);
+    //    var total = queryable.Count();
+    //    var results = query.IsPagination
+    //        ? await GetQueryablePagination(queryable, query).ToListAsync()
+    //        : await queryable.ToListAsync();
 
-        var total = queryable.Count();
-        var results = query.IsPagination
-            ? await GetQueryablePagination(queryable, query).ToListAsync()
-            : await queryable.ToListAsync();
-
-        return (results, query.IsPagination ? total : results.Count);
-    }
-
+    //    return (results, query.IsPagination ? total : results.Count);
+    //}
 
     public async Task<(List<User>, int)> GetStudentsNoTeam(UserGetAllQuery query, Guid projectId)
     {
@@ -281,9 +280,9 @@ public class UserRepository : BaseRepository<User>, IUserRepository
             .Include(e => e.SkillProfiles)
             .Include(e => e.Blogs)
             .Include(e => e.Projects)
-            .Include(e => e.IdeaOfOwners)
-            .Include(e => e.IdeaOfMentors)
-            .Include(e => e.IdeaOfSubMentors)
+            .Include(e => e.TopicOfOwners)
+            .Include(e => e.TopicOfMentors)
+            .Include(e => e.TopicOfSubMentors)
             .Include(e => e.TeamMembers)
             .Include(e => e.Comments);
 
@@ -291,61 +290,60 @@ public class UserRepository : BaseRepository<User>, IUserRepository
         return entity;
     }
 
+    //sua db
+    //public async Task<List<User>> GetCouncilsForIdeaVersionRequest(Guid ideaVersionId, Guid semesterId)
+    //{
+    //    var queryable = GetQueryable();
+    //    queryable = queryable.Include(m => m.UserXRoles).ThenInclude(m => m.Role);
 
-    public async Task<List<User>> GetCouncilsForIdeaVersionRequest(Guid ideaVersionId, Guid semesterId)
-    {
-        var queryable = GetQueryable();
-        queryable = queryable.Include(m => m.UserXRoles).ThenInclude(m => m.Role);
+    //    // Lấy thông tin idea để lấy mentor
+    //    var ideaVersion = await GetQueryable<Topic>()
+    //        .Where(i => i.Id == ideaVersionId)
+    //        .Include(e => e.StageTopic)
+    //        .FirstOrDefaultAsync();
 
-        // Lấy thông tin idea để lấy mentor
-        var ideaVersion = await GetQueryable<IdeaVersion>()
-            .Where(i => i.Id == ideaVersionId)
-            .Include(e => e.StageIdea)
-            .Include(e => e.Idea)
-            .FirstOrDefaultAsync();
+    //    if (ideaVersion == null)
+    //    {
+    //        throw new Exception("Idea Version not found");
+    //    }
 
-        if (ideaVersion == null)
-        {
-            throw new Exception("Idea Version not found");
-        }
+    //    var councils = await queryable
+    //        .Where(u => u.UserXRoles.Any(uxr =>
+    //            uxr.Role != null &&
+    //            uxr.Role.RoleName == "Council" &&
+    //            uxr.SemesterId == semesterId))
+    //        .Select(u => new
+    //        {
+    //            Council = u,
+    //            ApprovedCount = GetQueryable<TopicRequest>()
+    //                .Count(ir =>
+    //                    ir.ReviewerId == u.Id && ir.Status == IdeaVersionRequestStatus.Approved && ir.Role == "Council")
+    //        })
+    //        .OrderBy(x => x.ApprovedCount)
+    //        .Select(x => x.Council)
+    //        .ToListAsync();
+    //    if (ideaVersion.StageIdea == null)
+    //    {
+    //        throw new Exception("Stage idea not found");
+    //    }
 
-        var councils = await queryable
-            .Where(u => u.UserXRoles.Any(uxr =>
-                uxr.Role != null &&
-                uxr.Role.RoleName == "Council" &&
-                uxr.SemesterId == semesterId))
-            .Select(u => new
-            {
-                Council = u,
-                ApprovedCount = GetQueryable<IdeaVersionRequest>()
-                    .Count(ir =>
-                        ir.ReviewerId == u.Id && ir.Status == IdeaVersionRequestStatus.Approved && ir.Role == "Council")
-            })
-            .OrderBy(x => x.ApprovedCount)
-            .Select(x => x.Council)
-            .ToListAsync();
-        if (ideaVersion.StageIdea == null)
-        {
-            throw new Exception("Stage idea not found");
-        }
+    //    if (ideaVersion.Idea == null)
+    //    {
+    //        throw new Exception("Idea not found");
+    //    }
 
-        if (ideaVersion.Idea == null)
-        {
-            throw new Exception("Idea not found");
-        }
+    //    var number = ideaVersion.StageIdea.NumberReviewer;
+    //    if (number == null)
+    //    {
+    //        throw new Exception("Number reviewer not found");
+    //    }
 
-        var number = ideaVersion.StageIdea.NumberReviewer;
-        if (number == null)
-        {
-            throw new Exception("Number reviewer not found");
-        }
+    //    // Lọc bỏ những council trùng với mentor hoặc sub-mentor
+    //    councils = councils.Where(c => c.Id != ideaVersion.Idea.MentorId && c.Id != ideaVersion.Idea.SubMentorId)
+    //        .Take((int)number).ToList();
 
-        // Lọc bỏ những council trùng với mentor hoặc sub-mentor
-        councils = councils.Where(c => c.Id != ideaVersion.Idea.MentorId && c.Id != ideaVersion.Idea.SubMentorId)
-            .Take((int)number).ToList();
-
-        return councils;
-    }
+    //    return councils;
+    //}
 
     public async Task<User?> GetByEmail(string keyword)
     {
@@ -361,8 +359,8 @@ public class UserRepository : BaseRepository<User>, IUserRepository
     {
         var queryable = GetQueryable(m => m.Id == userId);
 
-        var user = await queryable.Include(m => m.IdeaOfMentors)
-            .Include(m => m.IdeaOfSubMentors)
+        var user = await queryable.Include(m => m.TopicOfMentors)
+            .Include(m => m.TopicOfSubMentors)
             .SingleOrDefaultAsync();
 
         return user;
@@ -459,5 +457,15 @@ public class UserRepository : BaseRepository<User>, IUserRepository
                                                                     e.Semester.Id == semesterId));
 
         return user;
+    }
+
+    public Task<List<User>> GetCouncilsForTopicVersionRequest(Guid ideaVersionId, Guid semesterId)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<(List<User>, int)> GetAllByCouncilWithTopicVersionRequestPending(UserGetAllQuery query)
+    {
+        throw new NotImplementedException();
     }
 }

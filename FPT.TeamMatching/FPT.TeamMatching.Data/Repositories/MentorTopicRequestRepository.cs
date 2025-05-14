@@ -57,9 +57,7 @@ namespace FPT.TeamMatching.Data.Repositories
             queryable = queryable.Where(m =>
                     m.ProjectId != null && userProjectIds.Contains(m.ProjectId.Value))
                 .Include(m => m.Project)
-                .Include(m => m.Topic)
-                .ThenInclude(m => m.IdeaVersion)
-                .ThenInclude(m => m.Idea);
+                .Include(m => m.Topic);
 
             queryable = Sort(queryable, query);
 
@@ -78,27 +76,25 @@ namespace FPT.TeamMatching.Data.Repositories
             var queryable = GetQueryable();
             queryable = queryable
                 .Include(m => m.Topic)
-                .ThenInclude(m => m.IdeaVersion)
-                .ThenInclude(m => m.Idea)
                 .Include(m => m.Project);
             // Check user of mentor 
 
-            var types = new List<IdeaType>
+            var types = new List<TopicType>
             {
-                IdeaType.Enterprise,
-                IdeaType.Lecturer
+                TopicType.Enterprise,
+                TopicType.Lecturer
             };
-            var queryableIdea = GetQueryable<Idea>();
+            var queryableIdea = GetQueryable<Topic>();
 
             var ideaIds = await queryableIdea.Where(m => m.Type != null
                                                          && types.Contains(m.Type.Value) && m.OwnerId == userId)
                 .Select(m => m.Id).ToListAsync();
 
-            queryable = queryable.Where(m =>
-                m.Topic != null &&
-                m.Topic.IdeaVersion != null &&
-                m.Topic.IdeaVersion.IdeaId.HasValue &&
-                ideaIds.Contains(m.Topic.IdeaVersion.IdeaId.Value));
+            //sua db
+            //queryable = queryable.Where(m =>
+            //    m.Topic != null &&
+            //    m.Topic.IdeaVersion.IdeaId.HasValue &&
+            //    ideaIds.Contains(m.Topic.IdeaVersion.IdeaId.Value));
 
             queryable = Sort(queryable, query);
 

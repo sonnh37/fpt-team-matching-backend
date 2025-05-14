@@ -40,13 +40,7 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
             .ThenInclude(e => e.User)
             .Include(e => e.Invitations)
             .Include(x => x.Reviews)
-            .Include(x => x.Topic).ThenInclude(m => m.IdeaVersion)
-            .Include(x => x.Topic).ThenInclude(m => m.IdeaVersion).ThenInclude(m => m.StageIdea)
-            .Include(x => x.Topic).ThenInclude(m => m.IdeaVersion).ThenInclude(m => m.Idea)
-            .Include(x => x.Topic).ThenInclude(m => m.IdeaVersion).ThenInclude(m => m.Idea)
-            .ThenInclude(m => m.Specialty)
-            .Include(x => x.Topic).ThenInclude(m => m.IdeaVersion).ThenInclude(m => m.Idea)
-            .ThenInclude(m => m.Specialty).ThenInclude(m => m.Profession);
+            .Include(x => x.Topic).ThenInclude(m => m.StageTopic);
 
         return queryable.FirstOrDefault();
     }
@@ -56,7 +50,6 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
     {
         var teamMember = await _context.TeamMembers.Where(e => e.UserId == userId &&
                                                                e.LeaveDate == null &&
-                                                               // (e.Status != TeamMemberStatus.Fail2) &&
                                                                e.IsDeleted == false)
             .OrderByDescending(m => m.CreatedDate)
             .FirstOrDefaultAsync();
@@ -69,14 +62,7 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
             .Include(e => e.TeamMembers)
             .ThenInclude(e => e.User)
             .Include(e => e.Invitations)
-            .Include(x => x.Reviews)
-            .Include(x => x.Topic).ThenInclude(m => m.IdeaVersion)
-            .Include(x => x.Topic).ThenInclude(m => m.IdeaVersion).ThenInclude(m => m.StageIdea)
-            .Include(x => x.Topic).ThenInclude(m => m.IdeaVersion).ThenInclude(m => m.Idea)
-            .Include(x => x.Topic).ThenInclude(m => m.IdeaVersion).ThenInclude(m => m.Idea)
-            .ThenInclude(m => m.Specialty)
-            .Include(x => x.Topic).ThenInclude(m => m.IdeaVersion).ThenInclude(m => m.Idea)
-            .ThenInclude(m => m.Specialty).ThenInclude(m => m.Profession);
+            .Include(x => x.Reviews);
 
         return queryable.FirstOrDefault();
     }
@@ -85,8 +71,7 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
     {
         var queryable = GetQueryable(x => x.Id == id);
         queryable = queryable.Include(m => m.TeamMembers)
-            .Include(m => m.Topic)
-            .ThenInclude(m => m.IdeaVersion);
+            .Include(m => m.Topic);
         var entity = await queryable.FirstOrDefaultAsync();
 
         return entity;
@@ -110,19 +95,11 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
         queryable = queryable.Include(e => e.TeamMembers)
             .ThenInclude(e => e.User)
             .Include(e => e.Invitations)
-            .Include(x => x.Reviews)
-            .Include(x => x.Topic).ThenInclude(m => m.IdeaVersion)
-            .Include(x => x.Topic).ThenInclude(m => m.IdeaVersion).ThenInclude(m => m.StageIdea)
-            .Include(x => x.Topic).ThenInclude(m => m.IdeaVersion).ThenInclude(m => m.Idea)
-            .Include(x => x.Topic).ThenInclude(m => m.IdeaVersion).ThenInclude(m => m.Idea)
-            .ThenInclude(m => m.Specialty)
-            .Include(x => x.Topic).ThenInclude(m => m.IdeaVersion).ThenInclude(m => m.Idea)
-            .ThenInclude(m => m.Specialty).ThenInclude(m => m.Profession);
+            .Include(x => x.Reviews);
 
         queryable = queryable.Where(m => m.Topic != null &&
-                                         m.Topic.IdeaVersion != null &&
-                                         m.Topic.IdeaVersion.StageIdea != null &&
-                                         m.Topic.IdeaVersion.StageIdea.SemesterId == semesterCurrent.Id
+                                         m.Topic.StageTopic != null &&
+                                         m.Topic.StageTopic.SemesterId == semesterCurrent.Id
         );
 
 
@@ -148,19 +125,11 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
         queryable = queryable.Include(e => e.TeamMembers)
             .ThenInclude(e => e.User)
             .Include(e => e.Invitations)
-            .Include(x => x.Reviews)
-            .Include(x => x.Topic).ThenInclude(m => m.IdeaVersion)
-            .Include(x => x.Topic).ThenInclude(m => m.IdeaVersion).ThenInclude(m => m.StageIdea)
-            .Include(x => x.Topic).ThenInclude(m => m.IdeaVersion).ThenInclude(m => m.Idea)
-            .Include(x => x.Topic).ThenInclude(m => m.IdeaVersion).ThenInclude(m => m.Idea)
-            .ThenInclude(m => m.Specialty)
-            .Include(x => x.Topic).ThenInclude(m => m.IdeaVersion).ThenInclude(m => m.Idea)
-            .ThenInclude(m => m.Specialty).ThenInclude(m => m.Profession);
+            .Include(x => x.Reviews);
 
         queryable = queryable.Where(m => m.Topic != null &&
-                                         m.Topic.IdeaVersion != null &&
-                                         m.Topic.IdeaVersion.StageIdea != null &&
-                                         m.Topic.IdeaVersion.StageIdea.SemesterId == semesterCurrent.Id
+                                         m.Topic.StageTopic != null &&
+                                         m.Topic.StageTopic.SemesterId == semesterCurrent.Id
         );
 
 
@@ -176,18 +145,12 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
             .ThenInclude(e => e.ProfileStudent)
             .ThenInclude(e => e.Specialty)
             .Include(e => e.Topic)
-            .ThenInclude(e => e.IdeaVersion)
-            .ThenInclude(e => e.Idea)
             .ThenInclude(e => e.Specialty)
             .ThenInclude(e => e.Profession)
             .Include(m => m.Topic)
-            .ThenInclude(e => e.IdeaVersion)
-            .ThenInclude(e => e.Idea)
             .ThenInclude(m => m.Owner)
             .Include(x => x.Reviews)
             .Include(x => x.Topic)
-            .ThenInclude(x => x.IdeaVersion)
-            .ThenInclude(x => x.Idea)
             .Include(x => x.MentorFeedback);
 
         if (query.IsHasTeam)
@@ -198,28 +161,24 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
         if (query.SpecialtyId != null)
         {
             queryable = queryable.Where(m =>
-                m.Topic != null && m.Topic.IdeaVersion != null &&
-                m.Topic.IdeaVersion.Idea != null &&
-                m.Topic.IdeaVersion.Idea.SpecialtyId == query.SpecialtyId);
+                m.Topic != null &&
+                m.Topic.SpecialtyId == query.SpecialtyId);
         }
 
         if (query.ProfessionId != null)
         {
             queryable = queryable.Where(m =>
                 m.Topic != null &&
-                m.Topic.IdeaVersion != null &&
-                m.Topic.IdeaVersion.Idea != null &&
-                m.Topic.IdeaVersion.Idea.Specialty != null &&
-                m.Topic.IdeaVersion.Idea.Specialty.ProfessionId == query.ProfessionId);
+                m.Topic.Specialty != null &&
+                m.Topic.Specialty.ProfessionId == query.ProfessionId);
         }
 
         if (!string.IsNullOrEmpty(query.EnglishName))
         {
             queryable = queryable.Where(m =>
                 m.Topic != null &&
-                m.Topic.IdeaVersion != null &&
-                m.Topic.IdeaVersion.EnglishName != null &&
-                m.Topic.IdeaVersion.EnglishName.ToLower().Trim()
+                m.Topic.EnglishName != null &&
+                m.Topic.EnglishName.ToLower().Trim()
                     .Contains(query.EnglishName.ToLower().Trim()));
         }
 
@@ -246,18 +205,16 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
         var tomorrow = today.AddDays(1);
         var project = await _context.Projects
             .Include(e => e.Topic)
-            .ThenInclude(e => e.IdeaVersion)
-            .ThenInclude(e => e.Idea)
             .Where(p => p.IsDeleted == false &&
                         p.Status == ProjectStatus.InProgress &&
                         p.Topic != null &&
-                        p.Topic.IdeaVersion != null &&
-                        p.Topic.IdeaVersion.StageIdea != null &&
-                        p.Topic.IdeaVersion.StageIdea.Semester != null &&
-                        p.Topic.IdeaVersion.StageIdea.Semester.StartDate != null &&
-                        p.Topic.IdeaVersion.StageIdea.Semester.StartDate.Value.AddHours(7) >= today &&
-                        p.Topic.IdeaVersion.StageIdea.Semester.StartDate.Value.AddHours(7) < tomorrow
-                // p.Topic.IdeaVersion.StageIdea.Semester.StartDate.Value.Day == DateTime.UtcNow.Day
+                        p.Topic != null &&
+                        p.Topic.StageTopic != null &&
+                        p.Topic.StageTopic.Semester != null &&
+                        p.Topic.StageTopic.Semester.StartDate != null &&
+                        p.Topic.StageTopic.Semester.StartDate.Value.AddHours(7) >= today &&
+                        p.Topic.StageTopic.Semester.StartDate.Value.AddHours(7) < tomorrow
+                // p.Topic.StageTopic.Semester.StartDate.Value.Day == DateTime.UtcNow.Day
             )
             .ToListAsync();
         return project;
@@ -301,9 +258,9 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
         var number = await _context.Projects.Where(e => e.Status == ProjectStatus.InProgress &&
                                                         e.IsDeleted == false &&
                                                         e.Topic != null &&
-                                                        e.Topic.IdeaVersion != null &&
-                                                        e.Topic.IdeaVersion.StageIdea != null &&
-                                                        e.Topic.IdeaVersion.StageIdea.SemesterId == semesterId)
+                                                        e.Topic != null &&
+                                                        e.Topic.StageTopic != null &&
+                                                        e.Topic.StageTopic.SemesterId == semesterId)
             .CountAsync();
         return number;
     }
@@ -323,14 +280,13 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
         var project = await queryable
             .Include(x => x.CapstoneSchedules)
             .Include(x => x.Topic)
-            .ThenInclude(x => x.IdeaVersion)
-            .ThenInclude(x => x.Idea)
+            .ThenInclude(x => x)
             .Where(e => e.IsDeleted == false &&
                         e.DefenseStage == defenseStage &&
                         e.Topic != null &&
-                        e.Topic.IdeaVersion != null &&
-                        e.Topic.IdeaVersion.StageIdea != null &&
-                        e.Topic.IdeaVersion.StageIdea.SemesterId == semesterId
+                        e.Topic != null &&
+                        e.Topic.StageTopic != null &&
+                        e.Topic.StageTopic.SemesterId == semesterId
             )
             .ToListAsync();
         return project;
@@ -341,16 +297,14 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
         var projects = await GetQueryable().Where(e => e.Status == ProjectStatus.InProgress &&
                                                        e.IsDeleted == false &&
                                                        e.Topic != null &&
-                                                       e.Topic.IdeaVersion != null &&
-                                                       e.Topic.IdeaVersion.StageIdea != null &&
-                                                       e.Topic.IdeaVersion.StageIdea.SemesterId == semesterId)
+                                                       e.Topic != null &&
+                                                       e.Topic.StageTopic != null &&
+                                                       e.Topic.StageTopic.SemesterId == semesterId)
             .Include(x => x.Topic)
-            .ThenInclude(x => x.IdeaVersion)
-            .ThenInclude(x => x.Idea)
+            .ThenInclude(x => x)
             .ThenInclude(x => x.Mentor)
             .Include(x => x.Topic)
-            .ThenInclude(x => x.IdeaVersion)
-            .ThenInclude(x => x.Idea)
+            .ThenInclude(x => x)
             .ThenInclude(x => x.SubMentor)
             .ToListAsync();
         return projects;
@@ -362,8 +316,7 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
         queryable = queryable
             .Include(x => x.Leader)
             .Include(m => m.Topic)
-            .ThenInclude(x => x.IdeaVersion)
-            .ThenInclude(x => x.Idea)
+            .ThenInclude(x => x)
             .Include(m => m.Leader)
             .Include(m => m.MentorFeedback);
 
@@ -371,35 +324,27 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
         {
             queryable = queryable.Where(m =>
                 m.Topic != null &&
-                m.Topic.IdeaVersion != null &&
-                m.Topic.IdeaVersion.Idea != null &&
-                (m.Topic.IdeaVersion.Idea.MentorId == userId ||
-                 m.Topic.IdeaVersion.Idea.SubMentorId == userId));
+                (m.Topic.MentorId == userId ||
+                 m.Topic.SubMentorId == userId));
         }
         else if (query.Roles.Contains("Mentor"))
         {
             queryable = queryable.Where(m =>
                 m.Topic != null &&
-                m.Topic.IdeaVersion != null &&
-                m.Topic.IdeaVersion.Idea != null &&
-                m.Topic.IdeaVersion.Idea.MentorId == userId);
+                m.Topic.MentorId == userId);
         }
         else if (query.Roles.Contains("SubMentor"))
         {
             queryable = queryable.Where(m =>
                 m.Topic != null &&
-                m.Topic.IdeaVersion != null &&
-                m.Topic.IdeaVersion.Idea != null &&
-                m.Topic.IdeaVersion.Idea.SubMentorId == userId);
+                m.Topic.SubMentorId == userId);
         }
         else
         {
             queryable = queryable.Where(m =>
                 m.Topic != null &&
-                m.Topic.IdeaVersion != null &&
-                m.Topic.IdeaVersion.Idea != null &&
-                (m.Topic.IdeaVersion.Idea.MentorId == userId ||
-                 m.Topic.IdeaVersion.Idea.SubMentorId == userId));
+                (m.Topic.MentorId == userId ||
+                 m.Topic.SubMentorId == userId));
         }
 
         queryable = BaseFilterHelper.Base(queryable, query);
@@ -421,8 +366,8 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
         var project = await queryable.Where(e => e.IsDeleted == false &&
                                                  e.TopicId == topicId)
             .Include(e => e.Topic)
-            .ThenInclude(e => e.IdeaVersion)
-            .ThenInclude(e => e.Idea)
+            .ThenInclude(e => e)
+            .ThenInclude(e => e)
             .ThenInclude(e => e.Mentor)
             .FirstOrDefaultAsync();
 
@@ -458,14 +403,14 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
         var project = await queryable.Where(p => p.IsDeleted == false &&
                                                  p.Topic != null &&
                                                  p.Status == ProjectStatus.Pending &&
-                                                 p.Topic.IdeaVersion != null &&
-                                                 p.Topic.IdeaVersion.StageIdea != null &&
-                                                 p.Topic.IdeaVersion.StageIdea.Semester != null &&
-                                                 p.Topic.IdeaVersion.StageIdea.Semester.StartDate != null &&
-                                                 p.Topic.IdeaVersion.StageIdea.Semester.StartDate.Value.AddHours(7) >=
-                                                 today && p.Topic.IdeaVersion.StageIdea.Semester.StartDate.Value
+                                                 p.Topic != null &&
+                                                 p.Topic.StageTopic != null &&
+                                                 p.Topic.StageTopic.Semester != null &&
+                                                 p.Topic.StageTopic.Semester.StartDate != null &&
+                                                 p.Topic.StageTopic.Semester.StartDate.Value.AddHours(7) >=
+                                                 today && p.Topic.StageTopic.Semester.StartDate.Value
                                                      .AddHours(7) < tomorrow
-                // p.Topic.IdeaVersion.StageIdea.Semester.StartDate.Value.Day == today
+                // p.Topic.StageTopic.Semester.StartDate.Value.Day == today
             )
             .ToListAsync();
         return project;

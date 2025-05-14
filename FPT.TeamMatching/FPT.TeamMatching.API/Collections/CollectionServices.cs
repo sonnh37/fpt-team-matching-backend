@@ -34,21 +34,18 @@ public static class CollectionServices
         services.AddTransient<ISpecialtyService, SpecialtyService>();
         services.AddTransient<ISemesterService, SemesterService>();
 
-        services.AddTransient<IIdeaService, IdeaService>();
-        services.AddTransient<IIdeaVersionService, IdeaVersionService>();
-        services.AddTransient<IIdeaVersionRequestService, IdeaVersionRequestService>();
-
         services.AddTransient<ITopicService, TopicService>();
+        services.AddTransient<ITopicRequestService, TopicRequestService>();
+
         services.AddTransient<ITopicVersionService, TopicVersionService>();
         services.AddTransient<ITopicVersionRequestService, TopicVersionRequestService>();
 
-        services.AddTransient<IStageIdeaService, StageIdeaService>();
+        services.AddTransient<IStageTopicService, StageTopicService>();
         services.AddTransient<ICapstoneScheduleService, CapstoneScheduleService>();
         services.AddTransient<IMentorTopicRequestService, MentorTopicRequestService>();
         services.AddSingleton<IUserIdProvider, CustomUserIdProvider>();
         services.AddSingleton<IFileUploadService, FileUploadService>();
         services.AddTransient<IMentorFeedbackService, MentorFeedbackService>();
-        services.AddTransient<ITimelineService, TimelineService>();
 
         services.AddTransient<ICriteriaService, CriteriaService>();
         services.AddTransient<ICriteriaFormService, CriteriaFormService>();

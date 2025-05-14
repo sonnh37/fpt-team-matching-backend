@@ -32,7 +32,7 @@ public class ProjectService : BaseService<Project>, IProjectService
     private readonly ISemesterRepository _semesterRepository;
     private readonly IReviewRepository _reviewRepository;
     private readonly ISemesterService _semesterService;
-    private readonly IStageIdeaRepositoty _stageIdeaRepositoty;
+    private readonly IStageTopicRepository _stageTopicRepository;
 
     public ProjectService(IMapper mapper, IUnitOfWork unitOfWork, ITeamMemberService teamMemberService, ISemesterService semesterService) : base(mapper,
         unitOfWork)
@@ -43,7 +43,7 @@ public class ProjectService : BaseService<Project>, IProjectService
         _serviceTeam = teamMemberService;
         _reviewRepository = unitOfWork.ReviewRepository;
         _semesterService = semesterService;
-        _stageIdeaRepositoty = unitOfWork.StageIdeaRepository;
+        _stageTopicRepository = unitOfWork.StageTopicRepository;
     }
 
     public async Task<BusinessResult> GetProjectsForMentor(ProjectGetListForMentorQuery query)
@@ -153,15 +153,15 @@ public class ProjectService : BaseService<Project>, IProjectService
     {
         try
         {
-            //lay ra stageIdea hien tai
-            var stageIdea = await _stageIdeaRepositoty.GetCurrentStageIdea();
-            if (stageIdea == null) return HandlerFail("Không có đợt duyệt ứng với ngày hiện tại!");
+            //lay ra stageTopic hien tai
+            var stageTopic = await _stageTopicRepository.GetCurrentStageTopic();
+            if (stageTopic == null) return HandlerFail("Không có đợt duyệt ứng với ngày hiện tại!");
 
             //ki cua stage idea
-            var semester = await _semesterRepository.GetSemesterByStageIdeaId(stageIdea.Id);
+            var semester = await _semesterRepository.GetSemesterByStageTopicId(stageTopic.Id);
             if (semester == null) return HandlerFail("Không có kì ứng với đợt duyệt hiện tại!");
 
-            var newTeamCode = await _semesterService.GenerateNewTeamCode(stageIdea.SemesterId);
+            var newTeamCode = await _semesterService.GenerateNewTeamCode(stageTopic.SemesterId);
 
             var codeExist = await _projectRepository.IsExistedTeamCode(newTeamCode);
             if (codeExist) return HandlerFail("Trùng mã nhóm!");
@@ -437,8 +437,8 @@ public class ProjectService : BaseService<Project>, IProjectService
             int index = 1;
             teamDefenses.ForEach(item =>
             {
-                //dt.Rows.Add(index++, item.Idea.IdeaCode, item.Idea.EnglishName);
-                dt.Rows.Add(index++, item.Topic.TopicCode, item.Topic.IdeaVersion.EnglishName);
+                //dt.Rows.Add(index++, item.Topic.TopicCode, item.Topic.EnglishName);
+                dt.Rows.Add(index++, item.Topic.TopicCode, item.Topic.EnglishName);
             });
         }
         return dt;

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace FPT.TeamMatching.Domain.Models.Requests.Commands.Topics
 {
-    public class TopicRestoreCommand: UpdateCommand
+    public class TopicRestoreCommand : UpdateCommand
     {
     }
 }

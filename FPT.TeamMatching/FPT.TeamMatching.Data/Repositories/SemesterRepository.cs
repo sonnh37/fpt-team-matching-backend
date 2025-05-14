@@ -28,10 +28,10 @@ namespace FPT.TeamMatching.Data.Repositories
                 .OrderByDescending(e => e.EndDate)
                 .FirstOrDefaultAsync();
         }
-        public async Task<Semester?> GetSemesterByStageIdeaId(Guid stageIdeaId)
+        public async Task<Semester?> GetSemesterByStageTopicId(Guid stageTopicId)
         {
             var s = await GetQueryable()
-                .Where(si => si.StageIdeas.Any(e => e.Id == stageIdeaId))
+                .Where(si => si.StageTopics.Any(e => e.Id == stageTopicId))
                 .FirstOrDefaultAsync();
 
             return s;

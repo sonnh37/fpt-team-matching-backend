@@ -1,4 +1,5 @@
-﻿using FPT.TeamMatching.Domain.Enums;
+﻿using FPT.TeamMatching.Domain.Entities;
+using FPT.TeamMatching.Domain.Enums;
 using FPT.TeamMatching.Domain.Models.Results.Bases;
 
 namespace FPT.TeamMatching.Domain.Models.Results;
@@ -11,11 +12,15 @@ public class UserResult : BaseResult
 
     public string? Username { get; set; }
 
+    public string? Password { get; set; }
+
     public string? Avatar { get; set; }
 
     public string? FirstName { get; set; }
 
     public string? LastName { get; set; }
+
+    public string? Code { get; set; }
 
     public string? Email { get; set; }
 
@@ -24,45 +29,46 @@ public class UserResult : BaseResult
     public string? Phone { get; set; }
 
     public string? Address { get; set; }
-    public string? Code {get; set;}
 
     public Department? Department { get; set; }
 
-    public ICollection<BlogResult> Blogs { get; set; } = new List<BlogResult>();
+    public virtual ProfileStudentResult? ProfileStudent { get; set; }
 
-    public ICollection<IdeaVersionRequestResult> IdeaVersionRequestOfReviewers { get; set; } = new List<IdeaVersionRequestResult>();
+    public virtual ICollection<BlogResult> Blogs { get; set; } = new List<BlogResult>();
 
-    public ICollection<IdeaResult> IdeaOfOwners { get; set; } = new List<IdeaResult>();
+    public virtual ICollection<TopicRequestResult> TopicRequestOfReviewers { get; set; } = new List<TopicRequestResult>();
 
-    public ICollection<IdeaResult> IdeaOfMentors { get; set; } = new List<IdeaResult>();
+    public virtual ICollection<TopicResult> TopicOfOwners { get; set; } = new List<TopicResult>();
 
-    public ICollection<IdeaResult> IdeaOfSubMentors { get; set; } = new List<IdeaResult>();
+    public virtual ICollection<TopicResult> TopicOfMentors { get; set; } = new List<TopicResult>();
 
-    public ICollection<TopicVersionResult> TopicVersionOfCouncils { get; set; } = new List<TopicVersionResult>();
+    public virtual ICollection<TopicResult> TopicOfSubMentors { get; set; } = new List<TopicResult>();
 
-    public ICollection<UserXRoleResult> UserXRoles { get; set; } = new List<UserXRoleResult>();
+    public virtual ICollection<TopicVersionRequestResult> TopicVersionRequestOfReviewers { get; set; } = new List<TopicVersionRequestResult>();
 
-    public ICollection<CommentResult> Comments { get; set; } = new List<CommentResult>();
+    public virtual ICollection<UserXRoleResult> UserXRoles { get; set; } = new List<UserXRoleResult>();
 
-    public ICollection<InvitationResult> InvitationOfSenders { get; set; } = new List<InvitationResult>();
+    public virtual ICollection<CommentResult> Comments { get; set; } = new List<CommentResult>();
 
-    public ICollection<InvitationResult> InvitationOfReceivers { get; set; } = new List<InvitationResult>();
+    public virtual ICollection<InvitationResult> InvitationOfSenders { get; set; } = new List<InvitationResult>();
 
-    public ICollection<BlogCvResult> BlogCvs { get; set; } = new List<BlogCvResult>();
+    public virtual ICollection<InvitationResult> InvitationOfReceivers { get; set; } = new List<InvitationResult>();
 
-    public ICollection<LikeResult> Likes { get; set; } = new List<LikeResult>();
+    public virtual ICollection<BlogCvResult> BlogCvs { get; set; } = new List<BlogCvResult>();
 
-    public ICollection<NotificationResult> Notifications { get; set; } = new List<NotificationResult>();
+    public virtual ICollection<LikeResult> Likes { get; set; } = new List<LikeResult>();
 
-    public ProfileStudentResult? ProfileStudent { get; set; }
+    public virtual ICollection<ProjectResult> Projects { get; set; } = new List<ProjectResult>();
 
-    public ICollection<ProjectResult> Projects { get; set; } = new List<ProjectResult>();
+    public virtual ICollection<RefreshTokenResult> RefreshTokens { get; set; } = new List<RefreshTokenResult>();
 
-    public ICollection<ProjectResult> ProjectOfLeaders { get; set; } = new List<ProjectResult>();
+    public virtual ICollection<SkillProfileResult> SkillProfiles { get; set; } = new List<SkillProfileResult>();
 
-    public ICollection<RefreshTokenResult> RefreshTokens { get; set; } = new List<RefreshTokenResult>();
+    public virtual ICollection<TeamMemberResult> TeamMembers { get; set; } = new List<TeamMemberResult>();
 
-    public ICollection<SkillProfileResult> SkillProfiles { get; set; } = new List<SkillProfileResult>();
+    public virtual ICollection<ReviewResult> Reviewer1s { get; set; } = new List<ReviewResult>();
 
-    public ICollection<TeamMemberResult> TeamMembers { get; set; } = new List<TeamMemberResult>();
+    public virtual ICollection<ReviewResult> Reviewer2s { get; set; } = new List<ReviewResult>();
+
+    public virtual ICollection<NotificationResult> Notifications { get; set; } = new List<NotificationResult>();
 }

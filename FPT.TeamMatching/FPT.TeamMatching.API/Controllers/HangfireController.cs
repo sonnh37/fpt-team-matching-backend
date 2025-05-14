@@ -15,11 +15,11 @@ public class HangfireController : ControllerBase
     private readonly IJobHangfireService _jobHangfireService;
     private readonly IRecurringJobManager _recurringJobManager;
     private readonly IReviewService _reviewService;
-    private readonly IIdeaService _ideaService;
+    private readonly ITopicService _ideaService;
     private readonly IConfiguration _configuration;
 
     public HangfireController(IBackgroundJobClient backgroundJobClient, IJobHangfireService hangfireService,
-        IRecurringJobManager recurringJobManager, IReviewService reviewService, IIdeaService ideaService, IConfiguration configuration)
+        IRecurringJobManager recurringJobManager, IReviewService reviewService, ITopicService ideaService, IConfiguration configuration)
     {
         _jobHangfireService = hangfireService;
         _backgroundJobClient = backgroundJobClient;
@@ -57,7 +57,8 @@ public class HangfireController : ControllerBase
         var name = _configuration.GetSection("HANGFIRE_SERVER_LOCAL");
         // var selectedDate = DateTimeOffset.Parse("2025-4-29 00:00:00");
         _recurringJobManager.RemoveIfExists("public-idea-result");
-        _recurringJobManager.AddOrUpdate("public-idea-result", () => _ideaService.AutoUpdateIdeaStatus(), "0 0 30 5 *", new RecurringJobOptions { QueueName = name.Value });
+        //sua db
+        //_recurringJobManager.AddOrUpdate("public-idea-result", () => _ideaService.AutoUpdateIdeaStatus(), "0 0 30 5 *", new RecurringJobOptions { QueueName = name.Value });
         // _backgroundJobClient.Schedule(() => _ideaService.AutoUpdateIdeaStatus(), selectedDate);
         return Ok();
     }

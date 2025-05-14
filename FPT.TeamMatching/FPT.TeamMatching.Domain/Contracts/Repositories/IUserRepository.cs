@@ -15,7 +15,7 @@ public interface IUserRepository : IBaseRepository<User>
     Task<User?> GetByEmail(string keyword);
     Task<User?> GetByUsername(string username);
     Task<List<PartnerInfoResult>> GetAllUsersWithNameOnly();
-    Task<List<User>> GetCouncilsForIdeaVersionRequest(Guid ideaVersionId, Guid semesterId);
+    Task<List<User>> GetCouncilsForTopicVersionRequest(Guid ideaVersionId, Guid semesterId);
     Task<User?> GetReviewerByMatchingEmail(string keyword);
     Task<List<UserIdEmailResult>> GetAllReviewerIdAndUsername(Guid semesterId);
     Task<User?> GetById(Guid id);
@@ -25,7 +25,7 @@ public interface IUserRepository : IBaseRepository<User>
 
     Task<User?> GetByIdWithProjects(Guid? userId);
 
-    Task<(List<User>, int)> GetAllByCouncilWithIdeaVersionRequestPending(UserGetAllQuery query);
+    Task<(List<User>, int)> GetAllByCouncilWithTopicVersionRequestPending(UserGetAllQuery query);
     Task<List<EmailSuggestionModels>> GetAllEmailSuggestions(string email);
     Task<(List<User>, int)> GetUsersInSemester(UserGetAllInSemesterQuery query);
     Task<bool> CheckRoleOfUserInSemester(Guid? userId, string role, Guid? semesterId);

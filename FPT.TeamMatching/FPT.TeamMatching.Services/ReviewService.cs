@@ -27,7 +27,7 @@ public class ReviewService : BaseService<Review>, IReviewService
     private readonly IUserRepository _userRepository;
     private readonly IProjectRepository _projectRepository;
     private readonly ISemesterRepository _semesterRepository;
-    private readonly IIdeaRepository _ideaRepository;
+    private readonly ITopicRepository _topicRepository;
     private readonly INotificationService _notificationService;
 
     public ReviewService(IMapper mapper, IUnitOfWork unitOfWork, INotificationService notificationService) : base(mapper, unitOfWork)
@@ -36,7 +36,7 @@ public class ReviewService : BaseService<Review>, IReviewService
         _userRepository = unitOfWork.UserRepository;
         _projectRepository = unitOfWork.ProjectRepository;
         _semesterRepository = unitOfWork.SemesterRepository;
-        _ideaRepository = unitOfWork.IdeaRepository;
+        _topicRepository = unitOfWork.TopicRepository;
         _notificationService = notificationService;
     }
 
@@ -165,7 +165,7 @@ public class ReviewService : BaseService<Review>, IReviewService
                     .WithMessage(Const.NOT_FOUND_MSG);
             }
             
-            var idea = await _ideaRepository.GetIdeaByProjectId(entities.ProjectId.Value);
+            var idea = await _topicRepository.GetTopicByProjectId(entities.ProjectId.Value);
             entities.FileUpload = request.FileUpload;
             await SetBaseEntityForUpdate(entities);
             _reviewRepository.Update(entities);
@@ -224,7 +224,7 @@ public class ReviewService : BaseService<Review>, IReviewService
             var currentSemester = await _semesterRepository.GetCurrentSemester();
             var reviewList = await _userRepository.GetAllReviewerIdAndUsername(currentSemester.Id);
             var reviewUsernameList = reviewList.Select(x => x.Code).ToList();
-            var customIdeaModel = await _ideaRepository.GetCustomIdea(semesterId, reviewNumber);
+            var customIdeaModel = await _topicRepository.GetCustomTopic(semesterId, reviewNumber);
             var latestStageReview = new List<Review>();
             if (reviewNumber != 1)
             {
@@ -278,7 +278,7 @@ public class ReviewService : BaseService<Review>, IReviewService
                                 listReviewFail.Add(new ReviewExcelModels
                                 {
                                     STT = STT,
-                                    TopicCode = project.IdeaCode ?? null,
+                                    TopicCode = project.TopicCode ?? null,
                                     Reason = "Review " + reviewNumber + " của topic này đã tồn tại"
                                 });
                                 continue;
@@ -290,18 +290,18 @@ public class ReviewService : BaseService<Review>, IReviewService
                                 listReviewFail.Add(new ReviewExcelModels
                                 {
                                     STT = STT,
-                                    TopicCode = project.IdeaCode ?? null,
+                                    TopicCode = project.TopicCode ?? null,
                                     Reason = "Topic code trong file không thể null"
                                 });
                                 continue;
                             }
                             //check idea code giong vs idea code cua project
-                            if (project.IdeaCode.TrimEnd('\r', '\n') != ideaCode)
+                            if (project.TopicCode.TrimEnd('\r', '\n') != ideaCode)
                             {
                                 listReviewFail.Add(new ReviewExcelModels
                                 {
                                     STT = STT,
-                                    TopicCode = project.IdeaCode ?? null,
+                                    TopicCode = project.TopicCode ?? null,
                                     Reason = "Lỗi topic code trong file không giống topic code trong hệ thống"
                                 });
                                 continue;
@@ -316,7 +316,7 @@ public class ReviewService : BaseService<Review>, IReviewService
                                 listReviewFail.Add(new ReviewExcelModels
                                 {
                                     STT = STT,
-                                    TopicCode = project.IdeaCode ?? null,
+                                    TopicCode = project.TopicCode ?? null,
                                     Reason = "GVHD không thể rỗng"
                                 });
                                 continue;
@@ -330,7 +330,7 @@ public class ReviewService : BaseService<Review>, IReviewService
                                 listReviewFail.Add(new ReviewExcelModels
                                 {
                                     STT = STT,
-                                    TopicCode = project.IdeaCode ?? null,
+                                    TopicCode = project.TopicCode ?? null,
                                     Reason = "GVHD không thể rỗng"
                                 });
                                 continue;
@@ -342,7 +342,7 @@ public class ReviewService : BaseService<Review>, IReviewService
                                 listReviewFail.Add(new ReviewExcelModels
                                 {
                                     STT = STT,
-                                    TopicCode = project.IdeaCode ?? null,
+                                    TopicCode = project.TopicCode ?? null,
                                     Reason = "Người review không thể là 1 trong 2 GVHD"
                                 });
                                 continue;
@@ -356,7 +356,7 @@ public class ReviewService : BaseService<Review>, IReviewService
                                 listReviewFail.Add(new ReviewExcelModels
                                 {
                                     STT = STT,
-                                    TopicCode = project.IdeaCode ?? null,
+                                    TopicCode = project.TopicCode ?? null,
                                     Reason = "Người review không tồn tại"
                                 });
                                 continue;
@@ -370,7 +370,7 @@ public class ReviewService : BaseService<Review>, IReviewService
                                 listReviewFail.Add(new ReviewExcelModels
                                 {
                                     STT = STT,
-                                    TopicCode = project.IdeaCode ?? null,
+                                    TopicCode = project.TopicCode ?? null,
                                     Reason = "Ngày review không hợp lệ"
                                 });
                                 continue;
@@ -384,7 +384,7 @@ public class ReviewService : BaseService<Review>, IReviewService
                                 listReviewFail.Add(new ReviewExcelModels
                                 {
                                     STT = STT,
-                                    TopicCode = project.IdeaCode ?? null,
+                                    TopicCode = project.TopicCode ?? null,
                                     Reason = "Slot là kiểu int và dữ liệu từ 1 - 5"
                                 });
                                 continue;
@@ -394,7 +394,7 @@ public class ReviewService : BaseService<Review>, IReviewService
                                 listReviewFail.Add(new ReviewExcelModels
                                 {
                                     STT = STT,
-                                    TopicCode = project.IdeaCode ?? null,
+                                    TopicCode = project.TopicCode ?? null,
                                     Reason = "Slot là kiểu int và dữ liệu từ 1 - 5"
                                 });
                                 continue;
@@ -407,7 +407,7 @@ public class ReviewService : BaseService<Review>, IReviewService
                                 listReviewFail.Add(new ReviewExcelModels
                                 {
                                     STT = STT,
-                                    TopicCode = project.IdeaCode ?? null,
+                                    TopicCode = project.TopicCode ?? null,
                                     Reason = "Room không thể rỗng"
                                 });
                                 continue;
@@ -423,7 +423,7 @@ public class ReviewService : BaseService<Review>, IReviewService
                                     listReviewFail.Add(new ReviewExcelModels
                                     {
                                         STT = STT,
-                                        TopicCode = project.IdeaCode ?? null,
+                                        TopicCode = project.TopicCode ?? null,
                                         Reason = $"Không thể tìm thấy review {reviewNumber - 1} của nhóm"
                                     });
                                     continue;
@@ -436,7 +436,7 @@ public class ReviewService : BaseService<Review>, IReviewService
                                     listReviewFail.Add(new ReviewExcelModels
                                     {
                                         STT = STT,
-                                        TopicCode = project.IdeaCode ?? null,
+                                        TopicCode = project.TopicCode ?? null,
                                         Reason = $"Vui lòng hoàn tất review {reviewNumber - 1} của nhóm."
                                     });
                                     continue;
@@ -447,7 +447,7 @@ public class ReviewService : BaseService<Review>, IReviewService
                                     listReviewFail.Add(new ReviewExcelModels
                                     {
                                         STT = STT,
-                                        TopicCode = project.IdeaCode ?? null,
+                                        TopicCode = project.TopicCode ?? null,
                                         Reason = $"Ngày của review {reviewNumber} không thể nhỏ hơn hoặc bằng ngày của review {reviewNumber - 1}."
                                     });
                                     continue;
@@ -916,10 +916,10 @@ public class ReviewService : BaseService<Review>, IReviewService
         foreach (var item in projects)
         {
             dt.Rows.Add(index++, item.Topic.TopicCode, item.TeamCode,
-            item.Topic.IdeaVersion.EnglishName, item.Topic.IdeaVersion.VietNamName,
-            item.Topic.IdeaVersion.Idea.Mentor.LastName + " " + item.Topic.IdeaVersion.Idea.Mentor.FirstName,
-            item.Topic.IdeaVersion.Idea.Mentor.Code,
-            (item.Topic.IdeaVersion.Idea.SubMentor == null ? null : item.Topic.IdeaVersion.Idea.SubMentor.Code));
+            item.Topic.EnglishName, item.Topic.VietNameseName,
+            item.Topic.Mentor.LastName + " " + item.Topic.Mentor.FirstName,
+            item.Topic.Mentor.Code,
+            (item.Topic.SubMentor == null ? null : item.Topic.SubMentor.Code));
         }
         return dt;
     }
