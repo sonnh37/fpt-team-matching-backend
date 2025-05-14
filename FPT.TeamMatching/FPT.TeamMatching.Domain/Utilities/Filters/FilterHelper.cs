@@ -86,17 +86,13 @@ public static class FilterHelper
         {
             queryable = queryable.Where(m =>
                 m.Topic != null &&
-                m.Topic.IdeaVersion != null &&
-                m.Topic.IdeaVersion.Idea != null &&
-                m.Topic.IdeaVersion.Idea.SubMentorId == null);
+                m.Topic.SubMentorId == null);
         }
         else if (query.Roles.Contains("SubMentor"))
         {
             queryable = queryable.Where(m =>
                 m.Topic != null &&
-                m.Topic.IdeaVersion != null &&
-                m.Topic.IdeaVersion.Idea != null &&
-                m.Topic.IdeaVersion.Idea.SubMentorId != null);
+                m.Topic.SubMentorId != null);
         }
 
         if (query.IsHasTeam)
