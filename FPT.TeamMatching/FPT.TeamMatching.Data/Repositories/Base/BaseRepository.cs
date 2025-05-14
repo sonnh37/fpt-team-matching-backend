@@ -18,12 +18,12 @@ public class BaseRepository<TEntity> : IBaseRepository<TEntity> where TEntity : 
     {
         _dbContext = dbContext;
     }
-    
+
     public DbContext GetDbContext()
     {
         return _dbContext;
     }
-    
+
     #region Commands
 
     public void Add(TEntity entity)
@@ -81,9 +81,9 @@ public class BaseRepository<TEntity> : IBaseRepository<TEntity> where TEntity : 
         queryable = FilterHelper.Apply(queryable, query);
 
         queryable = Sort(queryable, query);
-    
+
         var total = queryable.Count();
-        var results = query.IsPagination 
+        var results = query.IsPagination
             ? await GetQueryablePagination(queryable, query).ToListAsync()
             : await queryable.ToListAsync();
 
@@ -119,27 +119,71 @@ public class BaseRepository<TEntity> : IBaseRepository<TEntity> where TEntity : 
 
     protected static IQueryable<TEntity> Sort(IQueryable<TEntity> queryable, GetQueryableQuery getAllQuery)
     {
-        if (!queryable.Any()) return queryable;
+        if (!queryable.Any())
+            return queryable;
 
-        var parameter = Expression.Parameter(typeof(TEntity), "o");
-        var property = typeof(TEntity).GetProperty(getAllQuery.SortField ?? "",
+        // Xử lý trường hợp sortField là null hoặc empty
+        var sortField = getAllQuery.SortField;
+        if (string.IsNullOrEmpty(sortField))
+        {
+            sortField = "CreatedDate"; // Giá trị mặc định
+        }
+
+        // Chuẩn hóa sortField - thay _ thành . nếu có
+        var normalizedSortField = NormalizeSortField(sortField);
+
+        try
+        {
+            var parameter = Expression.Parameter(typeof(TEntity), "x");
+            Expression propertyAccess = parameter;
+            Type propertyType = typeof(TEntity);
+
+            // Xử lý từng phần của nested property
+            foreach (var propertyName in normalizedSortField.Split('.'))
+            {
+                var property = GetPropertyCaseInsensitive(propertyType, propertyName);
+
+                if (property == null)
+                    throw new ArgumentException($"Property '{propertyName}' not found in type '{propertyType.Name}'");
+
+                propertyAccess = Expression.Property(propertyAccess, property);
+                propertyType = property.PropertyType;
+            }
+
+            var orderByExp = Expression.Lambda(propertyAccess, parameter);
+            var methodName = getAllQuery.SortOrder == SortOrder.Ascending
+                ? "OrderBy"
+                : "OrderByDescending";
+
+            var resultExp = Expression.Call(
+                typeof(Queryable),
+                methodName,
+                new[] { typeof(TEntity), propertyType },
+                queryable.Expression,
+                Expression.Quote(orderByExp));
+
+            return queryable.Provider.CreateQuery<TEntity>(resultExp);
+        }
+        catch (Exception ex)
+        {
+            // Fallback về sort mặc định nếu có lỗi
+            Console.WriteLine($"Sorting error for field '{sortField}': {ex.Message}. Falling back to default sort.");
+            return queryable.OrderBy(x => x.CreatedDate);
+        }
+    }
+
+// Hàm chuẩn hóa sort field (hỗ trợ cả _ và .)
+    private static string NormalizeSortField(string sortField)
+    {
+        // Thay thế tất cả _ bằng .
+        return sortField.Replace('_', '.');
+    }
+
+// Hàm helper lấy property không phân biệt hoa thường
+    private static PropertyInfo GetPropertyCaseInsensitive(Type type, string propertyName)
+    {
+        return type.GetProperty(propertyName,
             BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
-
-        if (property == null)
-            // If the property doesn't exist, default to sorting by Id
-            property = typeof(TEntity).GetProperty("CreatedDate");
-
-        var propertyAccess = Expression.MakeMemberAccess(parameter, property);
-        var orderByExp = Expression.Lambda(propertyAccess, parameter);
-
-        var methodName = getAllQuery.SortOrder == SortOrder.Ascending ? "OrderBy" : "OrderByDescending";
-        var resultExp = Expression.Call(typeof(Queryable), methodName,
-            new[] { typeof(TEntity), property.PropertyType },
-            queryable.Expression, Expression.Quote(orderByExp));
-
-        queryable = queryable.Provider.CreateQuery<TEntity>(resultExp);
-
-        return queryable;
     }
 
     public IQueryable<TEntity> GetQueryable(CancellationToken cancellationToken = default)
@@ -165,7 +209,7 @@ public class BaseRepository<TEntity> : IBaseRepository<TEntity> where TEntity : 
     }
 
     #endregion
-    
+
     private DbSet<TEntity> DbSet
     {
         get
