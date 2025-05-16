@@ -406,6 +406,9 @@ public partial class FPTMatchingDbContext : BaseDbContext
 
             entity.HasOne(d => d.StageTopic).WithMany(p => p.Topics)
                 .HasForeignKey(d => d.StageTopicId);
+
+            entity.HasOne(d => d.Semester).WithMany(p => p.Topics)
+                .HasForeignKey(d => d.SemesterId);
         });
 
         modelBuilder.Entity<TopicRequest>(entity =>
