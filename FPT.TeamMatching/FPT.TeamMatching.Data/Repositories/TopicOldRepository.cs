@@ -26,7 +26,6 @@ namespace FPT.TeamMatching.Data.Repositories
         //    _semesterRepository = semesterRepository;
         //}
 
-        //sua db
         //public bool IsExistedTopicCode(string topicCode)
         //{
         //    var isExist = _context.Topics.Where(e => e.TopicCode == topicCode).Any();
@@ -131,69 +130,6 @@ namespace FPT.TeamMatching.Data.Repositories
             return null;
         }
 
-        //public async Task<(List<Topic>, int)> GetTopicsForMentor(TopicOldGetListForMentorQuery query, Guid userId)
-        //{
-        //    var queryable = GetQueryable();
-        //    queryable = queryable
-        //        .Include(x => x.IdeaVersion).ThenInclude(m => m.Idea)
-        //        .Include(x => x.IdeaVersion).ThenInclude(m => m.IdeaVersionRequests)
-        //        .Include(m => m.Project)
-        //        .Include(m => m.MentorTopicRequests)
-        //        .Include(m => m.TopicVersions);
-
-        //    queryable = queryable.Where(m =>
-        //        m.IdeaVersion != null &&
-        //        m.IdeaVersion.Idea != null &&
-        //        (m.IdeaVersion.Idea.Status != IdeaStatus.Rejected));
-        //    if (query.Roles.Contains("Mentor") && query.Roles.Contains("SubMentor"))
-        //    {
-        //        queryable = queryable.Where(m =>
-        //            m.IdeaVersion != null &&
-        //            m.IdeaVersion.Idea != null &&
-        //            (m.IdeaVersion.Idea.MentorId == userId ||
-        //             m.IdeaVersion.Idea.SubMentorId == userId));
-        //    }
-        //    else if (query.Roles.Contains("Mentor"))
-        //    {
-        //        queryable = queryable.Where(m =>
-        //            m.IdeaVersion != null &&
-        //            m.IdeaVersion.Idea != null &&
-        //            m.IdeaVersion.Idea.MentorId == userId);
-        //    }
-        //    else if (query.Roles.Contains("SubMentor"))
-        //    {
-        //        queryable = queryable.Where(m =>
-        //            m.IdeaVersion != null &&
-        //            m.IdeaVersion.Idea != null &&
-        //            m.IdeaVersion.Idea.SubMentorId == userId);
-        //    }
-        //    else
-        //    {
-        //        queryable = queryable.Where(m =>
-        //            m.IdeaVersion != null &&
-        //            m.IdeaVersion.Idea != null &&
-        //            (m.IdeaVersion.Idea.MentorId == userId ||
-        //             m.IdeaVersion.Idea.SubMentorId == userId));
-        //    }
-
-        //    queryable = BaseFilterHelper.Base(queryable, query);
-
-        //    queryable = Sort(queryable, query);
-
-        //    var total = queryable.Count();
-        //    var results = query.IsPagination
-        //        ? await GetQueryablePagination(queryable, query).ToListAsync()
-        //        : await queryable.ToListAsync();
-
-        //    return (results, query.IsPagination ? total : results.Count);
-        //}
-
-        //public async Task<List<Topic>> GetTopicByIdeaVersionId(List<Guid?> ideaVersionIds)
-        //{
-        //    var queryable = GetQueryable(x => ideaVersionIds.Contains(x.IdeaVersionId));
-        //    var entities = await queryable.ToListAsync();
-
-        //    return entities;
-        //}
+        
     }
 }

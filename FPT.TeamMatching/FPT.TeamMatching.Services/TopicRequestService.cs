@@ -156,24 +156,27 @@ public class TopicRequestService : BaseService<TopicRequest>, ITopicRequestServi
         }
     }
 
-    public async Task<BusinessResult> GetTopicVersionRequestsForCurrentReviewerByRolesAndStatus<TResult>(
+    public async Task<BusinessResult> GetTopicRequestsForCurrentReviewerByRolesAndStatus<TResult>(
         TopicRequestGetListByStatusAndRoleQuery query) where TResult : BaseResult
     {
         try
         {
             var userIdClaims = GetUserIdFromClaims();
+            if (userIdClaims == null)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("Không tìm thấy userId");
+            }
             var userId = userIdClaims.Value;
-            //sua db
-            //var (data, total) =
-            //    await _topicVersionRequestRepository.GetTopicVersionRequestsForCurrentReviewerByRolesAndStatus(query,
-            //        userId);
+            var (data, total) = await _topicRequestRepository.GetTopicVersionRequestsForCurrentReviewerByRolesAndStatus(query,userId);
 
-            //var results = _mapper.Map<List<TResult>>(data);
+            var results = _mapper.Map<List<TResult>>(data);
 
-            //var response = new QueryResult(query, results, total);
+            var response = new QueryResult(query, results, total);
 
             return new ResponseBuilder()
-                //.WithData(response)
+                .WithData(response)
                 .WithStatus(Const.SUCCESS_CODE)
                 .WithMessage(Const.SUCCESS_READ_MSG);
         }
@@ -223,7 +226,6 @@ public class TopicRequestService : BaseService<TopicRequest>, ITopicRequestServi
             var semester = await _semesterRepository.GetSemesterByStageTopicId(stageTopic.Id);
             if (semester == null) return HandlerFail("Không có kì ứng với đợt duyệt hiện tại");
 
-            //sua db
             //var topicVersion = await _topicVersionRepository.GetById(command.TopicVersionId);
             //if (topicVersion == null) return HandlerFail("Ko tìm thấy topicVersionId");
 
@@ -236,7 +238,6 @@ public class TopicRequestService : BaseService<TopicRequest>, ITopicRequestServi
 
             var newTopicVersionRequests = new List<TopicRequest>();
 
-            //sua db
             //foreach (var council in councils)
             //{
             //    var topicVersionRequest = new TopicRequest
@@ -258,7 +259,6 @@ public class TopicRequestService : BaseService<TopicRequest>, ITopicRequestServi
             if (!saveChange) return HandlerFail("Đã xảy ra lỗi khi tạo yêu cầu đến hội đồng");
 
             //send noti cho councils
-            //sua db
             //var request = new NotificationCreateForGroupUser
             //{
             //    Description = "Đề tài " + topicVersion?.Abbreviations + " đang chờ bạn duyệt với vai trò Council",
@@ -268,7 +268,6 @@ public class TopicRequestService : BaseService<TopicRequest>, ITopicRequestServi
             //mentor nop topic -> topic 
             //tao topic
             //Gen topic code
-            //sua db
             //var topicVersionsOfTopic = await _topicVersionRepository.GetTopicVersionsByTopicId(topicVersion.TopicId.Value);
             //var topicVersionListId = topicVersionsOfTopic.Select(m => m.Id).ToList().ConvertAll<Guid?>(x => x);
             //var existingTopics = await _unitOfWork.TopicRepository.GetTopicByTopicVersionId(topicVersionListId);
@@ -299,8 +298,8 @@ public class TopicRequestService : BaseService<TopicRequest>, ITopicRequestServi
         }
     }
 
-    public async Task<BusinessResult> RespondByMentorOrCouncil(
-        TopicRequestLecturerOrCouncilResponseCommand command)
+    public async Task<BusinessResult> RespondByMentorOrManager(
+        TopicRequestMentorOrManagerResponseCommand command)
     {
         try
         {
@@ -309,7 +308,7 @@ public class TopicRequestService : BaseService<TopicRequest>, ITopicRequestServi
             {
                 return new ResponseBuilder()
                     .WithStatus(Const.NOT_FOUND_CODE)
-                    .WithMessage("Không tìm thấy topic version request");
+                    .WithMessage("Không tìm thấy topic request");
             }
 
             topicRequest.Status = command.Status;
@@ -343,9 +342,7 @@ public class TopicRequestService : BaseService<TopicRequest>, ITopicRequestServi
             //            .WithMessage(Const.FAIL_SAVE_MSG);
             //    }
             //}
-            
 
-            //sua db
             //if (topicVersionRequest.TopicVersion == null)
             //{
             //    return new ResponseBuilder()
@@ -359,19 +356,17 @@ public class TopicRequestService : BaseService<TopicRequest>, ITopicRequestServi
             //        .WithStatus(Const.NOT_FOUND_CODE)
             //        .WithMessage(Const.NOT_FOUND_MSG);
             //}
-
+            var topic = await _topicRepository.GetById((Guid)topicRequest.TopicId);
+            if (topic == null)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(Const.NOT_FOUND_CODE)
+                    .WithMessage(Const.NOT_FOUND_MSG);
+            }
             //neu mentor response 
             if (topicRequest.Role == "Mentor" || topicRequest.Role == "SubMentor")
             {
-                var topic = await _topicRepository.GetById((Guid)topicRequest.TopicId);
-                if (topic == null)
-                {
-                    return new ResponseBuilder()
-                        .WithStatus(Const.NOT_FOUND_CODE)
-                        .WithMessage(Const.NOT_FOUND_MSG);
-                }
-
-                //neu la status la consider -> sua status cua topic -> ConsiderByMentor
+                //neu la status la consider -> sua status cua topic -> MentorConsidered
                 if (topicRequest.Status == TopicRequestStatus.Consider)
                 {
                     topic.Status = TopicStatus.MentorConsider;
@@ -401,6 +396,21 @@ public class TopicRequestService : BaseService<TopicRequest>, ITopicRequestServi
                     }
                 }
 
+                //neu la status la reject -> sua status cua topic -> reject
+                if (topicRequest.Status == TopicRequestStatus.Approved)
+                {
+                    topic.Status = TopicStatus.MentorRejected;
+                    await SetBaseEntityForUpdate(topic);
+                    _topicRepository.Update(topic);
+                    saveChange = await _unitOfWork.SaveChanges();
+                    if (!saveChange)
+                    {
+                        return new ResponseBuilder()
+                            .WithStatus(Const.FAIL_CODE)
+                            .WithMessage(Const.FAIL_SAVE_MSG);
+                    }
+                }
+
                 //noti cho owner
                 var topicInclude = await _topicRepository.GetById((Guid)topicRequest.TopicId, true);
                 var noti = new NotificationCreateForIndividual
@@ -413,17 +423,35 @@ public class TopicRequestService : BaseService<TopicRequest>, ITopicRequestServi
                                        topicInclude?.Mentor?.Code + " (Mentor) duyệt. Hãy kiểm tra kết quả!";
                     await _notificationService.CreateForUser(noti);
                 }
-                
+
                 if (topicRequest.Role == "SubMentor")
                 {
                     noti.Description = "Đề tài " + topicRequest.Topic.Abbreviation + " đã được " +
                                        topicInclude?.SubMentor?.Code + " (SubMentor) duyệt. Hãy kiểm tra kết quả!";
                     await _notificationService.CreateForUser(noti);
                 }
-                
-                
-                
             }
+
+            //neu manager reponse
+            if (topicRequest.Role == "Manager")
+            {
+                //neu la status la reject -> sua status cua topic -> reject
+                if (topicRequest.Status == TopicRequestStatus.Rejected)
+                {
+                    topic.Status = TopicStatus.ManagerRejected;
+                    await SetBaseEntityForUpdate(topic);
+                    _topicRepository.Update(topic);
+                    saveChange = await _unitOfWork.SaveChanges();
+                    if (!saveChange)
+                    {
+                        return new ResponseBuilder()
+                            .WithStatus(Const.FAIL_CODE)
+                            .WithMessage(Const.FAIL_SAVE_MSG);
+                    }
+                }
+            }
+
+            
 
             return new ResponseBuilder()
                 .WithStatus(Const.SUCCESS_CODE)

@@ -44,4 +44,8 @@ public interface ITopicRepository : IBaseRepository<Topic>
     Task<List<Topic>?> GetTopicNotApproveInSemester(Guid semesterId);
     
     Task<Topic> GetTopicByProjectId(Guid projectId);
+
+    Task<(List<Topic>, int)> GetTopicsForMentor(TopicGetListForMentorQuery query, Guid userId);
+
+    Task<List<Topic>> ApprovedTopicsBySemesterId(Guid semesterId);
 }

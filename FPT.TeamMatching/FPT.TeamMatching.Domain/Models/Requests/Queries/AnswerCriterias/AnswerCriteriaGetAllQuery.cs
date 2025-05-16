@@ -9,7 +9,7 @@ namespace FPT.TeamMatching.Domain.Models.Requests.Queries.AnswerCriterias
 {
     public class AnswerCriteriaGetAllQuery: GetQueryableQuery
     {
-        public Guid? IdeaVersionRequestId { get; set; }
+        public Guid? TopicRequestId { get; set; }
 
         public Guid? CriteriaId { get; set; }
 

@@ -12,8 +12,5 @@ namespace FPT.TeamMatching.Domain.Contracts.Services
 {
     public interface ITopicOldService
     {
-        //sua db
-        //Task<BusinessResult> GetTopicsForMentor(TopicOldGetListForMentorQuery query);
-        //Task<BusinessResult> GetTopicsOfSupervisors<TResult>(TopicOldGetListOfSupervisorsQuery query) where TResult : BaseResult;
     }
 }

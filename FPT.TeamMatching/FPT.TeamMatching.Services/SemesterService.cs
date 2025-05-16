@@ -13,9 +13,13 @@ namespace FPT.TeamMatching.Services
     public class SemesterService : BaseService<Semester>, ISemesterService
     {
         private readonly ISemesterRepository _semesterRepository;
+        private readonly ITopicRepository _topicRepository;
+        private readonly IProjectRepository _projectRepository;
         public SemesterService(IMapper mapper, IUnitOfWork unitOfWork) : base(mapper, unitOfWork)
         {
             _semesterRepository = unitOfWork.SemesterRepository;
+            _topicRepository = unitOfWork.TopicRepository;
+            _projectRepository = unitOfWork.ProjectRepository;
         }
         
         public async Task<BusinessResult> GetCurrentSemester()
@@ -93,7 +97,7 @@ namespace FPT.TeamMatching.Services
             }
         }
         
-        public async Task<string> GenerateNewTopicCode(Guid? semesterId)
+        public async Task<string> GenerateNewTopicCode(Guid semesterId)
         {
             try
             {
@@ -102,10 +106,9 @@ namespace FPT.TeamMatching.Services
                 var semesterCode = semester.SemesterCode;
                 var semesterPrefix = semester.SemesterPrefixName;
 
-                //get so luong idea dc duyet approve cua ki
-                //sua db
-                //var numberOfTopics = _unitOfWork.TopicRepository.NumberOfTopicBySemesterId(semester.Id);
-                var numberOfTopics = 0;
+                //get so luong topic dc duyet approve cua ki
+                var topics = await _topicRepository.ApprovedTopicsBySemesterId(semester.Id);
+                var numberOfTopics = topics.Count();
 
                 // Tạo số thứ tự tiếp theo
                 int nextNumberTopic = numberOfTopics + 1;
@@ -122,13 +125,14 @@ namespace FPT.TeamMatching.Services
             }
         }
         
-        public async Task<string> GenerateNewTeamCode(Guid? semesterId)
+        public async Task<string> GenerateNewTeamCode(Guid semesterId)
         {
             try
             {
                 var semester = await _semesterRepository.GetById(semesterId);
                 if (semester == null) return string.Empty;
-                var numberOfProjects = await _unitOfWork.ProjectRepository.NumberOfProjectInSemester(semester.Id);
+                var projects = await _projectRepository.GetInProgressProjectBySemesterId(semesterId);
+                var numberOfProjects = projects.Count();
                 // Tạo số thứ tự tiếp theo
                 int nextNumber = numberOfProjects + 1;
                 string semesterCode = semester.SemesterCode;
@@ -136,7 +140,6 @@ namespace FPT.TeamMatching.Services
                 string newTeamCode = $"{semesterCode}SE{nextNumber:D3}";
 
                 return newTeamCode;
-
             }
             catch (Exception ex)
             {
@@ -144,31 +147,5 @@ namespace FPT.TeamMatching.Services
                 return string.Empty;
             }
         }
-
-        // public async Task<BusinessResult> GetPresentSemester()
-        // {
-        //     try
-        //     {
-        //         var s = await _semesterRepository.GetPresentSemester();
-        //         if (s == null)
-        //         {
-        //             return new ResponseBuilder()
-        //             .WithStatus(Const.NOT_FOUND_CODE)
-        //             .WithMessage(Const.NOT_FOUND_MSG);
-        //         }
-        //         return new ResponseBuilder()
-        //             .WithData(s)
-        //             .WithStatus(Const.SUCCESS_CODE)
-        //             .WithMessage(Const.SUCCESS_READ_MSG);
-        //     }
-        //     catch (Exception ex)
-        //     {
-        //         var errorMessage = $"An error {typeof(SemesterResult).Name}: {ex.Message}";
-        //         return new ResponseBuilder()
-        //             .WithStatus(Const.FAIL_CODE)
-        //             .WithMessage(errorMessage);
-        //     }
-        // }
-
     }
 }

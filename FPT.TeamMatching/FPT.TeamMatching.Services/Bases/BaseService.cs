@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using DocumentFormat.OpenXml.Spreadsheet;
 using FPT.TeamMatching.Domain.Contracts.Repositories.Bases;
 using FPT.TeamMatching.Domain.Contracts.Services.Bases;
 using FPT.TeamMatching.Domain.Contracts.UnitOfWorks;
@@ -12,6 +13,7 @@ using FPT.TeamMatching.Domain.Models.Results.Bases;
 using FPT.TeamMatching.Domain.Utilities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 
 namespace FPT.TeamMatching.Services.Bases;
 
@@ -174,7 +176,6 @@ public abstract class BaseService<TEntity> : BaseService, IBaseService
         return saveChanges ? entity : null;
     }
 
-
     public async Task<BusinessResult> Restore<TResult>(UpdateCommand updateCommand)
         where TResult : BaseResult
     {
@@ -250,7 +251,6 @@ public abstract class BaseService<TEntity> : BaseService, IBaseService
                 .WithMessage(errorMessage);
         }
     }
-
 
     protected async Task<TEntity?> RestoreEntity(UpdateCommand updateCommand)
     {
@@ -357,6 +357,23 @@ public abstract class BaseService<TEntity> : BaseService, IBaseService
         }
     }
 
+    protected async Task<Semester?> GetSemesterInCurrentWorkSpace()
+    {
+        var userId = GetUserIdFromClaims();
+        var user = await _unitOfWork.UserRepository.GetById(userId);
+        try
+        {
+            using var doc = JsonDocument.Parse(user.Cache);
+            if (doc.RootElement.TryGetProperty("semester", out var semesterElement))
+            {
+                string semesterId = semesterElement.GetString();
+                var semester = await _unitOfWork.SemesterRepository.GetById(Guid.Parse(semesterId));
+                return semester;
+            }
+        }
+        catch (Exception) { return null; }
+        return null;
+    }
     public bool IsUserAuthenticated()
     {
         return _httpContextAccessor?.HttpContext != null &&

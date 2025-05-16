@@ -119,7 +119,6 @@ public class TopicService : BaseService<Topic>, ITopicService
             var topic = await CreateTopic(topicCreateModel);
             if (!await _unitOfWork.SaveChanges()) return HandlerFail("Lưu không thành công topic");
 
-            //sua db
             // 4. Create and save topic version
             //var topicVersion = await CreateTopicVersion(topicCreateModel, topic.Id, stageTopic.Id);
             //if (!await _unitOfWork.SaveChanges()) return HandlerFail("Lưu không thành công topic version");
@@ -127,7 +126,7 @@ public class TopicService : BaseService<Topic>, ITopicService
 
             // 5. Create requests and notifications
             //sua db
-            //await _topicVersionRequestService.CreateVersionRequesForFirstCreateTopic(topic, topicVersion.Id, semester.CriteriaFormId.Value);
+            //await _topicRequestRepository.Create(topic, topicVersion.Id, semester.CriteriaFormId.Value);
             //if (!await _unitOfWork.SaveChanges()) return HandlerFail("Lưu không thành công topic version request");
             //await SendNotifications(topic, topicVersion.Abbreviation);
 
@@ -240,7 +239,6 @@ public class TopicService : BaseService<Topic>, ITopicService
             if (!await _unitOfWork.SaveChanges()) return HandlerFail("Lưu không thành công topic");
 
             // 4. Create and save topic version
-            //sua db
             //var topicVersion = await CreateLecturerTopicVersion(topicCreateModel, topic.Id, stageTopic.Id);
             //if (!await _unitOfWork.SaveChanges()) return HandlerFail("Lưu không thành công topic version");
 
@@ -561,7 +559,6 @@ public class TopicService : BaseService<Topic>, ITopicService
         }
     }
 
-    //sua db
     //private async Task EvaluateTopicByAverageScore(Topic topic, StageTopic stageTopic)
     //{
     //    var totalCouncils = await _topicVersionRequestRepository.CountCouncilsForTopic(topic.Id);
@@ -798,7 +795,7 @@ public class TopicService : BaseService<Topic>, ITopicService
             existingProject.TopicId = topicResult.Id;
             if (string.IsNullOrEmpty(existingProject.TeamCode))
             {
-                existingProject.TeamCode = await _semesterService.GenerateNewTeamCode(stageTopic.SemesterId);
+                existingProject.TeamCode = await _semesterService.GenerateNewTeamCode((Guid)stageTopic.SemesterId);
             }
             existingProject.Status = ProjectStatus.Pending;
             await SetBaseEntityForUpdate(existingProject);
@@ -973,6 +970,31 @@ public class TopicService : BaseService<Topic>, ITopicService
             return new ResponseBuilder()
                 .WithStatus(Const.SUCCESS_CODE)
                 .WithMessage("Đã xảy ra lỗi khi cập nhật các dự án đến ngày bắt đầu");
+        }
+        catch (Exception ex)
+        {
+            var errorMessage = $"An error occurred in {typeof(TopicResult).Name}: {ex.Message}";
+            return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage(errorMessage);
+        }
+    }
+
+    public async Task<BusinessResult> GetTopicsForMentor(TopicGetListForMentorQuery query)
+    {
+        try
+        {
+            var userId = GetUserIdFromClaims();
+            if (userId == null) return HandlerFailAuth();
+
+            var (data, total) = await _topicRepository.GetTopicsForMentor(query, userId.Value);
+            var results = _mapper.Map<List<TopicResult>>(data);
+            var response = new QueryResult(query, results, total);
+
+            return new ResponseBuilder()
+                .WithData(response)
+                .WithStatus(Const.SUCCESS_CODE)
+                .WithMessage(Const.SUCCESS_READ_MSG);
         }
         catch (Exception ex)
         {

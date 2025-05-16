@@ -161,7 +161,7 @@ public class ProjectService : BaseService<Project>, IProjectService
             var semester = await _semesterRepository.GetSemesterByStageTopicId(stageTopic.Id);
             if (semester == null) return HandlerFail("Không có kì ứng với đợt duyệt hiện tại!");
 
-            var newTeamCode = await _semesterService.GenerateNewTeamCode(stageTopic.SemesterId);
+            var newTeamCode = await _semesterService.GenerateNewTeamCode((Guid)stageTopic.SemesterId);
 
             var codeExist = await _projectRepository.IsExistedTeamCode(newTeamCode);
             if (codeExist) return HandlerFail("Trùng mã nhóm!");

@@ -17,7 +17,6 @@ namespace FPT.TeamMatching.Services
         //{
         //}
         
-        //sua db
         //public async Task<BusinessResult> GetTopicsOfSupervisors<TResult>(TopicOldGetListOfSupervisorsQuery query)
         //    where TResult : BaseResult
         //{
