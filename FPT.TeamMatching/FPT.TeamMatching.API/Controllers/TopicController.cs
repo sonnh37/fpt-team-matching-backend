@@ -110,7 +110,7 @@ public class TopicController : ControllerBase
         return Ok(businessResult);
     }
     
-    [HttpGet("me/by-status")]
+    [HttpGet("me/by-list-status")]
     public async Task<IActionResult> GetUserIdeasByStatus([FromQuery] TopicGetListForUserByStatus request)
     {
         var businessResult = await _service.GetUserTopicsByStatus(request);

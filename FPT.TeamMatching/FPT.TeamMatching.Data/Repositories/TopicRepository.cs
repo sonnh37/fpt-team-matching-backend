@@ -48,18 +48,20 @@ public class TopicRepository : BaseRepository<Topic>, ITopicRepository
         return ideas;
     }
 
-    public async Task<List<Topic>> GetCurrentTopicByUserIdAndStatus(Guid userId, TopicStatus status)
+    public async Task<List<Topic>> GetCurrentTopicByUserIdAndStatus(Guid userId, List<TopicStatus> statusList)
     {
         var queryable = GetQueryable();
 
         var ideas = await queryable.Where(e => e.OwnerId == userId
-                                               && e.Status == status)
+                                               && e.Status != null
+                                               && statusList.Contains(e.Status.Value))
             .OrderByDescending(m => m.CreatedDate)
             .Include(e => e.TopicVersions).ThenInclude(e => e.TopicVersionRequests).ThenInclude(e => e.Reviewer)
             //sua db
             //.Include(e => e.TopicVersions).ThenInclude(e => e.StageTopic)
             //.Include(e => e.TopicVersions).ThenInclude(e => e.StageTopic).ThenInclude(m => m.Semester)
             .Include(m => m.Owner)
+            .Include(m => m.StageTopic)
             .Include(m => m.Mentor)
             .Include(m => m.SubMentor)
             .Include(m => m.Specialty).ThenInclude(m => m.Profession)
