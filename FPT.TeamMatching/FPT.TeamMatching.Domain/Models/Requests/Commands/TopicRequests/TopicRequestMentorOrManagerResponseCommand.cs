@@ -10,10 +10,10 @@ using System.Threading.Tasks;
 
 namespace FPT.TeamMatching.Domain.Models.Requests.Commands.TopicRequests
 {
-    public class TopicRequestLecturerOrCouncilResponseCommand : UpdateCommand
+    public class TopicRequestMentorOrManagerResponseCommand : UpdateCommand
     {
         public TopicRequestStatus? Status { get; set; }
 
-        public List<AnswerCriteriaForLecturerRespond>? AnswerCriteriaList { get; set; }
+        //public List<AnswerCriteriaForLecturerRespond>? AnswerCriteriaList { get; set; }
     }
 }

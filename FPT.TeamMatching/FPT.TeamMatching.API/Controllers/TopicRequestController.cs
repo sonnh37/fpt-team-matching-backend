@@ -16,7 +16,6 @@ public class TopicRequestController : ControllerBase
 {
     private readonly ITopicRequestService _service;
 
-
     public TopicRequestController(ITopicRequestService __service)
     {
         _service = __service;
@@ -38,22 +37,18 @@ public class TopicRequestController : ControllerBase
     }
 
     [HttpGet("me/by-status-and-roles")]
-    public async Task<IActionResult> GetIdeaVersionRequestsCurrentByStatusAndRoles([FromQuery] TopicRequestGetListByStatusAndRoleQuery query)
+    public async Task<IActionResult> GetTopicRequestsCurrentByStatusAndRoles([FromQuery] TopicRequestGetListByStatusAndRoleQuery query)
     {
-        //sua db
-        //var msg = await _service.GetIdeaVersionRequestsForCurrentReviewerByRolesAndStatus<TopicRequestResult>(query);
-        //return Ok(msg);
-        return null;
+        var msg = await _service.GetTopicRequestsForCurrentReviewerByRolesAndStatus<TopicRequestResult>(query);
+        return Ok(msg);
     }
     
-    [HttpPost("create-council-requests")]
-    public async Task<IActionResult> CreateCouncilRequests([FromBody] TopicRequestCreateForCouncilsCommand command)
-    {
-        //sua db
-        //var result = await _service.CreateCouncilRequestsForIdea(command);
-        //return Ok(result);
-        return null;
-    }
+    //[HttpPost("create-council-requests")]
+    //public async Task<IActionResult> CreateCouncilRequests([FromBody] TopicRequestCreateForCouncilsCommand command)
+    //{
+    //    var result = await _service.CreateCouncilRequestsForIdea(command);
+    //    return Ok(result);
+    //}
     
     [HttpGet("without-reviewer")]
     public async Task<IActionResult> GetAllUnassignedReviewer([FromQuery] GetQueryableQuery query)
@@ -101,9 +96,9 @@ public class TopicRequestController : ControllerBase
     }
 
     [HttpPut("respond-by-mentor-or-council")]
-    public async Task<IActionResult> RespondByMentorOrCouncil([FromBody] TopicRequestLecturerOrCouncilResponseCommand request)
+    public async Task<IActionResult> RespondByMentorOrCouncil([FromBody] TopicRequestMentorOrManagerResponseCommand request)
     {
-        var businessResult = await _service.RespondByMentorOrCouncil(request);
+        var businessResult = await _service.RespondByMentorOrManager(request);
 
         return Ok(businessResult);
     }

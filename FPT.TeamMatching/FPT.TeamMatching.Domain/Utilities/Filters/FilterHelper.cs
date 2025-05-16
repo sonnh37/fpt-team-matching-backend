@@ -69,11 +69,10 @@ public static class FilterHelper
     private static IQueryable<BaseEntity> AnswerCriteria(IQueryable<AnswerCriteria> queryable,
         AnswerCriteriaGetAllQuery query)
     {
-        //sua db
-        //if (query.TopicVersionRequestId != null)
-        //{
-        //    queryable = queryable.Where(m => m.TopicVersionRequestId == query.TopicVersionRequestId);
-        //}
+        if (query.TopicRequestId != null)
+        {
+            queryable = queryable.Where(m => m.TopicRequestId == query.TopicRequestId);
+        }
 
         queryable = BaseFilterHelper.Base(queryable, query);
 
@@ -175,13 +174,6 @@ public static class FilterHelper
 
     private static IQueryable<Topic>? Topic(IQueryable<Topic> queryable, TopicOldGetAllQuery query)
     {
-        //sua db
-        //if (query.TopicVersionId != null)
-        //{
-        //    queryable = queryable.Where(e =>
-        //        e.TopicVersion != null);
-        //}
-
         queryable = BaseFilterHelper.Base(queryable, query);
 
         return queryable;

@@ -90,12 +90,6 @@ namespace FPT.TeamMatching.Data.Repositories
                                                          && types.Contains(m.Type.Value) && m.OwnerId == userId)
                 .Select(m => m.Id).ToListAsync();
 
-            //sua db
-            //queryable = queryable.Where(m =>
-            //    m.Topic != null &&
-            //    m.Topic.IdeaVersion.IdeaId.HasValue &&
-            //    ideaIds.Contains(m.Topic.IdeaVersion.IdeaId.Value));
-
             queryable = Sort(queryable, query);
 
             var total = queryable.Count();

@@ -5,17 +5,16 @@ namespace FPT.TeamMatching.API.Job
 {
     public class PublicResultIdeaJob: IJob
     {
-        private readonly ITopicService _ideaService;
+        private readonly ITopicService _topicService;
 
-        public PublicResultIdeaJob(ITopicService ideaService, ITopicRequestService ideaVersionRequestService, IProjectService projectService)
+        public PublicResultIdeaJob(ITopicService topicService, ITopicRequestService topicVersionRequestService, IProjectService projectService)
         {
-            _ideaService = ideaService;
+            _topicService = topicService;
         }
 
         public async Task Execute(IJobExecutionContext context)
         {
-            //sua db
-            //await _ideaService.AutoUpdateIdeaStatus();
+            await _topicService.AutoUpdateTopicStatus();
         }
     }
 }

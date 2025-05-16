@@ -10,7 +10,7 @@ namespace FPT.TeamMatching.Domain.Contracts.Services
 {
     public interface ITopicRequestService : IBaseService
     {
-        Task<BusinessResult> RespondByMentorOrCouncil(TopicRequestLecturerOrCouncilResponseCommand command);
+        Task<BusinessResult> RespondByMentorOrManager(TopicRequestMentorOrManagerResponseCommand command);
 
         Task CreateVersionRequests(Topic topic, Guid versionId, Guid criteriaFormId);
         Task CreateVersionRequesForFirstCreateTopic(Topic topic, Guid versionId, Guid criteriaFormId);
@@ -19,7 +19,7 @@ namespace FPT.TeamMatching.Domain.Contracts.Services
 
         Task<BusinessResult> GetAllExceptPending<TResult>(TopicRequestGetAllQuery query) where TResult : BaseResult;
 
-        Task<BusinessResult> GetTopicVersionRequestsForCurrentReviewerByRolesAndStatus<TResult>(
+        Task<BusinessResult> GetTopicRequestsForCurrentReviewerByRolesAndStatus<TResult>(
             TopicRequestGetListByStatusAndRoleQuery query)
             where TResult : BaseResult;
 
