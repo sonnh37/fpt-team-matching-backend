@@ -381,9 +381,9 @@ public class TopicService : BaseService<Topic>, ITopicService
             var userId = GetUserIdFromClaims();
             if (userId == null) return HandlerError("Không tìm thấy người dùng");
 
-            if (query.Status == null) return HandlerFail("Nhập field trạng thái");
+            if (query.StatusList.Count == 0) return HandlerFail("Nhập field trạng thái");
 
-            var topics = await _topicRepository.GetCurrentTopicByUserIdAndStatus(userId.Value, query.Status.Value);
+            var topics = await _topicRepository.GetCurrentTopicByUserIdAndStatus(userId.Value, query.StatusList);
             var result = _mapper.Map<List<TopicResult>>(topics);
             if (result == null)
                 return new ResponseBuilder()
