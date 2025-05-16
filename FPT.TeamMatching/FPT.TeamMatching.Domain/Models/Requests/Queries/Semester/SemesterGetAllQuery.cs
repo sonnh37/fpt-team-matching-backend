@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using FPT.TeamMatching.Domain.Enums;
 
 namespace FPT.TeamMatching.Domain.Models.Requests.Queries.Semester
 {
@@ -17,11 +18,21 @@ namespace FPT.TeamMatching.Domain.Models.Requests.Queries.Semester
 
         public string? SemesterPrefixName { get; set; }
 
-        public DateTimeOffset? PublicTopicDate { get; set; }
-
         public DateTimeOffset? StartDate { get; set; }
 
         public DateTimeOffset? EndDate { get; set; }
+
+        public DateTimeOffset? OnGoingDate { get; set; }
+
+        public DateTimeOffset? PublicTopicDate { get; set; }
+
+        public SemesterStatus Status { get; set; }
+
+        public int MaxTeamSize { get; set; }
+
+        public int MinTeamSize { get; set; }
+
+        public int NumberOfTeam { get; set; }
 
         public int LimitTopicMentorOnly { get; set; }
 

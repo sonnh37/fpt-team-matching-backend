@@ -5,5 +5,5 @@ namespace FPT.TeamMatching.Domain.Models.Requests.Queries.Topics;
 
 public class TopicGetListForUserByStatus : GetQueryableQuery
 {
-    public TopicStatus? Status { get; set; }
+    public List<TopicStatus> StatusList { get; set; } = new List<TopicStatus>();
 }
