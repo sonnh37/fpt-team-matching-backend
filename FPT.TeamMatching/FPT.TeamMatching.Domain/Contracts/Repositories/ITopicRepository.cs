@@ -30,6 +30,8 @@ public interface ITopicRepository : IBaseRepository<Topic>
 
     Task<Topic?> GetTopicApproveInSemesterOfUser(Guid? userId, Guid semesterId);
 
+    Task<Topic?> GetTopicWithStatusInSemesterOfUser(Guid userId, Guid semesterId, TopicStatus status);
+
     Task<int> NumberOfTopicMentorOrOwner(Guid userId);
     Task<List<Topic>> GetTopicsByTopicCodes(string[] ideaCode);
 
@@ -48,4 +50,6 @@ public interface ITopicRepository : IBaseRepository<Topic>
     Task<(List<Topic>, int)> GetTopicsForMentor(TopicGetListForMentorQuery query, Guid userId);
 
     Task<List<Topic>> ApprovedTopicsBySemesterId(Guid semesterId);
+
+    Task<Topic?> GetTopicOfUserIsPendingInSemester(Guid userId, Guid semesterId);
 }

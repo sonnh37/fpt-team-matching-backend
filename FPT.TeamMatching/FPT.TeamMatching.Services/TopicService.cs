@@ -29,7 +29,6 @@ public class TopicService : BaseService<Topic>, ITopicService
     private readonly ITeamMemberRepository _teamMemberRepository;
     private readonly INotificationService _notificationService;
     private readonly ITopicRequestRepository _topicRequestRepository;
-    private readonly ITopicRequestService _topicRequestService;
     private readonly IProjectService _projectService;
     private readonly ISemesterService _semesterService;
     private readonly IUserService _userService;
@@ -51,7 +50,7 @@ public class TopicService : BaseService<Topic>, ITopicService
         _userRepository = unitOfWork.UserRepository;
         _stageTopicRepositoty = unitOfWork.StageTopicRepository;
         _teamMemberRepository = unitOfWork.TeamMemberRepository;
-        _topicRepository = unitOfWork.TopicRepository;
+        _topicRequestRepository = unitOfWork.TopicRequestRepository;
         _notificationService = notificationService;
         _projectService = projectService;
         _semesterService = semesterService;
@@ -97,68 +96,122 @@ public class TopicService : BaseService<Topic>, ITopicService
 
     #region Create-by-student
 
-    public async Task<BusinessResult> CreatePendingByStudent(TopicStudentCreatePendingCommand topicCreateModel)
+    public async Task<BusinessResult> SubmitToMentorByStudent(TopicStudentCreatePendingCommand topicCreateModel)
     {
         try
         {
-            // 1. Validate stage and semester
-            var (stageTopic, semester) = await GetCurrentStageAndSemester();
-            if (stageTopic == null || semester == null)
+            var userId = GetUserIdFromClaims();
+            // 1. check semester's status is preparing
+            var semester = await GetSemesterInCurrentWorkSpace();
+            if (semester == null)
             {
-                return HandlerFail("Không tìm thấy đợt duyệt hoặc kì tương ứng");
+                return HandlerFail("Không tìm thấy kì");
+            }
+            if (semester.Status != SemesterStatus.Preparing)
+            {
+                return HandlerFail("Hiện tại không được tạo ý tưởng");
             }
 
-            // 2. Validate student's existing topics
-            var validationError = await ValidateStudentTopics(topicCreateModel, stageTopic.Id, semester.Id);
+            // 2. Validate student's existing topic vs status khac draft 
+            var validationError = await ValidateStudentTopics(topicCreateModel, semester);
             if (validationError.Status != 1)
             {
                 return validationError;
             }
 
-            // 3. Create and save topic
-            var topic = await CreateTopic(topicCreateModel);
-            if (!await _unitOfWork.SaveChanges()) return HandlerFail("Lưu không thành công topic");
+            //3. Check xem student có bảng draft k, nếu có bảng draft thì update
+            var topic = await _topicRepository.GetTopicWithStatusInSemesterOfUser((Guid)userId, semester.Id, TopicStatus.Draft);
+            if (topic != null)
+            {
+                topic.MentorId = topicCreateModel.MentorId;
+                topic.SubMentorId = topicCreateModel.SubMentorId;
+                topic.VietNameseName = topicCreateModel.VietNameseName;
+                topic.EnglishName = topicCreateModel.EnglishName;
+                topic.Description = topicCreateModel.Description;
+                topic.Abbreviation = topicCreateModel.Abbreviation;
+                topic.FileUrl = topicCreateModel.FileUrl;
+                //status
+                topic.Status = TopicStatus.MentorPending;
+                await SetBaseEntityForUpdate(topic);
+                _topicRepository.Update(topic);
+            }
+            //k co bảng craft thì create
+            else
+            {
+                topic = _mapper.Map<Topic>(topicCreateModel);
+                topic.Id = Guid.NewGuid();
+                topic.OwnerId = userId;
+                topic.Status = TopicStatus.MentorPending;
+                topic.SemesterId = semester.Id;
+                topic.Type = TopicType.Student;
+                topic.IsExistedTeam = true;
+                topic.IsEnterpriseTopic = false;
 
-            // 4. Create and save topic version
-            //var topicVersion = await CreateTopicVersion(topicCreateModel, topic.Id, stageTopic.Id);
-            //if (!await _unitOfWork.SaveChanges()) return HandlerFail("Lưu không thành công topic version");
+                await SetBaseEntityForCreation(topic);
+                _topicRepository.Add(topic);
+            }
 
+            // 4. Create requests and notifications
+            var topicRequestForMentor = new TopicRequest
+            {
+                TopicId = topic.Id,
+                ReviewerId = topic.MentorId,
+                Status = TopicRequestStatus.Pending,
+                Role = "Mentor"
+            };
+            await SetBaseEntityForCreation(topicRequestForMentor);
+            _topicRequestRepository.Add(topicRequestForMentor);
 
-            // 5. Create requests and notifications
-            //sua db
-            //await _topicRequestRepository.Create(topic, topicVersion.Id, semester.CriteriaFormId.Value);
-            //if (!await _unitOfWork.SaveChanges()) return HandlerFail("Lưu không thành công topic version request");
-            //await SendNotifications(topic, topicVersion.Abbreviation);
+            if (topic.SubMentorId != null)
+            {
+                var topicRequestForSubMentor = new TopicRequest
+                {
+                    TopicId = topic.Id,
+                    ReviewerId = topic.SubMentorId,
+                    Status = TopicRequestStatus.Pending,
+                    Role = "SubMentor"
+                };
+                await SetBaseEntityForCreation(topicRequestForSubMentor);
+                _topicRequestRepository.Add(topicRequestForSubMentor);
+            }
+            // 5. Save change
+            var isSuccess = await _unitOfWork.SaveChanges();
+            if (!isSuccess) return HandlerFail("Gửi đề tài không thành công");
+            // 6. Noti 
+            await SendNotifications(topic);
 
             return new ResponseBuilder()
                 .WithStatus(Const.SUCCESS_CODE)
-                .WithMessage("Bạn đã tạo ý tưởng thành công");
+                .WithMessage("Bạn đã gửi đề tài thành công");
         }
         catch (Exception ex)
         {
-            return HandlerError($"Lỗi khi tạo đề tài: {ex.Message}");
+            return HandlerError($"Lỗi khi gửi đề tài: {ex.Message}");
         }
     }
 
     #region Helper methods
 
-    private async Task<BusinessResult> ValidateStudentTopics(TopicStudentCreatePendingCommand model, Guid stageTopicId,
-        Guid semesterId)
+    private async Task<BusinessResult> ValidateStudentTopics(TopicStudentCreatePendingCommand model,
+        Semester semester)
     {
         var userId = GetUserIdFromClaims();
 
-        if (await _topicRepository.GetTopicApproveInSemesterOfUser(userId, semesterId) != null)
+        var topicNotDraftOrReject = await _topicRepository.GetTopicNotRejectOfUserInSemester((Guid)userId, semester.Id);
+        if (topicNotDraftOrReject != null)
         {
-            return HandlerFail("Sinh viên đã có đề tài được duyệt trong kì này");
-        }
-
-        if (await _topicRepository.GetTopicPendingInStageTopicOfUser(userId, stageTopicId) != null)
-        {
-            return HandlerFail("Sinh viên có đề tài đang trong quá trình duyệt ở kì này");
+            if (topicNotDraftOrReject.Status == TopicStatus.ManagerApproved)
+            {
+                return HandlerFail("Sinh viên đã có đề tài được duyệt ở kì này");
+            }
+            else
+            {
+                return HandlerFail("Sinh viên có đề tài đang trong quá trình duyệt ở kì này");
+            }
         }
 
         if (model.MentorId == null) return HandlerFail("Nhập field Mentor Id");
-        // Check Mentor và sub
+        // Check Mentor và SubMentor
         var resBool = await _userService.CheckMentorAndSubMentorSlotAvailability(model.MentorId.Value,
             model.SubMentorId);
         if (resBool.Status != 1 || resBool.Data == null) return resBool;
@@ -356,20 +409,20 @@ public class TopicService : BaseService<Topic>, ITopicService
         return (stageTopic, semester);
     }
 
-    private async Task SendNotifications(Topic topic, string abbreviations)
+    private async Task SendNotifications(Topic topic)
     {
         await _notificationService.CreateForUser(new NotificationCreateForIndividual
         {
             UserId = topic.MentorId,
-            Description = $"Đề tài {abbreviations} đang chờ bạn duyệt với vai trò Mentor",
+            Description = $"Đề tài {topic.Abbreviation} đang chờ bạn duyệt với vai trò Mentor",
         });
 
         if (topic.SubMentorId.HasValue)
         {
             await _notificationService.CreateForUser(new NotificationCreateForIndividual
             {
-                UserId = topic.SubMentorId.Value,
-                Description = $"Đề tài {abbreviations} đang chờ bạn duyệt với vai trò SubMentor",
+                UserId = topic.SubMentorId,
+                Description = $"Đề tài {topic.Abbreviation} đang chờ bạn duyệt với vai trò SubMentor",
             });
         }
     }
@@ -735,27 +788,27 @@ public class TopicService : BaseService<Topic>, ITopicService
     //sua db
     //private async Task<TopicResult?> CreateTopicForTopic(TopicRe topicVersion, StageTopic stageTopic)
     //{
-        //try
-        //{
-        //    var newTopicCode = await _semesterService.GenerateNewTopicCode(stageTopic.SemesterId);
-        //    var codeExist = _topicRepository.IsExistedTopicCode(newTopicCode);
-        //    if (codeExist) return null;
+    //try
+    //{
+    //    var newTopicCode = await _semesterService.GenerateNewTopicCode(stageTopic.SemesterId);
+    //    var codeExist = _topicRepository.IsExistedTopicCode(newTopicCode);
+    //    if (codeExist) return null;
 
-        //    var topicCreateCommand = new TopicCreateCommand
-        //    {
-        //        TopicVersionId = topicVersion.Id,
-        //        TopicCode = newTopicCode
-        //    };
+    //    var topicCreateCommand = new TopicCreateCommand
+    //    {
+    //        TopicVersionId = topicVersion.Id,
+    //        TopicCode = newTopicCode
+    //    };
 
-        //    var res = await _topicService.CreateOrUpdate<TopicOldResult>(topicCreateCommand);
+    //    var res = await _topicService.CreateOrUpdate<TopicOldResult>(topicCreateCommand);
 
-        //    return res.Status == 1 ? res.Data as TopicOldResult : null;
-        //}
-        //catch (Exception ex)
-        //{
-        //    _logger.LogError(ex, $"Error creating topic for topic version {topicVersion.Id}");
-        //    return null;
-        //}
+    //    return res.Status == 1 ? res.Data as TopicOldResult : null;
+    //}
+    //catch (Exception ex)
+    //{
+    //    _logger.LogError(ex, $"Error creating topic for topic version {topicVersion.Id}");
+    //    return null;
+    //}
     //}
 
     //sua db
@@ -828,7 +881,7 @@ public class TopicService : BaseService<Topic>, ITopicService
             await SetBaseEntityForUpdate(topic);
             _topicRepository.Update(topic);
             await _unitOfWork.SaveChanges();
-            
+
             var noti = new NotificationCreateForIndividual()
             {
                 UserId = topic.OwnerId,

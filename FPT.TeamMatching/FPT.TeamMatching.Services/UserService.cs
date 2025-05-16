@@ -93,13 +93,13 @@ public class UserService : BaseService<User>, IUserService
     {
         try
         {
-            var upcomingSemester = await _semesterRepository.GetUpComingSemester();
-            if (upcomingSemester == null) return HandlerFail("Không có kì sắp đến");
-
+            //var upcomingSemester = await _semesterRepository.GetUpComingSemester();
+            //if (upcomingSemester == null) return HandlerFail("Không có kì sắp đến");
+            var semester = await GetSemesterInCurrentWorkSpace();
             var mentor = await _userRepository.GetById(mentorId);
             if (mentor == null) return HandlerFail("Không tìm thấy mentor");
 
-            var isMentor = await _userXRoleRepository.CheckRoleUserInSemester(mentorId, upcomingSemester.Id, "Mentor");
+            var isMentor = await _userXRoleRepository.CheckRoleUserInSemester(mentorId, semester.Id, "Mentor");
             if (!isMentor)
             {
                 return HandlerFail("Người dùng không phải là Mentor");
@@ -108,10 +108,10 @@ public class UserService : BaseService<User>, IUserService
             //k co submentor
             if (subMentorId == null)
             {
-                //check idea(chi co mentor) cua mentor in semester 
-                var ideas = _topicRepository.GetTopicsOnlyMentorOfUserInSemester(mentorId, upcomingSemester.Id);
+                //check topic(chi co mentor) cua mentor in semester 
+                var topics = _topicRepository.GetTopicsOnlyMentorOfUserInSemester(mentorId, semester.Id);
                 //
-                if (ideas == null || ideas.Count() < upcomingSemester.LimitTopicMentorOnly)
+                if (topics == null || topics.Count() < semester.LimitTopicMentorOnly)
                 {
                     return new ResponseBuilder()
                         .WithData(true)
@@ -123,7 +123,7 @@ public class UserService : BaseService<User>, IUserService
                     .WithData(false)
                     .WithStatus(Const.SUCCESS_CODE)
                     .WithMessage(
-                        $"{mentor.Email} hiện đã Mentor {upcomingSemester.LimitTopicMentorOnly} đề tài không có SubMentor. Cần SubMentor cho đề tài của bạn!");
+                        $"{mentor.Email} hiện đã Mentor {semester.LimitTopicMentorOnly} đề tài không có SubMentor. Cần SubMentor cho đề tài của bạn!");
             }
 
             //co submentor
@@ -131,15 +131,15 @@ public class UserService : BaseService<User>, IUserService
             if (subMentor == null) return HandlerFail("Không tìm thấy SubMentor");
 
             var isSubMentor =
-                await _userXRoleRepository.CheckRoleUserInSemester((Guid)subMentorId, upcomingSemester.Id, "Mentor");
+                await _userXRoleRepository.CheckRoleUserInSemester((Guid)subMentorId, semester.Id, "Mentor");
             if (!isSubMentor)
             {
                 return HandlerFail("Người dùng không phải là Mentor");
             }
 
-            var ideasBeSubMentor =
-                _topicRepository.GetTopicsBeSubMentorOfUserInSemester((Guid)subMentorId, upcomingSemester.Id);
-            if (ideasBeSubMentor == null || ideasBeSubMentor.Count() < upcomingSemester.LimitTopicSubMentor)
+            var topicsBeSubMentor =
+                _topicRepository.GetTopicsBeSubMentorOfUserInSemester((Guid)subMentorId, semester.Id);
+            if (topicsBeSubMentor == null || topicsBeSubMentor.Count() < semester.LimitTopicSubMentor)
             {
                 return new ResponseBuilder()
                     .WithData(true)
@@ -150,7 +150,7 @@ public class UserService : BaseService<User>, IUserService
             return new ResponseBuilder()
                 .WithData(false)
                 .WithStatus(Const.SUCCESS_CODE)
-                .WithMessage(mentor.Code + " hiện đã SubMentor " + upcomingSemester.LimitTopicMentorOnly +
+                .WithMessage(mentor.Code + " hiện đã SubMentor " + semester.LimitTopicMentorOnly +
                              " đề tài. Hãy chọn SubMentor khác!");
         }
         catch (Exception ex)

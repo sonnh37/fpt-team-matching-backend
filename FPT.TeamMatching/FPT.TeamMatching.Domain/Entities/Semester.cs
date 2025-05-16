@@ -39,6 +39,8 @@ public class Semester : BaseEntity
     
     public virtual ICollection<StageTopic> StageTopics { get; set; } = new List<StageTopic>();
 
+    public virtual ICollection<Topic> Topics { get; set; } = new List<Topic>();
+
     public virtual ICollection<UserXRole> UserXRoles { get; set; } = new List<UserXRole>();
 
     public virtual ICollection<Project> Projects { get; set; } = new List<Project>();

@@ -458,4 +458,28 @@ public class TopicRepository : BaseRepository<Topic>, ITopicRepository
                             .ToListAsync();
         return topics;
     }
+
+    public async Task<Topic?> GetTopicWithStatusInSemesterOfUser(Guid userId, Guid semesterId, TopicStatus status)
+    {
+        var queryable = GetQueryable();
+        var topic = await queryable.Where(e => e.IsDeleted == false &&
+                                                e.SemesterId == semesterId &&
+                                                e.Status == status)
+                                    .FirstOrDefaultAsync();
+        return topic;
+    }
+
+    public async Task<Topic?> GetTopicOfUserIsPendingInSemester(Guid userId, Guid semesterId)
+    {
+        var queryable = GetQueryable();
+        var topic = await queryable.Where(e => e.IsDeleted == false &&
+                                                e.StageTopic != null &&
+                                                e.StageTopic.Semester != null &&
+                                                e.StageTopic.Semester.Id == semesterId &&
+                                                (e.Status != TopicStatus.Draft && 
+                                                    e.Status != TopicStatus.MentorRejected &&   
+                                                    e.Status != TopicStatus.ManagerRejected))
+                                    .FirstOrDefaultAsync();
+        return topic;
+    }
 }
