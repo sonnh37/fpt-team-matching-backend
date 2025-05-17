@@ -17,7 +17,7 @@ namespace FPT.TeamMatching.Domain.Contracts.Services
         Task<BusinessResult> GetUserTopicsByStatus(TopicGetListForUserByStatus query);
         Task<BusinessResult> GetUserTopicsByStatusWithCurrentStageTopic(TopicGetCurrentStageForUserByStatus query);
         Task<BusinessResult> SubmitToMentorByStudent(TopicStudentCreatePendingCommand ideaCreateModel);
-        Task<BusinessResult> CreatePendingByLecturer(TopicLecturerCreatePendingCommand ideaCreateModel);
+        Task<BusinessResult> SubmitByLecturer(TopicLecturerCreatePendingCommand ideaCreateModel);
         Task<BusinessResult> GetTopicsByUserId();
         Task<BusinessResult> UpdateTopic(TopicUpdateCommand ideaUpdateCommand);
         Task<BusinessResult> UpdateStatusTopic(TopicUpdateStatusCommand command);

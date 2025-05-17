@@ -143,9 +143,16 @@ public class ProjectController : ControllerBase
     }
 
     [HttpGet("get-project-not-inprogress-yet")]
-    public async Task<IActionResult> GetProjectNotInProgress()
+    public async Task<IActionResult> GetProjectNotInProgressYet()
     {
         var businessResult = await _service.GetProjectNotInProgressYet();
+        return Ok(businessResult);
+    }
+
+    [HttpGet("get-project-not-canceled")]
+    public async Task<IActionResult> GetProjectNotCanceled()
+    {
+        var businessResult = await _service.GetProjectNotCanceled();
         return Ok(businessResult);
     }
 }

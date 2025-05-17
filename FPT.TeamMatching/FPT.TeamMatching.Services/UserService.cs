@@ -93,8 +93,6 @@ public class UserService : BaseService<User>, IUserService
     {
         try
         {
-            //var upcomingSemester = await _semesterRepository.GetUpComingSemester();
-            //if (upcomingSemester == null) return HandlerFail("Không có kì sắp đến");
             var semester = await GetSemesterInCurrentWorkSpace();
             var mentor = await _userRepository.GetById(mentorId);
             if (mentor == null) return HandlerFail("Không tìm thấy mentor");
@@ -109,7 +107,7 @@ public class UserService : BaseService<User>, IUserService
             if (subMentorId == null)
             {
                 //check topic(chi co mentor) cua mentor in semester 
-                var topics = _topicRepository.GetTopicsOnlyMentorOfUserInSemester(mentorId, semester.Id);
+                var topics = await _topicRepository.GetTopicsOnlyMentorOfUserInSemester(mentorId, semester.Id);
                 //
                 if (topics == null || topics.Count() < semester.LimitTopicMentorOnly)
                 {

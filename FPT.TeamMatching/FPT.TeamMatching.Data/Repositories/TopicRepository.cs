@@ -327,7 +327,7 @@ public class TopicRepository : BaseRepository<Topic>, ITopicRepository
         return (results, query.IsPagination ? total : results.Count);
     }
 
-    public List<Topic>? GetTopicsOnlyMentorOfUserInSemester(Guid mentorId, Guid semesterId)
+    public async Task<List<Topic>> GetTopicsOnlyMentorOfUserInSemester(Guid mentorId, Guid semesterId)
     {
         var queryable = GetQueryable();
 
@@ -338,9 +338,9 @@ public class TopicRepository : BaseRepository<Topic>, ITopicRepository
             .Where(i => i.TopicVersions != null &&
                         i.TopicVersions.OrderByDescending(iv => iv.CreatedDate).FirstOrDefault() != null);
 
-        var result = ideas.Where(e => e.StageTopic != null &&
+        var result = await ideas.Where(e => e.StageTopic != null &&
                                     e.StageTopic.SemesterId == semesterId)
-            .ToList();
+                                .ToListAsync();
 
         return result;
     }

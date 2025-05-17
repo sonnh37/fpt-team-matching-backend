@@ -14,20 +14,18 @@ namespace FPT.TeamMatching.Domain.Models.Requests.Commands.Topics
 
         public Guid? SpecialtyId { get; set; }
 
+        public string? VietNameseName { get; set; }
+
+        public string? EnglishName { get; set; }
+
         public string? Description { get; set; }
 
         public string? Abbreviation { get; set; }
-
-        public string? VietNamName { get; set; }
-
-        public string? EnglishName { get; set; }
 
         public bool IsEnterpriseTopic { get; set; }
 
         public string? EnterpriseName { get; set; }
 
-        public int? TeamSize { get; set; }
-
-        public string? File { get; set; }
+        public string? FileUrl { get; set; }
     }
 }

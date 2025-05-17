@@ -151,7 +151,7 @@ public class TopicService : BaseService<Topic>, ITopicService
                 _topicRepository.Add(topic);
             }
 
-            // 4. Create requests and notifications
+            // 4. Create requests 
             var topicRequestForMentor = new TopicRequest
             {
                 TopicId = topic.Id,
@@ -272,24 +272,102 @@ public class TopicService : BaseService<Topic>, ITopicService
 
     #region Create-by-lecturer
 
-    public async Task<BusinessResult> CreatePendingByLecturer(TopicLecturerCreatePendingCommand topicCreateModel)
+    public async Task<BusinessResult> SubmitByLecturer(TopicLecturerCreatePendingCommand topicCreateModel)
     {
         try
         {
+            var userId = GetUserIdFromClaims();
+
             // 1. Validate stage and semester
-            var (stageTopic, semester) = await GetCurrentStageAndSemester();
-            if (stageTopic == null || semester == null) return HandlerFail("Không tìm thấy đợt duyệt hoặc kì tương ứng");
+            var semester = await GetSemesterInCurrentWorkSpace();
+            if (semester == null)
+            {
+                return HandlerFail("Không tìm thấy kì");
+            }
+            if (semester.Status != SemesterStatus.Preparing)
+            {
+                return HandlerFail("Chưa đến thời gian đề tài");
+            }
+            var stageTopic = _stageTopicRepositoty.GetCurrentStageTopicBySemesterId(semester.Id);
+            if (stageTopic == null)
+            {
+                return HandlerFail("Chưa đến thời gian nộp đề tài");
+            }
 
             // 2. Validate lecturer-specific rules
-            var validationError = await ValidateLecturerRules(topicCreateModel);
+            var validationError = await ValidateLecturerRules(topicCreateModel, semester);
             if (validationError.Status != 1)
             {
                 return validationError;
             }
 
+            //3. Check xem lecturer có bảng draft k, nếu có bảng draft thì update
+            var topic = await _topicRepository.GetTopicWithStatusInSemesterOfUser((Guid)userId, semester.Id, TopicStatus.Draft);
+            if (topic != null)
+            {
+                topic.SubMentorId = topicCreateModel.SubMentorId;
+                topic.SpecialtyId = topicCreateModel.SpecialtyId;
+                topic.VietNameseName = topicCreateModel.VietNameseName;
+                topic.EnglishName = topicCreateModel.EnglishName;
+                topic.Description = topicCreateModel.Description;
+                topic.Abbreviation = topicCreateModel.Abbreviation;
+                topic.IsEnterpriseTopic = topicCreateModel.IsEnterpriseTopic;
+                topic.EnterpriseName = topicCreateModel.EnterpriseName;
+                topic.FileUrl = topicCreateModel.FileUrl;
+                //status
+                topic.Status = TopicStatus.ManagerPending;
+                await SetBaseEntityForUpdate(topic);
+                _topicRepository.Update(topic);
+            }
+            //k co bảng craft thì create
+            else
+            {
+                topic = _mapper.Map<Topic>(topicCreateModel);
+                topic.Id = Guid.NewGuid();
+                topic.OwnerId = userId;
+                topic.Status = TopicStatus.ManagerPending;
+                topic.SemesterId = semester.Id;
+                topic.IsExistedTeam = false;
+                topic.Type = topicCreateModel.IsEnterpriseTopic ? TopicType.Enterprise : TopicType.Lecturer;
+
+                await SetBaseEntityForCreation(topic);
+                _topicRepository.Add(topic);
+            }
+
+            // 4. Create requests 
+            var topicRequestForMentor = new TopicRequest
+            {
+                TopicId = topic.Id,
+                Status = TopicRequestStatus.Pending,
+                Role = "Manager"
+            };
+            await SetBaseEntityForCreation(topicRequestForMentor);
+            _topicRequestRepository.Add(topicRequestForMentor);
+
+            if (topic.SubMentorId != null)
+            {
+                var topicRequestForSubMentor = new TopicRequest
+                {
+                    TopicId = topic.Id,
+                    ReviewerId = topic.SubMentorId,
+                    Status = TopicRequestStatus.Pending,
+                    Role = "SubMentor"
+                };
+                await SetBaseEntityForCreation(topicRequestForSubMentor);
+                _topicRequestRepository.Add(topicRequestForSubMentor);
+            }
+            // 5. Save change
+            var isSuccess = await _unitOfWork.SaveChanges();
+            if (!isSuccess) return HandlerFail("Gửi đề tài không thành công");
+            // 6. Noti 
+            await SendNotifications(topic);
+
+            return new ResponseBuilder()
+                .WithStatus(Const.SUCCESS_CODE)
+                .WithMessage("Bạn đã gửi đề tài thành công");
             // 3. Create and save topic
-            var topic = await CreateLecturerTopic(topicCreateModel);
-            if (!await _unitOfWork.SaveChanges()) return HandlerFail("Lưu không thành công topic");
+            //var topic = await CreateLecturerTopic(topicCreateModel);
+            //if (!await _unitOfWork.SaveChanges()) return HandlerFail("Lưu không thành công topic");
 
             // 4. Create and save topic version
             //var topicVersion = await CreateLecturerTopicVersion(topicCreateModel, topic.Id, stageTopic.Id);
@@ -307,9 +385,9 @@ public class TopicService : BaseService<Topic>, ITopicService
             //    await SendNotifications(topic, topicVersion.Abbreviation);
             //}
 
-            return new ResponseBuilder()
-                .WithStatus(Const.SUCCESS_CODE)
-                .WithMessage("Bạn đã tạo ý tưởng thành công");
+            //return new ResponseBuilder()
+            //    .WithStatus(Const.SUCCESS_CODE)
+            //    .WithMessage("Bạn đã tạo ý tưởng thành công");
         }
         catch (Exception ex)
         {
@@ -317,7 +395,7 @@ public class TopicService : BaseService<Topic>, ITopicService
         }
     }
 
-    private async Task<BusinessResult> ValidateLecturerRules(TopicLecturerCreatePendingCommand model)
+    private async Task<BusinessResult> ValidateLecturerRules(TopicLecturerCreatePendingCommand model, Semester semester)
     {
         var userId = GetUserIdFromClaims();
         if (userId == null)
@@ -331,14 +409,13 @@ public class TopicService : BaseService<Topic>, ITopicService
                 return HandlerFail("Không tồn tại submentor");
         }
 
-        // Check if this is 5th+ topic and needs submentor
-        // var numberOfTopics = await _topicRepository.NumberOfTopicMentorOrOwner(userId.Value);
-        // if (numberOfTopics > 4 && model.SubMentorId == null)
-        //     return HandlerFail("Đề tài thứ 5 trở lên cần có submentor");
+        // Check if topic needs submentor
+        //var topicOnlyMentor = await _topicRepository.GetTopicsOnlyMentorOfUserInSemester((Guid)userId, semester.Id);
+        //if (topicOnlyMentor.Count() > semester.LimitTopicMentorOnly && model.SubMentorId == null)
+        //    return HandlerFail("Đề tài thứ " + semester.LimitTopicMentorOnly + " trở lên cần có submentor");
 
-        // Check Mentor và sub
-        var resBool = await _userService.CheckMentorAndSubMentorSlotAvailability(userId.Value,
-            model.SubMentorId);
+        // Check Mentor và SubMentor
+        var resBool = await _userService.CheckMentorAndSubMentorSlotAvailability(userId.Value,model.SubMentorId);
         if (resBool.Status != 1 || resBool.Data == null) return resBool;
         var isHasSlot = resBool.Data is bool;
         if (!isHasSlot) return HandlerFail(resBool.Message);

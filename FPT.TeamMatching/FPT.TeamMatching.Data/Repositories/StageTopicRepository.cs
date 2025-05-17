@@ -35,8 +35,19 @@ namespace FPT.TeamMatching.Data.Repositories
                 .Where(e => e.IsDeleted == false &&
                         e.StartDate.LocalDateTime.Date <= DateTime.Now.Date &&
                         DateTime.Now.Date <= e.EndDate.LocalDateTime.Date )
+                .Include(e => e.Semester)
                 .FirstOrDefaultAsync();
         }
 
+        public async Task<StageTopic?> GetCurrentStageTopicBySemesterId(Guid semesterId)
+        {
+            return await GetQueryable()
+                .Where(e => e.IsDeleted == false &&
+                        e.StartDate.LocalDateTime.Date <= DateTime.Now.Date &&
+                        DateTime.Now.Date <= e.EndDate.LocalDateTime.Date &&
+                        e.SemesterId == semesterId)
+                .Include(e => e.Semester)
+                .FirstOrDefaultAsync();
+        }
     }
 }

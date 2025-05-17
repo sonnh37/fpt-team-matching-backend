@@ -27,5 +27,7 @@ public interface IProjectService : IBaseService
     Task<BusinessResult> GetProjectBySemesterAndStage(Guid semester, int stage);
 
     Task<BusinessResult> GetProjectInSemesterCurrentByUserIdLogin();
-    Task<BusinessResult> GetProjectNotInProgressYet();
+    Task<BusinessResult> GetProjectNotInProgressYet(); 
+    Task<BusinessResult> GetProjectNotCanceled(); 
+
 }

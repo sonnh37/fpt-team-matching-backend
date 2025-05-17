@@ -429,7 +429,22 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
                                                             e.SemesterId == semesterId &&
                                                             (e.Status == ProjectStatus.Forming || e.Status == ProjectStatus.Pending))
                                                 .Include(e => e.TeamMembers)
+                                                    .ThenInclude(e => e.User)
                                                 .ToListAsync(); 
+
+        return projectsWithMember;
+    }
+
+    public async Task<List<Project>> GetProjectNotCanceledInSemester(Guid semesterId)
+    {
+        var queryable = GetQueryable();
+
+        var projectsWithMember = await queryable.Where(e => e.IsDeleted == false &&
+                                                            e.SemesterId == semesterId &&
+                                                            e.Status != ProjectStatus.Canceled)
+                                                .Include(e => e.TeamMembers)
+                                                    .ThenInclude(e => e.User)
+                                                .ToListAsync();
 
         return projectsWithMember;
     }

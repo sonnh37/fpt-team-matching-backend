@@ -89,10 +89,10 @@ public class TopicController : ControllerBase
         return Ok(msg);
     }
 
-    [HttpPost("create-pending-by-lecturer")]
-    public async Task<IActionResult> CreatePendingByLecturer([FromBody] TopicLecturerCreatePendingCommand request)
+    [HttpPost("submit-by-lecturer")]
+    public async Task<IActionResult> SubmitByLecturer([FromBody] TopicLecturerCreatePendingCommand request)
     {
-        var msg = await _service.CreatePendingByLecturer(request);
+        var msg = await _service.SubmitByLecturer(request);
         return Ok(msg);
     }
     
