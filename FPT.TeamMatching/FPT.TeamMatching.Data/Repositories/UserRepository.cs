@@ -416,14 +416,16 @@ public class UserRepository : BaseRepository<User>, IUserRepository
         return result;
     }
 
-    public async Task<List<User>?> GetStudentDoNotHaveTeam()
+    public async Task<List<User>?> GetStudentDoNotHaveTeam(Guid semesterId)
     {
-        var students = await GetQueryable().Where(e => e.IsDeleted == false &&
-                                                       e.UserXRoles.Any(e => e.Role.RoleName == "Student") &&
-                                                       ( // Chưa có nhóm (không có TeamMembers nào)
+        var students = await GetQueryable()
+            .Include(x => x.ProfileStudent)
+            .Where(e => e.IsDeleted == false &&
+                                                       e.UserXRoles.Any(e => e.Role.RoleName == "Student" && e.SemesterId == semesterId) &&
+                                                       ( 
+                                                           // Chưa có nhóm (không có TeamMembers nào)
                                                            !e.TeamMembers.Any() ||
                                                            // Có nhóm nhưng tất cả status đều "Fail"
-                                                           //e.TeamMembers.All(tm => tm.Status == TeamMemberStatus.Failed)))
                                                            e.TeamMembers.All(tm =>
                                                                tm.Status == TeamMemberStatus.Fail2)))
             .ToListAsync();

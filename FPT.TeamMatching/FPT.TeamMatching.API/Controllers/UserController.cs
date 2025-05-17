@@ -113,9 +113,9 @@ public class UserController : ControllerBase
     }
 
     [HttpGet("get-student-do-not-have-team")]
-    public async Task<IActionResult> GetStudentDoNotHaveTeam()
+    public async Task<IActionResult> GetStudentDoNotHaveTeam([FromQuery] Guid semesterId)
     {
-        var msg = await _userService.GetStudentDoNotHaveTeam();
+        var msg = await _userService.GetStudentDoNotHaveTeam(semesterId);
         return Ok(msg);
     }
 
