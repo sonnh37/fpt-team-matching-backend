@@ -13,5 +13,7 @@ namespace FPT.TeamMatching.Domain.Contracts.Repositories
         Task<StageTopic?> GetByStageNumberAndSemester(int number, Guid semesterId);
 
         Task<StageTopic?> GetCurrentStageTopic();
+
+        Task<StageTopic?> GetCurrentStageTopicBySemesterId (Guid semesterId);
     }
 }

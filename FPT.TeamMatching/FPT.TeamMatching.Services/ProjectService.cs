@@ -541,4 +541,29 @@ public class ProjectService : BaseService<Project>, IProjectService
                 .WithMessage(e.Message);
         }
     }
+
+    public async Task<BusinessResult> GetProjectNotCanceled()
+    {
+        try
+        {
+            var semester = await GetSemesterInCurrentWorkSpace();
+            if (semester == null)
+            {
+                return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage("Không tìm thấy kì");
+            }
+            var projectsWithMember = await _projectRepository.GetProjectNotCanceledInSemester(semester.Id);
+            return new ResponseBuilder()
+                .WithData(projectsWithMember)
+                .WithStatus(Const.SUCCESS_CODE)
+                .WithMessage(Const.SUCCESS_READ_MSG);
+        }
+        catch (Exception e)
+        {
+            return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage(e.Message);
+        }
+    }
 }

@@ -33,4 +33,5 @@ public interface IProjectRepository : IBaseRepository<Project>
     Task<bool> IsExistedTeamCode(string teamCode);
 
     Task<List<Project>> GetProjectNotInProgressYetInSemester(Guid semesterId);
+    Task<List<Project>> GetProjectNotCanceledInSemester(Guid semesterId);
 }

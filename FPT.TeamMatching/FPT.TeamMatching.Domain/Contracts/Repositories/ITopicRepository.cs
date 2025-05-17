@@ -37,7 +37,7 @@ public interface ITopicRepository : IBaseRepository<Topic>
 
     Task<(List<Topic>, int)> GetTopicsOfSupervisors(TopicGetListOfSupervisorsQuery query);
 
-    List<Topic>? GetTopicsOnlyMentorOfUserInSemester(Guid mentorId, Guid semesterId);
+    Task<List<Topic>> GetTopicsOnlyMentorOfUserInSemester(Guid mentorId, Guid semesterId);
 
     List<Topic>? GetTopicsBeSubMentorOfUserInSemester(Guid subMentorId, Guid semesterId);
 
