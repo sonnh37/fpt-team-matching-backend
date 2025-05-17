@@ -1,4 +1,5 @@
 ﻿using FPT.TeamMatching.Domain.Contracts.Services;
+using FPT.TeamMatching.Domain.Entities;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Projects;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Projects;
 using FPT.TeamMatching.Domain.Models.Results;
@@ -141,4 +142,10 @@ public class ProjectController : ControllerBase
         return Ok(businessResult);
     }
 
+    [HttpGet("get-project-not-inprogress-yet")]
+    public async Task<IActionResult> GetProjectNotInProgress()
+    {
+        var businessResult = await _service.GetProjectNotInProgressYet();
+        return Ok(businessResult);
+    }
 }
