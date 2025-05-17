@@ -397,11 +397,11 @@ public class UserService : BaseService<User>, IUserService
         }
     }
 
-    public async Task<BusinessResult> GetStudentDoNotHaveTeam()
+    public async Task<BusinessResult> GetStudentDoNotHaveTeam(Guid semesterId)
     {
         try
         {
-            var result = await _userRepository.GetStudentDoNotHaveTeam();
+            var result = await _userRepository.GetStudentDoNotHaveTeam(semesterId);
             if (result.Count == 0)
             {
                 return new ResponseBuilder()
@@ -708,27 +708,21 @@ public class UserService : BaseService<User>, IUserService
                 user.ProfileStudent = profileStudents.FirstOrDefault(x => x.UserId == user.Id);
                 user.ProfileStudent ??= new ProfileStudent();
                 user.ProfileStudent.SemesterId = semester.Id;
-                var roleUser = await _userXRoleRepository.GetByUserId(user.Id);
-                var studentRole = roleUser.FirstOrDefault(x => x.RoleId == roleStudent.Id);
-                if (studentRole == null)
+              
+                _userXRoleRepository.Add(new UserXRole
                 {
-                    _userXRoleRepository.Add(new UserXRole
-                    {
-                        UserId = user.Id,
-                        RoleId = roleStudent.Id,
-                        SemesterId =  semester.Id,
-                        IsPrimary = true,
-                        IsDeleted = false,
-                        CreatedDate = DateTime.UtcNow,
-                        UpdatedDate = DateTime.UtcNow,
-                    });
-                }
-                studentRole.SemesterId = semester.Id;
-                _userXRoleRepository.Update(studentRole);
+                    UserId = user.Id,
+                    RoleId = roleStudent.Id,
+                    SemesterId =  semester.Id,
+                    IsPrimary = true,
+                    IsDeleted = false,
+                    CreatedDate = DateTime.UtcNow,
+                    UpdatedDate = DateTime.UtcNow,
+                });
                 // user.UserXRoles.FirstOrDefault(x => x.RoleId == roleStudent.Id).SemesterId = semester.Id;
             }
 
-            _userRepository.UpdateRange(listEntity);
+            // _userRepository.UpdateRange(listEntity);
             var saveChange = await _unitOfWork.SaveChanges();
             if (!saveChange)
             {
