@@ -420,4 +420,17 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
 
         return isExist;
     }
+
+    public async Task<List<Project>> GetProjectNotInProgressYetInSemester(Guid semesterId)
+    {
+        var queryable = GetQueryable();
+
+        var projectsWithMember = await queryable.Where(e => e.IsDeleted == false &&
+                                                            e.SemesterId == semesterId &&
+                                                            (e.Status == ProjectStatus.Forming || e.Status == ProjectStatus.Pending))
+                                                .Include(e => e.TeamMembers)
+                                                .ToListAsync(); 
+
+        return projectsWithMember;
+    }
 }

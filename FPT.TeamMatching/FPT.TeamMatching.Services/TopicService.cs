@@ -109,7 +109,7 @@ public class TopicService : BaseService<Topic>, ITopicService
             }
             if (semester.Status != SemesterStatus.Preparing)
             {
-                return HandlerFail("Hiện tại không được tạo ý tưởng");
+                return HandlerFail("Hiện tại không được tạo đề tài");
             }
 
             // 2. Validate student's existing topic vs status khac draft 
