@@ -70,4 +70,5 @@ public class TeamMemberRepository : BaseRepository<TeamMember>, ITeamMemberRepos
 
         return hasTeam;
     }
+
 }

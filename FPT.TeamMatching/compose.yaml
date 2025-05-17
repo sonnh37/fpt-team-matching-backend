@@ -12,6 +12,10 @@
     env_file:
       - ./FPT.TeamMatching.API/.env
     restart: always
+    develop:
+      watch:
+        - action: rebuild
+          path: .
   redis:
     image: redis:7.0
     container_name: fpt.matching.redis

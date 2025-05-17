@@ -47,7 +47,7 @@ public interface IUserService : IBaseService
     //
     // Task<BusinessResult> GetByRefreshToken(UserGetByRefreshTokenQuery request);
 
-    Task<BusinessResult> GetStudentDoNotHaveTeam();
+    Task<BusinessResult> GetStudentDoNotHaveTeam(Guid semesterId);
     Task<BusinessResult> GetAllReviewer();
     Task<BusinessResult> ImportStudents(IFormFile file, Guid semesterId);
     Task<BusinessResult> ImportStudent(CreateByManagerCommand command);

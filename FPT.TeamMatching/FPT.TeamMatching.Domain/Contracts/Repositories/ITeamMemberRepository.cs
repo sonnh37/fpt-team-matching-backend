@@ -17,4 +17,5 @@ public interface ITeamMemberRepository : IBaseRepository<TeamMember>
     Task<TeamMember?> GetByUserAndProject(Guid userId, Guid projectId);
 
     Task<bool> UserHasTeamNow(Guid userId);
+
 }
