@@ -12,7 +12,7 @@ public interface ITeamMemberRepository : IBaseRepository<TeamMember>
     Task<TeamMember> GetMemberByUserId(Guid userId);
 
     //get list thanh vien hien tai cua team
-    Task<List<TeamMember>?> GetMembersOfTeamByProjectId(Guid projectId);
+    Task<List<TeamMember>> GetMembersOfTeamByProjectId(Guid projectId);
 
     Task<TeamMember?> GetByUserAndProject(Guid userId, Guid projectId);
 

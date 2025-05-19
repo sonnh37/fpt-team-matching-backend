@@ -31,4 +31,6 @@ public interface IProjectService : IBaseService
     Task<BusinessResult> GetProjectNotCanceled();
     Task<BusinessResult> ManagerCreateProject(ProjectCreateByManagerCommand command);
 
+    Task<BusinessResult> SubmitBlockProjectByStudent(Guid projectId);
+    Task<BusinessResult> BlockProjectByManager(Guid projectId);
 }

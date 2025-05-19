@@ -21,7 +21,7 @@ namespace FPT.TeamMatching.Services
             _topicRepository = unitOfWork.TopicRepository;
             _projectRepository = unitOfWork.ProjectRepository;
         }
-        
+
         public async Task<BusinessResult> GetCurrentSemester()
         {
             try
@@ -46,7 +46,7 @@ namespace FPT.TeamMatching.Services
                     .WithMessage(errorMessage);
             }
         }
-        
+
         public async Task<BusinessResult> GetBeforeSemester()
         {
             try
@@ -71,7 +71,7 @@ namespace FPT.TeamMatching.Services
                     .WithMessage(errorMessage);
             }
         }
-        
+
         public async Task<BusinessResult> GetUpComingSemester()
         {
             try
@@ -96,12 +96,12 @@ namespace FPT.TeamMatching.Services
                     .WithMessage(errorMessage);
             }
         }
-        
-        public async Task<string> GenerateNewTopicCode(Guid semesterId)
+
+        public async Task<string> GenerateNewTopicCode()
         {
             try
             {
-                var semester = await _semesterRepository.GetById(semesterId);
+                var semester = await GetSemesterInCurrentWorkSpace();
                 if (semester == null) return string.Empty;
                 var semesterCode = semester.SemesterCode;
                 var semesterPrefix = semester.SemesterPrefixName;
@@ -109,13 +109,21 @@ namespace FPT.TeamMatching.Services
                 //get so luong topic dc duyet approve cua ki
                 var topics = await _topicRepository.ApprovedTopicsBySemesterId(semester.Id);
                 var numberOfTopics = topics.Count();
+                int nextNumber = numberOfTopics;
+                string newTopicCode = "";
 
-                // Tạo số thứ tự tiếp theo
-                int nextNumberTopic = numberOfTopics + 1;
+                //check trùng mã
+                bool isExisted = await _topicRepository.IsExistTopicCode(newTopicCode);
+                do
+                {
+                    // Tạo số thứ tự tiếp theo
+                    nextNumber += 1;
+                    // Tạo mã Topic mới theo định dạng:
+                    // semesterPrefix + semesterCode + "SE" + số thứ tự (2 chữ số)
+                    newTopicCode = $"{semesterPrefix}{semesterCode}SE{nextNumber:D2}";
+                }
+                while (isExisted);
 
-                // Tạo mã Idea mới theo định dạng:
-                // semesterPrefix + semesterCode + "SE" + số thứ tự (2 chữ số)
-                string newTopicCode = $"{semesterPrefix}{semesterCode}SE{nextNumberTopic:D2}";
                 return newTopicCode;
             }
             catch (Exception ex)
@@ -124,20 +132,30 @@ namespace FPT.TeamMatching.Services
                 return string.Empty;
             }
         }
-        
-        public async Task<string> GenerateNewTeamCode(Guid semesterId)
+
+        public async Task<string> GenerateNewTeamCode()
         {
             try
             {
-                var semester = await _semesterRepository.GetById(semesterId);
+                var semester = await GetSemesterInCurrentWorkSpace();
                 if (semester == null) return string.Empty;
-                var projects = await _projectRepository.GetInProgressProjectBySemesterId(semesterId);
+                var projects = await _projectRepository.GetInProgressProjectBySemesterId(semester.Id);
                 var numberOfProjects = projects.Count();
-                // Tạo số thứ tự tiếp theo
-                int nextNumber = numberOfProjects + 1;
+                int nextNumber = numberOfProjects;
                 string semesterCode = semester.SemesterCode;
-                // Tạo mã nhóm
-                string newTeamCode = $"{semesterCode}SE{nextNumber:D3}";
+                var newTeamCode = "";
+
+                //check trùng mã
+                bool isExisted = true;
+                do
+                {
+                    // Tạo số thứ tự tiếp theo
+                    nextNumber += 1;
+                    // Tạo mã nhóm
+                    newTeamCode = $"{semesterCode}SE{nextNumber:D3}";
+                    isExisted = await _projectRepository.IsExistedTeamCode(newTeamCode);
+                }
+                while (isExisted);
 
                 return newTeamCode;
             }

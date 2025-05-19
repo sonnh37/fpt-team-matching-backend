@@ -21,8 +21,6 @@ using FPT.TeamMatching.Domain.Models.Requests.Commands.Notifications;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Base;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Projects;
 
-// ReSharper disable All
-
 namespace FPT.TeamMatching.Services;
 
 public class ProjectService : BaseService<Project>, IProjectService
@@ -164,7 +162,7 @@ public class ProjectService : BaseService<Project>, IProjectService
             var semester = await _semesterRepository.GetSemesterByStageTopicId(stageTopic.Id);
             if (semester == null) return HandlerFail("Không có kì ứng với đợt duyệt hiện tại!");
 
-            var newTeamCode = await _semesterService.GenerateNewTeamCode((Guid)stageTopic.SemesterId);
+            var newTeamCode = await _semesterService.GenerateNewTeamCode();
 
             var codeExist = await _projectRepository.IsExistedTeamCode(newTeamCode);
             if (codeExist) return HandlerFail("Trùng mã nhóm!");
@@ -623,6 +621,126 @@ public class ProjectService : BaseService<Project>, IProjectService
                      .WithStatus(Const.SUCCESS_CODE)
                      .WithMessage(Const.SUCCESS_SAVE_MSG)
                  ;
+        }
+        catch (Exception e)
+        {
+            return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage(e.Message);
+        }
+    }
+
+    public async Task<BusinessResult> SubmitBlockProjectByStudent(Guid projectId)
+    {
+        try
+        {
+            var semester = await GetSemesterInCurrentWorkSpace();
+            if (semester == null)
+            {
+                return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage("Không tìm thấy kì");
+            }
+            var project = await _projectRepository.GetById(projectId);
+            if (project == null)
+            {
+                return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage("Không tìm thấy nhóm");
+            }
+            if (project.TopicId == null)
+            {
+                return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage("Nhóm chưa có đề tài");
+            }
+            var members = await _teamMemberRepository.GetMembersOfTeamByProjectId(projectId);
+            if (members.Count() < semester.MinTeamSize || members.Count() > semester.MaxTeamSize)
+            {
+                return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage("Số lượng thành viên của nhóm phải <= " + semester.MaxTeamSize + " và >= " + semester.MinTeamSize);
+            }
+            
+            //chot nhom doi status sang Pending
+            project.Status = ProjectStatus.Pending;
+            await SetBaseEntityForUpdate(project);
+
+            _projectRepository.Update(project);
+            bool isSuccess = await _unitOfWork.SaveChanges();
+            if (!isSuccess)
+            {
+                return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage(Const.FAIL_SAVE_MSG);
+            }
+            return new ResponseBuilder()
+                .WithStatus(Const.SUCCESS_CODE)
+                .WithMessage(Const.SUCCESS_SAVE_MSG);
+        }
+        catch (Exception e)
+        {
+            return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage(e.Message);
+        }
+    }
+
+    public async Task<BusinessResult> BlockProjectByManager(Guid projectId)
+    {
+        try
+        {
+            var semester = await GetSemesterInCurrentWorkSpace();
+            if (semester == null)
+            {
+                return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage("Không tìm thấy kì");
+            }
+            var project = await _projectRepository.GetById(projectId);
+            if (project == null)
+            {
+                return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage("Không tìm thấy nhóm");
+            }
+            if (project.TopicId == null)
+            {
+                return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage("Nhóm chưa có đề tài");
+            }
+            var members = await _teamMemberRepository.GetMembersOfTeamByProjectId(projectId);
+            if (members.Count() < semester.MinTeamSize || members.Count() > semester.MaxTeamSize)
+            {
+                return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage("Số lượng thành viên của nhóm phải <= " + semester.MaxTeamSize + " và >= " + semester.MinTeamSize);
+            }
+
+            //chot nhom doi status sang InProgress va gen team code
+            var teamCode = await _semesterService.GenerateNewTeamCode();
+            if (teamCode == null)
+            {
+                return new ResponseBuilder()
+               .WithStatus(Const.FAIL_CODE)
+               .WithMessage("Xảy ra lỗi khi gen team code");
+            }
+            project.TeamCode = teamCode;
+            project.Status = ProjectStatus.InProgress;
+            await SetBaseEntityForUpdate(project);
+            _projectRepository.Update(project);
+
+            bool isSuccess = await _unitOfWork.SaveChanges();
+            if (!isSuccess)
+            {
+                return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage(Const.FAIL_SAVE_MSG);
+            }
+            return new ResponseBuilder()
+                .WithStatus(Const.SUCCESS_CODE)
+                .WithMessage(Const.SUCCESS_SAVE_MSG);
         }
         catch (Exception e)
         {

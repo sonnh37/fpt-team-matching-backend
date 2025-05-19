@@ -452,6 +452,7 @@ public class TopicRepository : BaseRepository<Topic>, ITopicRepository
     {
         var queryable = GetQueryable();
         var topics = await queryable.Where(e => e.IsDeleted == false &&
+                            e.Status == TopicStatus.ManagerApproved &&
                             e.StageTopic != null &&
                             e.StageTopic.Semester != null &&
                             e.StageTopic.Semester.Id == semesterId)
@@ -481,5 +482,26 @@ public class TopicRepository : BaseRepository<Topic>, ITopicRepository
                                                     e.Status != TopicStatus.ManagerRejected))
                                     .FirstOrDefaultAsync();
         return topic;
+    }
+
+    public async Task<List<Topic>> GetApprovedTopicsDoNotHaveTeamInSemester(Guid semesterId)
+    {
+        var queryable = GetQueryable();
+        var topics = await queryable.Where(e => e.IsDeleted == false &&
+                                                e.SemesterId == semesterId &&
+                                                e.Status == TopicStatus.ManagerApproved &&
+                                                e.IsExistedTeam == false)
+                                    .ToListAsync();
+        return topics;
+    }
+
+    public async Task<bool> IsExistTopicCode(string topicCode)
+    {
+        var queryable = GetQueryable();
+
+        var isExist = await queryable.Where(e => e.IsDeleted == false &&
+                                                e.TopicCode == topicCode).AnyAsync();
+
+        return isExist;
     }
 }

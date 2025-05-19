@@ -252,7 +252,7 @@ namespace FPT.TeamMatching.Services
                     {
                         if (string.IsNullOrEmpty(project.TeamCode))
                         {
-                            project.TeamCode = await _semesterService.GenerateNewTeamCode(semester.Id);
+                            project.TeamCode = await _semesterService.GenerateNewTeamCode();
                         }
                     }
 

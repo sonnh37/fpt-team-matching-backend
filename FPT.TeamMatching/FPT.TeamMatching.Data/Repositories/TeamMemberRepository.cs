@@ -44,7 +44,7 @@ public class TeamMemberRepository : BaseRepository<TeamMember>, ITeamMemberRepos
         return teamMember;
     }
 
-    public async Task<List<TeamMember>?> GetMembersOfTeamByProjectId(Guid projectId)
+    public async Task<List<TeamMember>> GetMembersOfTeamByProjectId(Guid projectId)
     {
         var tm = await _dbContext.TeamMembers.Where(e => e.IsDeleted == false &&
                                                          e.ProjectId == projectId &&

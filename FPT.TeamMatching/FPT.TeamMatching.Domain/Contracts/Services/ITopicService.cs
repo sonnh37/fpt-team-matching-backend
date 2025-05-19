@@ -30,5 +30,7 @@ namespace FPT.TeamMatching.Domain.Contracts.Services
         Task<BusinessResult> GetTopicsOfReviewerByRolesAndStatus<TResult>(
             TopicRequestGetListByStatusAndRoleQuery query) where TResult : BaseResult;
 
+        Task<BusinessResult> GetApprovedTopicsDoNotHaveTeam();
+
     }
 }
