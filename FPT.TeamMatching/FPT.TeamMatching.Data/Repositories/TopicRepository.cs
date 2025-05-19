@@ -46,11 +46,12 @@ public class TopicRepository : BaseRepository<Topic>, ITopicRepository
         return ideas;
     }
 
-    public async Task<List<Topic>> GetCurrentTopicByUserIdAndStatus(Guid userId, List<TopicStatus> statusList)
+    public async Task<List<Topic>> GetCurrentTopicByUserIdAndStatus(Guid? userId, Guid? semesterId, List<TopicStatus> statusList)
     {
         var queryable = GetQueryable();
 
         var ideas = await queryable.Where(e => e.OwnerId == userId
+                                               && e.SemesterId == semesterId
                                                && e.Status != null
                                                && statusList.Contains(e.Status.Value))
             .OrderByDescending(m => m.CreatedDate)
