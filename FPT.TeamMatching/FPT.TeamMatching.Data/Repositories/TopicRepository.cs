@@ -56,10 +56,10 @@ public class TopicRepository : BaseRepository<Topic>, ITopicRepository
                                                && statusList.Contains(e.Status.Value))
             .OrderByDescending(m => m.CreatedDate)
             .Include(e => e.TopicVersions).ThenInclude(e => e.TopicVersionRequests).ThenInclude(e => e.Reviewer)
-            .Include(e => e.StageTopic).ThenInclude(m => m.Semester)
+            .Include(e => e.StageTopic)
             .Include(m => m.Owner)
-            .Include(m => m.StageTopic)
             .Include(m => m.Mentor)
+            .Include(m => m.Semester)
             .Include(m => m.SubMentor)
             .Include(m => m.Specialty).ThenInclude(m => m.Profession)
             .ToListAsync();
