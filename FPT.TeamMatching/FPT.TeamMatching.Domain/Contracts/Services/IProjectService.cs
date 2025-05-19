@@ -28,6 +28,7 @@ public interface IProjectService : IBaseService
 
     Task<BusinessResult> GetProjectInSemesterCurrentByUserIdLogin();
     Task<BusinessResult> GetProjectNotInProgressYet(); 
-    Task<BusinessResult> GetProjectNotCanceled(); 
+    Task<BusinessResult> GetProjectNotCanceled();
+    Task<BusinessResult> ManagerCreateProject(ProjectCreateByManagerCommand command);
 
 }

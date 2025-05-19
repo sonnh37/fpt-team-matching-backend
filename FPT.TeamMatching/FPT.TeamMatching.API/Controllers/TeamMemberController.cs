@@ -98,4 +98,11 @@ public class TeamMemberController : ControllerBase
 
         return Ok(businessResult);
     }
+
+    [HttpPost("add-range-by-manager")]
+    public async Task<IActionResult> AddTeamMemberByMentor([FromBody] TeamMemberAddRangeCommand requests)
+    {
+        var result = await _teammemberservice.AddRange(requests);
+        return Ok(result); 
+    }
 }

@@ -5,6 +5,7 @@ using FPT.TeamMatching.Domain.Contracts.Repositories;
 using FPT.TeamMatching.Domain.Contracts.Services;
 using FPT.TeamMatching.Domain.Contracts.UnitOfWorks;
 using FPT.TeamMatching.Domain.Entities;
+using FPT.TeamMatching.Domain.Models.Requests.Commands.Notifications;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.TeamMembers;
 using FPT.TeamMatching.Domain.Models.Responses;
 using FPT.TeamMatching.Domain.Utilities;
@@ -19,13 +20,15 @@ public class TeamMemberService : BaseService<TeamMember>, ITeamMemberService
     private readonly IProjectRepository _projectRepository;
     private readonly IMentorFeedbackRepository _mentorFeedbackRepository;
     private readonly IReviewRepository _reviewRepository;
+    private readonly INotificationService _notificationService;
 
-    public TeamMemberService(IMapper mapper, IUnitOfWork unitOfWork) : base(mapper, unitOfWork)
+    public TeamMemberService(IMapper mapper, IUnitOfWork unitOfWork, INotificationService notificationService) : base(mapper, unitOfWork)
     {
         _teamMemberRepository = unitOfWork.TeamMemberRepository;
         _projectRepository = unitOfWork.ProjectRepository;
         _mentorFeedbackRepository = unitOfWork.MentorFeedbackRepository;
         _reviewRepository = unitOfWork.ReviewRepository;
+        _notificationService = notificationService;
     }
 
     public async Task<BusinessResult> GetTeamMemberByUserId()
@@ -245,6 +248,8 @@ public class TeamMemberService : BaseService<TeamMember>, ITeamMemberService
         }
     }
 
+   
+
     public async Task<BusinessResult> UpdateTeamMemberByMentor(List<MentorUpdate> requests)
     {
         try
@@ -317,6 +322,49 @@ public class TeamMemberService : BaseService<TeamMember>, ITeamMemberService
         catch (Exception ex)
         {
             return HandlerError(ex.Message);
+        }
+    }
+    public async Task<BusinessResult> AddRange(TeamMemberAddRangeCommand command)
+    {
+        try
+        {
+            var semester =  await GetSemesterInCurrentWorkSpace();
+            if (command.TeamMembers.Count < semester.MinTeamSize || command.TeamMembers.Count > semester.MaxTeamSize)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("Số lượng thành viên không phù hợp");
+            }
+            List<TeamMember> entityList = new List<TeamMember>();
+            foreach (var teamMemberCreateCommand in command.TeamMembers)
+            {
+                teamMemberCreateCommand.JoinDate = DateTime.UtcNow;
+                var mapTeamMember = _mapper.Map<TeamMember>(teamMemberCreateCommand);
+                entityList.Add(mapTeamMember);
+            }
+            _teamMemberRepository.AddRange(entityList);
+            var saveChange = await _unitOfWork.SaveChanges();
+            if (!saveChange)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage(Const.FAIL_SAVE_MSG);
+            }
+
+            await _notificationService.CreateForTeam(new NotificationCreateForTeam
+            {
+                ProjectId = semester.Id,
+                Note = "",
+                Description = "Nhóm của bạn đã được thêm thành viên mới bởi quản lí vui lòng kiểm tra"
+            });
+            return new ResponseBuilder()
+                .WithStatus(Const.SUCCESS_CODE)
+                .WithMessage(Const.SUCCESS_SAVE_MSG);
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
         }
     }
 }
