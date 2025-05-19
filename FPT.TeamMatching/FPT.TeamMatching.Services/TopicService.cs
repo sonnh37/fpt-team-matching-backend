@@ -150,6 +150,8 @@ public class TopicService : BaseService<Topic>, ITopicService
                 await SetBaseEntityForCreation(topic);
                 _topicRepository.Add(topic);
             }
+            
+            if (!await _unitOfWork.SaveChanges()) return HandlerFail("Gửi đề tài không thành công");
 
             // 4. Create requests 
             var topicRequestForMentor = new TopicRequest
@@ -573,12 +575,12 @@ public class TopicService : BaseService<Topic>, ITopicService
         try
         {
             var userId = GetUserIdFromClaims();
-            var project = await _projectRepository.GetProjectByUserIdLogin(userId.Value);
+            var project = await _topicRepository.GetById(topicUpdateCommand.Id);
             if (project == null) return HandlerFail("Không tìm thấy dự án");
 
-            var command = _mapper.Map<Topic>(topicUpdateCommand);
-            await SetBaseEntityForUpdate(command);
-            _topicRepository.Update(command);
+            _mapper.Map(topicUpdateCommand, project);
+            await SetBaseEntityForUpdate(project);
+            _topicRepository.Update(project);
             var check = await _unitOfWork.SaveChanges();
 
             if (!check)
@@ -841,9 +843,15 @@ public class TopicService : BaseService<Topic>, ITopicService
         {
             var userIdClaims = GetUserIdFromClaims();
             var userId = userIdClaims.Value;
+            var semester = await GetSemesterInCurrentWorkSpace();
+            if (semester == null)
+            {
+                return HandlerFail("Không tìm thấy kì");
+            }
+            
             var (data, total) =
                 await _topicRepository.GetTopicsOfReviewerByRolesAndStatus(query,
-                    userId);
+                    userId, semester.Id);
 
             var results = _mapper.Map<List<TResult>>(data);
 

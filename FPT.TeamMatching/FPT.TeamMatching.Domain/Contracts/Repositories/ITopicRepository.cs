@@ -13,7 +13,7 @@ public interface ITopicRepository : IBaseRepository<Topic>
     Task<IList<Topic>> GetTopicsByUserId(Guid userId);
 
     Task<(List<Topic>, int)> GetTopicsOfReviewerByRolesAndStatus(
-        TopicRequestGetListByStatusAndRoleQuery query, Guid userId);
+        TopicRequestGetListByStatusAndRoleQuery query, Guid? userId, Guid? semesterId);
 
     Task<int> NumberApprovedTopicsOfSemester(Guid? semesterId);
 
