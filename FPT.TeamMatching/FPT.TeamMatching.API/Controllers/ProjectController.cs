@@ -156,6 +156,13 @@ public class ProjectController : ControllerBase
         return Ok(businessResult);
     }
 
+    [HttpPost("create-project-by-manager")]
+    public async Task<IActionResult> CreateProjectByManager([FromBody] ProjectCreateByManagerCommand request)
+    {
+        var result = await _service.ManagerCreateProject(request);
+        return Ok(result);
+    }
+
     [HttpGet("submit-block-project-by-student/{projectId:guid}")]
     public async Task<IActionResult> SubmitBlockProjectByStudent(Guid projectId)
     {
