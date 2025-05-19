@@ -75,7 +75,7 @@ public class TopicRequestService : BaseService<TopicRequest>, ITopicRequestServi
         //     _topicVersionRequestRepository.Add(subMentorRequest);
         // }
     }
-    
+
     public async Task CreateVersionRequesForFirstCreateTopic(Topic topic, Guid versionId, Guid criteriaFormId)
     {
         var semesterUpComing = await _semesterRepository.GetUpComingSemester();
@@ -132,7 +132,7 @@ public class TopicRequestService : BaseService<TopicRequest>, ITopicRequestServi
     }
 
     public async Task<BusinessResult>
-       GetAllExceptPending<TResult>(TopicRequestGetAllQuery query) where TResult : BaseResult
+        GetAllExceptPending<TResult>(TopicRequestGetAllQuery query) where TResult : BaseResult
     {
         try
         {
@@ -168,8 +168,10 @@ public class TopicRequestService : BaseService<TopicRequest>, ITopicRequestServi
                     .WithStatus(Const.FAIL_CODE)
                     .WithMessage("Không tìm thấy userId");
             }
+
             var userId = userIdClaims.Value;
-            var (data, total) = await _topicRequestRepository.GetTopicVersionRequestsForCurrentReviewerByRolesAndStatus(query,userId);
+            var (data, total) =
+                await _topicRequestRepository.GetTopicVersionRequestsForCurrentReviewerByRolesAndStatus(query, userId);
 
             var results = _mapper.Map<List<TResult>>(data);
 
@@ -252,7 +254,8 @@ public class TopicRequestService : BaseService<TopicRequest>, ITopicRequestServi
             //    newTopicVersionRequests.Add(topicVersionRequest);
             //}
 
-            if (newTopicVersionRequests.Count == 0) return HandlerNotFound("Không có người dùng có thể tham gia hội đồng");
+            if (newTopicVersionRequests.Count == 0)
+                return HandlerNotFound("Không có người dùng có thể tham gia hội đồng");
 
             _topicRequestRepository.AddRange(newTopicVersionRequests);
             var saveChange = await _unitOfWork.SaveChanges();
@@ -303,7 +306,7 @@ public class TopicRequestService : BaseService<TopicRequest>, ITopicRequestServi
     {
         try
         {
-            var topicRequest = await _topicRequestRepository.GetById(command.Id, true);
+            var topicRequest = await _topicRequestRepository.GetById(command.Id);
             if (topicRequest == null)
             {
                 return new ResponseBuilder()
@@ -356,13 +359,14 @@ public class TopicRequestService : BaseService<TopicRequest>, ITopicRequestServi
             //        .WithStatus(Const.NOT_FOUND_CODE)
             //        .WithMessage(Const.NOT_FOUND_MSG);
             //}
-            var topic = await _topicRepository.GetById((Guid)topicRequest.TopicId);
+            var topic = await _topicRepository.GetById(topicRequest.TopicId);
             if (topic == null)
             {
                 return new ResponseBuilder()
                     .WithStatus(Const.NOT_FOUND_CODE)
                     .WithMessage(Const.NOT_FOUND_MSG);
             }
+
             //neu mentor response 
             if (topicRequest.Role == "Mentor" || topicRequest.Role == "SubMentor")
             {
@@ -372,8 +376,7 @@ public class TopicRequestService : BaseService<TopicRequest>, ITopicRequestServi
                     topic.Status = TopicStatus.MentorConsider;
                     await SetBaseEntityForUpdate(topic);
                     _topicRepository.Update(topic);
-                    saveChange = await _unitOfWork.SaveChanges();
-                    if (!saveChange)
+                    if (!await _unitOfWork.SaveChanges())
                     {
                         return new ResponseBuilder()
                             .WithStatus(Const.FAIL_CODE)
@@ -387,8 +390,7 @@ public class TopicRequestService : BaseService<TopicRequest>, ITopicRequestServi
                     topic.Status = TopicStatus.MentorRejected;
                     await SetBaseEntityForUpdate(topic);
                     _topicRepository.Update(topic);
-                    saveChange = await _unitOfWork.SaveChanges();
-                    if (!saveChange)
+                    if (!await _unitOfWork.SaveChanges())
                     {
                         return new ResponseBuilder()
                             .WithStatus(Const.FAIL_CODE)
@@ -402,8 +404,7 @@ public class TopicRequestService : BaseService<TopicRequest>, ITopicRequestServi
                     topic.Status = TopicStatus.MentorRejected;
                     await SetBaseEntityForUpdate(topic);
                     _topicRepository.Update(topic);
-                    saveChange = await _unitOfWork.SaveChanges();
-                    if (!saveChange)
+                    if (!await _unitOfWork.SaveChanges())
                     {
                         return new ResponseBuilder()
                             .WithStatus(Const.FAIL_CODE)
@@ -412,21 +413,22 @@ public class TopicRequestService : BaseService<TopicRequest>, ITopicRequestServi
                 }
 
                 //noti cho owner
-                var topicInclude = await _topicRepository.GetById((Guid)topicRequest.TopicId, true);
+                var topicInclude = await _topicRepository.GetById(topicRequest.TopicId, true);
                 var noti = new NotificationCreateForIndividual
                 {
                     UserId = topicInclude?.OwnerId,
                 };
+
                 if (topicRequest.Role == "Mentor")
                 {
-                    noti.Description = "Đề tài " + topicRequest.Topic.Abbreviation + " đã được " +
+                    noti.Description = "Đề tài " + topicInclude?.Abbreviation + " đã được " +
                                        topicInclude?.Mentor?.Code + " (Mentor) duyệt. Hãy kiểm tra kết quả!";
                     await _notificationService.CreateForUser(noti);
                 }
 
                 if (topicRequest.Role == "SubMentor")
                 {
-                    noti.Description = "Đề tài " + topicRequest.Topic.Abbreviation + " đã được " +
+                    noti.Description = "Đề tài " + topicRequest.Topic?.Abbreviation + " đã được " +
                                        topicInclude?.SubMentor?.Code + " (SubMentor) duyệt. Hãy kiểm tra kết quả!";
                     await _notificationService.CreateForUser(noti);
                 }
@@ -441,8 +443,7 @@ public class TopicRequestService : BaseService<TopicRequest>, ITopicRequestServi
                     topic.Status = TopicStatus.ManagerRejected;
                     await SetBaseEntityForUpdate(topic);
                     _topicRepository.Update(topic);
-                    saveChange = await _unitOfWork.SaveChanges();
-                    if (!saveChange)
+                    if (!await _unitOfWork.SaveChanges())
                     {
                         return new ResponseBuilder()
                             .WithStatus(Const.FAIL_CODE)
@@ -451,7 +452,6 @@ public class TopicRequestService : BaseService<TopicRequest>, ITopicRequestServi
                 }
             }
 
-            
 
             return new ResponseBuilder()
                 .WithStatus(Const.SUCCESS_CODE)

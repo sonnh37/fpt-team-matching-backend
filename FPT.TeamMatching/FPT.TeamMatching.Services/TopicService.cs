@@ -843,9 +843,15 @@ public class TopicService : BaseService<Topic>, ITopicService
         {
             var userIdClaims = GetUserIdFromClaims();
             var userId = userIdClaims.Value;
+            var semester = await GetSemesterInCurrentWorkSpace();
+            if (semester == null)
+            {
+                return HandlerFail("Không tìm thấy kì");
+            }
+            
             var (data, total) =
                 await _topicRepository.GetTopicsOfReviewerByRolesAndStatus(query,
-                    userId);
+                    userId, semester.Id);
 
             var results = _mapper.Map<List<TResult>>(data);
 
