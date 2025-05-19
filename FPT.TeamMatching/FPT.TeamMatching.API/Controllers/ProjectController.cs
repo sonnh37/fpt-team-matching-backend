@@ -155,4 +155,11 @@ public class ProjectController : ControllerBase
         var businessResult = await _service.GetProjectNotCanceled();
         return Ok(businessResult);
     }
+
+    [HttpPost("create-project-by-manager")]
+    public async Task<IActionResult> CreateProjectByManager([FromBody] ProjectCreateByManagerCommand request)
+    {
+        var result = await _service.ManagerCreateProject(request);
+        return Ok(result);
+    }
 }

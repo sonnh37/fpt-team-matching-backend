@@ -17,6 +17,7 @@ using FPT.TeamMatching.Domain.Utilities;
 using FPT.TeamMatching.Services.Bases;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
+using FPT.TeamMatching.Domain.Models.Requests.Commands.Notifications;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Base;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Projects;
 
@@ -33,8 +34,9 @@ public class ProjectService : BaseService<Project>, IProjectService
     private readonly IReviewRepository _reviewRepository;
     private readonly ISemesterService _semesterService;
     private readonly IStageTopicRepository _stageTopicRepository;
+    private readonly INotificationService _notificationService;
 
-    public ProjectService(IMapper mapper, IUnitOfWork unitOfWork, ITeamMemberService teamMemberService, ISemesterService semesterService) : base(mapper,
+    public ProjectService(IMapper mapper, IUnitOfWork unitOfWork, ITeamMemberService teamMemberService, ISemesterService semesterService, INotificationService notificationService) : base(mapper,
         unitOfWork)
     {
         _projectRepository = unitOfWork.ProjectRepository;
@@ -44,6 +46,7 @@ public class ProjectService : BaseService<Project>, IProjectService
         _reviewRepository = unitOfWork.ReviewRepository;
         _semesterService = semesterService;
         _stageTopicRepository = unitOfWork.StageTopicRepository;
+        _notificationService = notificationService;
     }
 
     public async Task<BusinessResult> GetProjectsForMentor(ProjectGetListForMentorQuery query)
@@ -558,6 +561,68 @@ public class ProjectService : BaseService<Project>, IProjectService
                 .WithData(projectsWithMember)
                 .WithStatus(Const.SUCCESS_CODE)
                 .WithMessage(Const.SUCCESS_READ_MSG);
+        }
+        catch (Exception e)
+        {
+            return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage(e.Message);
+        }
+    }
+
+    public async Task<BusinessResult> ManagerCreateProject(ProjectCreateByManagerCommand command)
+    {
+        try
+        {
+            var semester =  await GetSemesterInCurrentWorkSpace();
+            if (command.TeamMembers.Count < semester.MinTeamSize || command.TeamMembers.Count > semester.MaxTeamSize)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("Số lượng thành viên không phù hợp");
+            }
+            // var entity = _mapper.Map<Project>(command);
+            var projects = await _projectRepository.GetInProgressProjectBySemesterId(semester.Id);
+            var numberOfProjects = projects.Count();
+            // Tạo số thứ tự tiếp theo
+            int nextNumber = numberOfProjects + 1;
+            string semesterCode = semester.SemesterCode;
+            // Tạo mã nhóm
+            string newTeamCode = $"{semesterCode}SE{nextNumber:D3}";
+
+            var mapMember = _mapper.Map<List<TeamMember>>(command.TeamMembers);
+            var entity = new Project
+            {
+                Id = Guid.NewGuid(),
+                TeamCode = newTeamCode,
+                LeaderId = command.LeaderId,
+                TeamMembers = mapMember,
+                Status = ProjectStatus.Pending,
+                TeamSize = command.TeamMembers.Count,
+                SemesterId = semester.Id,
+            };
+     
+            _projectRepository.Add(entity);
+             var saveChanges = await _unitOfWork.SaveChanges();
+             if (!saveChanges)
+             {
+                 return new ResponseBuilder()
+                     .WithStatus(Const.FAIL_CODE)
+                     .WithMessage(Const.FAIL_SAVE_MSG);
+             }
+             
+             //notification to team members
+             await _notificationService.CreateForTeam(new NotificationCreateForTeam
+             {
+                 Description = "Bạn đã được thêm vào nhóm do quản lí xếp",
+                 ProjectId = entity.Id,
+                 Note = null
+             });
+
+             return new ResponseBuilder()
+                     .WithStatus(Const.SUCCESS_CODE)
+                     .WithMessage(Const.SUCCESS_SAVE_MSG)
+                 ;
         }
         catch (Exception e)
         {
