@@ -28,6 +28,8 @@ public interface IProjectService : IBaseService
 
     Task<BusinessResult> GetProjectInSemesterCurrentByUserIdLogin();
     Task<BusinessResult> GetProjectNotInProgressYet(); 
-    Task<BusinessResult> GetProjectNotCanceled(); 
+    Task<BusinessResult> GetProjectNotCanceled();
 
+    Task<BusinessResult> SubmitBlockProjectByStudent(Guid projectId);
+    Task<BusinessResult> BlockProjectByManager(Guid projectId);
 }

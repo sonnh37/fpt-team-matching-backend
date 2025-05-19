@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using FPT.TeamMatching.Domain.Models.Responses;
 using FPT.TeamMatching.Domain.Models.Results.Bases;
 
 namespace FPT.TeamMatching.Domain.Contracts.Services
@@ -15,8 +14,8 @@ namespace FPT.TeamMatching.Domain.Contracts.Services
     {
         // Task<BusinessResult> GetPresentSemester();
         Task<BusinessResult> GetCurrentSemester();
-        Task<string> GenerateNewTeamCode(Guid semesterId);
-        Task<string> GenerateNewTopicCode(Guid semesterId);
+        Task<string> GenerateNewTeamCode();
+        Task<string> GenerateNewTopicCode();
         Task<BusinessResult> GetBeforeSemester();
         Task<BusinessResult> GetUpComingSemester();
     }

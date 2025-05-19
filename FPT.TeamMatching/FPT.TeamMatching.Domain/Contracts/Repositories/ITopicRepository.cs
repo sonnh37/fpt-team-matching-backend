@@ -52,4 +52,8 @@ public interface ITopicRepository : IBaseRepository<Topic>
     Task<List<Topic>> ApprovedTopicsBySemesterId(Guid semesterId);
 
     Task<Topic?> GetTopicOfUserIsPendingInSemester(Guid userId, Guid semesterId);
+
+    Task<List<Topic>> GetApprovedTopicsDoNotHaveTeamInSemester(Guid semesterId);
+
+    Task<bool> IsExistTopicCode (string topicCode);
 }

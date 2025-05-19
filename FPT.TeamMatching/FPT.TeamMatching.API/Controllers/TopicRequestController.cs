@@ -95,8 +95,8 @@ public class TopicRequestController : ControllerBase
         return Ok(businessResult);
     }
 
-    [HttpPut("respond-by-mentor-or-council")]
-    public async Task<IActionResult> RespondByMentorOrCouncil([FromBody] TopicRequestMentorOrManagerResponseCommand request)
+    [HttpPut("respond-by-mentor-or-manager")]
+    public async Task<IActionResult> RespondByMentorOrManager([FromBody] TopicRequestMentorOrManagerResponseCommand request)
     {
         var businessResult = await _service.RespondByMentorOrManager(request);
 

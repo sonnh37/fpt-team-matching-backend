@@ -116,5 +116,12 @@ public class TopicController : ControllerBase
         var businessResult = await _service.GetUserTopicsByStatus(request);
         return Ok(businessResult);
     }
+
+    [HttpGet("get-approved-topics-do-not-have-team")]
+    public async Task<IActionResult> GetApprovedTopicsDoNotHaveTeam()
+    {
+        var businessResult = await _service.GetApprovedTopicsDoNotHaveTeam();
+        return Ok(businessResult);
+    }
 }
 

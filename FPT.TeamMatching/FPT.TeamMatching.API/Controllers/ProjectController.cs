@@ -29,14 +29,14 @@ public class ProjectController : ControllerBase
         var msg = await _service.GetAll<ProjectResult>(query);
         return Ok(msg);
     }
-    
+
     [HttpGet("search")]
     public async Task<IActionResult> SearchProjects([FromQuery] ProjectSearchQuery query)
     {
         var result = await _service.SearchProjects(query);
         return Ok(result);
     }
-    
+
     [HttpGet("me/mentor-projects")]
     public async Task<IActionResult> GetProjectsForMentor([FromQuery] ProjectGetListForMentorQuery query)
     {
@@ -95,7 +95,7 @@ public class ProjectController : ControllerBase
         var businessResult = await _service.GetProjectByUserIdLogin();
         return Ok(businessResult);
     }
-    
+
     [HttpGet("semester-current/get-by-user-id")]
     public async Task<IActionResult> GetProjectInSemesterCurrentByUserIdLogin()
     {
@@ -153,6 +153,20 @@ public class ProjectController : ControllerBase
     public async Task<IActionResult> GetProjectNotCanceled()
     {
         var businessResult = await _service.GetProjectNotCanceled();
+        return Ok(businessResult);
+    }
+
+    [HttpGet("submit-block-project-by-student/{projectId:guid}")]
+    public async Task<IActionResult> SubmitBlockProjectByStudent(Guid projectId)
+    {
+        var businessResult = await _service.SubmitBlockProjectByStudent(projectId);
+        return Ok(businessResult);
+    }
+
+    [HttpPut("block-project-by-manager/{projectId:guid}")]
+    public async Task<IActionResult> BlockProjectByManager(Guid projectId)
+    {
+        var businessResult = await _service.BlockProjectByManager(projectId);
         return Ok(businessResult);
     }
 }

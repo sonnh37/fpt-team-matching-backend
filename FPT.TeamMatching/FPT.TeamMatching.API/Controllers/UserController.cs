@@ -42,12 +42,12 @@ public class UserController : ControllerBase
         return Ok(msg);
     }
 
-    [HttpGet("council/pending-ideas")]
-    public async Task<IActionResult> GetAllByCouncilWithIdeaVersionRequestPending([FromQuery] UserGetAllQuery query)
-    {
-        var msg = await _userService.GetAllByCouncilWithIdeaVersionRequestPending(query);
-        return Ok(msg);
-    }
+    //[HttpGet("council/pending-ideas")]
+    //public async Task<IActionResult> GetAllByCouncilWithIdeaVersionRequestPending([FromQuery] UserGetAllQuery query)
+    //{
+    //    var msg = await _userService.GetAllByCouncilWithIdeaVersionRequestPending(query);
+    //    return Ok(msg);
+    //}
 
 
     [HttpGet("{id:guid}")]

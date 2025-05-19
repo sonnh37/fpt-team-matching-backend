@@ -297,8 +297,7 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
         var projects = await GetQueryable().Where(e =>e.IsDeleted == false && 
                                                        e.Status == ProjectStatus.InProgress &&
                                                        e.Topic != null &&
-                                                       e.Topic.StageTopic != null &&
-                                                       e.Topic.StageTopic.SemesterId == semesterId)
+                                                       e.Topic.SemesterId == semesterId)
                                             .Include(x => x.Topic)
                                                 .ThenInclude(x => x.Mentor)
                                             .Include(x => x.Topic)

@@ -925,7 +925,7 @@ public class TopicService : BaseService<Topic>, ITopicService
             existingProject.TopicId = topicResult.Id;
             if (string.IsNullOrEmpty(existingProject.TeamCode))
             {
-                existingProject.TeamCode = await _semesterService.GenerateNewTeamCode((Guid)stageTopic.SemesterId);
+                existingProject.TeamCode = await _semesterService.GenerateNewTeamCode();
             }
             existingProject.Status = ProjectStatus.Pending;
             await SetBaseEntityForUpdate(existingProject);
@@ -1123,6 +1123,32 @@ public class TopicService : BaseService<Topic>, ITopicService
 
             return new ResponseBuilder()
                 .WithData(response)
+                .WithStatus(Const.SUCCESS_CODE)
+                .WithMessage(Const.SUCCESS_READ_MSG);
+        }
+        catch (Exception ex)
+        {
+            var errorMessage = $"An error occurred in {typeof(TopicResult).Name}: {ex.Message}";
+            return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage(errorMessage);
+        }
+    }
+
+    public async Task<BusinessResult> GetApprovedTopicsDoNotHaveTeam()
+    {
+        try
+        {
+            var semester = await GetSemesterInCurrentWorkSpace();
+            if (semester == null)
+            {
+                return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage("Không tìm thấy kì");
+            }
+            var topics = await _topicRepository.GetApprovedTopicsDoNotHaveTeamInSemester(semester.Id);
+            return new ResponseBuilder()
+                .WithData(topics)
                 .WithStatus(Const.SUCCESS_CODE)
                 .WithMessage(Const.SUCCESS_READ_MSG);
         }
