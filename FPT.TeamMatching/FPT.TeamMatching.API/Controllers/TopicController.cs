@@ -97,7 +97,7 @@ public class TopicController : ControllerBase
     }
     
     [HttpGet("me/by-status-and-roles")]
-    public async Task<IActionResult> GetIdeaVersionRequestsCurrentByStatusAndRoles([FromQuery] TopicRequestGetListByStatusAndRoleQuery query)
+    public async Task<IActionResult> GetIdeaRequestsCurrentByStatusAndRoles([FromQuery] TopicRequestGetListByStatusAndRoleQuery query)
     {
         var msg = await _service.GetTopicsOfReviewerByRolesAndStatus<TopicResult>(query);
         return Ok(msg);

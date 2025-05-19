@@ -509,11 +509,12 @@ public class TopicService : BaseService<Topic>, ITopicService
         try
         {
             var userId = GetUserIdFromClaims();
-            if (userId == null) return HandlerError("Không tìm thấy người dùng");
-
+            
             if (query.StatusList.Count == 0) return HandlerFail("Nhập field trạng thái");
 
-            var topics = await _topicRepository.GetCurrentTopicByUserIdAndStatus(userId.Value, query.StatusList);
+            var semester = await GetSemesterInCurrentWorkSpace();
+
+            var topics = await _topicRepository.GetCurrentTopicByUserIdAndStatus(userId, semester?.Id, query.StatusList);
             var result = _mapper.Map<List<TopicResult>>(topics);
             if (result == null)
                 return new ResponseBuilder()

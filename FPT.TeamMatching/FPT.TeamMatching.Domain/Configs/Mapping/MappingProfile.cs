@@ -172,6 +172,7 @@ public class MappingProfile : Profile
         CreateMap<Project, ProjectCreateCommand>().ReverseMap();
         CreateMap<Project, ProjectUpdateCommand>().ReverseMap();
         CreateMap<Project, UpdateDefenseStage>().ReverseMap();
+        CreateMap<Project, ProjectCreateByManagerCommand>();
 
         #endregion
 

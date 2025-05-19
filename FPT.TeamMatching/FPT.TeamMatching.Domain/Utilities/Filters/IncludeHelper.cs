@@ -48,16 +48,16 @@ public static class IncludeHelper
             .Include(e => e.SubMentor)
             .Include(e => e.TopicRequests)
             .ThenInclude(e => e.Reviewer)
-            .Include(e => e.StageTopic).ThenInclude(m => m.Semester)
+            .Include(e => e.StageTopic)
             .Include(e => e.TopicRequests)
             .ThenInclude(iv => iv.AnswerCriterias)
             .Include(m => m.Owner)
             .ThenInclude(u => u.UserXRoles)
             .ThenInclude(ur => ur.Role)
             .Include(e => e.TopicVersions)
-            .ThenInclude(m => m.Topic)
             .Include(m => m.Mentor)
             .Include(m => m.SubMentor)
+            .Include(m => m.Semester)
             .Include(m => m.Specialty)
             .ThenInclude(m => m.Profession);
         return queryable;
