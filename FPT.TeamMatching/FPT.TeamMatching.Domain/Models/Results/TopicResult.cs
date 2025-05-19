@@ -16,6 +16,8 @@ namespace FPT.TeamMatching.Domain.Models.Results
 
         public Guid? StageTopicId { get; set; }
 
+        public Guid? SemesterId { get; set; }
+
         public string? TopicCode { get; set; }
 
         public TopicType? Type { get; set; }
@@ -49,6 +51,8 @@ namespace FPT.TeamMatching.Domain.Models.Results
         public virtual SpecialtyResult? Specialty { get; set; }
 
         public virtual StageTopicResult? StageTopic { get; set; }
+
+        public virtual SemesterResult? Semester { get; set; }
 
         public virtual ICollection<TopicRequestResult> TopicRequests { get; set; } = new List<TopicRequestResult>();
 
