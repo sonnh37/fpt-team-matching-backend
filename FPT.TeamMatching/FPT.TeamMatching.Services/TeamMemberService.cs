@@ -329,7 +329,9 @@ public class TeamMemberService : BaseService<TeamMember>, ITeamMemberService
         try
         {
             var semester =  await GetSemesterInCurrentWorkSpace();
-            if (command.TeamMembers.Count < semester.MinTeamSize || command.TeamMembers.Count > semester.MaxTeamSize)
+            var allTeamMember = await _teamMemberRepository.GetMembersOfTeamByProjectId(command.TeamMembers.First().ProjectId.Value);
+            
+            if (allTeamMember.Count + command.TeamMembers.Count < semester.MinTeamSize || allTeamMember.Count + command.TeamMembers.Count > semester.MaxTeamSize)
             {
                 return new ResponseBuilder()
                     .WithStatus(Const.FAIL_CODE)
