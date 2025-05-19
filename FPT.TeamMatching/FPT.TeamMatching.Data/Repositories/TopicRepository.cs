@@ -126,26 +126,25 @@ public class TopicRepository : BaseRepository<Topic>, ITopicRepository
             .Include(i => i.Mentor)
             .Include(i => i.SubMentor)
             .Include(i => i.Specialty)
-            .Include(i => i.TopicVersions)
-            .Include(i => i.TopicVersions).ThenInclude(m => m.Topic).ThenInclude(m => m.Project)
-            .Include(i => i.TopicVersions)
-            .ThenInclude(iv => iv.TopicVersionRequests)
-            .Where(i => i.TopicVersions.Any(e => e.TopicVersionRequests.Any(ivr =>
-                    ivr.Status != null &&
-                    ivr.Role != null &&
-                    query.Roles.Contains(ivr.Role) &&
-                    //sua db
-                    //query.Status == ivr.Status &&
-                    ivr.ReviewerId == userId)));
+            .Include(i => i.TopicRequests)
+  .Include(i => i.Project) // nếu bạn cần dùng `i.Project` (trước đây là qua Topic → TopicVersion → Topic)
+  .Where(i => i.TopicRequests.Any(ivr =>
+      ivr.Status != null &&
+       ivr.Status == query.Status
+      &&
+      ivr.Role != null &&
+      query.Roles.Contains(ivr.Role) &&
+      ivr.ReviewerId == userId
+  ));
 
         queryable = queryable.Where((i => i.StageTopic != null && i.StageTopic.SemesterId == semester.Id));
         // Thêm điều kiện kiểm tra Topic null nếu có role Mentor, 
         // Mentor: thì chỉ lấy những idea chưa có topic
         // Council: lấy idea có topic
-        if (query.Roles.Contains("Mentor") || query.Roles.Contains("SubMentor"))
+       /* if (query.Roles.Contains("Mentor") || query.Roles.Contains("SubMentor"))
         {
             queryable = queryable.Where(i => i.TopicVersions.All(iv => iv.Topic == null));
-        }
+        }*/
 
         queryable = queryable.Where(m => m.Status == query.TopicStatus);
 
