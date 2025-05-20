@@ -460,12 +460,12 @@ public class TopicRepository : BaseRepository<Topic>, ITopicRepository
         return topics;
     }
 
-    public async Task<Topic?> GetTopicWithStatusInSemesterOfUser(Guid userId, Guid semesterId, TopicStatus status)
+    public async Task<Topic?> GetTopicWithStatusInSemesterOfUser(Guid userId, Guid semesterId, List<TopicStatus> listStatus)
     {
         var queryable = GetQueryable();
         var topic = await queryable.Where(e => e.IsDeleted == false &&
                                                 e.SemesterId == semesterId &&
-                                                e.Status == status)
+                                                listStatus.Contains((TopicStatus)e.Status))
                                     .FirstOrDefaultAsync();
         return topic;
     }
@@ -505,5 +505,10 @@ public class TopicRepository : BaseRepository<Topic>, ITopicRepository
                                                 e.TopicCode == topicCode).AnyAsync();
 
         return isExist;
+    }
+
+    public Task<(List<Topic>, int)> GetTopicsOfReviewerByRolesAndStatus(TopicRequestGetListByStatusAndRoleQuery query, Guid? userId, Guid? semesterId)
+    {
+        throw new NotImplementedException();
     }
 }
