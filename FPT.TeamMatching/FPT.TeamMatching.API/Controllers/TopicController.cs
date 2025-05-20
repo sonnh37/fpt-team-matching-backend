@@ -83,19 +83,33 @@ public class TopicController : ControllerBase
     }
 
     [HttpPost("submit-to-mentor-by-student")]
-    public async Task<IActionResult> SubmitToMentorByStudent([FromBody] TopicStudentCreatePendingCommand request)
+    public async Task<IActionResult> SubmitToMentorByStudent([FromBody] TopicSubmitForMentorByStudentCommand request)
     {
         var msg = await _service.SubmitToMentorByStudent(request);
         return Ok(msg);
     }
 
-    [HttpPost("submit-by-lecturer")]
-    public async Task<IActionResult> SubmitByLecturer([FromBody] TopicLecturerCreatePendingCommand request)
+    [HttpPost("resubmit-to-mentor-by-student")]
+    public async Task<IActionResult> ResubmitToMentorByStudent([FromBody] TopicResubmitForMentorByStudentCommand request)
     {
-        var msg = await _service.SubmitByLecturer(request);
+        var msg = await _service.ResubmitToMentorByStudent(request);
         return Ok(msg);
     }
-    
+
+    [HttpPost("submit-topic-of-lecturer-by-lecturer")]
+    public async Task<IActionResult> SubmitTopicOfLecturerByLecturer([FromBody] TopicLecturerCreatePendingCommand request)
+    {
+        var msg = await _service.SubmitTopicOfLecturerByLecturer(request);
+        return Ok(msg);
+    }
+
+    [HttpPut("submit-topic-of-student-by-lecturer/{topicId:guid}")]
+    public async Task<IActionResult> SubmitTopicOfStudentByLecturer([FromRoute] Guid topicId)
+    {
+        var msg = await _service.SubmitTopicOfStudentByLecturer(topicId);
+        return Ok(msg);
+    }
+
     [HttpGet("me/by-status-and-roles")]
     public async Task<IActionResult> GetIdeaRequestsCurrentByStatusAndRoles([FromQuery] TopicRequestGetListByStatusAndRoleQuery query)
     {

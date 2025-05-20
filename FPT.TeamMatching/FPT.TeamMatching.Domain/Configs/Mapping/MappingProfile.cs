@@ -116,7 +116,8 @@ public class MappingProfile : Profile
 
         CreateMap<Topic, TopicResult>().ReverseMap();
         CreateMap<Topic, TopicCreateCommand>().ReverseMap();
-        CreateMap<Topic, TopicStudentCreatePendingCommand>().ReverseMap();
+        CreateMap<Topic, TopicSubmitForMentorByStudentCommand>().ReverseMap();
+        CreateMap<Topic, TopicResubmitForMentorByStudentCommand>().ReverseMap();
         CreateMap<Topic, TopicLecturerCreatePendingCommand>().ReverseMap();
         CreateMap<Topic, TopicUpdateCommand>().ReverseMap();
 

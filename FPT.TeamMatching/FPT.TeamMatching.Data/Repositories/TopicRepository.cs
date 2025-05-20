@@ -455,12 +455,13 @@ public class TopicRepository : BaseRepository<Topic>, ITopicRepository
         return topics;
     }
 
-    public async Task<Topic?> GetTopicWithStatusInSemesterOfUser(Guid userId, Guid semesterId, TopicStatus status)
+    public async Task<Topic?> GetTopicWithStatusInSemesterOfUser(Guid userId, Guid semesterId, List<TopicStatus> listStatus)
     {
         var queryable = GetQueryable();
         var topic = await queryable.Where(e => e.IsDeleted == false &&
+                                               e.OwnerId == userId &&
                                                e.SemesterId == semesterId &&
-                                               e.Status == status)
+                                               listStatus.Contains((TopicStatus)e.Status))
             .FirstOrDefaultAsync();
         return topic;
     }

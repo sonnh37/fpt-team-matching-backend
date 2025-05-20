@@ -16,10 +16,14 @@ namespace FPT.TeamMatching.Domain.Contracts.Services
     {
         Task<BusinessResult> GetUserTopicsByStatus(TopicGetListForUserByStatus query);
         Task<BusinessResult> GetUserTopicsByStatusWithCurrentStageTopic(TopicGetCurrentStageForUserByStatus query);
-        Task<BusinessResult> SubmitToMentorByStudent(TopicStudentCreatePendingCommand ideaCreateModel);
-        Task<BusinessResult> SubmitByLecturer(TopicLecturerCreatePendingCommand ideaCreateModel);
+
+        Task<BusinessResult> SubmitToMentorByStudent(TopicSubmitForMentorByStudentCommand topicCreateModel);
+        Task<BusinessResult> ResubmitToMentorByStudent(TopicResubmitForMentorByStudentCommand topicCreateModel);
+        Task<BusinessResult> SubmitTopicOfLecturerByLecturer(TopicLecturerCreatePendingCommand topicCreateModel);
+        Task<BusinessResult> SubmitTopicOfStudentByLecturer(Guid topicId);
+
         Task<BusinessResult> GetTopicsByUserId();
-        Task<BusinessResult> UpdateTopic(TopicUpdateCommand ideaUpdateCommand);
+        Task<BusinessResult> UpdateTopic(TopicUpdateCommand topicUpdateCommand);
         Task<BusinessResult> UpdateStatusTopic(TopicUpdateStatusCommand command);
         Task<BusinessResult> GetTopicsForMentor(TopicGetListForMentorQuery query);
         Task<BusinessResult> GetTopicsOfSupervisors<TResult>(TopicGetListOfSupervisorsQuery query) where TResult : BaseResult;
