@@ -113,7 +113,7 @@ namespace FPT.TeamMatching.Services
                 string newTopicCode = "";
 
                 //check trùng mã
-                bool isExisted = await _topicRepository.IsExistTopicCode(newTopicCode);
+                bool isExisted = true; 
                 do
                 {
                     // Tạo số thứ tự tiếp theo
@@ -121,6 +121,7 @@ namespace FPT.TeamMatching.Services
                     // Tạo mã Topic mới theo định dạng:
                     // semesterPrefix + semesterCode + "SE" + số thứ tự (2 chữ số)
                     newTopicCode = $"{semesterPrefix}{semesterCode}SE{nextNumber:D2}";
+                    isExisted = await _topicRepository.IsExistTopicCode(newTopicCode);
                 }
                 while (isExisted);
 
