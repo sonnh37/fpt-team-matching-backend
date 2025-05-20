@@ -5,6 +5,7 @@ using FPT.TeamMatching.Domain.Contracts.Repositories;
 using FPT.TeamMatching.Domain.Contracts.Services;
 using FPT.TeamMatching.Domain.Contracts.UnitOfWorks;
 using FPT.TeamMatching.Domain.Entities;
+using FPT.TeamMatching.Domain.Enums;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Notifications;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.TeamMembers;
 using FPT.TeamMatching.Domain.Models.Responses;
@@ -329,8 +330,36 @@ public class TeamMemberService : BaseService<TeamMember>, ITeamMemberService
         try
         {
             var semester =  await GetSemesterInCurrentWorkSpace();
-            var allTeamMember = await _teamMemberRepository.GetMembersOfTeamByProjectId(command.TeamMembers.First().ProjectId.Value);
+            var foundProject = await _projectRepository.GetById(command.ProjectId);
+            if (foundProject == null)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("Không tìm thấy nhóm");
+            }
+            var foundTopic = await _unitOfWork.TopicRepository.GetById(command.TopicId);
+
+            if (foundTopic == null || foundTopic.IsDeleted == true || foundTopic.IsExistedTeam == true)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("Không tìm thấy đề tài");
+            }
+
+            if (foundProject.TopicId != null)
+            {
+                var oldTopic = await _unitOfWork.TopicRepository.GetById(foundProject.TopicId);
+                if (oldTopic == null)
+                {
+                    return new ResponseBuilder()
+                        .WithStatus(Const.FAIL_CODE)
+                        .WithMessage("Đề tài cũ không tìm thấy");
+                }
+                oldTopic.IsExistedTeam = false;
+                _unitOfWork.TopicRepository.Update(oldTopic);
+            }
             
+            var allTeamMember = await _teamMemberRepository.GetMembersOfTeamByProjectId(command.ProjectId);
             if (allTeamMember.Count + command.TeamMembers.Count < semester.MinTeamSize || allTeamMember.Count + command.TeamMembers.Count > semester.MaxTeamSize)
             {
                 return new ResponseBuilder()
@@ -341,10 +370,27 @@ public class TeamMemberService : BaseService<TeamMember>, ITeamMemberService
             foreach (var teamMemberCreateCommand in command.TeamMembers)
             {
                 teamMemberCreateCommand.JoinDate = DateTime.UtcNow;
+                teamMemberCreateCommand.Status = TeamMemberStatus.InProgress;
                 var mapTeamMember = _mapper.Map<TeamMember>(teamMemberCreateCommand);
                 entityList.Add(mapTeamMember);
             }
+            
+            List<TeamMember> existingTeamMembers = new List<TeamMember>();
+            foreach (var teamMember in allTeamMember)
+            {
+                teamMember.Status = TeamMemberStatus.InProgress;
+                existingTeamMembers.Add(teamMember);
+            }
+            
+            foundTopic.IsExistedTeam = true;
+            foundProject.Status = ProjectStatus.InProgress;
+            foundProject.TopicId = command.TopicId;
+            
+            _projectRepository.Update(foundProject);
+            _unitOfWork.TopicRepository.Update(foundTopic);
+            _teamMemberRepository.UpdateRange(existingTeamMembers);
             _teamMemberRepository.AddRange(entityList);
+
             var saveChange = await _unitOfWork.SaveChanges();
             if (!saveChange)
             {

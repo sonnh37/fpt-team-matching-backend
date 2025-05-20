@@ -26,7 +26,6 @@ namespace FPT.TeamMatching.Services;
 public class ProjectService : BaseService<Project>, IProjectService
 {
     private readonly IProjectRepository _projectRepository;
-    private readonly ITopicRepository _topicRepository;
     private readonly ITeamMemberRepository _teamMemberRepository;
     private readonly ITeamMemberService _serviceTeam;
     private readonly ISemesterRepository _semesterRepository;
@@ -34,12 +33,12 @@ public class ProjectService : BaseService<Project>, IProjectService
     private readonly ISemesterService _semesterService;
     private readonly IStageTopicRepository _stageTopicRepository;
     private readonly INotificationService _notificationService;
+    private readonly ITopicRepository _topicRepository;
 
     public ProjectService(IMapper mapper, IUnitOfWork unitOfWork, ITeamMemberService teamMemberService, ISemesterService semesterService, INotificationService notificationService) : base(mapper,
         unitOfWork)
     {
         _projectRepository = unitOfWork.ProjectRepository;
-        _topicRepository = unitOfWork.TopicRepository;
         _teamMemberRepository = unitOfWork.TeamMemberRepository;
         _semesterRepository = unitOfWork.SemesterRepository;
         _serviceTeam = teamMemberService;
@@ -47,6 +46,7 @@ public class ProjectService : BaseService<Project>, IProjectService
         _semesterService = semesterService;
         _stageTopicRepository = unitOfWork.StageTopicRepository;
         _notificationService = notificationService;
+        _topicRepository = _unitOfWork.TopicRepository;
     }
 
     public async Task<BusinessResult> GetProjectsForMentor(ProjectGetListForMentorQuery query)
@@ -574,13 +574,21 @@ public class ProjectService : BaseService<Project>, IProjectService
     {
         try
         {
-            var semester = await GetSemesterInCurrentWorkSpace();
+            var semester =  await GetSemesterInCurrentWorkSpace();
             if (command.TeamMembers.Count < semester.MinTeamSize || command.TeamMembers.Count > semester.MaxTeamSize)
             {
                 return new ResponseBuilder()
                     .WithStatus(Const.FAIL_CODE)
                     .WithMessage("Số lượng thành viên không phù hợp");
             }
+            var topic = await _unitOfWork.TopicRepository.GetById(command.TopicId);
+            if (topic == null)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("Không tìm thấy đề tài");
+            }
+
             // var entity = _mapper.Map<Project>(command);
             var projects = await _projectRepository.GetInProgressProjectBySemesterId(semester.Id);
             var numberOfProjects = projects.Count();
@@ -597,27 +605,32 @@ public class ProjectService : BaseService<Project>, IProjectService
                 TeamCode = newTeamCode,
                 LeaderId = command.LeaderId,
                 TeamMembers = mapMember,
-                Status = ProjectStatus.Pending,
+                Status = ProjectStatus.InProgress,
                 TeamSize = command.TeamMembers.Count,
                 SemesterId = semester.Id,
+                TopicId = command.TopicId,
             };
 
             _projectRepository.Add(entity);
-            var saveChanges = await _unitOfWork.SaveChanges();
-            if (!saveChanges)
-            {
-                return new ResponseBuilder()
-                    .WithStatus(Const.FAIL_CODE)
-                    .WithMessage(Const.FAIL_SAVE_MSG);
-            }
 
-            //notification to team members
-            await _notificationService.CreateForTeam(new NotificationCreateForTeam
-            {
-                Description = "Bạn đã được thêm vào nhóm do quản lí xếp",
-                ProjectId = entity.Id,
-                Note = null
-            });
+            topic.IsExistedTeam = true;
+            _unitOfWork.TopicRepository.Update(topic);
+            
+             var saveChanges = await _unitOfWork.SaveChanges();
+             if (!saveChanges)
+             {
+                 return new ResponseBuilder()
+                     .WithStatus(Const.FAIL_CODE)
+                     .WithMessage(Const.FAIL_SAVE_MSG);
+             }
+             
+             //notification to team members
+             await _notificationService.CreateForTeam(new NotificationCreateForTeam
+             {
+                 Description = "Bạn đã được thêm vào nhóm do quản lí xếp",
+                 ProjectId = entity.Id,
+                 Note = null
+             });
 
             return new ResponseBuilder()
                     .WithStatus(Const.SUCCESS_CODE)
@@ -663,7 +676,7 @@ public class ProjectService : BaseService<Project>, IProjectService
                 .WithStatus(Const.FAIL_CODE)
                 .WithMessage("Số lượng thành viên của nhóm phải <= " + semester.MaxTeamSize + " và >= " + semester.MinTeamSize);
             }
-
+            
             //chot nhom doi status sang Pending
             project.Status = ProjectStatus.Pending;
             await SetBaseEntityForUpdate(project);
