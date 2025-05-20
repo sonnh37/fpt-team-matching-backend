@@ -35,6 +35,8 @@ public class TopicRepository : BaseRepository<Topic>, ITopicRepository
         return ideas;
     }
 
+  
+
     public async Task<IList<Topic>> GetTopicsByTypeMentorAndEnterprise()
     {
         var queryable = GetQueryable();
@@ -113,38 +115,32 @@ public class TopicRepository : BaseRepository<Topic>, ITopicRepository
     }
 
     public async Task<(List<Topic>, int)> GetTopicsOfReviewerByRolesAndStatus(
-        TopicRequestGetListByStatusAndRoleQuery query, Guid userId)
+        TopicRequestGetListByStatusAndRoleQuery query, Guid? userId, Guid? semesterId)
     {
-        var semester = await _semesterRepository.GetUpComingSemester();
-        if (semester == null)
-        {
-            return (new List<Topic>(), 0);
-        }
-
         var queryable = GetQueryable()
             .Include(i => i.Owner).ThenInclude(m => m.Projects)
             .Include(i => i.Mentor)
             .Include(i => i.SubMentor)
             .Include(i => i.Specialty)
             .Include(i => i.TopicRequests)
-  .Include(i => i.Project) // nếu bạn cần dùng `i.Project` (trước đây là qua Topic → TopicVersion → Topic)
-  .Where(i => i.TopicRequests.Any(ivr =>
-      ivr.Status != null &&
-       ivr.Status == query.Status
-      &&
-      ivr.Role != null &&
-      query.Roles.Contains(ivr.Role) &&
-      ivr.ReviewerId == userId
-  ));
+            .Include(i => i.Project) // nếu bạn cần dùng `i.Project` (trước đây là qua Topic → TopicVersion → Topic)
+            .Where(i => i.TopicRequests.Any(ivr =>
+                ivr.Status != null &&
+                ivr.Status == query.Status
+                &&
+                ivr.Role != null &&
+                query.Roles.Contains(ivr.Role) &&
+                ivr.ReviewerId == userId
+            ));
 
-        queryable = queryable.Where((i => i.StageTopic != null && i.StageTopic.SemesterId == semester.Id));
+        queryable = queryable.Where((i => i.SemesterId == semesterId));
         // Thêm điều kiện kiểm tra Topic null nếu có role Mentor, 
         // Mentor: thì chỉ lấy những idea chưa có topic
         // Council: lấy idea có topic
-       /* if (query.Roles.Contains("Mentor") || query.Roles.Contains("SubMentor"))
-        {
-            queryable = queryable.Where(i => i.TopicVersions.All(iv => iv.Topic == null));
-        }*/
+        /* if (query.Roles.Contains("Mentor") || query.Roles.Contains("SubMentor"))
+         {
+             queryable = queryable.Where(i => i.TopicVersions.All(iv => iv.Topic == null));
+         }*/
 
         queryable = queryable.Where(m => m.Status == query.TopicStatus);
 
@@ -157,7 +153,6 @@ public class TopicRepository : BaseRepository<Topic>, ITopicRepository
 
         return (results, query.IsPagination ? total : results.Count);
     }
-
     public async Task<Topic?> GetTopicPendingInStageTopicOfUser(Guid? userId, Guid stageTopicId)
     {
         var queryable = GetQueryable();
@@ -189,6 +184,11 @@ public class TopicRepository : BaseRepository<Topic>, ITopicRepository
             .FirstOrDefaultAsync();
 
         return idea;
+    }
+
+    public Task<Topic?> GetTopicWithStatusInSemesterOfUser(Guid userId, Guid semesterId, List<TopicStatus> listStatus)
+    {
+        throw new NotImplementedException();
     }
 
     public async Task<int> NumberOfTopicMentorOrOwner(Guid userId)
