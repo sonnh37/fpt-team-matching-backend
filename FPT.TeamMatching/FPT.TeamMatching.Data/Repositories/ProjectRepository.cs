@@ -443,6 +443,7 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
                                                             e.Status != ProjectStatus.Canceled)
                                                 .Include(e => e.TeamMembers)
                                                     .ThenInclude(e => e.User)
+                                                    .Include(x => x.Topic)
                                                 .ToListAsync();
 
         return projectsWithMember;

@@ -579,6 +579,14 @@ public class ProjectService : BaseService<Project>, IProjectService
                     .WithStatus(Const.FAIL_CODE)
                     .WithMessage("Số lượng thành viên không phù hợp");
             }
+            var topic = await _unitOfWork.TopicRepository.GetById(command.TopicId);
+            if (topic == null)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("Không tìm thấy đề tài");
+            }
+
             // var entity = _mapper.Map<Project>(command);
             var projects = await _projectRepository.GetInProgressProjectBySemesterId(semester.Id);
             var numberOfProjects = projects.Count();
@@ -595,12 +603,17 @@ public class ProjectService : BaseService<Project>, IProjectService
                 TeamCode = newTeamCode,
                 LeaderId = command.LeaderId,
                 TeamMembers = mapMember,
-                Status = ProjectStatus.Pending,
+                Status = ProjectStatus.InProgress,
                 TeamSize = command.TeamMembers.Count,
                 SemesterId = semester.Id,
+                TopicId = command.TopicId,
             };
-     
+
             _projectRepository.Add(entity);
+
+            topic.IsExistedTeam = true;
+            _unitOfWork.TopicRepository.Update(topic);
+            
              var saveChanges = await _unitOfWork.SaveChanges();
              if (!saveChanges)
              {
