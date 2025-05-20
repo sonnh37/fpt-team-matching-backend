@@ -26,6 +26,7 @@ namespace FPT.TeamMatching.Services;
 public class ProjectService : BaseService<Project>, IProjectService
 {
     private readonly IProjectRepository _projectRepository;
+    private readonly ITopicRepository _topicRepository;
     private readonly ITeamMemberRepository _teamMemberRepository;
     private readonly ITeamMemberService _serviceTeam;
     private readonly ISemesterRepository _semesterRepository;
@@ -38,6 +39,7 @@ public class ProjectService : BaseService<Project>, IProjectService
         unitOfWork)
     {
         _projectRepository = unitOfWork.ProjectRepository;
+        _topicRepository = unitOfWork.TopicRepository;
         _teamMemberRepository = unitOfWork.TeamMemberRepository;
         _semesterRepository = unitOfWork.SemesterRepository;
         _serviceTeam = teamMemberService;
@@ -572,7 +574,7 @@ public class ProjectService : BaseService<Project>, IProjectService
     {
         try
         {
-            var semester =  await GetSemesterInCurrentWorkSpace();
+            var semester = await GetSemesterInCurrentWorkSpace();
             if (command.TeamMembers.Count < semester.MinTeamSize || command.TeamMembers.Count > semester.MaxTeamSize)
             {
                 return new ResponseBuilder()
@@ -599,28 +601,28 @@ public class ProjectService : BaseService<Project>, IProjectService
                 TeamSize = command.TeamMembers.Count,
                 SemesterId = semester.Id,
             };
-     
-            _projectRepository.Add(entity);
-             var saveChanges = await _unitOfWork.SaveChanges();
-             if (!saveChanges)
-             {
-                 return new ResponseBuilder()
-                     .WithStatus(Const.FAIL_CODE)
-                     .WithMessage(Const.FAIL_SAVE_MSG);
-             }
-             
-             //notification to team members
-             await _notificationService.CreateForTeam(new NotificationCreateForTeam
-             {
-                 Description = "Bạn đã được thêm vào nhóm do quản lí xếp",
-                 ProjectId = entity.Id,
-                 Note = null
-             });
 
-             return new ResponseBuilder()
-                     .WithStatus(Const.SUCCESS_CODE)
-                     .WithMessage(Const.SUCCESS_SAVE_MSG)
-                 ;
+            _projectRepository.Add(entity);
+            var saveChanges = await _unitOfWork.SaveChanges();
+            if (!saveChanges)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage(Const.FAIL_SAVE_MSG);
+            }
+
+            //notification to team members
+            await _notificationService.CreateForTeam(new NotificationCreateForTeam
+            {
+                Description = "Bạn đã được thêm vào nhóm do quản lí xếp",
+                ProjectId = entity.Id,
+                Note = null
+            });
+
+            return new ResponseBuilder()
+                    .WithStatus(Const.SUCCESS_CODE)
+                    .WithMessage(Const.SUCCESS_SAVE_MSG)
+                ;
         }
         catch (Exception e)
         {
@@ -661,7 +663,7 @@ public class ProjectService : BaseService<Project>, IProjectService
                 .WithStatus(Const.FAIL_CODE)
                 .WithMessage("Số lượng thành viên của nhóm phải <= " + semester.MaxTeamSize + " và >= " + semester.MinTeamSize);
             }
-            
+
             //chot nhom doi status sang Pending
             project.Status = ProjectStatus.Pending;
             await SetBaseEntityForUpdate(project);
@@ -748,5 +750,54 @@ public class ProjectService : BaseService<Project>, IProjectService
                 .WithStatus(Const.FAIL_CODE)
                 .WithMessage(e.Message);
         }
+    }
+
+    public async Task<BusinessResult> CancelProjectByManager(Guid projectId)
+    {
+        var project = await _projectRepository.GetById(projectId);
+        if (project == null)
+        {
+            return new ResponseBuilder()
+            .WithStatus(Const.FAIL_CODE)
+            .WithMessage("Không tìm thấy nhóm");
+        }
+        var topic = await _topicRepository.GetTopicByProjectId(projectId);
+        var members = await _teamMemberRepository.GetMembersOfTeamByProjectId(projectId);
+
+        //update project
+        project.Status = ProjectStatus.Canceled;
+        project.TopicId = null;
+        await SetBaseEntityForUpdate(project);
+        _projectRepository.Update(project);
+
+        //update topic
+        if (topic != null)
+        {
+            topic.IsExistedTeam = false;
+            await SetBaseEntityForUpdate(topic);
+            _topicRepository.Update(topic);
+        }
+
+        //update members
+        if (members != null)
+        {
+            foreach (var member in members)
+            {
+                member.LeaveDate = DateTime.UtcNow;
+                await SetBaseEntityForUpdate(member);
+            }
+            _teamMemberRepository.UpdateRange(members);
+        }
+
+        var isSuccess = await _unitOfWork.SaveChanges();
+        if (!isSuccess)
+        {
+            return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage("Xảy ra lỗi khi hủy nhóm");
+        }
+        return new ResponseBuilder()
+                .WithStatus(Const.SUCCESS_CODE)
+                .WithMessage("Hủy nhóm thành công");
     }
 }
