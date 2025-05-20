@@ -33,4 +33,5 @@ public interface IProjectService : IBaseService
 
     Task<BusinessResult> SubmitBlockProjectByStudent(Guid projectId);
     Task<BusinessResult> BlockProjectByManager(Guid projectId);
+    Task<BusinessResult> CancelProjectByManager(Guid projectId);
 }

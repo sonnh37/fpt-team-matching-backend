@@ -176,4 +176,11 @@ public class ProjectController : ControllerBase
         var businessResult = await _service.BlockProjectByManager(projectId);
         return Ok(businessResult);
     }
+
+    [HttpPut("cancel-project-by-manager/{projectId:guid}")]
+    public async Task<IActionResult> CancelProjectByManager(Guid projectId)
+    {
+        var businessResult = await _service.CancelProjectByManager(projectId);
+        return Ok(businessResult);
+    }
 }
