@@ -393,10 +393,12 @@ public class TopicRepository : BaseRepository<Topic>, ITopicRepository
 
     public async Task<Topic> GetTopicByProjectId(Guid projectId)
     {
-        var queryable = await GetQueryable().Include(x => x.TopicVersions)
-            .ThenInclude(x => x.Topic)
-            .ThenInclude(x => x.Project)
-            .FirstOrDefaultAsync(x => x.TopicVersions.FirstOrDefault().Topic.Project.Id == projectId);
+        var queryable = await GetQueryable()
+            // .Include(x => x.TopicVersions)
+            // .ThenInclude(x => x.Topic)
+            // .ThenInclude(x => x.Project)
+            .Include(x => x.Project)
+            .FirstOrDefaultAsync(x => x.Project.Id == projectId);
         return queryable;
     }
 
