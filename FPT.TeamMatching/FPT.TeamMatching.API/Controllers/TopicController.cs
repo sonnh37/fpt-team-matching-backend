@@ -137,5 +137,12 @@ public class TopicController : ControllerBase
         var businessResult = await _service.GetApprovedTopicsDoNotHaveTeam();
         return Ok(businessResult);
     }
+    
+    [HttpGet("me/mentor-topics")]
+    public async Task<IActionResult> GetTopicsForMentor([FromQuery] TopicGetListForMentorQuery query)
+    {
+        var businessResult = await _service.GetTopicsForMentor(query);
+        return Ok(businessResult);
+    }
 }
 
