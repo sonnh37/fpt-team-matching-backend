@@ -401,7 +401,7 @@ public class TopicRequestService : BaseService<TopicRequest>, ITopicRequestServi
                 //neu la status la reject -> sua status cua topic -> reject
                 if (topicRequest.Status == TopicRequestStatus.Approved)
                 {
-                    topic.Status = TopicStatus.MentorRejected;
+                    topic.Status = TopicStatus.MentorApproved;
                     await SetBaseEntityForUpdate(topic);
                     _topicRepository.Update(topic);
                     if (!await _unitOfWork.SaveChanges())

@@ -343,7 +343,7 @@ public class TopicService : BaseService<Topic>, ITopicService
 
     #region Create-by-lecturer
 
-    public async Task<BusinessResult> SubmitTopicOfLecturerByLecturer(TopicLecturerCreatePendingCommand topicCreateModel)
+    public async Task<BusinessResult>  SubmitTopicOfLecturerByLecturer(TopicLecturerCreatePendingCommand topicCreateModel)
     {
         try
         {
@@ -1228,8 +1228,16 @@ public class TopicService : BaseService<Topic>, ITopicService
         {
             var userId = GetUserIdFromClaims();
             if (userId == null) return HandlerFailAuth();
+            
+            var semester = await GetSemesterInCurrentWorkSpace();
+            if (semester == null)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("Không tìm thấy kì");
+            }
 
-            var (data, total) = await _topicRepository.GetTopicsForMentor(query, userId.Value);
+            var (data, total) = await _topicRepository.GetTopicsForMentor(query, userId, semester.Id);
             var results = _mapper.Map<List<TopicResult>>(data);
             var response = new QueryResult(query, results, total);
 
