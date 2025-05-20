@@ -427,7 +427,9 @@ public class UserRepository : BaseRepository<User>, IUserRepository
                             !e.TeamMembers.Any() ||
                             // Có nhóm nhưng tất cả status đều "Fail"
                             e.TeamMembers.All(tm =>
-                                tm.Status == TeamMemberStatus.Fail2)))
+                                tm.Status == TeamMemberStatus.Fail2)||
+                            e.TeamMembers.All(tm => tm.LeaveDate.HasValue)
+                            )) 
             .ToListAsync();
         return students;
     }

@@ -774,21 +774,30 @@ public class ProjectService : BaseService<Project>, IProjectService
             .WithStatus(Const.FAIL_CODE)
             .WithMessage("Không tìm thấy nhóm");
         }
-        var topic = await _topicRepository.GetTopicByProjectId(projectId);
         var members = await _teamMemberRepository.GetMembersOfTeamByProjectId(projectId);
-
+        if (project.TopicId != null)
+        {
+            var topic = await _topicRepository.GetTopicByProjectId(projectId);
+            topic.IsExistedTeam = false;
+            await SetBaseEntityForUpdate(topic);
+            _topicRepository.Update(topic);
+        }
         //update project
         project.Status = ProjectStatus.Canceled;
         project.TopicId = null;
         await SetBaseEntityForUpdate(project);
-        _projectRepository.Update(project);
-
-        //update topic
-        if (topic != null)
+        try
         {
-            topic.IsExistedTeam = false;
-            await SetBaseEntityForUpdate(topic);
-            _topicRepository.Update(topic);
+            var entry = _projectRepository.GetDbContext().Entry(project);
+            if (entry.State == EntityState.Detached)
+            {
+                _projectRepository.Update(project);
+            }
+        }
+        catch (Exception ex)
+        {
+            _projectRepository.GetDbContext().ChangeTracker.Clear(); 
+            _projectRepository.Update(project); 
         }
 
         //update members
