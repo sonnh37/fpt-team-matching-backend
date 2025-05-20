@@ -421,13 +421,13 @@ public class UserRepository : BaseRepository<User>, IUserRepository
         var students = await GetQueryable()
             .Include(x => x.ProfileStudent)
             .Where(e => e.IsDeleted == false &&
-                                                       e.UserXRoles.Any(e => e.Role.RoleName == "Student" && e.SemesterId == semesterId) &&
-                                                       ( 
-                                                           // Chưa có nhóm (không có TeamMembers nào)
-                                                           !e.TeamMembers.Any() ||
-                                                           // Có nhóm nhưng tất cả status đều "Fail"
-                                                           e.TeamMembers.All(tm =>
-                                                               tm.Status == TeamMemberStatus.Fail2)))
+                        e.UserXRoles.Any(e => e.Role.RoleName == "Student" && e.SemesterId == semesterId) &&
+                        ( 
+                            // Chưa có nhóm (không có TeamMembers nào)
+                            !e.TeamMembers.Any() ||
+                            // Có nhóm nhưng tất cả status đều "Fail"
+                            e.TeamMembers.All(tm =>
+                                tm.Status == TeamMemberStatus.Fail2)))
             .ToListAsync();
         return students;
     }

@@ -13,7 +13,7 @@ public interface ITopicRepository : IBaseRepository<Topic>
     Task<IList<Topic>> GetTopicsByUserId(Guid userId);
 
     Task<(List<Topic>, int)> GetTopicsOfReviewerByRolesAndStatus(
-        TopicRequestGetListByStatusAndRoleQuery query, Guid userId);
+        TopicRequestGetListByStatusAndRoleQuery query, Guid? userId, Guid? semesterId);
 
     Task<int> NumberApprovedTopicsOfSemester(Guid? semesterId);
 
@@ -30,7 +30,7 @@ public interface ITopicRepository : IBaseRepository<Topic>
 
     Task<Topic?> GetTopicApproveInSemesterOfUser(Guid? userId, Guid semesterId);
 
-    Task<Topic?> GetTopicWithStatusInSemesterOfUser(Guid userId, Guid semesterId, TopicStatus status);
+    Task<Topic?> GetTopicWithStatusInSemesterOfUser(Guid userId, Guid semesterId, List<TopicStatus> listStatus);
 
     Task<int> NumberOfTopicMentorOrOwner(Guid userId);
     Task<List<Topic>> GetTopicsByTopicCodes(string[] ideaCode);

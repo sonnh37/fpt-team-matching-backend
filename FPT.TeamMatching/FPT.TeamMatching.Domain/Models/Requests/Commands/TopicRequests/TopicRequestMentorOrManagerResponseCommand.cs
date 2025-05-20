@@ -14,6 +14,5 @@ namespace FPT.TeamMatching.Domain.Models.Requests.Commands.TopicRequests
     {
         public TopicRequestStatus? Status { get; set; }
 
-        //public List<AnswerCriteriaForLecturerRespond>? AnswerCriteriaList { get; set; }
     }
 }

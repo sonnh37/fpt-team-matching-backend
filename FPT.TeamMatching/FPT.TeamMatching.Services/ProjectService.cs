@@ -33,6 +33,7 @@ public class ProjectService : BaseService<Project>, IProjectService
     private readonly ISemesterService _semesterService;
     private readonly IStageTopicRepository _stageTopicRepository;
     private readonly INotificationService _notificationService;
+    private readonly ITopicRepository _topicRepository;
 
     public ProjectService(IMapper mapper, IUnitOfWork unitOfWork, ITeamMemberService teamMemberService, ISemesterService semesterService, INotificationService notificationService) : base(mapper,
         unitOfWork)
@@ -45,6 +46,7 @@ public class ProjectService : BaseService<Project>, IProjectService
         _semesterService = semesterService;
         _stageTopicRepository = unitOfWork.StageTopicRepository;
         _notificationService = notificationService;
+        _topicRepository = _unitOfWork.TopicRepository;
     }
 
     public async Task<BusinessResult> GetProjectsForMentor(ProjectGetListForMentorQuery query)
@@ -630,10 +632,10 @@ public class ProjectService : BaseService<Project>, IProjectService
                  Note = null
              });
 
-             return new ResponseBuilder()
-                     .WithStatus(Const.SUCCESS_CODE)
-                     .WithMessage(Const.SUCCESS_SAVE_MSG)
-                 ;
+            return new ResponseBuilder()
+                    .WithStatus(Const.SUCCESS_CODE)
+                    .WithMessage(Const.SUCCESS_SAVE_MSG)
+                ;
         }
         catch (Exception e)
         {
@@ -761,5 +763,54 @@ public class ProjectService : BaseService<Project>, IProjectService
                 .WithStatus(Const.FAIL_CODE)
                 .WithMessage(e.Message);
         }
+    }
+
+    public async Task<BusinessResult> CancelProjectByManager(Guid projectId)
+    {
+        var project = await _projectRepository.GetById(projectId);
+        if (project == null)
+        {
+            return new ResponseBuilder()
+            .WithStatus(Const.FAIL_CODE)
+            .WithMessage("Không tìm thấy nhóm");
+        }
+        var topic = await _topicRepository.GetTopicByProjectId(projectId);
+        var members = await _teamMemberRepository.GetMembersOfTeamByProjectId(projectId);
+
+        //update project
+        project.Status = ProjectStatus.Canceled;
+        project.TopicId = null;
+        await SetBaseEntityForUpdate(project);
+        _projectRepository.Update(project);
+
+        //update topic
+        if (topic != null)
+        {
+            topic.IsExistedTeam = false;
+            await SetBaseEntityForUpdate(topic);
+            _topicRepository.Update(topic);
+        }
+
+        //update members
+        if (members != null)
+        {
+            foreach (var member in members)
+            {
+                member.LeaveDate = DateTime.UtcNow;
+                await SetBaseEntityForUpdate(member);
+            }
+            _teamMemberRepository.UpdateRange(members);
+        }
+
+        var isSuccess = await _unitOfWork.SaveChanges();
+        if (!isSuccess)
+        {
+            return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage("Xảy ra lỗi khi hủy nhóm");
+        }
+        return new ResponseBuilder()
+                .WithStatus(Const.SUCCESS_CODE)
+                .WithMessage("Hủy nhóm thành công");
     }
 }
