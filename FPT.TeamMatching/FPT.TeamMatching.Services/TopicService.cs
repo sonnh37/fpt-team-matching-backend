@@ -738,6 +738,9 @@ public class TopicService : BaseService<Topic>, ITopicService
         {
             List<TResult>? results;
 
+            var semester = await GetSemesterInCurrentWorkSpace();
+            query.SemesterId = semester?.Id;
+
             var (data, total) = await _topicRepository.GetTopicsOfSupervisors(query);
 
             results = _mapper.Map<List<TResult>>(data);

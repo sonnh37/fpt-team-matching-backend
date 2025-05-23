@@ -251,13 +251,7 @@ public class TopicRepository : BaseRepository<Topic>, ITopicRepository
 
     public async Task<(List<Topic>, int)> GetTopicsOfSupervisors(TopicGetListOfSupervisorsQuery query)
     {
-        var semester = await _semesterRepository.GetCurrentSemester();
-        if (semester == null)
-        {
-            return (new List<Topic>(), 0);
-        }
-
-        var semesterId = semester.Id;
+        var semesterId = query.SemesterId;
         var currentDate = DateTime.UtcNow; // Sử dụng UTC để tránh vấn đề múi giờ
 
         var queryable = GetQueryable();
