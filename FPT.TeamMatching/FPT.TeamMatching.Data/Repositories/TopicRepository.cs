@@ -397,7 +397,7 @@ public class TopicRepository : BaseRepository<Topic>, ITopicRepository
             // .Include(x => x.TopicVersions)
             // .ThenInclude(x => x.Topic)
             // .ThenInclude(x => x.Project)
-            .Include(x => x.Project)
+            // .Include(x => x.Project)
             .FirstOrDefaultAsync(x => x.Project.Id == projectId);
         return queryable;
     }
