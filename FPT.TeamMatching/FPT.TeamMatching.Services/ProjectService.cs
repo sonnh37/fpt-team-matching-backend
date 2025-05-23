@@ -133,7 +133,9 @@ public class ProjectService : BaseService<Project>, IProjectService
             var userId = GetUserIdFromClaims();
             if (userId == null) return HandlerFailAuth();
 
-            var project = await _projectRepository.GetProjectInSemesterCurrentByUserIdLoginFollowNewest(userId.Value);
+            var semester = await GetSemesterInCurrentWorkSpace();
+
+            var project = await _projectRepository.GetProjectInSemesterByUserIdLoginFollowNewest(userId.Value, semester?.Id);
             if (project == null) return HandlerFail("Người dùng không có project đang tồn tại");
 
             if (project.Status == ProjectStatus.Canceled)
@@ -176,7 +178,7 @@ public class ProjectService : BaseService<Project>, IProjectService
                 LeaderId = GetUserIdFromClaims(),
                 TeamName = command.TeamName,
                 TeamSize = command.TeamSize,
-                Status = ProjectStatus.Pending
+                Status = ProjectStatus.Forming
             };
             await SetBaseEntityForCreation(project);
             _projectRepository.Add(project);

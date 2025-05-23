@@ -9,6 +9,7 @@ public interface IProjectRepository : IBaseRepository<Project>
     Task<Project?> GetProjectByUserIdLogin(Guid userId);
     Task<Project?> GetByIdForCheckMember(Guid? id);
     Task<Project?> GetProjectInSemesterCurrentByUserIdLoginFollowNewest(Guid userId);
+    Task<Project?> GetProjectInSemesterByUserIdLoginFollowNewest(Guid? userId, Guid? semesterId);
     Task<Project?> GetProjectByUserIdLoginFollowNewest(Guid userId);
     Task<(List<Project>, int)> GetProjectsForMentor(ProjectGetListForMentorQuery query, Guid userId);
     Task<List<Project>?> GetProjectsStartingNow();

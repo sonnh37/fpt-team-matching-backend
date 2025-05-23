@@ -135,6 +135,35 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
 
         return queryable.FirstOrDefault();
     }
+    
+    public async Task<Project?> GetProjectInSemesterByUserIdLoginFollowNewest(Guid? userId, Guid? semesterId)
+    {
+        var teamMember = await _context.TeamMembers.Where(e => e.UserId == userId &&
+                                                               e.LeaveDate == null &&
+                                                               // (e.Status != TeamMemberStatus.Fail2) &&
+                                                               e.IsDeleted == false)
+            .OrderByDescending(m => m.CreatedDate)
+            .FirstOrDefaultAsync();
+        if (teamMember == null) return null;
+        
+
+        var queryable = GetQueryable().Where(e => e.Id == teamMember.ProjectId);
+
+        queryable = queryable.Include(e => e.TeamMembers)
+            .ThenInclude(e => e.User)
+            .Include(e => e.Invitations)
+            .Include(x => x.Reviews);
+
+        queryable = queryable.Where(m => m.Topic != null &&
+                                         m.Topic.StageTopic != null &&
+                                         m.Topic.StageTopic.SemesterId == semesterId
+        );
+
+
+        return queryable.FirstOrDefault();
+    }
+    
+    
 
     public async Task<(List<Project>, int)> SearchProjects(ProjectSearchQuery query)
     {

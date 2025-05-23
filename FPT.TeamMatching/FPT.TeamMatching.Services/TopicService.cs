@@ -107,6 +107,7 @@ public class TopicService : BaseService<Topic>, ITopicService
             {
                 return HandlerFail("Không tìm thấy kì");
             }
+
             if (semester.Status != SemesterStatus.Preparing)
             {
                 return HandlerFail("Hiện tại không được tạo đề tài");
@@ -120,7 +121,8 @@ public class TopicService : BaseService<Topic>, ITopicService
             }
 
             //3. Check xem student có bảng draft k, nếu có bảng draft thì update
-            var topic = await _topicRepository.GetTopicWithStatusInSemesterOfUser((Guid)userId, semester.Id, [TopicStatus.Draft]);
+            var topic = await _topicRepository.GetTopicWithStatusInSemesterOfUser((Guid)userId, semester.Id,
+                [TopicStatus.Draft]);
             if (topic != null)
             {
                 topic.MentorId = topicCreateModel.MentorId;
@@ -150,7 +152,7 @@ public class TopicService : BaseService<Topic>, ITopicService
                 await SetBaseEntityForCreation(topic);
                 _topicRepository.Add(topic);
             }
-            
+
             // 4. Create requests 
             var topicRequestForMentor = new TopicRequest
             {
@@ -203,19 +205,22 @@ public class TopicService : BaseService<Topic>, ITopicService
             {
                 return HandlerFail("Không tìm thấy kì");
             }
+
             if (semester.Status != SemesterStatus.Preparing)
             {
                 return HandlerFail("Hiện tại không được resubmit đề tài");
             }
 
             //2. Check topic mentor consider of user
-            var topic = await _topicRepository.GetTopicWithStatusInSemesterOfUser((Guid)userId, semester.Id, [TopicStatus.MentorConsider]);
+            var topic = await _topicRepository.GetTopicWithStatusInSemesterOfUser((Guid)userId, semester.Id,
+                [TopicStatus.MentorConsider]);
             if (topic == null)
             {
                 return new ResponseBuilder()
-                .WithStatus(Const.FAIL_CODE)
-                .WithMessage("Không tìm thấy đề tài");
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("Không tìm thấy đề tài");
             }
+
             //update topic
             topic.VietNameseName = topicCreateModel.VietNameseName;
             topic.EnglishName = topicCreateModel.EnglishName;
@@ -343,7 +348,8 @@ public class TopicService : BaseService<Topic>, ITopicService
 
     #region Create-by-lecturer
 
-    public async Task<BusinessResult>  SubmitTopicOfLecturerByLecturer(TopicLecturerCreatePendingCommand topicCreateModel)
+    public async Task<BusinessResult> SubmitTopicOfLecturerByLecturer(
+        TopicLecturerCreatePendingCommand topicCreateModel)
     {
         try
         {
@@ -355,10 +361,12 @@ public class TopicService : BaseService<Topic>, ITopicService
             {
                 return HandlerFail("Không tìm thấy kì");
             }
+
             if (semester.Status != SemesterStatus.Preparing)
             {
                 return HandlerFail("Chưa đến thời gian đề tài");
             }
+
             var stageTopic = await _stageTopicRepositoty.GetCurrentStageTopicBySemesterId(semester.Id);
             if (stageTopic == null)
             {
@@ -373,7 +381,8 @@ public class TopicService : BaseService<Topic>, ITopicService
             }
 
             //3. Check xem lecturer có bảng draft k, nếu có bảng draft thì update
-            var topic = await _topicRepository.GetTopicWithStatusInSemesterOfUser((Guid)userId, semester.Id, [TopicStatus.Draft]);
+            var topic = await _topicRepository.GetTopicWithStatusInSemesterOfUser((Guid)userId, semester.Id,
+                [TopicStatus.Draft]);
             if (topic != null)
             {
                 topic.TopicCode = await _semesterService.GenerateNewTopicCode();
@@ -458,10 +467,12 @@ public class TopicService : BaseService<Topic>, ITopicService
         {
             return HandlerFail("Không tìm thấy kì");
         }
+
         if (semester.Status != SemesterStatus.Preparing)
         {
             return HandlerFail("Chưa đến thời gian đề tài");
         }
+
         var stageTopic = await _stageTopicRepositoty.GetCurrentStageTopicBySemesterId(semester.Id);
         if (stageTopic == null)
         {
@@ -496,8 +507,8 @@ public class TopicService : BaseService<Topic>, ITopicService
         if (!isSuccess) return HandlerFail("Gửi đề tài không thành công");
 
         return new ResponseBuilder()
-                .WithStatus(Const.SUCCESS_CODE)
-                .WithMessage("Bạn đã gửi đề tài thành công");
+            .WithStatus(Const.SUCCESS_CODE)
+            .WithMessage("Bạn đã gửi đề tài thành công");
     }
 
     private async Task<BusinessResult> ValidateLecturerRules(TopicLecturerCreatePendingCommand model, Semester semester)
@@ -520,7 +531,7 @@ public class TopicService : BaseService<Topic>, ITopicService
         //    return HandlerFail("Đề tài thứ " + semester.LimitTopicMentorOnly + " trở lên cần có submentor");
 
         // Check Mentor và SubMentor
-        var resBool = await _userService.CheckMentorAndSubMentorSlotAvailability(userId.Value,model.SubMentorId);
+        var resBool = await _userService.CheckMentorAndSubMentorSlotAvailability(userId.Value, model.SubMentorId);
         if (resBool.Status != 1 || resBool.Data == null) return resBool;
         var isHasSlot = resBool.Data is bool;
         if (!isHasSlot) return HandlerFail(resBool.Message);
@@ -614,17 +625,20 @@ public class TopicService : BaseService<Topic>, ITopicService
         try
         {
             var userId = GetUserIdFromClaims();
-            
+
             if (query.StatusList.Count == 0) return HandlerFail("Nhập field trạng thái");
 
             var semester = await GetSemesterInCurrentWorkSpace();
+            var stageTopic = semester?.StageTopics.OrderDescending().FirstOrDefault();
 
-            var topics = await _topicRepository.GetCurrentTopicByUserIdAndStatus(userId, semester?.Id, query.StatusList);
+            var topics =
+                await _topicRepository.GetCurrentTopicByUserIdAndStatus(userId, semester?.Id, query.StatusList,
+                    stageTopic?.ResultDate);
             var result = _mapper.Map<List<TopicResult>>(topics);
-            if (result == null)
-                return new ResponseBuilder()
-                    .WithStatus(Const.NOT_FOUND_CODE)
-                    .WithMessage(Const.NOT_FOUND_MSG);
+
+            // do here
+
+            // end
 
             return new ResponseBuilder()
                 .WithData(result)
@@ -640,7 +654,8 @@ public class TopicService : BaseService<Topic>, ITopicService
         }
     }
 
-    public async Task<BusinessResult> GetUserTopicsByStatusWithCurrentStageTopic(TopicGetCurrentStageForUserByStatus query)
+    public async Task<BusinessResult> GetUserTopicsByStatusWithCurrentStageTopic(
+        TopicGetCurrentStageForUserByStatus query)
     {
         try
         {
@@ -737,6 +752,9 @@ public class TopicService : BaseService<Topic>, ITopicService
         try
         {
             List<TResult>? results;
+
+            var semester = await GetSemesterInCurrentWorkSpace();
+            query.SemesterId = semester?.Id;
 
             var (data, total) = await _topicRepository.GetTopicsOfSupervisors(query);
 
@@ -951,7 +969,7 @@ public class TopicService : BaseService<Topic>, ITopicService
             {
                 return HandlerFail("Không tìm thấy kì");
             }
-            
+
             var (data, total) =
                 await _topicRepository.GetTopicsOfReviewerByRolesAndStatus(query,
                     userId, semester.Id);
@@ -1039,6 +1057,7 @@ public class TopicService : BaseService<Topic>, ITopicService
             {
                 existingProject.TeamCode = await _semesterService.GenerateNewTeamCode();
             }
+
             existingProject.Status = ProjectStatus.Pending;
             await SetBaseEntityForUpdate(existingProject);
             _projectRepository.Update(existingProject);
@@ -1077,7 +1096,6 @@ public class TopicService : BaseService<Topic>, ITopicService
                 Description = "Kết quả đề tài đã được công bố. Hãy kiểm tra kết quả!"
             };
             await _notificationService.CreateForUser(noti);
-
         }
         catch (Exception ex)
         {
@@ -1228,7 +1246,7 @@ public class TopicService : BaseService<Topic>, ITopicService
         {
             var userId = GetUserIdFromClaims();
             if (userId == null) return HandlerFailAuth();
-            
+
             var semester = await GetSemesterInCurrentWorkSpace();
             if (semester == null)
             {
@@ -1263,9 +1281,10 @@ public class TopicService : BaseService<Topic>, ITopicService
             if (semester == null)
             {
                 return new ResponseBuilder()
-                .WithStatus(Const.FAIL_CODE)
-                .WithMessage("Không tìm thấy kì");
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("Không tìm thấy kì");
             }
+
             var topics = await _topicRepository.GetApprovedTopicsDoNotHaveTeamInSemester(semester.Id);
             return new ResponseBuilder()
                 .WithData(topics)
@@ -1280,6 +1299,4 @@ public class TopicService : BaseService<Topic>, ITopicService
                 .WithMessage(errorMessage);
         }
     }
-
-    
 }
