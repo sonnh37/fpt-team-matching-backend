@@ -20,13 +20,15 @@ namespace FPT.TeamMatching.Domain.Models.Requests.Queries.Topics
 
         public Guid? StageTopicId { get; set; }
 
+        public Guid? SemesterId { get; set; }
+
         public string? TopicCode { get; set; }
 
         public TopicType? Type { get; set; }
 
         public TopicStatus? Status { get; set; }
 
-        public bool IsExistedTeam { get; set; }
+        public bool? IsExistedTeam { get; set; }
 
         public string? VietNameseName { get; set; }
 

@@ -17,7 +17,8 @@ public interface ITopicRepository : IBaseRepository<Topic>
 
     Task<int> NumberApprovedTopicsOfSemester(Guid? semesterId);
 
-    Task<List<Topic>> GetCurrentTopicByUserIdAndStatus(Guid? userId, Guid? semesterId, List<TopicStatus> statusList);
+    Task<List<Topic>> GetCurrentTopicByUserIdAndStatus(Guid? userId, Guid? semesterId,
+        List<TopicStatus> statusList, DateTimeOffset? resultDate = null);
 
     Task<List<Topic>> GetUserTopicsByStatusWithCurrentStageTopic(Guid? userId, TopicStatus? status,
         Guid? currentStageTopicId);

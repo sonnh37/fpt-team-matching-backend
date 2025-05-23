@@ -48,14 +48,46 @@ public class TopicRepository : BaseRepository<Topic>, ITopicRepository
     }
 
     public async Task<List<Topic>> GetCurrentTopicByUserIdAndStatus(Guid? userId, Guid? semesterId,
-        List<TopicStatus> statusList)
+        List<TopicStatus> statusList, DateTimeOffset? resultDate = null)
     {
         var queryable = GetQueryable();
+        var currentDate = DateTimeOffset.UtcNow;
+        var originalStatusList = new List<TopicStatus>(statusList);
 
-        var ideas = await queryable.Where(e => e.OwnerId == userId
-                                               && e.SemesterId == semesterId
-                                               && e.Status != null
-                                               && statusList.Contains(e.Status.Value))
+        if (resultDate.HasValue && currentDate <= resultDate.Value)
+        {
+            // Tạo bản sao để không ảnh hưởng list gốc
+            var newStatusList = new List<TopicStatus>(statusList);
+    
+            // Nếu có Approved hoặc Rejected trong yêu cầu
+            if (statusList.Contains(TopicStatus.ManagerApproved) || 
+                statusList.Contains(TopicStatus.ManagerRejected))
+            {
+                // Thêm Pending nếu chưa có
+                if (!newStatusList.Contains(TopicStatus.ManagerPending))
+                {
+                    newStatusList.Add(TopicStatus.ManagerPending);
+                }
+            }
+    
+            // Nếu có Pending trong yêu cầu
+            if (statusList.Contains(TopicStatus.ManagerPending))
+            {
+                // Thêm cả Approved và Rejected nếu chưa có
+                if (!newStatusList.Contains(TopicStatus.ManagerApproved))
+                    newStatusList.Add(TopicStatus.ManagerApproved);
+            
+                if (!newStatusList.Contains(TopicStatus.ManagerRejected))
+                    newStatusList.Add(TopicStatus.ManagerRejected);
+            }
+    
+            statusList = newStatusList;
+        }
+        var ideas = await queryable
+            .Where(e => e.OwnerId == userId
+                        && e.SemesterId == semesterId
+                        && e.Status != null
+                        && statusList.Contains(e.Status.Value))
             .OrderByDescending(m => m.CreatedDate)
             .Include(e => e.TopicVersions).ThenInclude(e => e.TopicVersionRequests).ThenInclude(e => e.Reviewer)
             .Include(e => e.StageTopic)
@@ -64,7 +96,30 @@ public class TopicRepository : BaseRepository<Topic>, ITopicRepository
             .Include(m => m.Semester)
             .Include(m => m.SubMentor)
             .Include(m => m.Specialty).ThenInclude(m => m.Profession)
+            .AsSplitQuery() 
             .ToListAsync();
+
+        if (resultDate.HasValue && currentDate < resultDate.Value)
+        {
+            foreach (var topic in ideas.ToList())
+            {
+                if ((originalStatusList.Contains(TopicStatus.ManagerApproved) &&
+                     topic.Status == TopicStatus.ManagerApproved) ||
+                    (originalStatusList.Contains(TopicStatus.ManagerRejected) &&
+                     topic.Status == TopicStatus.ManagerRejected))
+                {
+                    ideas.Remove(topic);
+                }
+                else
+                {
+                    if ((originalStatusList.Contains(TopicStatus.ManagerPending) &&
+                         (topic.Status == TopicStatus.ManagerApproved || topic.Status == TopicStatus.ManagerRejected)))
+                    {
+                        topic.Status = TopicStatus.ManagerPending;
+                    }
+                }
+            }
+        }
 
         return ideas;
     }
