@@ -448,4 +448,10 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
 
         return projectsWithMember;
     }
+
+    public async Task<Project> GetByIdAsNoTracking(Guid projectId)
+    {
+        var result = await _context.Projects.AsNoTracking().FirstOrDefaultAsync(x => x.Id == projectId);
+        return result;
+    }
 }
