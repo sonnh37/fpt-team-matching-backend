@@ -398,7 +398,7 @@ public class TopicRequestService : BaseService<TopicRequest>, ITopicRequestServi
                     }
                 }
 
-                //neu la status la reject -> sua status cua topic -> reject
+                //neu la status la approve -> sua status cua topic -> approve
                 if (topicRequest.Status == TopicRequestStatus.Approved)
                 {
                     topic.Status = TopicStatus.MentorApproved;

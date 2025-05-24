@@ -22,6 +22,7 @@ public interface IUserRepository : IBaseRepository<User>
     Task<User?> GetByIdForDetail(Guid id);
 
     Task<List<User>?> GetStudentDoNotHaveTeam(Guid semesterId);
+    Task<List<User>> GetStudentDoNotHaveFinalResult(Guid semesterId);
 
     Task<User?> GetByIdWithProjects(Guid? userId);
 

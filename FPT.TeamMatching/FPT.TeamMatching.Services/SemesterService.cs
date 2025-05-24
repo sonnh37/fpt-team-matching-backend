@@ -3,6 +3,7 @@ using FPT.TeamMatching.Domain.Contracts.Repositories;
 using FPT.TeamMatching.Domain.Contracts.Services;
 using FPT.TeamMatching.Domain.Contracts.UnitOfWorks;
 using FPT.TeamMatching.Domain.Entities;
+using FPT.TeamMatching.Domain.Enums;
 using FPT.TeamMatching.Domain.Models.Responses;
 using FPT.TeamMatching.Domain.Models.Results;
 using FPT.TeamMatching.Domain.Utilities;
@@ -167,17 +168,32 @@ namespace FPT.TeamMatching.Services
             }
         }
 
-        public async Task<BusinessResult> UpdateStatusToOnGoing()
+        public async Task<BusinessResult> UpdateStatus(SemesterStatus status)
         {
-            try
+            var semester = await GetSemesterInCurrentWorkSpace();
+            if (semester == null)
             {
-                var semester = await GetSemesterInCurrentWorkSpace();
-                if (semester == null)
-                {
-                    return new ResponseBuilder()
-                        .WithStatus(Const.FAIL_CODE)
-                        .WithMessage("Không tìm thấy kì");
-                }
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("Không tìm thấy kì");
+            }
+            //status phai la preparing, ongoing, closed
+            if (status == SemesterStatus.NotStarted)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("Trạng thái tiếp theo của kì không thể là Not Started");
+            }
+            //status = Preparing
+            if (status == SemesterStatus.Preparing)
+            {
+                semester.StartDate = DateTime.UtcNow;
+
+            }
+
+            //status = OnGoing
+            else if (status == SemesterStatus.OnGoing)
+            {
                 //check xem còn nhóm nào đang pending k
                 var projects = await _projectRepository.GetProjectNotInProgressYetInSemester(semester.Id);
                 if (projects.Count() != 0)
@@ -196,29 +212,36 @@ namespace FPT.TeamMatching.Services
                         .WithMessage("Còn " + students.Count() + " sinh viên chưa có nhóm");
                 }
 
-                //update status semester
                 semester.OnGoingDate = DateTime.UtcNow;
-                semester.Status = Domain.Enums.SemesterStatus.OnGoing;
-                await SetBaseEntityForUpdate(semester);
-                _semesterRepository.Update(semester);
-                var isSuccess = await _unitOfWork.SaveChanges();
-                if (!isSuccess)
+            }
+
+            //status = Closed
+            else if (status == SemesterStatus.Closed)
+            {
+                var students = await _userRepository.GetStudentDoNotHaveFinalResult(semester.Id);
+                if (students.Count() != 0)
                 {
                     return new ResponseBuilder()
                         .WithStatus(Const.FAIL_CODE)
-                        .WithMessage("Đã xảy ra lỗi khi cập nhật học kì");
+                        .WithMessage("Còn " + students.Count() + " sinh viên chưa được cập nhật kết quả");
                 }
-                return new ResponseBuilder()
-                        .WithStatus(Const.SUCCESS_CODE)
-                        .WithMessage("Cập nhật học kì thành công");
+                semester.EndDate = DateTime.UtcNow;
             }
-            catch (Exception ex)
+
+            //update status semester
+            semester.Status = status;
+            await SetBaseEntityForUpdate(semester);
+            _semesterRepository.Update(semester);
+            var isSuccess = await _unitOfWork.SaveChanges();
+            if (!isSuccess)
             {
-                var errorMessage = $"An error {typeof(SemesterResult).Name}: {ex.Message}";
                 return new ResponseBuilder()
                     .WithStatus(Const.FAIL_CODE)
-                    .WithMessage(errorMessage); ;
+                    .WithMessage("Đã xảy ra lỗi khi cập nhật học kì");
             }
+            return new ResponseBuilder()
+                    .WithStatus(Const.SUCCESS_CODE)
+                    .WithMessage("Chuyển trạng thái học kì sang " + status.ToString() + " thành công");
         }
     }
 }
