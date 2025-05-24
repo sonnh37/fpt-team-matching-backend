@@ -434,6 +434,20 @@ public class UserRepository : BaseRepository<User>, IUserRepository
         return students;
     }
 
+    public async Task<List<User>?> GetStudentDoNotHaveFinalResult(Guid semesterId)
+    {
+        var students = await GetQueryable()
+            .Where(e => e.IsDeleted == false &&
+                        e.UserXRoles.Any(e => e.Role.RoleName == "Student" && e.SemesterId == semesterId) &&
+                        (
+                        e.TeamMembers != null &&
+                        e.TeamMembers.Any(e => e.Status == TeamMemberStatus.InProgress)
+                        )
+                   )
+            .ToListAsync();
+        return students;
+    }
+
     public async Task<List<EmailSuggestionModels>> GetAllEmailSuggestions(string email)
     {
         var result = await GetQueryable()
@@ -472,4 +486,6 @@ public class UserRepository : BaseRepository<User>, IUserRepository
     {
         throw new NotImplementedException();
     }
+
+    
 }
