@@ -12,11 +12,11 @@ namespace FPT.TeamMatching.Domain.Contracts.Services
 {
     public interface ISemesterService: IBaseService
     {
-        // Task<BusinessResult> GetPresentSemester();
         Task<BusinessResult> GetCurrentSemester();
         Task<string> GenerateNewTeamCode();
         Task<string> GenerateNewTopicCode();
         Task<BusinessResult> GetBeforeSemester();
         Task<BusinessResult> GetUpComingSemester();
+        Task<BusinessResult> UpdateStatusToOnGoing();
     }
 }

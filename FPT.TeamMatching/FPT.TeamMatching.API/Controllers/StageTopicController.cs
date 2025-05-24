@@ -79,5 +79,13 @@ namespace FPT.TeamMatching.API.Controllers
 
             return Ok(businessResult);
         }
+
+        [HttpGet("show-result/{stageTopicId:guid}")]
+        public async Task<IActionResult> ShowResult([FromRoute] Guid stageTopicId)
+        {
+            var businessResult = await _service.ShowResult(stageTopicId);
+
+            return Ok(businessResult);
+        }
     }
 }
