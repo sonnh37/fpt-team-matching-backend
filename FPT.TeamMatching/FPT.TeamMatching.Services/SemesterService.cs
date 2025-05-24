@@ -15,11 +15,13 @@ namespace FPT.TeamMatching.Services
         private readonly ISemesterRepository _semesterRepository;
         private readonly ITopicRepository _topicRepository;
         private readonly IProjectRepository _projectRepository;
+        private readonly IUserRepository _userRepository;
         public SemesterService(IMapper mapper, IUnitOfWork unitOfWork) : base(mapper, unitOfWork)
         {
             _semesterRepository = unitOfWork.SemesterRepository;
             _topicRepository = unitOfWork.TopicRepository;
             _projectRepository = unitOfWork.ProjectRepository;
+            _userRepository = unitOfWork.UserRepository;
         }
 
         public async Task<BusinessResult> GetCurrentSemester()
@@ -113,7 +115,7 @@ namespace FPT.TeamMatching.Services
                 string newTopicCode = "";
 
                 //check trùng mã
-                bool isExisted = true; 
+                bool isExisted = true;
                 do
                 {
                     // Tạo số thứ tự tiếp theo
@@ -129,7 +131,6 @@ namespace FPT.TeamMatching.Services
             }
             catch (Exception ex)
             {
-                var errorMessage = $"An error {typeof(SemesterResult).Name}: {ex.Message}";
                 return string.Empty;
             }
         }
@@ -162,8 +163,61 @@ namespace FPT.TeamMatching.Services
             }
             catch (Exception ex)
             {
-                var errorMessage = $"An error {typeof(SemesterResult).Name}: {ex.Message}";
                 return string.Empty;
+            }
+        }
+
+        public async Task<BusinessResult> UpdateStatusToOnGoing()
+        {
+            try
+            {
+                var semester = await GetSemesterInCurrentWorkSpace();
+                if (semester == null)
+                {
+                    return new ResponseBuilder()
+                        .WithStatus(Const.FAIL_CODE)
+                        .WithMessage("Không tìm thấy kì");
+                }
+                //check xem còn nhóm nào đang pending k
+                var projects = await _projectRepository.GetProjectNotInProgressYetInSemester(semester.Id);
+                if (projects.Count() != 0)
+                {
+                    return new ResponseBuilder()
+                        .WithStatus(Const.FAIL_CODE)
+                        .WithMessage("Còn " + projects.Count() + " nhóm chưa được chốt");
+                }
+
+                //check xem còn student nào chưa có nhóm k
+                var students = await _userRepository.GetStudentDoNotHaveTeam(semester.Id);
+                if (students != null)
+                {
+                    return new ResponseBuilder()
+                        .WithStatus(Const.FAIL_CODE)
+                        .WithMessage("Còn " + students.Count() + " sinh viên chưa có nhóm");
+                }
+
+                //update status semester
+                semester.OnGoingDate = DateTime.UtcNow;
+                semester.Status = Domain.Enums.SemesterStatus.OnGoing;
+                await SetBaseEntityForUpdate(semester);
+                _semesterRepository.Update(semester);
+                var isSuccess = await _unitOfWork.SaveChanges();
+                if (!isSuccess)
+                {
+                    return new ResponseBuilder()
+                        .WithStatus(Const.FAIL_CODE)
+                        .WithMessage("Đã xảy ra lỗi khi cập nhật học kì");
+                }
+                return new ResponseBuilder()
+                        .WithStatus(Const.SUCCESS_CODE)
+                        .WithMessage("Cập nhật học kì thành công");
+            }
+            catch (Exception ex)
+            {
+                var errorMessage = $"An error {typeof(SemesterResult).Name}: {ex.Message}";
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage(errorMessage); ;
             }
         }
     }

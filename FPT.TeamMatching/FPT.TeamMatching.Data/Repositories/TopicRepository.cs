@@ -489,9 +489,8 @@ public class TopicRepository : BaseRepository<Topic>, ITopicRepository
         var queryable = GetQueryable();
         var topics = await queryable.Where(e => e.IsDeleted == false &&
                                                 e.SemesterId == semesterId &&
-                                                e.Status == TopicStatus.ManagerApproved 
-                                                // &&
-                                                // e.IsExistedTeam == false
+                                                e.Status == TopicStatus.ManagerApproved &&
+                                                e.IsExistedTeam == false
                                                 )
                                     .ToListAsync();
         return topics;
@@ -510,5 +509,17 @@ public class TopicRepository : BaseRepository<Topic>, ITopicRepository
     public Task<(List<Topic>, int)> GetTopicsOfReviewerByRolesAndStatus(TopicRequestGetListByStatusAndRoleQuery query, Guid? userId, Guid? semesterId)
     {
         throw new NotImplementedException();
+    }
+
+    public async Task<List<Topic>> GetTopicWithStatusInStageTopic(List<TopicStatus> topicList, Guid stageTopicId)
+    {
+        var queryable = GetQueryable();
+
+        var topics = await queryable.Where(e => e.IsDeleted == false &&
+                                                e.StageTopicId == stageTopicId &&
+                                                topicList.Contains((TopicStatus)e.Status))
+                                    .ToListAsync();
+
+        return topics;
     }
 }

@@ -135,11 +135,12 @@ namespace FPT.TeamMatching.API.Controllers
             return Ok(businessResult);
         }
 
-        // [HttpGet("get-present-semester")]
-        // public async Task<IActionResult> GetPresentSemester()
-        // {
-        //     var msg = await _service.GetPresentSemester();
-        //     return Ok(msg);
-        // }
+        [HttpPut("update-status-to-on-going")]
+        public async Task<IActionResult> UpdateStatusToOnGoing()
+        {
+            var businessResult = await _service.UpdateStatusToOnGoing();
+
+            return Ok(businessResult);
+        }
     }
 }
