@@ -176,12 +176,19 @@ public static class IncludeHelper
             .ThenInclude(e => e.ProfileStudent)
             .ThenInclude(e => e.Specialty)
             .Include(e => e.Topic)
-            .ThenInclude(e => e.Specialty)
-            .ThenInclude(e => e.Profession)
-            .Include(m => m.Topic)
-            .ThenInclude(m => m.Owner)
+            .ThenInclude(t => t.Specialty)
+            .ThenInclude(s => s.Profession)
+            .Include(p => p.Topic)
+            .ThenInclude(t => t.Mentor)
+            .Include(p => p.Topic)
+            .ThenInclude(t => t.SubMentor)
+            .Include(p => p.Topic)
+            .ThenInclude(t => t.Semester)
+            .Include(p => p.Topic)
+            .ThenInclude(t => t.Owner)
             .Include(x => x.Reviews)
-            .Include(x => x.MentorFeedback);
+            .Include(x => x.MentorFeedback)
+            .Include(x => x.Semester);
 
         return queryable;
     }

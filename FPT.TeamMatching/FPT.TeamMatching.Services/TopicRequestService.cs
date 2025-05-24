@@ -401,7 +401,7 @@ public class TopicRequestService : BaseService<TopicRequest>, ITopicRequestServi
                 //neu la status la reject -> sua status cua topic -> reject
                 if (topicRequest.Status == TopicRequestStatus.Approved)
                 {
-                    topic.Status = TopicStatus.MentorRejected;
+                    topic.Status = TopicStatus.MentorApproved;
                     await SetBaseEntityForUpdate(topic);
                     _topicRepository.Update(topic);
                     if (!await _unitOfWork.SaveChanges())
@@ -449,6 +449,14 @@ public class TopicRequestService : BaseService<TopicRequest>, ITopicRequestServi
                             .WithStatus(Const.FAIL_CODE)
                             .WithMessage(Const.FAIL_SAVE_MSG);
                     }
+                }
+                
+                if (topicRequest.Status == TopicRequestStatus.Approved)
+                {
+                    topic.Status = TopicStatus.ManagerApproved;
+                    await SetBaseEntityForUpdate(topic);
+                    _topicRepository.Update(topic);
+                    if (!await _unitOfWork.SaveChanges()) return HandlerFail(Const.FAIL_SAVE_MSG);
                 }
             }
 

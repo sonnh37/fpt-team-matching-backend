@@ -382,6 +382,11 @@ public static class FilterHelper
         {
             queryable = queryable.Where(m => m.SpecialtyId == query.SpecialtyId);
         }
+        
+        if (query.SemesterId != null)
+        {
+            queryable = queryable.Where(m => m.SemesterId == query.SemesterId);
+        }
 
         if (query.Status != null)
         {

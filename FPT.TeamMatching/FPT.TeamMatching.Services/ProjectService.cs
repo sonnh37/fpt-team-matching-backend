@@ -133,7 +133,9 @@ public class ProjectService : BaseService<Project>, IProjectService
             var userId = GetUserIdFromClaims();
             if (userId == null) return HandlerFailAuth();
 
-            var project = await _projectRepository.GetProjectInSemesterCurrentByUserIdLoginFollowNewest(userId.Value);
+            var semester = await GetSemesterInCurrentWorkSpace();
+
+            var project = await _projectRepository.GetProjectInSemesterByUserIdLoginFollowNewest(userId.Value, semester?.Id);
             if (project == null) return HandlerFail("Người dùng không có project đang tồn tại");
 
             if (project.Status == ProjectStatus.Canceled)
@@ -176,7 +178,7 @@ public class ProjectService : BaseService<Project>, IProjectService
                 LeaderId = GetUserIdFromClaims(),
                 TeamName = command.TeamName,
                 TeamSize = command.TeamSize,
-                Status = ProjectStatus.Pending
+                Status = ProjectStatus.Forming
             };
             await SetBaseEntityForCreation(project);
             _projectRepository.Add(project);
@@ -767,50 +769,60 @@ public class ProjectService : BaseService<Project>, IProjectService
 
     public async Task<BusinessResult> CancelProjectByManager(Guid projectId)
     {
-        var project = await _projectRepository.GetById(projectId);
-        if (project == null)
+        try
         {
-            return new ResponseBuilder()
-            .WithStatus(Const.FAIL_CODE)
-            .WithMessage("Không tìm thấy nhóm");
-        }
-        var topic = await _topicRepository.GetTopicByProjectId(projectId);
-        var members = await _teamMemberRepository.GetMembersOfTeamByProjectId(projectId);
-
-        //update project
-        project.Status = ProjectStatus.Canceled;
-        project.TopicId = null;
-        await SetBaseEntityForUpdate(project);
-        _projectRepository.Update(project);
-
-        //update topic
-        if (topic != null)
-        {
-            topic.IsExistedTeam = false;
-            await SetBaseEntityForUpdate(topic);
-            _topicRepository.Update(topic);
-        }
-
-        //update members
-        if (members != null)
-        {
-            foreach (var member in members)
+            var project = await _projectRepository.GetById(projectId);
+            if (project == null)
             {
-                member.LeaveDate = DateTime.UtcNow;
-                await SetBaseEntityForUpdate(member);
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("Không tìm thấy nhóm");
             }
-            _teamMemberRepository.UpdateRange(members);
-        }
 
-        var isSuccess = await _unitOfWork.SaveChanges();
-        if (!isSuccess)
+            var members = await _teamMemberRepository.GetMembersOfTeamByProjectId(projectId);
+            if (project.TopicId != null)
+            {
+                var topic = await _topicRepository.GetTopicByProjectId(projectId);
+                topic.IsExistedTeam = false;
+                await SetBaseEntityForUpdate(topic);
+                _topicRepository.Update(topic);
+            }
+
+            //update project
+            project.Status = ProjectStatus.Canceled;
+            project.TopicId = null;
+            await SetBaseEntityForUpdate(project);
+            _projectRepository.Update(project);
+
+            //update members
+            if (members != null)
+            {
+                foreach (var member in members)
+                {
+                    member.LeaveDate = DateTime.UtcNow;
+                    await SetBaseEntityForUpdate(member);
+                }
+
+                _teamMemberRepository.UpdateRange(members);
+            }
+
+            var isSuccess = await _unitOfWork.SaveChanges();
+            if (!isSuccess)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("Xảy ra lỗi khi hủy nhóm");
+            }
+
+            return new ResponseBuilder()
+                .WithStatus(Const.SUCCESS_CODE)
+                .WithMessage("Hủy nhóm thành công");
+        }
+        catch (Exception e)
         {
             return new ResponseBuilder()
                 .WithStatus(Const.FAIL_CODE)
-                .WithMessage("Xảy ra lỗi khi hủy nhóm");
+                .WithMessage(e.Message);
         }
-        return new ResponseBuilder()
-                .WithStatus(Const.SUCCESS_CODE)
-                .WithMessage("Hủy nhóm thành công");
     }
 }
