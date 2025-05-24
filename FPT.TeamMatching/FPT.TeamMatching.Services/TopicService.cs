@@ -65,25 +65,16 @@ public class TopicService : BaseService<Topic>, ITopicService
         try
         {
             var userId = GetUserIdFromClaims();
-            if (userId != null)
-            {
-                var topics = await _topicRepository.GetTopicsByUserId(userId.Value);
-                var result = _mapper.Map<IList<TopicResult>>(topics);
-                if (result == null)
-                    return new ResponseBuilder()
-                        .WithData(result)
-                        .WithStatus(Const.NOT_FOUND_CODE)
-                        .WithMessage(Const.NOT_FOUND_MSG);
-
-                return new ResponseBuilder()
-                    .WithData(result)
-                    .WithStatus(Const.SUCCESS_CODE)
-                    .WithMessage(Const.SUCCESS_READ_MSG);
-            }
+            var semester = await GetSemesterInCurrentWorkSpace();
+           
+            var topics = await _topicRepository.GetTopicsByUserId(userId, semester?.Id);
+            var result = _mapper.Map<IList<TopicResult>>(topics);
 
             return new ResponseBuilder()
-                .WithStatus(Const.FAIL_CODE)
-                .WithMessage(Const.FAIL_READ_MSG);
+                .WithData(result)
+                .WithStatus(Const.SUCCESS_CODE)
+                .WithMessage(Const.SUCCESS_READ_MSG);
+
         }
         catch (Exception ex)
         {
@@ -635,10 +626,6 @@ public class TopicService : BaseService<Topic>, ITopicService
                 await _topicRepository.GetCurrentTopicByUserIdAndStatus(userId, semester?.Id, query.StatusList,
                     stageTopic?.ResultDate);
             var result = _mapper.Map<List<TopicResult>>(topics);
-
-            // do here
-
-            // end
 
             return new ResponseBuilder()
                 .WithData(result)

@@ -825,26 +825,6 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
         return false;
     }
 
-    private async Task<bool> StudentHaveTopic(Guid userId)
-    {
-        var topics = await _topicRepository.GetTopicsByUserId(userId);
-        bool haveTopic = false;
-        if (!topics.Any())
-        {
-            return haveTopic = false;
-        }
-
-        foreach (var topic in topics)
-        {
-            if (topic.Status != TopicStatus.ManagerRejected && topic.Status != TopicStatus.MentorRejected)
-            {
-                haveTopic = true;
-            }
-        }
-
-        return haveTopic;
-    }
-
     private async Task<bool> StudentInTeamMember(Guid userId)
     {
         var teamMembers = await _teamMemberRepository.GetTeamMemberByUserId(userId);
