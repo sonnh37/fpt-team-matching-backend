@@ -558,12 +558,7 @@ public class TopicRepository : BaseRepository<Topic>, ITopicRepository
 
         return isExist;
     }
-
-    public Task<(List<Topic>, int)> GetTopicsOfReviewerByRolesAndStatus(TopicRequestGetListByStatusAndRoleQuery query, Guid? userId, Guid? semesterId)
-    {
-        throw new NotImplementedException();
-    }
-
+    
     public async Task<List<Topic>> GetTopicWithStatusInStageTopic(List<TopicStatus> topicList, Guid stageTopicId)
     {
         var queryable = GetQueryable();
