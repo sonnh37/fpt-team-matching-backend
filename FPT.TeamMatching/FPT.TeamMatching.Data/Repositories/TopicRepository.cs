@@ -558,7 +558,7 @@ public class TopicRepository : BaseRepository<Topic>, ITopicRepository
 
         return isExist;
     }
-
+    
     public async Task<List<Topic>> GetTopicWithStatusInStageTopic(List<TopicStatus> topicList, Guid stageTopicId)
     {
         var queryable = GetQueryable();
