@@ -704,6 +704,38 @@ public class TopicService : BaseService<Topic>, ITopicService
             return HandlerError(ex.Message);
         }
     }
+    
+    public async Task<BusinessResult> UpdateTopicAsProject(TopicUpdateAsProjectCommand topicUpdateCommand)
+    {
+        try
+        {
+            var userId = GetUserIdFromClaims();
+            var semester = await GetSemesterInCurrentWorkSpace();
+            var projectInfo = await _projectRepository.GetProjectByLeaderIdInSemester(userId, semester?.Id);
+            if (projectInfo == null) return HandlerFail("Chưa tạo nhóm");
+            
+            var topic = await _topicRepository.GetById(topicUpdateCommand.Id);
+            if (topic == null) return HandlerFail("Không tìm thấy dự án");
+
+            topic.IsExistedTeam = true;
+            await SetBaseEntityForUpdate(topic);
+            _topicRepository.Update(topic);
+            if (!await _unitOfWork.SaveChanges()) return HandlerFail(Const.FAIL_SAVE_MSG);
+            
+            projectInfo.TopicId = topic.Id;
+            await SetBaseEntityForUpdate(projectInfo);
+            _projectRepository.Update(projectInfo);
+            if (!await _unitOfWork.SaveChanges()) return HandlerFail(Const.FAIL_SAVE_MSG);
+
+            return new ResponseBuilder()
+                .WithStatus(Const.SUCCESS_CODE)
+                .WithMessage(Const.SUCCESS_SAVE_MSG);
+        }
+        catch (Exception ex)
+        {
+            return HandlerError(ex.Message);
+        }
+    }
 
     public async Task<BusinessResult> UpdateStatusTopic(TopicUpdateStatusCommand command)
     {

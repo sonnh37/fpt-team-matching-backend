@@ -152,7 +152,14 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
         queryable = queryable.Include(e => e.TeamMembers)
             .ThenInclude(e => e.User)
             .Include(e => e.Invitations)
-            .Include(x => x.Reviews);
+            .Include(x => x.Reviews)
+            .Include(x => x.Topic)
+            .Include(x => x.Topic).ThenInclude(m => m.Owner)
+            .Include(x => x.Topic).ThenInclude(m => m.Mentor)
+            .Include(x => x.Topic).ThenInclude(m => m.SubMentor)
+            .Include(x => x.Topic).ThenInclude(m => m.Specialty)
+            .Include(x => x.Topic).ThenInclude(m => m.StageTopic)
+            .Include(x => x.Topic).ThenInclude(m => m.Specialty).ThenInclude(m => m.Profession);
 
         queryable = queryable.Where(m => m.Topic != null &&
                                          m.Topic.StageTopic != null &&
@@ -299,6 +306,15 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
         var project = await _context.Projects.Where(e => e.IsDeleted == false &&
                                                          e.LeaderId == leaderId &&
                                                          e.Status == ProjectStatus.Pending)
+            .FirstOrDefaultAsync();
+        return project;
+    }
+    
+    public async Task<Project?> GetProjectByLeaderIdInSemester(Guid? leaderId, Guid? semesterId)
+    {
+        var project = await _context.Projects.Where(e => e.IsDeleted == false &&
+                                                         e.LeaderId == leaderId &&
+                                                         e.SemesterId == semesterId)
             .FirstOrDefaultAsync();
         return project;
     }

@@ -166,6 +166,10 @@ public class ProjectService : BaseService<Project>, IProjectService
             var semester = await _semesterRepository.GetSemesterByStageTopicId(stageTopic.Id);
             if (semester == null) return HandlerFail("Không có kì ứng với đợt duyệt hiện tại!");
 
+            var semesterCurrent = await GetSemesterInCurrentWorkSpace();
+            if(semesterCurrent?.Status != SemesterStatus.Preparing)
+                return HandlerFail("Chỉ được tạo ở kì đang chuẩn bị");
+            
             var newTeamCode = await _semesterService.GenerateNewTeamCode();
 
             var codeExist = await _projectRepository.IsExistedTeamCode(newTeamCode);
@@ -178,6 +182,7 @@ public class ProjectService : BaseService<Project>, IProjectService
                 LeaderId = GetUserIdFromClaims(),
                 TeamName = command.TeamName,
                 TeamSize = command.TeamSize,
+                SemesterId = semesterCurrent.Id,
                 Status = ProjectStatus.Forming
             };
             await SetBaseEntityForCreation(project);
@@ -196,7 +201,7 @@ public class ProjectService : BaseService<Project>, IProjectService
             {
                 UserId = project.LeaderId,
                 ProjectId = project.Id,
-                Role = Domain.Enums.TeamMemberRole.Leader,
+                Role = TeamMemberRole.Leader,
                 JoinDate = DateTime.UtcNow,
                 Status = TeamMemberStatus.Pending
             };
