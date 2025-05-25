@@ -97,6 +97,7 @@ public class TopicRepository : BaseRepository<Topic>, ITopicRepository
             .Include(m => m.Semester)
             .Include(m => m.SubMentor)
             .Include(m => m.Specialty).ThenInclude(m => m.Profession)
+            .Include(m => m.Project)
             .AsSplitQuery() 
             .ToListAsync();
 
