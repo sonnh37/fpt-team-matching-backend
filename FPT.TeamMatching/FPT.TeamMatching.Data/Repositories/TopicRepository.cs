@@ -24,13 +24,14 @@ public class TopicRepository : BaseRepository<Topic>, ITopicRepository
         _dbContext = dbContext;
     }
 
-    public async Task<IList<Topic>> GetTopicsByUserId(Guid userId)
+    public async Task<IList<Topic>> GetTopicsByUserId(Guid? userId, Guid? semesterId)
     {
         var queryable = GetQueryable();
 
-        var ideas = await queryable.Where(e => e.OwnerId == userId)
+        var ideas = await queryable.Where(e => e.OwnerId == userId && e.SemesterId == semesterId)
             .Include(e => e.TopicVersions).ThenInclude(e => e.TopicVersionRequests).ThenInclude(e => e.Reviewer)
             .Include(e => e.StageTopic)
+            .Include(e => e.Project)
             .ToListAsync();
         return ideas;
     }
@@ -96,6 +97,7 @@ public class TopicRepository : BaseRepository<Topic>, ITopicRepository
             .Include(m => m.Semester)
             .Include(m => m.SubMentor)
             .Include(m => m.Specialty).ThenInclude(m => m.Profession)
+            .Include(m => m.Project)
             .AsSplitQuery() 
             .ToListAsync();
 

@@ -109,6 +109,13 @@ public class TopicController : ControllerBase
         var msg = await _service.SubmitTopicOfStudentByLecturer(topicId);
         return Ok(msg);
     }
+    
+    [HttpPut("select-as-project")]
+    public async Task<IActionResult> SubmitTopicOfStudentByLecturer([FromBody] TopicUpdateAsProjectCommand request)
+    {
+        var msg = await _service.UpdateTopicAsProject(request);
+        return Ok(msg);
+    }
 
     [HttpGet("me/by-status-and-roles")]
     public async Task<IActionResult> GetIdeaRequestsCurrentByStatusAndRoles([FromQuery] TopicRequestGetListByStatusAndRoleQuery query)

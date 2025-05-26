@@ -22,6 +22,8 @@ namespace FPT.TeamMatching.Domain.Contracts.Services
         Task<BusinessResult> SubmitTopicOfLecturerByLecturer(TopicLecturerCreatePendingCommand topicCreateModel);
         Task<BusinessResult> SubmitTopicOfStudentByLecturer(Guid topicId);
 
+        Task<BusinessResult> UpdateTopicAsProject(TopicUpdateAsProjectCommand topicUpdateCommand);
+
         Task<BusinessResult> GetTopicsByUserId();
         Task<BusinessResult> UpdateTopic(TopicUpdateCommand topicUpdateCommand);
         Task<BusinessResult> UpdateStatusTopic(TopicUpdateStatusCommand command);
