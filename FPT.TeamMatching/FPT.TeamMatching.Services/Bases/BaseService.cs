@@ -374,6 +374,23 @@ public abstract class BaseService<TEntity> : BaseService, IBaseService
         catch (Exception) { return null; }
         return null;
     }
+
+    protected async Task<List<string?>?> GetRolesOfUser()
+    {
+        try
+        {
+            if (!IsUserAuthenticated())
+                return null;
+            var semester = await GetSemesterInCurrentWorkSpace();
+            var userId = GetUserIdFromClaims();
+            var user = await _unitOfWork.UserRepository.GetById(userId, true);
+            return user.UserXRoles.Where(e => e.SemesterId == semester.Id).Select(e => e.Role.RoleName).ToList();
+        }
+        catch (Exception ex)
+        {
+            return null;
+        }
+    }
     public bool IsUserAuthenticated()
     {
         return _httpContextAccessor?.HttpContext != null &&

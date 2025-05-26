@@ -13,6 +13,5 @@ namespace FPT.TeamMatching.Domain.Models.Requests.Commands.TopicRequests
     public class TopicRequestMentorOrManagerResponseCommand : UpdateCommand
     {
         public TopicRequestStatus? Status { get; set; }
-
     }
 }

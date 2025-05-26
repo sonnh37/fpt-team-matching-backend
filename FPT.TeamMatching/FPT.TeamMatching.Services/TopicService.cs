@@ -137,7 +137,7 @@ public class TopicService : BaseService<Topic>, ITopicService
                 await SetBaseEntityForUpdate(topic);
                 _topicRepository.Update(topic);
             }
-            //k co bảng craft thì create
+            //k co bảng draft thì create
             else
             {
                 topic = _mapper.Map<Topic>(topicCreateModel);
@@ -1297,6 +1297,269 @@ public class TopicService : BaseService<Topic>, ITopicService
             return new ResponseBuilder()
                 .WithStatus(Const.FAIL_CODE)
                 .WithMessage(errorMessage);
+        }
+    }
+
+    public async Task<BusinessResult> CreateDraft(TopicCreateOrUpdateDraft command)
+    {
+        try
+        {
+            // check semester preparing
+            var semester = await GetSemesterInCurrentWorkSpace();
+            if (semester == null)
+            {
+                return HandlerFail("Không tìm thấy kì");
+            }
+
+            if (semester.Status != SemesterStatus.Preparing)
+            {
+                return HandlerFail("Chưa đến thời gian tạo đề tài");
+            }
+
+            // check user
+            var user = await GetUserAsync();
+            if (user == null)
+            {
+                return HandlerFail("Không tìm thấy user");
+            }
+
+            // check role
+            var role = await GetRolesOfUser();
+            if (role.Count() == 0)
+            {
+                return HandlerFail("Không tìm thấy role");
+            }
+
+            var draft = _mapper.Map<Topic>(command);
+
+            //check mentor 1
+            if (command.MentorId != null)
+            {
+                if (role.Contains("Student"))
+                {
+                    var isMentor = await _userRepository.CheckRoleOfUserInSemester(command.MentorId, "Mentor", semester.Id);
+                    if (!isMentor)
+                    {
+                        return HandlerFail("Mentor 1 không phải là Mentor trong kì này!");
+                    }
+                }
+            }
+
+            //check mentor 2
+            if (command.SubMentorId != null)
+            {
+                var isMentor = await _userRepository.CheckRoleOfUserInSemester(command.SubMentorId, "Mentor", semester.Id);
+                if (!isMentor)
+                {
+                    return HandlerFail("Mentor 2 không phải là Mentor trong kì này!");
+                }
+            }
+
+            //check tao draft
+            //sinh vien
+            if (role.Contains("Student"))
+            {
+                if (draft.IsEnterpriseTopic)
+                {
+                    return HandlerFail("Sinh viên không thể tạo đề tài doanh nghiệp");
+                }
+                if (draft.EnterpriseName != null)
+                {
+                    return HandlerFail("Sinh viên không thể nhập tên doanh nghiệp");
+                }
+                draft.Type = TopicType.Student;
+            }
+            //giang vien
+            else if (role.Contains("Lecturer"))
+            {
+                if (!role.Contains("Mentor"))
+                {
+                    return HandlerFail("Người dùng không phải là Mentor trong kì này nên không thể tạo đề tài");
+                }
+                if (draft.IsEnterpriseTopic && draft.EnterpriseName == null)
+                {
+                    return HandlerFail("Đề tài doanh nghiệp cần phải có tên doanh nghiệp");
+                }
+                if (!draft.IsEnterpriseTopic && draft.EnterpriseName != null)
+                {
+                    return HandlerFail("Đề tài không cần phải có tên doanh nghiệp");
+                }
+                if (draft.IsEnterpriseTopic)
+                {
+                    draft.Type = TopicType.Enterprise;
+                }
+                else
+                {
+                    draft.Type = TopicType.Lecturer;
+                }
+            }
+            else
+            {
+                return HandlerFail("Người dùng phải là giảng viên hoặc sinh viên");
+            }
+
+            draft.OwnerId = user.Id;
+            draft.Status = TopicStatus.Draft;
+            draft.SemesterId = semester.Id;
+            draft.IsExistedTeam = false;
+
+            _topicRepository.Add(draft);
+            await SetBaseEntityForCreation(draft);
+            var isSuccess = await _unitOfWork.SaveChanges();
+            if (!isSuccess)
+            {
+                return HandlerFail("Đã xảy ra lỗi khi tạo bản nháp");
+            }
+
+            return new ResponseBuilder()
+                    .WithStatus(Const.SUCCESS_CODE)
+                    .WithMessage(Const.SUCCESS_SAVE_MSG);
+        }
+        catch (Exception ex)
+        {
+            var errorMessage = $"An error occured in {typeof(TopicResult).Name}: {ex.Message}";
+            return new ResponseBuilder()
+                     .WithStatus(Const.FAIL_CODE)
+                     .WithMessage(errorMessage);
+        }
+    }
+
+    public async Task<BusinessResult> UpdateDraft(TopicCreateOrUpdateDraft command)
+    {
+        try
+        {
+            // check semester preparing
+            var semester = await GetSemesterInCurrentWorkSpace();
+            if (semester == null)
+            {
+                return HandlerFail("Không tìm thấy kì");
+            }
+
+            if (semester.Status != SemesterStatus.Preparing)
+            {
+                return HandlerFail("Chưa đến thời gian tạo đề tài");
+            }
+
+            // check user
+            var user = await GetUserAsync();
+            if (user == null)
+            {
+                return HandlerFail("Không tìm thấy user");
+            }
+
+            // check role
+            var role = await GetRolesOfUser();
+            if (role.Count() == 0)
+            {
+                return HandlerFail("Không tìm thấy role");
+            }
+
+            var draft = await _topicRepository.GetById(command.Id);
+
+            if (draft == null)
+            {
+                return HandlerFail("Không tìm thấy đề tài");
+            }
+
+            //check owner
+            if (draft.OwnerId == user.Id)
+            {
+                return HandlerFail("Người dùng không phải người sở hữu đề tài");
+            }
+            //check mentor 1
+            if (command.MentorId != null)
+            {
+                if (role.Contains("Student"))
+                {
+                    var isMentor = await _userRepository.CheckRoleOfUserInSemester(command.MentorId, "Mentor", semester.Id);
+                    if (!isMentor)
+                    {
+                        return HandlerFail("Mentor 1 không phải là Mentor trong kì này!");
+                    }
+                }
+            }
+
+            //check mentor 2
+            if (command.SubMentorId != null)
+            {
+                var isMentor = await _userRepository.CheckRoleOfUserInSemester(command.SubMentorId, "Mentor", semester.Id);
+                if (!isMentor)
+                {
+                    return HandlerFail("Mentor 2 không phải là Mentor trong kì này!");
+                }
+            }
+
+            //check update draft
+            //sinh vien
+            if (role.Contains("Student"))
+            {
+                if (draft.IsEnterpriseTopic)
+                {
+                    return HandlerFail("Sinh viên không thể tạo đề tài doanh nghiệp");
+                }
+                if (draft.EnterpriseName != null)
+                {
+                    return HandlerFail("Sinh viên không thể nhập tên doanh nghiệp");
+                }
+            }
+
+            //giang vien
+            else if (role.Contains("Lecturer"))
+            {
+                if (!role.Contains("Mentor"))
+                {
+                    return HandlerFail("Người dùng không phải là Mentor trong kì này nên không thể tạo đề tài");
+                }
+                if (draft.IsEnterpriseTopic && draft.EnterpriseName == null)
+                {
+                    return HandlerFail("Đề tài doanh nghiệp cần phải có tên doanh nghiệp");
+                }
+                if (!draft.IsEnterpriseTopic && draft.EnterpriseName != null)
+                {
+                    return HandlerFail("Đề tài không cần phải có tên doanh nghiệp");
+                }
+                if (draft.IsEnterpriseTopic)
+                {
+                    draft.Type = TopicType.Enterprise;
+                }
+                else
+                {
+                    draft.Type = TopicType.Lecturer;
+                }
+            }
+            else
+            {
+                return HandlerFail("Người dùng phải là giảng viên hoặc sinh viên");
+            }
+
+            draft.MentorId = command.MentorId;
+            draft.SubMentorId = command.SubMentorId;
+            draft.Abbreviation = command.Abbreviation;
+            draft.Description = command.Description;
+            draft.VietNameseName = command.VietNameseName;
+            draft.EnglishName = command.EnglishName;
+            draft.FileUrl = command.FileUrl;
+            draft.IsEnterpriseTopic = command.IsEnterpriseTopic;
+            draft.EnterpriseName = command.EnterpriseName;
+
+            _topicRepository.Update(draft);
+            await SetBaseEntityForUpdate(draft);
+            var isSuccess = await _unitOfWork.SaveChanges();
+            if (!isSuccess)
+            {
+                return HandlerFail("Đã xảy ra lỗi khi cập nhật bản nháp");
+            }
+
+            return new ResponseBuilder()
+                    .WithStatus(Const.SUCCESS_CODE)
+                    .WithMessage(Const.SUCCESS_SAVE_MSG);
+        }
+        catch (Exception ex)
+        {
+            var errorMessage = $"An error occured in {typeof(TopicResult).Name}: {ex.Message}";
+            return new ResponseBuilder()
+                     .WithStatus(Const.FAIL_CODE)
+                     .WithMessage(errorMessage);
         }
     }
 }

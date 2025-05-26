@@ -73,7 +73,7 @@ namespace FPT.TeamMatching.API.Controllers
             return Ok(msg);
         }
 
-        [HttpGet("get-by-idea-version-id")]
+        [HttpGet("get-by-topic-version-id")]
         public async Task<IActionResult> GetByTopicId([FromQuery] Guid id)
         {
             var msg = await _service.GetAllTopicVersionByIdeaId(id);
