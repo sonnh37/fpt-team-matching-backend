@@ -1351,29 +1351,6 @@ public class TopicService : BaseService<Topic>, ITopicService
 
             var draft = _mapper.Map<Topic>(command);
 
-            //check mentor 1
-            if (command.MentorId != null)
-            {
-                if (role.Contains("Student"))
-                {
-                    var isMentor = await _userRepository.CheckRoleOfUserInSemester(command.MentorId, "Mentor", semester.Id);
-                    if (!isMentor)
-                    {
-                        return HandlerFail("Mentor 1 không phải là Mentor trong kì này!");
-                    }
-                }
-            }
-
-            //check mentor 2
-            if (command.SubMentorId != null)
-            {
-                var isMentor = await _userRepository.CheckRoleOfUserInSemester(command.SubMentorId, "Mentor", semester.Id);
-                if (!isMentor)
-                {
-                    return HandlerFail("Mentor 2 không phải là Mentor trong kì này!");
-                }
-            }
-
             //check tao draft
             //sinh vien
             if (role.Contains("Student"))
@@ -1485,28 +1462,6 @@ public class TopicService : BaseService<Topic>, ITopicService
             {
                 return HandlerFail("Người dùng không phải người sở hữu đề tài");
             }
-            //check mentor 1
-            if (command.MentorId != null)
-            {
-                if (role.Contains("Student"))
-                {
-                    var isMentor = await _userRepository.CheckRoleOfUserInSemester(command.MentorId, "Mentor", semester.Id);
-                    if (!isMentor)
-                    {
-                        return HandlerFail("Mentor 1 không phải là Mentor trong kì này!");
-                    }
-                }
-            }
-
-            //check mentor 2
-            if (command.SubMentorId != null)
-            {
-                var isMentor = await _userRepository.CheckRoleOfUserInSemester(command.SubMentorId, "Mentor", semester.Id);
-                if (!isMentor)
-                {
-                    return HandlerFail("Mentor 2 không phải là Mentor trong kì này!");
-                }
-            }
 
             //check update draft
             //sinh vien
@@ -1551,8 +1506,6 @@ public class TopicService : BaseService<Topic>, ITopicService
                 return HandlerFail("Người dùng phải là giảng viên hoặc sinh viên");
             }
 
-            draft.MentorId = command.MentorId;
-            draft.SubMentorId = command.SubMentorId;
             draft.Abbreviation = command.Abbreviation;
             draft.Description = command.Description;
             draft.VietNameseName = command.VietNameseName;
