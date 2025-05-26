@@ -8,27 +8,15 @@ using System.Threading.Tasks;
 
 namespace FPT.TeamMatching.Domain.Models.Requests.Commands.Topics
 {
-    public class TopicCreateCommand : CreateCommand
+    public class TopicCreateOrUpdateDraft
     {
-        public Guid? OwnerId { get; set; }
+        public Guid? Id { get; set; }
 
         public Guid? MentorId { get; set; }
 
         public Guid? SubMentorId { get; set; }
 
-        public Guid? SemesterId { get; set; }
-
         public Guid? SpecialtyId { get; set; }
-
-        public Guid? StageTopicId { get; set; }
-
-        public string? TopicCode { get; set; }
-
-        public TopicType? Type { get; set; }
-
-        public TopicStatus? Status { get; set; }
-
-        public bool IsExistedTeam { get; set; }
 
         public string? VietNameseName { get; set; }
 

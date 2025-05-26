@@ -169,7 +169,7 @@ public class UserController : ControllerBase
     }
 
     [HttpGet("check-mentor-and-submentor-slot-availability")]
-    public async Task<IActionResult> CheckUserHasProjects([FromQuery] UserCheckMentorAndSubMentorQuery query)
+    public async Task<IActionResult> CheckMentorAndSubMentorSlotAvailability([FromQuery] UserCheckMentorAndSubMentorQuery query)
     {
         var hasProjects = await _userService.CheckMentorAndSubMentorSlotAvailability(query.MentorId, query.SubMentorId);
         return Ok(hasProjects);

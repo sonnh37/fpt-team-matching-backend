@@ -100,7 +100,7 @@ public class TeamMemberController : ControllerBase
     }
 
     [HttpPost("add-range-by-manager")]
-    public async Task<IActionResult> AddTeamMemberByMentor([FromBody] TeamMemberAddRangeCommand requests)
+    public async Task<IActionResult> AddRangeByManager([FromBody] TeamMemberAddRangeCommand requests)
     {
         var result = await _teammemberservice.AddRange(requests);
         return Ok(result); 

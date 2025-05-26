@@ -120,6 +120,7 @@ public class MappingProfile : Profile
         CreateMap<Topic, TopicResubmitForMentorByStudentCommand>().ReverseMap();
         CreateMap<Topic, TopicLecturerCreatePendingCommand>().ReverseMap();
         CreateMap<Topic, TopicUpdateCommand>().ReverseMap();
+        CreateMap<Topic, TopicCreateOrUpdateDraft>().ReverseMap();
 
         #endregion
 
