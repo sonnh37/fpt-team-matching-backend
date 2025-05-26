@@ -15,6 +15,7 @@ using FPT.TeamMatching.Domain.Models.Results;
 using FPT.TeamMatching.Domain.Models.Results.Bases;
 using FPT.TeamMatching.Domain.Utilities;
 using FPT.TeamMatching.Services.Bases;
+using Microsoft.EntityFrameworkCore;
 
 namespace FPT.TeamMatching.Services;
 
@@ -328,37 +329,9 @@ public class TopicRequestService : BaseService<TopicRequest>, ITopicRequestServi
                     .WithMessage(Const.FAIL_SAVE_MSG);
             }
 
-            //if (topicVersionRequest.Role != "SubMentor")
-            //{
-            //    var answerCriteriaList = _mapper.Map<List<AnswerCriteria>>(command.AnswerCriteriaList);
-            //    foreach (var answerCriteria in answerCriteriaList)
-            //    {
-            //        answerCriteria.TopicVersionRequestId = topicVersionRequest.Id;
-            //        await SetBaseEntityForCreation(answerCriteria);
-            //    }
+            var topicRequestPendings = await _topicRequestRepository.GetQueryable(m =>
+                m.TopicId == topicRequest.TopicId && m.Status == TopicRequestStatus.Pending).ToListAsync();
 
-            //    _answerCriteriaRepository.AddRange(answerCriteriaList);
-            //    if (!await _unitOfWork.SaveChanges())
-            //    {
-            //        return new ResponseBuilder()
-            //            .WithStatus(Const.FAIL_CODE)
-            //            .WithMessage(Const.FAIL_SAVE_MSG);
-            //    }
-            //}
-
-            //if (topicVersionRequest.TopicVersion == null)
-            //{
-            //    return new ResponseBuilder()
-            //        .WithStatus(Const.NOT_FOUND_CODE)
-            //        .WithMessage(Const.NOT_FOUND_MSG);
-            //}
-
-            //if (topicVersionRequest.TopicVersion.TopicId == null)
-            //{
-            //    return new ResponseBuilder()
-            //        .WithStatus(Const.NOT_FOUND_CODE)
-            //        .WithMessage(Const.NOT_FOUND_MSG);
-            //}
             var topic = await _topicRepository.GetById(topicRequest.TopicId);
             if (topic == null)
             {
@@ -399,7 +372,7 @@ public class TopicRequestService : BaseService<TopicRequest>, ITopicRequestServi
                 }
 
                 //neu la status la reject -> sua status cua topic -> reject
-                if (topicRequest.Status == TopicRequestStatus.Approved)
+                if (topicRequest.Status == TopicRequestStatus.Approved && topicRequestPendings.Count == 0)
                 {
                     topic.Status = TopicStatus.MentorApproved;
                     await SetBaseEntityForUpdate(topic);
@@ -419,14 +392,14 @@ public class TopicRequestService : BaseService<TopicRequest>, ITopicRequestServi
                     UserId = topicInclude?.OwnerId,
                 };
 
-                if (topicRequest.Role == "Mentor")
+                if (topicRequest.Role == "Mentor" && topicRequestPendings.Count == 0)
                 {
                     noti.Description = "Đề tài " + topicInclude?.Abbreviation + " đã được " +
                                        topicInclude?.Mentor?.Code + " (Mentor) duyệt. Hãy kiểm tra kết quả!";
                     await _notificationService.CreateForUser(noti);
                 }
 
-                if (topicRequest.Role == "SubMentor")
+                if (topicRequest.Role == "SubMentor" && topicRequestPendings.Count == 0)
                 {
                     noti.Description = "Đề tài " + topicRequest.Topic?.Abbreviation + " đã được " +
                                        topicInclude?.SubMentor?.Code + " (SubMentor) duyệt. Hãy kiểm tra kết quả!";
@@ -450,7 +423,7 @@ public class TopicRequestService : BaseService<TopicRequest>, ITopicRequestServi
                             .WithMessage(Const.FAIL_SAVE_MSG);
                     }
                 }
-                
+
                 if (topicRequest.Status == TopicRequestStatus.Approved)
                 {
                     topic.Status = TopicStatus.ManagerApproved;

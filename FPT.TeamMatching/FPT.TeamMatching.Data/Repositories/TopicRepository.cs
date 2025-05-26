@@ -199,7 +199,10 @@ public class TopicRepository : BaseRepository<Topic>, ITopicRepository
              queryable = queryable.Where(i => i.TopicVersions.All(iv => iv.Topic == null));
          }*/
 
-        queryable = queryable.Where(m => m.Status == query.TopicStatus);
+        if (query.TopicStatus != null)
+        {
+            queryable = queryable.Where(m => m.Status == query.TopicStatus);
+        }
 
         queryable = Sort(queryable, query);
 

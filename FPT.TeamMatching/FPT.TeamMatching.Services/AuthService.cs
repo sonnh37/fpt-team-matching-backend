@@ -102,7 +102,7 @@ public class AuthService : IAuthService
                 .WithStatus(Const.NOT_FOUND_CODE)
                 .WithMessage("Email không tìm thấy.");
 
-        var hasRole = user.UserXRoles.Any(m => ((m.RoleId != null)));
+        var hasRole = user.UserXRoles.Any(m => ((m.SemesterId != null)));
         if (!hasRole)
         {
             return new ResponseBuilder()
