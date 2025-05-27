@@ -346,18 +346,28 @@ public class TopicRequestService : BaseService<TopicRequest>, ITopicRequestServi
                 //neu la status la approve -> sua status cua topic -> approve
                 if (topicRequest.Status == TopicRequestStatus.Approved)
                 {
-                    var approveTopicRequestOfSubMentor = await _topicRequestRepository.GetByTopicIdAndRoleAndStatus(topic.Id, "SubMentor", TopicRequestStatus.Approved);
-                    if (approveTopicRequestOfSubMentor.Any())
+                    var approveTopicRequestOfSubMentor = await _topicRequestRepository.GetByTopicIdAndRoleAndStatus(
+                        topic.Id, "SubMentor", TopicRequestStatus.Approved);
+                    var shouldApprove = topic.SubMentorId == null || 
+                                         (topic.SubMentorId != null && 
+                                          approveTopicRequestOfSubMentor.Any());
+    
+                    if (shouldApprove)
                     {
                         topic.Status = TopicStatus.MentorApproved;
                     }
+                    
                 }
 
                 //neu la status la consider -> sua status cua topic -> MentorConsidered
                 if (topicRequest.Status == TopicRequestStatus.Consider)
                 {
                     var approveTopicRequestOfSubMentor = await _topicRequestRepository.GetByTopicIdAndRoleAndStatus(topic.Id, "SubMentor", TopicRequestStatus.Approved);
-                    if (approveTopicRequestOfSubMentor.Any())
+                    var shouldApprove = topic.SubMentorId == null || 
+                                        (topic.SubMentorId != null && 
+                                         approveTopicRequestOfSubMentor.Any());
+    
+                    if (shouldApprove)
                     {
                         topic.Status = TopicStatus.MentorConsider;
                     }
@@ -390,11 +400,20 @@ public class TopicRequestService : BaseService<TopicRequest>, ITopicRequestServi
                 {
                     var approveTopicRequestOfMentor = await _topicRequestRepository.GetByTopicIdAndRoleAndStatus(topic.Id, "Mentor", TopicRequestStatus.Approved);
                     var considerTopicRequestOfMentor = await _topicRequestRepository.GetByTopicIdAndRoleAndStatus(topic.Id, "Mentor", TopicRequestStatus.Consider);
-                    if (approveTopicRequestOfMentor.Any())
+                    var shouldApprove = topic.SubMentorId == null || 
+                                        (topic.SubMentorId != null && 
+                                         approveTopicRequestOfMentor.Any());
+    
+                    if (shouldApprove)
                     {
                         topic.Status = TopicStatus.MentorApproved;
                     }
-                    if (considerTopicRequestOfMentor.Any())
+                    
+                    var shouldConsider = topic.SubMentorId == null || 
+                                        (topic.SubMentorId != null && 
+                                         considerTopicRequestOfMentor.Any());
+    
+                    if (shouldConsider)
                     {
                         topic.Status = TopicStatus.MentorConsider;
                     }

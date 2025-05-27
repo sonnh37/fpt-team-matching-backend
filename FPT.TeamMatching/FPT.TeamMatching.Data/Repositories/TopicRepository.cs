@@ -462,7 +462,11 @@ public class TopicRepository : BaseRepository<Topic>, ITopicRepository
             .Include(m => m.TopicRequests)
             .Include(m => m.Project)
             .Include(m => m.MentorTopicRequests)
-            .Include(m => m.TopicVersions);
+            .Include(m => m.TopicVersions)
+            .Include(m => m.SubMentor)
+            .Include(m => m.Mentor)
+            .Include(m => m.Owner)
+            .Include(m => m.Specialty);
 
         if (query.Statuses.Count > 0)
         {

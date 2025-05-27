@@ -159,7 +159,7 @@ public class TopicController : ControllerBase
         return Ok(businessResult);
     }
 
-    [HttpPost("update-draft")]
+    [HttpPut("update-draft")]
     public async Task<IActionResult> UpdateDraft([FromQuery] TopicCreateOrUpdateDraft command)
     {
         var businessResult = await _service.UpdateDraft(command);
