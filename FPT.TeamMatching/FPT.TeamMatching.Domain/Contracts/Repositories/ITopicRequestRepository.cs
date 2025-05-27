@@ -27,5 +27,7 @@ namespace FPT.TeamMatching.Domain.Contracts.Repositories
         Task<int> CountCouncilsForIdea(Guid ideaId);
 
         Task<List<TopicRequest>?> GetRoleMentorNotApproveInSemester(Guid semesterId);
+
+        Task<List<TopicRequest>> GetByTopicIdAndRoleAndStatus(Guid topicId, string role, TopicRequestStatus status);
     }
 }

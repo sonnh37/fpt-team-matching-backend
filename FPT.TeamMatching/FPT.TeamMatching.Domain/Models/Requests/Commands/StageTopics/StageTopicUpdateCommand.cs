@@ -10,8 +10,6 @@ namespace FPT.TeamMatching.Domain.Models.Requests.Commands.StageTopics
 {
     public class StageTopicUpdateCommand : UpdateCommand
     {
-        public Guid? SemesterId { get; set; }
-
         public DateTimeOffset StartDate { get; set; }
 
         public DateTimeOffset EndDate { get; set; }

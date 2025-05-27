@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using FPT.TeamMatching.Domain.Models.Responses;
 using FPT.TeamMatching.Domain.Models.Results.Bases;
+using FPT.TeamMatching.Domain.Models.Requests.Commands.StageTopics;
 
 namespace FPT.TeamMatching.Domain.Contracts.Services
 {
@@ -16,5 +17,8 @@ namespace FPT.TeamMatching.Domain.Contracts.Services
         Task<BusinessResult> GetCurrentStageTopic<TResult>() where TResult : BaseResult;
 
         Task<BusinessResult> ShowResult(Guid stageTopicId);
+
+        Task<BusinessResult> Create(StageTopicCreateCommand command);
+        Task<BusinessResult> Update(StageTopicUpdateCommand command);
     }
 }

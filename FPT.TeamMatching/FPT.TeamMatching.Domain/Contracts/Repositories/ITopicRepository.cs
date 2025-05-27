@@ -40,7 +40,7 @@ public interface ITopicRepository : IBaseRepository<Topic>
 
     Task<List<Topic>> GetTopicsOnlyMentorOfUserInSemester(Guid mentorId, Guid semesterId);
 
-    List<Topic>? GetTopicsBeSubMentorOfUserInSemester(Guid subMentorId, Guid semesterId);
+    Task<List<Topic>> GetTopicsBeSubMentorOfUserInSemester(Guid subMentorId, Guid semesterId);
 
     Task<Topic?> GetTopicNotRejectOfUserInSemester(Guid userId, Guid semesterId);
 

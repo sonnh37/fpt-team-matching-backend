@@ -52,14 +52,14 @@ namespace FPT.TeamMatching.API.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] StageTopicCreateCommand request)
         {
-            var msg = await _service.CreateOrUpdate<StageTopicResult>(request);
+            var msg = await _service.Create(request);
             return Ok(msg);
         }
 
         [HttpPut]
         public async Task<IActionResult> Update([FromBody] StageTopicUpdateCommand request)
         {
-            var businessResult = await _service.CreateOrUpdate<StageTopicResult>(request);
+            var businessResult = await _service.Update(request);
 
             return Ok(businessResult);
         }

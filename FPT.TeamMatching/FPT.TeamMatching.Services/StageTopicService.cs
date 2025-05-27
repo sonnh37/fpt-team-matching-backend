@@ -9,6 +9,7 @@ using FPT.TeamMatching.Domain.Models.Results.Bases;
 using FPT.TeamMatching.Domain.Utilities;
 using FPT.TeamMatching.Domain.Enums;
 using FPT.TeamMatching.Domain.Models.Results;
+using FPT.TeamMatching.Domain.Models.Requests.Commands.StageTopics;
 
 namespace FPT.TeamMatching.Services
 {
@@ -21,6 +22,79 @@ namespace FPT.TeamMatching.Services
         {
             _stageTopicRepositoty = unitOfWork.StageTopicRepository;
             _topicRepository = unitOfWork.TopicRepository;
+        }
+
+        public async Task<BusinessResult> Create(StageTopicCreateCommand command)
+        {
+            try
+            {
+                // check semester
+                var semester = await GetSemesterInCurrentWorkSpace();
+                if (semester == null)
+                {
+                    return HandlerFail("Không tìm thấy kì");
+                }
+                if (semester.Status != SemesterStatus.Preparing)
+                {
+                    return HandlerFail("Hiện tại không được tạo đợt duyệt");
+                }
+                //check stage number
+                if (command.StageNumber > 5 || command.StageNumber < 1)
+                {
+                    return HandlerFail("Số thứ tự của đợt duyệt phải nhỏ hơn 5 và lớn hơn 0");
+                }
+
+                //check start date sau start date semester
+                if (command.StartDate <= semester.StartDate)
+                {
+                    return HandlerFail("Ngày bắt đầu của đợt duyệt phải sau ngày bắt đầu của kì học");
+                }
+
+                //check end date trc end date semester
+                if (command.EndDate >= semester.EndDate)
+                {
+                    return HandlerFail("Ngày kết thúc của đợt duyệt phải trước ngày kết thúc của kì học");
+                }
+
+                //check end date sau start date 
+                if (command.StartDate >= command.EndDate)
+                {
+                    return HandlerFail("Ngày bắt đầu của đợt duyệt phải trước ngày kết thúc");
+                }
+
+                //check result date sau end date stage topic
+                if (command.ResultDate <= command.EndDate)
+                {
+                    return HandlerFail("Ngày công bố kết quả đợt duyệt phải sau ngày kết thúc đợt duyệt");
+                }
+                //check result date truoc end date semester
+                if (command.ResultDate >= semester.EndDate)
+                {
+                    return HandlerFail("Ngày công bố kết quả đợt duyệt phải trước ngày kết thúc học kì");
+                }
+
+                var stageTopic = _mapper.Map<StageTopic>(command);
+                stageTopic.SemesterId = semester.Id;
+                await SetBaseEntityForCreation(stageTopic);
+                _stageTopicRepositoty.Add(stageTopic);
+
+                var isSuccess = await _unitOfWork.SaveChanges();
+                if (!isSuccess)
+                {
+                    return HandlerFail("Đã xảy ra lỗi khi tạo đợt duyệt");
+                }
+
+                return new ResponseBuilder()
+                    .WithStatus(Const.SUCCESS_CODE)
+                    .WithMessage("Tạo đợt duyệt thành công");
+            }
+            catch (Exception ex)
+            {
+                var errorMessage = $"An error {typeof(StageTopicResult).Name}: {ex.Message}";
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage(errorMessage);
+            }
         }
 
         public async Task<BusinessResult> GetByStageNumber<TResult>(int number) where TResult : BaseResult
@@ -106,6 +180,83 @@ namespace FPT.TeamMatching.Services
                 return new ResponseBuilder()
                     .WithStatus(Const.SUCCESS_CODE)
                     .WithMessage("Đã công bố kết quả đợt duyệt");
+            }
+            catch (Exception ex)
+            {
+                var errorMessage = $"An error {typeof(StageTopicResult).Name}: {ex.Message}";
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage(errorMessage);
+            }
+        }
+
+        public async Task<BusinessResult> Update(StageTopicUpdateCommand command)
+        {
+            try
+            {
+                var stageTopic = await _stageTopicRepositoty.GetById(command.Id);
+                if (stageTopic == null)
+                {
+                    return HandlerFail("Không tìm thấy đợt duyệt");
+                }
+
+                // check semester
+                var semester = await GetSemesterInCurrentWorkSpace();
+                if (semester == null)
+                {
+                    return HandlerFail("Không tìm thấy kì");
+                }
+                if (semester.Status != SemesterStatus.Preparing)
+                {
+                    return HandlerFail("Hiện tại không được cập nhật đợt duyệt");
+                }
+                //check stage number
+                if (command.StageNumber > 5 || command.StageNumber < 1)
+                {
+                    return HandlerFail("Số thứ tự của đợt duyệt phải nhỏ hơn 5 và lớn hơn 0");
+                }
+
+                //check start date sau start date semester
+                if (command.StartDate <= semester.StartDate)
+                {
+                    return HandlerFail("Ngày bắt đầu của đợt duyệt phải sau ngày bắt đầu của kì học");
+                }
+
+                //check end date trc end date semester
+                if (command.EndDate >= semester.EndDate)
+                {
+                    return HandlerFail("Ngày kết thúc của đợt duyệt phải trước ngày kết thúc của kì học");
+                }
+
+                //check end date sau start date 
+                if (command.StartDate >= command.EndDate)
+                {
+                    return HandlerFail("Ngày bắt đầu của đợt duyệt phải trước ngày kết thúc");
+                }
+
+                //check result date sau end date 
+                if (command.ResultDate <= command.EndDate)
+                {
+                    return HandlerFail("Ngày công bố kết quả đợt duyệt phải sau ngày kết thúc");
+                }
+
+                stageTopic.StageNumber = command.StageNumber;
+                stageTopic.StartDate = command.StartDate;
+                stageTopic.EndDate = command.EndDate;
+                stageTopic.ResultDate = command.ResultDate;
+
+                await SetBaseEntityForUpdate(stageTopic);
+                _stageTopicRepositoty.Update(stageTopic);
+
+                var isSuccess = await _unitOfWork.SaveChanges();
+                if (!isSuccess)
+                {
+                    return HandlerFail("Đã xảy ra lỗi khi cập nhật đợt duyệt");
+                }
+
+                return new ResponseBuilder()
+                    .WithStatus(Const.SUCCESS_CODE)
+                    .WithMessage("Cập nhật đợt duyệt thành công");
             }
             catch (Exception ex)
             {
