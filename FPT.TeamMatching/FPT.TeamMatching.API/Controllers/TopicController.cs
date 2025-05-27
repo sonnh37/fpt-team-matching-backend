@@ -151,6 +151,13 @@ public class TopicController : ControllerBase
         var businessResult = await _service.GetTopicsForMentor(query);
         return Ok(businessResult);
     }
+    
+    [HttpGet("me/submentor-topic-invites")]
+    public async Task<IActionResult> GetTopicInvitesForSubMentor([FromQuery] TopicGetListInviteForSubmentorQuery query)
+    {
+        var businessResult = await _service.GetTopicInvitesForSubMentor(query);
+        return Ok(businessResult);
+    }
 
     [HttpPost("create-draft")]
     public async Task<IActionResult> CreateDraft([FromBody] TopicCreateOrUpdateDraft command)
@@ -159,7 +166,7 @@ public class TopicController : ControllerBase
         return Ok(businessResult);
     }
 
-    [HttpPost("update-draft")]
+    [HttpPut("update-draft")]
     public async Task<IActionResult> UpdateDraft([FromQuery] TopicCreateOrUpdateDraft command)
     {
         var businessResult = await _service.UpdateDraft(command);

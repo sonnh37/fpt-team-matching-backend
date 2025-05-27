@@ -401,11 +401,11 @@ public class TopicRepository : BaseRepository<Topic>, ITopicRepository
         var queryable = GetQueryable();
 
         var topics = await queryable.Where(e => e.IsDeleted == false &&
-                                         e.SubMentorId == subMentorId &&
-                                         e.Status != TopicStatus.ManagerRejected &&
-                                         e.Status != TopicStatus.MentorRejected &&
-                                        e.SemesterId == semesterId)
-                               .ToListAsync();
+                                                e.SubMentorId == subMentorId &&
+                                                e.Status != TopicStatus.ManagerRejected &&
+                                                e.Status != TopicStatus.MentorRejected &&
+                                                e.SemesterId == semesterId)
+            .ToListAsync();
 
         return topics;
     }
@@ -462,7 +462,11 @@ public class TopicRepository : BaseRepository<Topic>, ITopicRepository
             .Include(m => m.TopicRequests)
             .Include(m => m.Project)
             .Include(m => m.MentorTopicRequests)
-            .Include(m => m.TopicVersions);
+            .Include(m => m.TopicVersions)
+            .Include(m => m.SubMentor)
+            .Include(m => m.Mentor)
+            .Include(m => m.Owner)
+            .Include(m => m.Specialty);
 
         if (query.Statuses.Count > 0)
         {
@@ -494,6 +498,40 @@ public class TopicRepository : BaseRepository<Topic>, ITopicRepository
         {
             queryable = queryable.Where(m => m.MentorId == userId || m.OwnerId == userId || m.SubMentorId == userId);
         }
+
+        queryable = BaseFilterHelper.Base(queryable, query);
+
+        queryable = Sort(queryable, query);
+
+        var total = queryable.Count();
+        var results = query.IsPagination
+            ? await GetQueryablePagination(queryable, query).ToListAsync()
+            : await queryable.ToListAsync();
+
+        return (results, query.IsPagination ? total : results.Count);
+    }
+
+    public async Task<(List<Topic>, int)> GetTopicInvitesForSubMentor(TopicGetListInviteForSubmentorQuery query,Guid? userId,
+        Guid? semesterId)
+    {
+        var queryable = GetQueryable();
+        queryable = queryable
+            .Include(m => m.TopicRequests)
+            .Include(m => m.Project)
+            .Include(m => m.MentorTopicRequests)
+            .Include(m => m.TopicVersions)
+            .Include(m => m.SubMentor)
+            .Include(m => m.Mentor)
+            .Include(m => m.Owner)
+            .Include(m => m.Specialty);
+
+
+        queryable = queryable.Where(m => m.Status != null &&
+                                         (m.Status == TopicStatus.ManagerApproved));
+
+        queryable = queryable.Where(m => m.SemesterId == semesterId);
+
+        queryable = queryable.Where(m => m.TopicRequests.Any(m => m.ReviewerId == userId && m.Status == TopicRequestStatus.Pending));
 
         queryable = BaseFilterHelper.Base(queryable, query);
 
@@ -551,8 +589,8 @@ public class TopicRepository : BaseRepository<Topic>, ITopicRepository
                                                 e.SemesterId == semesterId &&
                                                 e.Status == TopicStatus.ManagerApproved &&
                                                 e.IsExistedTeam == false
-                                                )
-                                    .ToListAsync();
+            )
+            .ToListAsync();
         return topics;
     }
 
@@ -565,7 +603,7 @@ public class TopicRepository : BaseRepository<Topic>, ITopicRepository
 
         return isExist;
     }
-    
+
     public async Task<List<Topic>> GetTopicWithStatusInStageTopic(List<TopicStatus> topicList, Guid stageTopicId)
     {
         var queryable = GetQueryable();
@@ -573,7 +611,7 @@ public class TopicRepository : BaseRepository<Topic>, ITopicRepository
         var topics = await queryable.Where(e => e.IsDeleted == false &&
                                                 e.StageTopicId == stageTopicId &&
                                                 topicList.Contains((TopicStatus)e.Status))
-                                    .ToListAsync();
+            .ToListAsync();
 
         return topics;
     }
