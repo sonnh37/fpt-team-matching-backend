@@ -36,4 +36,5 @@ public interface IProjectRepository : IBaseRepository<Project>
 
     Task<List<Project>> GetProjectNotInProgressYetInSemester(Guid semesterId);
     Task<List<Project>> GetProjectNotCanceledInSemester(Guid semesterId);
+    Task<Project> GetByIdAsNoTracking(Guid projectId);
 }

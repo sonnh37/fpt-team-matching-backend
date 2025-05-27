@@ -396,21 +396,18 @@ public class TopicRepository : BaseRepository<Topic>, ITopicRepository
         return result;
     }
 
-    public List<Topic>? GetTopicsBeSubMentorOfUserInSemester(Guid subMentorId, Guid semesterId)
+    public async Task<List<Topic>> GetTopicsBeSubMentorOfUserInSemester(Guid subMentorId, Guid semesterId)
     {
         var queryable = GetQueryable();
 
-        var ideas = queryable.Where(e => e.IsDeleted == false &&
+        var topics = await queryable.Where(e => e.IsDeleted == false &&
                                          e.SubMentorId == subMentorId &&
-                                         e.Status != TopicStatus.ManagerRejected)
-            .Where(i => i.TopicVersions != null &&
-                        i.TopicVersions.OrderByDescending(iv => iv.CreatedDate).FirstOrDefault() != null);
+                                         e.Status != TopicStatus.ManagerRejected &&
+                                         e.Status != TopicStatus.MentorRejected &&
+                                        e.SemesterId == semesterId)
+                               .ToListAsync();
 
-        var result = ideas.Where(e => e.StageTopic != null &&
-                                      e.StageTopic.SemesterId == semesterId)
-            .ToList();
-
-        return result;
+        return topics;
     }
 
     public async Task<Topic?> GetTopicNotRejectOfUserInSemester(Guid userId, Guid semesterId)
@@ -452,7 +449,7 @@ public class TopicRepository : BaseRepository<Topic>, ITopicRepository
             // .Include(x => x.TopicVersions)
             // .ThenInclude(x => x.Topic)
             // .ThenInclude(x => x.Project)
-            .Include(x => x.Project)
+            // .Include(x => x.Project)
             .FirstOrDefaultAsync(x => x.Project.Id == projectId);
         return queryable;
     }
@@ -552,11 +549,10 @@ public class TopicRepository : BaseRepository<Topic>, ITopicRepository
         var queryable = GetQueryable();
         var topics = await queryable.Where(e => e.IsDeleted == false &&
                                                 e.SemesterId == semesterId &&
-                                                e.Status == TopicStatus.ManagerApproved
-                // &&
-                // e.IsExistedTeam == false
-            )
-            .ToListAsync();
+                                                e.Status == TopicStatus.ManagerApproved &&
+                                                e.IsExistedTeam == false
+                                                )
+                                    .ToListAsync();
         return topics;
     }
 
@@ -568,5 +564,17 @@ public class TopicRepository : BaseRepository<Topic>, ITopicRepository
                                                  e.TopicCode == topicCode).AnyAsync();
 
         return isExist;
+    }
+    
+    public async Task<List<Topic>> GetTopicWithStatusInStageTopic(List<TopicStatus> topicList, Guid stageTopicId)
+    {
+        var queryable = GetQueryable();
+
+        var topics = await queryable.Where(e => e.IsDeleted == false &&
+                                                e.StageTopicId == stageTopicId &&
+                                                topicList.Contains((TopicStatus)e.Status))
+                                    .ToListAsync();
+
+        return topics;
     }
 }

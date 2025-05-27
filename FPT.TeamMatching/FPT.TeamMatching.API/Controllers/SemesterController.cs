@@ -1,4 +1,5 @@
 ﻿using FPT.TeamMatching.Domain.Contracts.Services;
+using FPT.TeamMatching.Domain.Enums;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Semester;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Semester;
 using FPT.TeamMatching.Domain.Models.Results;
@@ -135,11 +136,12 @@ namespace FPT.TeamMatching.API.Controllers
             return Ok(businessResult);
         }
 
-        // [HttpGet("get-present-semester")]
-        // public async Task<IActionResult> GetPresentSemester()
-        // {
-        //     var msg = await _service.GetPresentSemester();
-        //     return Ok(msg);
-        // }
+        [HttpPut("update-status")]
+        public async Task<IActionResult> UpdateStatus([FromQuery] SemesterStatus status)
+        {
+            var businessResult = await _service.UpdateStatus(status);
+
+            return Ok(businessResult);
+        }
     }
 }

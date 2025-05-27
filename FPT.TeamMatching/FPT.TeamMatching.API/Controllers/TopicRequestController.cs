@@ -43,13 +43,6 @@ public class TopicRequestController : ControllerBase
         return Ok(msg);
     }
     
-    //[HttpPost("create-council-requests")]
-    //public async Task<IActionResult> CreateCouncilRequests([FromBody] TopicRequestCreateForCouncilsCommand command)
-    //{
-    //    var result = await _service.CreateCouncilRequestsForIdea(command);
-    //    return Ok(result);
-    //}
-    
     [HttpGet("without-reviewer")]
     public async Task<IActionResult> GetAllUnassignedReviewer([FromQuery] GetQueryableQuery query)
     {
@@ -96,18 +89,25 @@ public class TopicRequestController : ControllerBase
     }
 
     [HttpPut("respond-by-mentor-or-manager")]
-    public async Task<IActionResult> RespondByMentorOrManager([FromBody] TopicRequestMentorOrManagerResponseCommand request)
+    public async Task<IActionResult> RespondByMentorOrManager([FromBody] TopicRequestForRespondCommand request)
     {
         var businessResult = await _service.RespondByMentorOrManager(request);
 
         return Ok(businessResult);
     }
 
-    //[HttpPut("council-response")]
-    //public async Task<IActionResult> CouncilResponse([FromBody] IdeaVersionRequestLecturerOrCouncilResponseCommand request)
-    //{
-    //    var businessResult = await _service.CouncilResponse(request);
+    [HttpPost("send-request-to-submentor-by-mentor")]
+    public async Task<IActionResult> SendRequestToSubMentorByMentor([FromBody] TopicRequestForSubMentorCommand command)
+    {
+        var msg = await _service.SendRequestToSubMentorByMentor(command);
+        return Ok(msg);
+    }
 
-    //    return Ok(businessResult);
-    //}
+    [HttpPut("submentor-response-request-of-mentor")]
+    public async Task<IActionResult> SubMentorResponseRequestOfMentor([FromBody] TopicRequestForRespondCommand command)
+    {
+        var businessResult = await _service.SubMentorResponseRequestOfMentor(command);
+
+        return Ok(businessResult);
+    }
 }

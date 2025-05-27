@@ -52,14 +52,14 @@ namespace FPT.TeamMatching.API.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] StageTopicCreateCommand request)
         {
-            var msg = await _service.CreateOrUpdate<StageTopicResult>(request);
+            var msg = await _service.Create(request);
             return Ok(msg);
         }
 
         [HttpPut]
         public async Task<IActionResult> Update([FromBody] StageTopicUpdateCommand request)
         {
-            var businessResult = await _service.CreateOrUpdate<StageTopicResult>(request);
+            var businessResult = await _service.Update(request);
 
             return Ok(businessResult);
         }
@@ -76,6 +76,14 @@ namespace FPT.TeamMatching.API.Controllers
         public async Task<IActionResult> Delete([FromQuery] StageTopicDeleteCommand request)
         {
             var businessResult = await _service.DeleteById(request.Id, request.IsPermanent);
+
+            return Ok(businessResult);
+        }
+
+        [HttpGet("show-result/{stageTopicId:guid}")]
+        public async Task<IActionResult> ShowResult([FromRoute] Guid stageTopicId)
+        {
+            var businessResult = await _service.ShowResult(stageTopicId);
 
             return Ok(businessResult);
         }

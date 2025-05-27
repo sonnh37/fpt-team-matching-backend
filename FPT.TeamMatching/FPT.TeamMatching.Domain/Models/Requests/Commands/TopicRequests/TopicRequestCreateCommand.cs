@@ -10,8 +10,6 @@ namespace FPT.TeamMatching.Domain.Models.Requests.Commands.TopicRequests
 
         public Guid? ReviewerId { get; set; }
 
-        public Guid? CriteriaFormId { get; set; }
-
         public TopicRequestStatus? Status { get; set; }
 
         public DateTimeOffset? ProcessDate { get; set; }

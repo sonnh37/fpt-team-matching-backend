@@ -10,7 +10,7 @@ namespace FPT.TeamMatching.Domain.Contracts.Services
 {
     public interface ITopicRequestService : IBaseService
     {
-        Task<BusinessResult> RespondByMentorOrManager(TopicRequestMentorOrManagerResponseCommand command);
+        Task<BusinessResult> RespondByMentorOrManager(TopicRequestForRespondCommand command);
 
         Task CreateVersionRequests(Topic topic, Guid versionId, Guid criteriaFormId);
         Task CreateVersionRequesForFirstCreateTopic(Topic topic, Guid versionId, Guid criteriaFormId);
@@ -26,5 +26,8 @@ namespace FPT.TeamMatching.Domain.Contracts.Services
         Task<BusinessResult> GetAllUnassignedReviewer<TResult>(GetQueryableQuery query) where TResult : BaseResult;
 
         Task<BusinessResult> CreateCouncilRequestsForTopic(TopicRequestCreateForCouncilsCommand command);
+
+        Task<BusinessResult> SendRequestToSubMentorByMentor(TopicRequestForSubMentorCommand command);
+        Task<BusinessResult> SubMentorResponseRequestOfMentor(TopicRequestForRespondCommand command);
     }
 }

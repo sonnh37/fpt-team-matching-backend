@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using DocumentFormat.OpenXml.Math;
 using FPT.TeamMatching.Domain.Contracts.Repositories;
 using FPT.TeamMatching.Domain.Contracts.Services;
 using FPT.TeamMatching.Domain.Contracts.UnitOfWorks;
@@ -15,7 +14,6 @@ using FPT.TeamMatching.Domain.Models.Results;
 using FPT.TeamMatching.Domain.Models.Results.Bases;
 using FPT.TeamMatching.Domain.Utilities;
 using FPT.TeamMatching.Services.Bases;
-using Microsoft.EntityFrameworkCore;
 
 namespace FPT.TeamMatching.Services;
 
@@ -303,7 +301,7 @@ public class TopicRequestService : BaseService<TopicRequest>, ITopicRequestServi
     }
 
     public async Task<BusinessResult> RespondByMentorOrManager(
-        TopicRequestMentorOrManagerResponseCommand command)
+        TopicRequestForRespondCommand command)
     {
         try
         {
@@ -321,16 +319,6 @@ public class TopicRequestService : BaseService<TopicRequest>, ITopicRequestServi
 
             await SetBaseEntityForUpdate(topicRequest);
             _topicRequestRepository.Update(topicRequest);
-            var saveChange = await _unitOfWork.SaveChanges();
-            if (!saveChange)
-            {
-                return new ResponseBuilder()
-                    .WithStatus(Const.FAIL_CODE)
-                    .WithMessage(Const.FAIL_SAVE_MSG);
-            }
-
-            var topicRequestPendings = await _topicRequestRepository.GetQueryable(m =>
-                m.TopicId == topicRequest.TopicId && m.Status == TopicRequestStatus.Pending).ToListAsync();
 
             var topic = await _topicRepository.GetById(topicRequest.TopicId);
             if (topic == null)
@@ -340,99 +328,107 @@ public class TopicRequestService : BaseService<TopicRequest>, ITopicRequestServi
                     .WithMessage(Const.NOT_FOUND_MSG);
             }
 
-            //neu mentor response 
-            if (topicRequest.Role == "Mentor" || topicRequest.Role == "SubMentor")
+            var topicInclude = await _topicRepository.GetById(topicRequest.TopicId, true);
+            var noti = new NotificationCreateForIndividual
             {
-                //neu la status la consider -> sua status cua topic -> MentorConsidered
-                if (topicRequest.Status == TopicRequestStatus.Consider)
-                {
-                    topic.Status = TopicStatus.MentorConsider;
-                    await SetBaseEntityForUpdate(topic);
-                    _topicRepository.Update(topic);
-                    if (!await _unitOfWork.SaveChanges())
-                    {
-                        return new ResponseBuilder()
-                            .WithStatus(Const.FAIL_CODE)
-                            .WithMessage(Const.FAIL_SAVE_MSG);
-                    }
-                }
+                UserId = topicInclude?.OwnerId,
+            };
 
+            //neu mentor response 
+            if (topicRequest.Role == "Mentor")
+            {
                 //neu la status la reject -> sua status cua topic -> reject
                 if (topicRequest.Status == TopicRequestStatus.Rejected)
                 {
                     topic.Status = TopicStatus.MentorRejected;
-                    await SetBaseEntityForUpdate(topic);
-                    _topicRepository.Update(topic);
-                    if (!await _unitOfWork.SaveChanges())
+                }
+
+                //neu la status la approve -> sua status cua topic -> approve
+                if (topicRequest.Status == TopicRequestStatus.Approved)
+                {
+                    var approveTopicRequestOfSubMentor = await _topicRequestRepository.GetByTopicIdAndRoleAndStatus(topic.Id, "SubMentor", TopicRequestStatus.Approved);
+                    if (approveTopicRequestOfSubMentor.Any())
                     {
-                        return new ResponseBuilder()
-                            .WithStatus(Const.FAIL_CODE)
-                            .WithMessage(Const.FAIL_SAVE_MSG);
+                        topic.Status = TopicStatus.MentorApproved;
                     }
                 }
 
-                //neu la status la reject -> sua status cua topic -> reject
-                if (topicRequest.Status == TopicRequestStatus.Approved && topicRequestPendings.Count == 0)
+                //neu la status la consider -> sua status cua topic -> MentorConsidered
+                if (topicRequest.Status == TopicRequestStatus.Consider)
                 {
-                    topic.Status = TopicStatus.MentorApproved;
-                    await SetBaseEntityForUpdate(topic);
-                    _topicRepository.Update(topic);
-                    if (!await _unitOfWork.SaveChanges())
+                    var approveTopicRequestOfSubMentor = await _topicRequestRepository.GetByTopicIdAndRoleAndStatus(topic.Id, "SubMentor", TopicRequestStatus.Approved);
+                    if (approveTopicRequestOfSubMentor.Any())
                     {
-                        return new ResponseBuilder()
-                            .WithStatus(Const.FAIL_CODE)
-                            .WithMessage(Const.FAIL_SAVE_MSG);
+                        topic.Status = TopicStatus.MentorConsider;
                     }
+                }
+
+                await SetBaseEntityForUpdate(topic);
+                _topicRepository.Update(topic);
+                var isSuccess = await _unitOfWork.SaveChanges();
+                if (!isSuccess)
+                {
+                    return HandlerFail(Const.FAIL_SAVE_MSG);
                 }
 
                 //noti cho owner
-                var topicInclude = await _topicRepository.GetById(topicRequest.TopicId, true);
-                var noti = new NotificationCreateForIndividual
+                noti.Description = "Đề tài " + topicInclude?.Abbreviation + " đã được " +
+                                    topicInclude?.Mentor?.Code + " (Mentor) duyệt. Hãy kiểm tra kết quả!";
+                await _notificationService.CreateForUser(noti);
+            }
+            //neu submentor response
+            else if (topicRequest.Role == "SubMentor")
+            {
+                //neu la status la reject -> sua status cua topic -> reject
+                if (topicRequest.Status == TopicRequestStatus.Rejected)
                 {
-                    UserId = topicInclude?.OwnerId,
-                };
-
-                if (topicRequest.Role == "Mentor" && topicRequestPendings.Count == 0)
-                {
-                    noti.Description = "Đề tài " + topicInclude?.Abbreviation + " đã được " +
-                                       topicInclude?.Mentor?.Code + " (Mentor) duyệt. Hãy kiểm tra kết quả!";
-                    await _notificationService.CreateForUser(noti);
+                    topic.Status = TopicStatus.MentorRejected;
                 }
 
-                if (topicRequest.Role == "SubMentor" && topicRequestPendings.Count == 0)
+                //neu la status la approve -> sua status cua topic -> approve
+                if (topicRequest.Status == TopicRequestStatus.Approved)
                 {
-                    noti.Description = "Đề tài " + topicRequest.Topic?.Abbreviation + " đã được " +
-                                       topicInclude?.SubMentor?.Code + " (SubMentor) duyệt. Hãy kiểm tra kết quả!";
-                    await _notificationService.CreateForUser(noti);
+                    var approveTopicRequestOfMentor = await _topicRequestRepository.GetByTopicIdAndRoleAndStatus(topic.Id, "Mentor", TopicRequestStatus.Approved);
+                    var considerTopicRequestOfMentor = await _topicRequestRepository.GetByTopicIdAndRoleAndStatus(topic.Id, "Mentor", TopicRequestStatus.Consider);
+                    if (approveTopicRequestOfMentor.Any())
+                    {
+                        topic.Status = TopicStatus.MentorApproved;
+                    }
+                    if (considerTopicRequestOfMentor.Any())
+                    {
+                        topic.Status = TopicStatus.MentorConsider;
+                    }
                 }
+
+                noti.Description = "Đề tài " + topicRequest.Topic?.Abbreviation + " đã được " +
+                                           topicInclude?.SubMentor?.Code + " (SubMentor) duyệt. Hãy kiểm tra kết quả!";
+                await _notificationService.CreateForUser(noti);
             }
 
             //neu manager reponse
-            if (topicRequest.Role == "Manager")
+            else if (topicRequest.Role == "Manager")
             {
                 //neu la status la reject -> sua status cua topic -> reject
                 if (topicRequest.Status == TopicRequestStatus.Rejected)
                 {
                     topic.Status = TopicStatus.ManagerRejected;
-                    await SetBaseEntityForUpdate(topic);
-                    _topicRepository.Update(topic);
-                    if (!await _unitOfWork.SaveChanges())
-                    {
-                        return new ResponseBuilder()
-                            .WithStatus(Const.FAIL_CODE)
-                            .WithMessage(Const.FAIL_SAVE_MSG);
-                    }
                 }
 
+                //neu la status la approve -> sua status cua topic -> approve
                 if (topicRequest.Status == TopicRequestStatus.Approved)
                 {
                     topic.Status = TopicStatus.ManagerApproved;
-                    await SetBaseEntityForUpdate(topic);
-                    _topicRepository.Update(topic);
-                    if (!await _unitOfWork.SaveChanges()) return HandlerFail(Const.FAIL_SAVE_MSG);
                 }
-            }
 
+                await SetBaseEntityForUpdate(topic);
+                _topicRepository.Update(topic);
+                var isSuccess = await _unitOfWork.SaveChanges();
+                if (!isSuccess) return HandlerFail(Const.FAIL_SAVE_MSG);
+
+                //noti cho owner
+                noti.Description = "Đề tài " + topicRequest.Topic?.Abbreviation + " đã được duyệt xong. Hãy kiểm tra kết quả!";
+                await _notificationService.CreateForUser(noti);
+            }
 
             return new ResponseBuilder()
                 .WithStatus(Const.SUCCESS_CODE)
@@ -441,6 +437,170 @@ public class TopicRequestService : BaseService<TopicRequest>, ITopicRequestServi
         catch (Exception ex)
         {
             var errorMessage = $"An error {typeof(TopicRequestResult).Name}: {ex.Message}";
+            return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage(errorMessage);
+        }
+    }
+
+    public async Task<BusinessResult> SendRequestToSubMentorByMentor(TopicRequestForSubMentorCommand command)
+    {
+        try
+        {
+            //semester is preparing
+            var semester = await GetSemesterInCurrentWorkSpace();
+            if (semester == null)
+            {
+                return HandlerFail("Không tìm thấy kì");
+            }
+
+            if (semester.Status != SemesterStatus.Preparing)
+            {
+                return HandlerFail("Hiện tại không được gửi yêu cầu");
+            }
+
+            // check topic
+            var topic = await _topicRepository.GetById(command.TopicId);
+            if (topic == null)
+            {
+                return HandlerFail("Không tìm thấy đề tài");
+            }
+
+            //check topic co submentor chuaw
+            if (topic.SubMentorId != null)
+            {
+                return HandlerFail("Đề tài đã có Mentor 2");
+            }
+
+            //check co role mentor trong ki nay k
+            var submentor = await _userRepository.GetById(command.ReviewerId);
+            if (submentor == null)
+            {
+                return HandlerFail("Không tìm thấy người dùng");
+            }
+
+            var isMentor = await _userRepository.CheckRoleOfUserInSemester(submentor.Id, "Mentor", semester.Id);
+            if (!isMentor)
+            {
+                return HandlerFail("Người dùng không phải là Mentor ở kì học này");
+            }
+
+            //check con slot lam submentor k
+            var topicBeSubMentor = await _topicRepository.GetTopicsBeSubMentorOfUserInSemester(submentor.Id, semester.Id);
+            if (topicBeSubMentor.Count() == semester.LimitTopicSubMentor)
+            {
+                return HandlerFail("Mentor này đã làm Mentor 2 đủ số lượng nhóm quy định của kì: " + topicBeSubMentor.Count());
+            }
+
+            var topicRequest = new TopicRequest
+            {
+                TopicId = command.TopicId,
+                ReviewerId = command.ReviewerId,
+                Role = "SubMentor",
+                Status = TopicRequestStatus.Pending
+            };
+
+            await SetBaseEntityForCreation(topicRequest);
+            _topicRequestRepository.Add(topicRequest);
+            var isSuccess = await _unitOfWork.SaveChanges();
+            if (!isSuccess)
+            {
+                return HandlerFail("Đã xảy ra lỗi khi gửi yêu cầu");
+            }
+
+            //noti cho mentor - người gửi
+            var user = await GetUserAsync();
+
+            var noti = new NotificationCreateForIndividual
+            {
+                UserId = topicRequest.ReviewerId,
+                Description = user?.Code + " đã gửi lời mời làm Mentor 2 cho đề tài " + topic.Abbreviation + " đến bạn"
+            };
+            await _notificationService.CreateForIndividual(noti);
+
+            return new ResponseBuilder()
+                .WithStatus(Const.SUCCESS_CODE)
+                .WithMessage("Gửi yêu cầu thành công");
+        }
+        catch (Exception ex)
+        {
+            var errorMessage = $"An error occurred in {typeof(TopicResult).Name}: {ex.Message}";
+            return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage(errorMessage);
+        }
+    }
+
+    public async Task<BusinessResult> SubMentorResponseRequestOfMentor(TopicRequestForRespondCommand command)
+    {
+        try
+        {
+            // check topic request
+            var topicRequest = await _topicRequestRepository.GetById(command.Id);
+            if (topicRequest == null)
+            {
+                return HandlerFail("Không tìm thấy yêu cầu");
+            }
+
+            //semester is preparing
+            var semester = await GetSemesterInCurrentWorkSpace();
+            if (semester == null)
+            {
+                return HandlerFail("Không tìm thấy kì");
+            }
+
+            if (semester.Status != SemesterStatus.Preparing)
+            {
+                return HandlerFail("Hiện tại không được phản hồi");
+            }
+
+            var user = await GetUserAsync();
+
+            var topic = await _topicRepository.GetById(topicRequest.TopicId);
+            if (topic == null)
+            {
+                return HandlerFail("Không tìm thấy đề tài");
+            }
+            //neu approve -> them submentor vao topic
+            if (command.Status == TopicRequestStatus.Approved)
+            {
+                //check con slot lam submentor k
+                var topicBeSubMentor = await _topicRepository.GetTopicsBeSubMentorOfUserInSemester(user.Id, semester.Id);
+                if (topicBeSubMentor.Count() == semester.LimitTopicSubMentor)
+                {
+                    return HandlerFail("Bạn đã làm Mentor 2 đủ số lượng nhóm quy định của kì: " + topicBeSubMentor.Count());
+                }
+
+                topic.SubMentorId = user.Id;
+                await SetBaseEntityForUpdate(topic);
+                _topicRepository.Update(topic);
+            }
+
+            topicRequest.Status = command.Status;
+            await SetBaseEntityForUpdate(topicRequest);
+            _topicRequestRepository.Update(topicRequest);
+
+            var isSuccess = await _unitOfWork.SaveChanges();
+            if (!isSuccess)
+            {
+                return HandlerFail("Đã xảy ra lỗi khi phản hồi");
+            }
+
+            //noti cho mentor - người gửi
+            var noti = new NotificationCreateForIndividual
+            {
+                UserId = topic.MentorId,
+                Description = user?.Code + " đã phản hồi lời mời làm Mentor 2 cho đề tài " + topic.Abbreviation + " của bạn"
+            };
+            await _notificationService.CreateForIndividual(noti);
+
+            return new ResponseBuilder()
+                .WithStatus(Const.SUCCESS_CODE)
+                .WithMessage("Phản hồi thành công");
+        }
+        catch (Exception ex)
+        {
+            var errorMessage = $"An error occurred in {typeof(TopicResult).Name}: {ex.Message}";
             return new ResponseBuilder()
                 .WithStatus(Const.FAIL_CODE)
                 .WithMessage(errorMessage);

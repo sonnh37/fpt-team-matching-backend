@@ -109,7 +109,6 @@ public class MappingProfile : Profile
         CreateMap<TeamMember, TeamMemberResult>().ReverseMap();
         CreateMap<TeamMember, TeamMemberCreateCommand>().ReverseMap();
         CreateMap<TeamMember, TeamMemberUpdateCommand>().ReverseMap();
-
         #endregion
 
         #region Topic
@@ -120,6 +119,7 @@ public class MappingProfile : Profile
         CreateMap<Topic, TopicResubmitForMentorByStudentCommand>().ReverseMap();
         CreateMap<Topic, TopicLecturerCreatePendingCommand>().ReverseMap();
         CreateMap<Topic, TopicUpdateCommand>().ReverseMap();
+        CreateMap<Topic, TopicCreateOrUpdateDraft>().ReverseMap();
 
         #endregion
 
@@ -138,7 +138,7 @@ public class MappingProfile : Profile
         CreateMap<TopicRequest, TopicRequestResult>().ReverseMap();
         CreateMap<TopicRequest, TopicRequestCreateCommand>().ReverseMap();
         CreateMap<TopicRequest, TopicRequestUpdateCommand>().ReverseMap();
-        CreateMap<TopicRequest, TopicRequestMentorOrManagerResponseCommand>().ReverseMap();
+        CreateMap<TopicRequest, TopicRequestForRespondCommand>().ReverseMap();
 
         #endregion
 
