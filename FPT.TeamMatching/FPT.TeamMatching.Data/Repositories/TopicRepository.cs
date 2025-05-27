@@ -392,21 +392,18 @@ public class TopicRepository : BaseRepository<Topic>, ITopicRepository
         return result;
     }
 
-    public List<Topic>? GetTopicsBeSubMentorOfUserInSemester(Guid subMentorId, Guid semesterId)
+    public async Task<List<Topic>> GetTopicsBeSubMentorOfUserInSemester(Guid subMentorId, Guid semesterId)
     {
         var queryable = GetQueryable();
 
-        var ideas = queryable.Where(e => e.IsDeleted == false &&
+        var topics = await queryable.Where(e => e.IsDeleted == false &&
                                          e.SubMentorId == subMentorId &&
-                                         e.Status != TopicStatus.ManagerRejected)
-            .Where(i => i.TopicVersions != null &&
-                        i.TopicVersions.OrderByDescending(iv => iv.CreatedDate).FirstOrDefault() != null);
+                                         e.Status != TopicStatus.ManagerRejected &&
+                                         e.Status != TopicStatus.MentorRejected &&
+                                        e.SemesterId == semesterId)
+                               .ToListAsync();
 
-        var result = ideas.Where(e => e.StageTopic != null &&
-                                      e.StageTopic.SemesterId == semesterId)
-            .ToList();
-
-        return result;
+        return topics;
     }
 
     public async Task<Topic?> GetTopicNotRejectOfUserInSemester(Guid userId, Guid semesterId)

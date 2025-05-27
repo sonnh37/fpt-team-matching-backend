@@ -188,4 +188,17 @@ public class TopicRequestRepository : BaseRepository<TopicRequest>, ITopicReques
     {
         throw new NotImplementedException();
     }
+
+    public async Task<List<TopicRequest>> GetByTopicIdAndRoleAndStatus(Guid topicId, string role, TopicRequestStatus status)
+    {
+        var queryable = GetQueryable();
+
+        var topicRequests = await queryable.Where(e => e.IsDeleted == false &&
+                                                       e.TopicId == topicId &&
+                                                       e.Role == role &&
+                                                       e.Status == status)
+                                            .ToListAsync();
+
+        return topicRequests;
+    }
 }

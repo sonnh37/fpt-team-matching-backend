@@ -135,8 +135,7 @@ public class UserService : BaseService<User>, IUserService
                 return HandlerFail("Người dùng không phải là Mentor");
             }
 
-            var topicsBeSubMentor =
-                _topicRepository.GetTopicsBeSubMentorOfUserInSemester((Guid)subMentorId, semester.Id);
+            var topicsBeSubMentor = await _topicRepository.GetTopicsBeSubMentorOfUserInSemester((Guid)subMentorId, semester.Id);
             if (topicsBeSubMentor == null || topicsBeSubMentor.Count() < semester.LimitTopicSubMentor)
             {
                 return new ResponseBuilder()
