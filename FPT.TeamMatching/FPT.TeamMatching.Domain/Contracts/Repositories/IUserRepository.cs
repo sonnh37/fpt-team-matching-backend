@@ -11,7 +11,7 @@ public interface IUserRepository : IBaseRepository<User>
     Task<(List<User>, int)> GetData(UserGetAllQuery query);
 
     Task<User?> GetUserByUsernameOrEmail(string? key);
-    Task<(List<User>, int)> GetStudentsNoTeam(UserGetAllQuery query, Guid projectId);
+    Task<(List<User>, int)> GetStudentsNoTeam(UserGetAllQuery query, Guid projectId, Guid semesterId);
     Task<User?> GetByEmail(string keyword);
     Task<User?> GetByUsername(string username);
     Task<List<PartnerInfoResult>> GetAllUsersWithNameOnly();

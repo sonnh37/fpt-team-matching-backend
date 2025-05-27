@@ -305,7 +305,7 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
     {
         var project = await _context.Projects.Where(e => e.IsDeleted == false &&
                                                          e.LeaderId == leaderId &&
-                                                         e.Status == ProjectStatus.Pending)
+                                                         (e.Status == ProjectStatus.Pending || e.Status == ProjectStatus.Forming))
             .FirstOrDefaultAsync();
         return project;
     }

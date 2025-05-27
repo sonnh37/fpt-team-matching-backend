@@ -69,14 +69,14 @@ public class UserRepository : BaseRepository<User>, IUserRepository
     //    return (results, query.IsPagination ? total : results.Count);
     //}
 
-    public async Task<(List<User>, int)> GetStudentsNoTeam(UserGetAllQuery query, Guid projectId)
+    public async Task<(List<User>, int)> GetStudentsNoTeam(UserGetAllQuery query, Guid projectId, Guid semesterId)
     {
         var queryable = GetQueryable();
-        var semester = await _semesterRepository.GetUpComingSemester();
-        if (semester == null)
-        {
-            return (new List<User>(), 0);
-        }
+        // var semester = await _semesterRepository.GetUpComingSemester();
+        // if (semester == null)
+        // {
+        //     return (new List<User>(), 0);
+        // }
 
         queryable = queryable.Include(m => m.UserXRoles).ThenInclude(m => m.Role)
             .Include(m => m.TeamMembers).ThenInclude(m => m.Project)
@@ -86,7 +86,7 @@ public class UserRepository : BaseRepository<User>, IUserRepository
             !m.InvitationOfReceivers.Any(ior =>
                 (ior.ProjectId == projectId && (ior.Status == InvitationStatus.Pending))) &&
             m.UserXRoles.Any(uxr =>
-                uxr.Role != null && uxr.Role.RoleName == "Student" && uxr.SemesterId == semester.Id) &&
+                uxr.Role != null && uxr.Role.RoleName == "Student" && uxr.SemesterId == semesterId) &&
             (!m.TeamMembers.Any() ||
              !m.TeamMembers.Any(tm =>
                  (tm.Project != null && (tm.Project.Status == ProjectStatus.Pending ||
