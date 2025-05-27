@@ -103,7 +103,8 @@ public class AuthService : IAuthService
                 .WithMessage("Email không tìm thấy.");
 
         var hasRole = user.UserXRoles.Any(m => ((m.SemesterId != null)));
-        if (!hasRole)
+        var isStudent = user.UserXRoles.Any(m => m.Role != null && ((m.Role.RoleName == "Student")));
+        if (!hasRole && isStudent)
         {
             return new ResponseBuilder()
                 .WithStatus(Const.FAIL_CODE)

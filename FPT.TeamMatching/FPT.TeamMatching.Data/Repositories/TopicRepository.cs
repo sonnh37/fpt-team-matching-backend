@@ -59,9 +59,9 @@ public class TopicRepository : BaseRepository<Topic>, ITopicRepository
         {
             // Tạo bản sao để không ảnh hưởng list gốc
             var newStatusList = new List<TopicStatus>(statusList);
-    
+
             // Nếu có Approved hoặc Rejected trong yêu cầu
-            if (statusList.Contains(TopicStatus.ManagerApproved) || 
+            if (statusList.Contains(TopicStatus.ManagerApproved) ||
                 statusList.Contains(TopicStatus.ManagerRejected))
             {
                 // Thêm Pending nếu chưa có
@@ -70,20 +70,21 @@ public class TopicRepository : BaseRepository<Topic>, ITopicRepository
                     newStatusList.Add(TopicStatus.ManagerPending);
                 }
             }
-    
+
             // Nếu có Pending trong yêu cầu
             if (statusList.Contains(TopicStatus.ManagerPending))
             {
                 // Thêm cả Approved và Rejected nếu chưa có
                 if (!newStatusList.Contains(TopicStatus.ManagerApproved))
                     newStatusList.Add(TopicStatus.ManagerApproved);
-            
+
                 if (!newStatusList.Contains(TopicStatus.ManagerRejected))
                     newStatusList.Add(TopicStatus.ManagerRejected);
             }
-    
+
             statusList = newStatusList;
         }
+
         var ideas = await queryable
             .Where(e => e.OwnerId == userId
                         && e.SemesterId == semesterId
@@ -98,7 +99,7 @@ public class TopicRepository : BaseRepository<Topic>, ITopicRepository
             .Include(m => m.SubMentor)
             .Include(m => m.Specialty).ThenInclude(m => m.Profession)
             .Include(m => m.Project)
-            .AsSplitQuery() 
+            .AsSplitQuery()
             .ToListAsync();
 
         if (resultDate.HasValue && currentDate < resultDate.Value)
@@ -466,7 +467,11 @@ public class TopicRepository : BaseRepository<Topic>, ITopicRepository
             .Include(m => m.MentorTopicRequests)
             .Include(m => m.TopicVersions);
 
-        // queryable = queryable.Where(m => m.Status != TopicStatus.ManagerRejected);
+        if (query.Statuses.Count > 0)
+        {
+            queryable = queryable.Where(m => m.Status != null &&
+                                             (query.Statuses.Contains(m.Status.Value)));
+        }
 
         queryable = queryable.Where(m => m.SemesterId == semesterId);
 
