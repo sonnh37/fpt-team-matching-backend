@@ -187,6 +187,7 @@ public static class IncludeHelper
             .Include(p => p.Topic)
             .ThenInclude(t => t.Owner)
             .Include(x => x.Reviews)
+            .Include(x => x.Leader)
             .Include(x => x.MentorFeedback)
             .Include(x => x.Semester);
 
