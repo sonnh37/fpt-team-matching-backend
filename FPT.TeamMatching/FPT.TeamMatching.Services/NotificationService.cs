@@ -512,7 +512,7 @@ public class NotificationService : BaseService<Notification>, INotificationServi
             {
                 listNotiMembers.Add(new NotificationXUser
                 {
-                    UserId = teamMember.Id,
+                    UserId = teamMember.UserId,
                     NotificationId = noti.Id,
                     IsRead = false
                 });
