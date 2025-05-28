@@ -597,14 +597,6 @@ public class UserService : BaseService<User>, IUserService
                     .WithMessage("Tài khoản này đã tồn tại. Bạn có muốn cập nhật lại tài khoản này không ?");
             }
 
-            // var upComingSemester = await _unitOfWork.SemesterRepository.GetUpComingSemester();
-            // if (upComingSemester == null)
-            // {
-            //     return new ResponseBuilder()
-            //         .WithStatus(Const.FAIL_CODE)
-            //         .WithMessage("No upcoming semester!");
-            // }
-            
             var semester = await _unitOfWork.SemesterRepository.GetById(command.SemesterId);
             if (semester == null)
             {

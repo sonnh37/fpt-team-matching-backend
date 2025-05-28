@@ -49,5 +49,13 @@ namespace FPT.TeamMatching.Data.Repositories
                 .Include(e => e.Semester)
                 .FirstOrDefaultAsync();
         }
+
+        public async Task<List<StageTopic>> GetStageTopicsOfSemester(Guid semesterId)
+        {
+            return await GetQueryable()
+                .Where(e => e.IsDeleted == false &&
+                            e.SemesterId == semesterId)
+                .ToListAsync();
+        }
     }
 }
