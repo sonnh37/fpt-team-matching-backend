@@ -58,10 +58,9 @@ public class TeamMemberService : BaseService<TeamMember>, ITeamMemberService
         try
         {
             var userId = GetUserIdFromClaims();
-            var semester = await GetSemesterInCurrentWorkSpace();
             if (userId == null) return HandlerFail("Không tìm thấy người dùng");
-            var teamMemberCurrentUser =
-                await _teamMemberRepository.GetTeamMemberActiveByUserId(userId.Value, semester?.Id);
+            var semesterWs = await GetSemesterInCurrentWorkSpace();
+            var teamMemberCurrentUser = await _teamMemberRepository.GetTeamMemberActiveByUserId(userId.Value, semesterWs.Id);
             if (teamMemberCurrentUser == null) return HandlerFail("Người dùng chưa có nhóm");
 
             teamMemberCurrentUser.LeaveDate = DateTime.UtcNow;
@@ -252,6 +251,7 @@ public class TeamMemberService : BaseService<TeamMember>, ITeamMemberService
         }
     }
 
+   
 
     public async Task<BusinessResult> UpdateTeamMemberByMentor(List<MentorUpdate> requests)
     {

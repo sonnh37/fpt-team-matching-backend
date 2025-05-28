@@ -1,5 +1,6 @@
 ﻿using FPT.TeamMatching.Domain.Contracts.Repositories.Bases;
 using FPT.TeamMatching.Domain.Entities;
+using FPT.TeamMatching.Domain.Enums;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Projects;
 
 namespace FPT.TeamMatching.Domain.Contracts.Repositories;
@@ -26,7 +27,7 @@ public interface IProjectRepository : IBaseRepository<Project>
 
     Task<Project?> GetProjectInSemesterCurrentByUserIdLogin(Guid userId);
     
-    Task<(List<Project>, int)> SearchProjects(ProjectSearchQuery query);
+    Task<(List<Project>, int)> SearchProjects(ProjectSearchQuery query, Guid semesterId);
 
     Task<List<Project>?> GetPendingProjectsWithNoTopicStartingBySemesterId(Guid semesterId);
 
@@ -37,4 +38,6 @@ public interface IProjectRepository : IBaseRepository<Project>
     Task<List<Project>> GetProjectNotInProgressYetInSemester(Guid semesterId);
     Task<List<Project>> GetProjectNotCanceledInSemester(Guid semesterId);
     Task<Project> GetByIdAsNoTracking(Guid projectId);
+
+    Task<Project?> GetProjectWithStatusByLeaderId(Guid leaderId, List<ProjectStatus> listStatus);
 }

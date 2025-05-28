@@ -11,6 +11,7 @@ using FPT.TeamMatching.Domain.Utilities;
 using FPT.TeamMatching.Services.Bases;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Notifications;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.MentorTopicRequests;
+using DocumentFormat.OpenXml.Drawing;
 
 namespace FPT.TeamMatching.Services
 {
@@ -45,9 +46,14 @@ namespace FPT.TeamMatching.Services
                 var projectOfUserCurrent = await _projectRepository.GetProjectByUserIdLogin(userId.Value);
                 if (projectOfUserCurrent == null) return HandlerFail("Vui lòng tạo nhóm trước khi gửi yêu cầu");
 
-                var hasUserSentRequest =
-                    projectOfUserCurrent.MentorTopicRequests.Any(m =>
-                        m.ProjectId == projectOfUserCurrent.Id && m.Status != MentorTopicRequestStatus.Rejected);
+                //check co nhom
+                var teamMember = await _teamMemberRepository.GetPendingTeamMemberOfUser((Guid)userId);
+                if (teamMember.Role != TeamMemberRole.Leader) return HandlerFail("Chỉ nhóm trưởng được xin đề tài");
+                var project = await _projectRepository.GetProjectWithStatusByLeaderId((Guid)teamMember.UserId, [ProjectStatus.Pending, ProjectStatus.Forming, ProjectStatus.InProgress]);
+                if (project == null) return HandlerFail("Cần có nhóm trước khi xin đề tài");
+                if (project.TopicId != null) return HandlerFail("Nhóm bạn đã có đề tài");
+
+                var hasUserSentRequest = projectOfUserCurrent.MentorTopicRequests.Any(m => m.ProjectId == projectOfUserCurrent.Id && m.Status != MentorTopicRequestStatus.Rejected);
                 if (hasUserSentRequest) return HandlerFail("Bạn đã gửi yêu cầu cho đề tài này");
 
                 var topic = await _unitOfWork.TopicRepository.GetById(request.TopicId, true);
@@ -57,19 +63,6 @@ namespace FPT.TeamMatching.Services
                         .WithStatus(Const.NOT_FOUND_CODE)
                         .WithMessage("Không tìm thấy đề tài");
                 }
-
-                //check project exist
-
-                //check team size so voi topic team size
-                var teammembers = await _teamMemberRepository.GetMembersOfTeamByProjectId(projectOfUserCurrent.Id);
-                var abbre = topic.Abbreviation;   
-                //if (teammembers != null && teammembers.Count != teamSize)
-                //{
-                //    return new ResponseBuilder()
-                //        .WithStatus(Const.FAIL_CODE)
-                //        .WithMessage("Đề tài " + abbre + " yêu cầu nhóm có " + teamSize +
-                //                     " thành viên. Nhóm hiện tại chưa đáp ứng điều kiện này.");
-                //}
 
                 var entity = new MentorTopicRequest
                 {
@@ -275,7 +268,7 @@ namespace FPT.TeamMatching.Services
 
                     return new ResponseBuilder()
                         .WithStatus(Const.SUCCESS_CODE)
-                        .WithMessage(Const.SUCCESS_SAVE_MSG);
+                        .WithMessage("Đã phản hồi thành công");
                 }
 
                 return new ResponseBuilder()

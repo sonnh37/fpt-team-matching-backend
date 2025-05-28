@@ -8,6 +8,7 @@ using FPT.TeamMatching.Domain.Models.Requests.Queries.Projects;
 using FPT.TeamMatching.Domain.Utilities.Filters;
 using Microsoft.EntityFrameworkCore;
 using MongoDB.Driver.Linq;
+using System.Linq;
 
 namespace FPT.TeamMatching.Data.Repositories;
 
@@ -172,10 +173,10 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
     
     
 
-    public async Task<(List<Project>, int)> SearchProjects(ProjectSearchQuery query)
+    public async Task<(List<Project>, int)> SearchProjects(ProjectSearchQuery query, Guid semesterId)
     {
         var queryable = GetQueryable();
-        var semesterCurrent = await _semesterRepository.GetCurrentSemester();
+        // var semesterCurrent = await _semesterRepository.GetCurrentSemester();
         queryable = queryable.Include(e => e.TeamMembers)
             .ThenInclude(e => e.User)
             .ThenInclude(e => e.ProfileStudent)
@@ -191,34 +192,36 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
 
         if (query.IsHasTeam)
         {
-            queryable = queryable.Where(m => m.TeamMembers.Count > 0 && m.TopicId != null);
+            queryable = queryable.Where(m => m.TeamMembers.Count > 0 
+                                             // && m.TopicId != null
+                                                );
         }
 
-        if (query.SpecialtyId != null)
-        {
-            queryable = queryable.Where(m =>
-                m.Topic != null &&
-                m.Topic.SpecialtyId == query.SpecialtyId);
-        }
+        // if (query.SpecialtyId != null)
+        // {
+        //     queryable = queryable.Where(m =>
+        //         m.Topic != null &&
+        //         m.Topic.SpecialtyId == query.SpecialtyId);
+        // }
 
-        if (query.ProfessionId != null)
-        {
-            queryable = queryable.Where(m =>
-                m.Topic != null &&
-                m.Topic.Specialty != null &&
-                m.Topic.Specialty.ProfessionId == query.ProfessionId);
-        }
+        // if (query.ProfessionId != null)
+        // {
+        //     queryable = queryable.Where(m =>
+        //         m.Topic != null &&
+        //         m.Topic.Specialty != null &&
+        //         m.Topic.Specialty.ProfessionId == query.ProfessionId);
+        // }
 
-        if (!string.IsNullOrEmpty(query.EnglishName))
-        {
-            queryable = queryable.Where(m =>
-                m.Topic != null &&
-                m.Topic.EnglishName != null &&
-                m.Topic.EnglishName.ToLower().Trim()
-                    .Contains(query.EnglishName.ToLower().Trim()));
-        }
+        // if (!string.IsNullOrEmpty(query.EnglishName))
+        // {
+        //     queryable = queryable.Where(m =>
+        //         m.Topic != null &&
+        //         m.Topic.EnglishName != null &&
+        //         m.Topic.EnglishName.ToLower().Trim()
+        //             .Contains(query.EnglishName.ToLower().Trim()));
+        // }
 
-        queryable = semesterCurrent != null
+        queryable = semesterId != null
             ? queryable.Where(m => m.Status != ProjectStatus.Canceled && m.Status != ProjectStatus.Pending)
             : queryable.Where(m => m.Status == ProjectStatus.Pending);
 
@@ -496,5 +499,14 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
     {
         var result = await _context.Projects.AsNoTracking().FirstOrDefaultAsync(x => x.Id == projectId);
         return result;
+    }
+
+    public async Task<Project?> GetProjectWithStatusByLeaderId(Guid leaderId, List<ProjectStatus> listStatus)
+    {
+        var project = await _context.Projects.Where(e => e.IsDeleted == false &&
+                                                         e.LeaderId == leaderId &&
+                                                         listStatus.Contains((ProjectStatus)e.Status))
+                                             .FirstOrDefaultAsync();
+        return project;
     }
 }
