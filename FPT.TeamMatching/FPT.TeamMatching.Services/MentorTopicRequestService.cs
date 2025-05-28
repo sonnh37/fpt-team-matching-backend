@@ -268,7 +268,7 @@ namespace FPT.TeamMatching.Services
 
                     return new ResponseBuilder()
                         .WithStatus(Const.SUCCESS_CODE)
-                        .WithMessage(Const.SUCCESS_SAVE_MSG);
+                        .WithMessage("Đã phản hồi thành công");
                 }
 
                 return new ResponseBuilder()
