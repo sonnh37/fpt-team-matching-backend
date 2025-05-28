@@ -58,7 +58,8 @@ public class TeamMemberService : BaseService<TeamMember>, ITeamMemberService
         {
             var userId = GetUserIdFromClaims();
             if (userId == null) return HandlerFail("Không tìm thấy người dùng");
-            var teamMemberCurrentUser = await _teamMemberRepository.GetTeamMemberActiveByUserId(userId.Value);
+            var semesterWs = await GetSemesterInCurrentWorkSpace();
+            var teamMemberCurrentUser = await _teamMemberRepository.GetTeamMemberActiveByUserId(userId.Value, semesterWs.Id);
             if (teamMemberCurrentUser == null) return HandlerFail("Người dùng chưa có nhóm");
 
             teamMemberCurrentUser.LeaveDate = DateTime.UtcNow;

@@ -19,14 +19,16 @@ public class TeamMemberRepository : BaseRepository<TeamMember>, ITeamMemberRepos
     }
 
     // Get teammber mà user đang active
-    public async Task<TeamMember?> GetTeamMemberActiveByUserId(Guid userId)
+    public async Task<TeamMember?> GetTeamMemberActiveByUserId(Guid userId, Guid semesterId)
     {
-        var semester = await _semesterRepository.GetUpComingSemester();
-        if (semester == null) return null;
-        var queryable = GetQueryable(m =>
-            m.UserId == userId && m.IsDeleted == false && m.Project != null && m.Project.Leader != null &&
-            m.Project.Leader.UserXRoles.Any(m => m.SemesterId == semester.Id));
-        return await queryable.SingleOrDefaultAsync();
+        // var semester = await _semesterRepository.GetUpComingSemester();
+        // if (semester == null) return null;
+        // var queryable = GetQueryable(m =>
+        //     m.UserId == userId && m.IsDeleted == false && m.Project != null && m.Project.Leader != null &&
+        //     m.Project.Leader.UserXRoles.Any(m => m.SemesterId == semesterId));
+        
+        var dbContext = await _dbContext.TeamMembers.FirstOrDefaultAsync(x => x.UserId == userId && x.IsDeleted == false && x.Project != null && x.Project.Leader != null && x.Project.Leader.UserXRoles.Any(y => y.SemesterId == semesterId));
+        return dbContext;
     }
 
     public async Task<List<TeamMember>> GetTeamMemberByUserId(Guid userId)
