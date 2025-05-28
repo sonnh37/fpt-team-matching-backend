@@ -274,6 +274,7 @@ namespace FPT.TeamMatching.Services
                 }
 
                 var semester = _mapper.Map<Semester>(command);
+                semester.Status = SemesterStatus.NotStarted;
                 await SetBaseEntityForCreation(semester);
                 _semesterRepository.Add(semester);
                 var isSuccess = await _unitOfWork.SaveChanges();
