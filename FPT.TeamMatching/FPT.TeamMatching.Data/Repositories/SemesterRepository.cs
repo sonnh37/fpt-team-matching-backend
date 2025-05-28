@@ -22,7 +22,7 @@ namespace FPT.TeamMatching.Data.Repositories
         {
             var now = new DateOnly(DateTime.UtcNow.Year, DateTime.UtcNow.Month, DateTime.UtcNow.Day);
 
-            // Lấy kì học gần nhất đã kết thúc trước ngày hiện tại
+            // Lấy học kỳ gần nhất đã kết thúc trước ngày hiện tại
             return await GetQueryable()
                 .Where(e => DateOnly.FromDateTime(e.EndDate.Value.DateTime) < now)
                 .OrderByDescending(e => e.EndDate)

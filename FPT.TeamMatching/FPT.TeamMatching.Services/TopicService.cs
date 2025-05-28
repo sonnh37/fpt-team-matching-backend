@@ -1204,14 +1204,14 @@ public class TopicService : BaseService<Topic>, ITopicService
                 var notiSystemForStudent = new NotificationCreateForRoleBased
                 {
                     Description =
-                        "Hôm nay là ngày bắt đầu kì học. Tất cả đề tài chưa duyệt và nhóm thiếu thành viên đã bị tự động hủy. Vui lòng kiểm tra!",
+                        "Hôm nay là ngày bắt đầu học kỳ. Tất cả đề tài chưa duyệt và nhóm thiếu thành viên đã bị tự động hủy. Vui lòng kiểm tra!",
                     Role = "Student"
                 };
                 await _notificationService.CreateForRoleBased(notiSystemForStudent);
                 var notiSystemForLecturer = new NotificationCreateForRoleBased
                 {
                     Description =
-                        "Hôm nay là ngày bắt đầu kì học. Tất cả đề tài chưa duyệt và nhóm thiếu thành viên đã bị tự động hủy. Vui lòng kiểm tra!",
+                        "Hôm nay là ngày bắt đầu học kỳ. Tất cả đề tài chưa duyệt và nhóm thiếu thành viên đã bị tự động hủy. Vui lòng kiểm tra!",
                     Role = "Lecturer"
                 };
                 await _notificationService.CreateForRoleBased(notiSystemForLecturer);
@@ -1293,7 +1293,7 @@ public class TopicService : BaseService<Topic>, ITopicService
         }
     }
 
-    public async Task<BusinessResult> CreateDraft(TopicCreateOrUpdateDraft command)
+    public async Task<BusinessResult> CreateDraft(TopicCreateDraftCommand command)
     {
         try
         {
@@ -1394,7 +1394,7 @@ public class TopicService : BaseService<Topic>, ITopicService
         }
     }
 
-    public async Task<BusinessResult> UpdateDraft(TopicCreateOrUpdateDraft command)
+    public async Task<BusinessResult> UpdateDraft(TopicUpdateDraftCommand command)
     {
         try
         {

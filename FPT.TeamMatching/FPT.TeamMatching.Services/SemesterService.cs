@@ -4,6 +4,7 @@ using FPT.TeamMatching.Domain.Contracts.Services;
 using FPT.TeamMatching.Domain.Contracts.UnitOfWorks;
 using FPT.TeamMatching.Domain.Entities;
 using FPT.TeamMatching.Domain.Enums;
+using FPT.TeamMatching.Domain.Models.Requests.Commands.Semester;
 using FPT.TeamMatching.Domain.Models.Responses;
 using FPT.TeamMatching.Domain.Models.Results;
 using FPT.TeamMatching.Domain.Utilities;
@@ -237,11 +238,118 @@ namespace FPT.TeamMatching.Services
             {
                 return new ResponseBuilder()
                     .WithStatus(Const.FAIL_CODE)
-                    .WithMessage("Đã xảy ra lỗi khi cập nhật học kì");
+                    .WithMessage("Đã xảy ra lỗi khi cập nhật học kỳ");
             }
             return new ResponseBuilder()
                     .WithStatus(Const.SUCCESS_CODE)
-                    .WithMessage("Chuyển trạng thái học kì sang " + status.ToString() + " thành công");
+                    .WithMessage("Chuyển trạng thái học kỳ sang " + status.ToString() + " thành công");
+        }
+
+        public async Task<BusinessResult> Create(SemesterCreateCommand command)
+        {
+            try
+            {
+                //check public topic date sau start date 
+                if (command.PublicTopicDate <= command.StartDate)
+                {
+                    return HandlerFail("Ngày công bố đề tài phải sau ngày bắt đầu học kỳ");
+                }
+
+                //check ongoing date sau public topic date 
+                if (command.OnGoingDate <= command.PublicTopicDate)
+                {
+                    return HandlerFail("Ngày khóa nhóm phải sau ngày công bố đề tài");
+                }
+
+                //check end date sau ongoing date
+                if (command.EndDate <= command.OnGoingDate)
+                {
+                    return HandlerFail("Ngày kết thúc học kỳ phải sau ngày khóa nhóm");
+                }
+
+                //check max team size > min team size
+                if (command.MaxTeamSize <= command.MinTeamSize)
+                {
+                    return HandlerFail("Kích thước nhóm tối đa phải lớn hơn kích thước nhóm tối thiểu");
+                }
+
+                var semester = _mapper.Map<Semester>(command);
+                await SetBaseEntityForCreation(semester);
+                _semesterRepository.Add(semester);
+                var isSuccess = await _unitOfWork.SaveChanges();
+                if (!isSuccess)
+                {
+                    return HandlerFail("Đã xảy ra lỗi khi tạo học kỳ");
+                }
+                
+                return new ResponseBuilder()
+                    .WithStatus(Const.SUCCESS_CODE)
+                    .WithMessage("Tạo học kỳ thành công");
+            }
+            catch (Exception ex)
+            {
+                var errorMessage = $"An error {typeof(SemesterResult).Name}: {ex.Message}";
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage(errorMessage);
+            }
+        }
+
+        public async Task<BusinessResult> Update(SemesterUpdateCommand command)
+        {
+            try
+            {
+                //get semester
+                var semester = await _semesterRepository.GetById(command.Id);
+                if (semester == null)
+                {
+                    return HandlerFail("Không tìm thấy học kỳ");
+                }
+
+                //check public topic date sau start date 
+                if (command.PublicTopicDate <= command.StartDate)
+                {
+                    return HandlerFail("Ngày công bố đề tài phải sau ngày bắt đầu học kỳ");
+                }
+
+                //check ongoing date sau public topic date 
+                if (command.OnGoingDate <= command.PublicTopicDate)
+                {
+                    return HandlerFail("Ngày khóa nhóm phải sau ngày công bố đề tài");
+                }
+
+                //check end date sau ongoing date
+                if (command.EndDate <= command.OnGoingDate)
+                {
+                    return HandlerFail("Ngày kết thúc học kỳ phải sau ngày khóa nhóm");
+                }
+
+                //check max team size > min team size
+                if (command.MaxTeamSize <= command.MinTeamSize)
+                {
+                    return HandlerFail("Kích thước nhóm tối đa phải lớn hơn kích thước nhóm tối thiểu");
+                }
+
+                semester = _mapper.Map<Semester>(command);
+                await SetBaseEntityForUpdate(semester);
+                _semesterRepository.Update(semester);
+                var isSuccess = await _unitOfWork.SaveChanges();
+                if (!isSuccess)
+                {
+                    return HandlerFail("Đã xảy ra lỗi khi cập nhật học kỳ");
+                }
+
+                return new ResponseBuilder()
+                    .WithStatus(Const.SUCCESS_CODE)
+                    .WithMessage("Cập nhật học kỳ thành công");
+            }
+            catch (Exception ex)
+            {
+                var errorMessage = $"An error {typeof(SemesterResult).Name}: {ex.Message}";
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage(errorMessage);
+            }
         }
     }
 }

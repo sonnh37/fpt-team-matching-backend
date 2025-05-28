@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using FPT.TeamMatching.Domain.Models.Results.Bases;
 using FPT.TeamMatching.Domain.Enums;
+using FPT.TeamMatching.Domain.Models.Requests.Commands.Semester;
 
 namespace FPT.TeamMatching.Domain.Contracts.Services
 {
@@ -19,5 +20,8 @@ namespace FPT.TeamMatching.Domain.Contracts.Services
         Task<BusinessResult> GetBeforeSemester();
         Task<BusinessResult> GetUpComingSemester();
         Task<BusinessResult> UpdateStatus(SemesterStatus status);
+
+        Task<BusinessResult> Create(SemesterCreateCommand command);
+        Task<BusinessResult> Update(SemesterUpdateCommand command);
     }
 }

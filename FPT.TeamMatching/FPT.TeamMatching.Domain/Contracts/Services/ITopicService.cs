@@ -38,8 +38,8 @@ namespace FPT.TeamMatching.Domain.Contracts.Services
 
         Task<BusinessResult> GetApprovedTopicsDoNotHaveTeam();
 
-        Task<BusinessResult> CreateDraft(TopicCreateOrUpdateDraft command);
-        Task<BusinessResult> UpdateDraft(TopicCreateOrUpdateDraft command);
+        Task<BusinessResult> CreateDraft(TopicCreateDraftCommand command);
+        Task<BusinessResult> UpdateDraft(TopicUpdateDraftCommand command);
 
     }
 }

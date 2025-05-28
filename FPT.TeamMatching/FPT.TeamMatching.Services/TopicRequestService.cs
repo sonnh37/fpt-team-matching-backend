@@ -482,7 +482,7 @@ public class TopicRequestService : BaseService<TopicRequest>, ITopicRequestServi
             var isMentor = await _userRepository.CheckRoleOfUserInSemester(submentor.Id, "Mentor", semester.Id);
             if (!isMentor)
             {
-                return HandlerFail("Người dùng không phải là Mentor ở kì học này");
+                return HandlerFail("Người dùng không phải là Mentor ở học kỳ này");
             }
 
             //check con slot lam submentor k

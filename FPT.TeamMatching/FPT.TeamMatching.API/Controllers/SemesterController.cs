@@ -75,48 +75,55 @@ namespace FPT.TeamMatching.API.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] SemesterCreateCommand request)
+        public async Task<IActionResult> Create([FromBody] SemesterCreateCommand command)
         {
-            var timeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
-            var msg = await _service.CreateOrUpdate<SemesterResult>(request);
-            if (msg.Status == 1)
-            {
-                // auto-update-when-semester-start
-                // var name = _configuration.GetSection("HANGFIRE_SERVER_LOCAL");
-                var timeUpdateProject = Utils.ToCronExpression(request.StartDate.Value);
-                _recurringJobManager.AddOrUpdate("auto-update-project-inprogress-"+request.SemesterCode, () => _topicService.UpdateWhenSemesterStart(), timeUpdateProject, new RecurringJobOptions { TimeZone = timeZone});
-                // create review hangfire
-                var timeCreateReview = Utils.ToCronExpression(request.StartDate.Value); // deplay for 5 minutes for project updated
-                _recurringJobManager.AddOrUpdate("auto-create-review-"+request.SemesterCode, () => _reviewService.CreateReviewsForActiveProject(),timeCreateReview , new RecurringJobOptions { TimeZone = timeZone });
-                
-                // auto update topic status 
-                var timePublicTopicResult = Utils.ToCronExpression(request.PublicTopicDate.Value);
+            //var timeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+            //var msg = await _service.CreateOrUpdate<SemesterResult>(request);
+            //if (msg.Status == 1)
+            //{
+            //    // auto-update-when-semester-start
+            //    // var name = _configuration.GetSection("HANGFIRE_SERVER_LOCAL");
+            //    var timeUpdateProject = Utils.ToCronExpression(request.StartDate.Value);
+            //    _recurringJobManager.AddOrUpdate("auto-update-project-inprogress-"+request.SemesterCode, () => _topicService.UpdateWhenSemesterStart(), timeUpdateProject, new RecurringJobOptions { TimeZone = timeZone});
+            //    // create review hangfire
+            //    var timeCreateReview = Utils.ToCronExpression(request.StartDate.Value); // deplay for 5 minutes for project updated
+            //    _recurringJobManager.AddOrUpdate("auto-create-review-"+request.SemesterCode, () => _reviewService.CreateReviewsForActiveProject(),timeCreateReview , new RecurringJobOptions { TimeZone = timeZone });
 
-                _recurringJobManager.AddOrUpdate("auto-update-result-"+request.SemesterCode, () => _topicService.AutoUpdateTopicStatus(), timePublicTopicResult, new RecurringJobOptions { TimeZone = timeZone });
-                
-            }
-          
-            return Ok(msg);
+            //    // auto update topic status 
+            //    var timePublicTopicResult = Utils.ToCronExpression(request.PublicTopicDate.Value);
+
+            //    _recurringJobManager.AddOrUpdate("auto-update-result-"+request.SemesterCode, () => _topicService.AutoUpdateTopicStatus(), timePublicTopicResult, new RecurringJobOptions { TimeZone = timeZone });
+
+            //}
+            //return Ok(msg);
+
+            var businessResult = await _service.Create(command);
+
+            return Ok(businessResult);
         }
 
         [HttpPut]
-        public async Task<IActionResult> Update([FromBody] SemesterUpdateCommand request)
+        public async Task<IActionResult> Update([FromBody] SemesterUpdateCommand command)
         {
-            var businessResult = await _service.CreateOrUpdate<SemesterResult>(request);
-            var timeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
-            // var name = _configuration.GetSection("HANGFIRE_SERVER_LOCAL");
-           
-            var timeUpdateProject = Utils.ToCronExpression(request.StartDate.Value.LocalDateTime);
-            _recurringJobManager.AddOrUpdate("auto-update-project-inprogress-"+request.SemesterCode, () => _topicService.UpdateWhenSemesterStart(), timeUpdateProject, new RecurringJobOptions {  TimeZone = timeZone});
-            // create review hangfire
-            // _backgroundJobClient.Schedule(() => _topicService.UpdateWhenSemesterStart(),
-            //     request.StartDate.Value.LocalDateTime.AddHours(23) - DateTimeOffset.Now);
-           
-            var timeCreateReview = Utils.ToCronExpression(request.StartDate.Value); // deplay for 5 minutes for project updated
-            _recurringJobManager.AddOrUpdate("auto-create-review-"+request.SemesterCode, () => _reviewService.CreateReviewsForActiveProject(),timeCreateReview , new RecurringJobOptions {  TimeZone = timeZone });
-           
-            var timePublicTopicResult = Utils.ToCronExpression(request.PublicTopicDate.Value);
-            _recurringJobManager.AddOrUpdate("auto-update-result-"+request.SemesterCode, () => _topicService.AutoUpdateTopicStatus(), timePublicTopicResult, new RecurringJobOptions {  TimeZone = timeZone });
+            //var businessResult = await _service.CreateOrUpdate<SemesterResult>(request);
+            //var timeZone = TimeZoneInfo.FindSystemTimeZoneById("SE Asia Standard Time");
+            //// var name = _configuration.GetSection("HANGFIRE_SERVER_LOCAL");
+
+            //var timeUpdateProject = Utils.ToCronExpression(request.StartDate.Value.LocalDateTime);
+            //_recurringJobManager.AddOrUpdate("auto-update-project-inprogress-"+request.SemesterCode, () => _topicService.UpdateWhenSemesterStart(), timeUpdateProject, new RecurringJobOptions {  TimeZone = timeZone});
+            //// create review hangfire
+            //// _backgroundJobClient.Schedule(() => _topicService.UpdateWhenSemesterStart(),
+            ////     request.StartDate.Value.LocalDateTime.AddHours(23) - DateTimeOffset.Now);
+
+            //var timeCreateReview = Utils.ToCronExpression(request.StartDate.Value); // deplay for 5 minutes for project updated
+            //_recurringJobManager.AddOrUpdate("auto-create-review-"+request.SemesterCode, () => _reviewService.CreateReviewsForActiveProject(),timeCreateReview , new RecurringJobOptions {  TimeZone = timeZone });
+
+            //var timePublicTopicResult = Utils.ToCronExpression(request.PublicTopicDate.Value);
+            //_recurringJobManager.AddOrUpdate("auto-update-result-"+request.SemesterCode, () => _topicService.AutoUpdateTopicStatus(), timePublicTopicResult, new RecurringJobOptions {  TimeZone = timeZone });
+            //return Ok(businessResult);
+
+            var businessResult = await _service.Update(command);
+
             return Ok(businessResult);
         }
 

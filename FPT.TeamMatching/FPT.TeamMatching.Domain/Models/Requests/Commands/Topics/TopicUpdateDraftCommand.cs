@@ -8,10 +8,8 @@ using System.Threading.Tasks;
 
 namespace FPT.TeamMatching.Domain.Models.Requests.Commands.Topics
 {
-    public class TopicCreateOrUpdateDraft
+    public class TopicUpdateDraftCommand: UpdateCommand
     {
-        public Guid? Id { get; set; }
-
         public Guid? SpecialtyId { get; set; }
 
         public string? VietNameseName { get; set; }

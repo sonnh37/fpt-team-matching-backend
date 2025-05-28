@@ -153,14 +153,14 @@ public class TopicController : ControllerBase
     }
 
     [HttpPost("create-draft")]
-    public async Task<IActionResult> CreateDraft([FromBody] TopicCreateOrUpdateDraft command)
+    public async Task<IActionResult> CreateDraft([FromBody] TopicCreateDraftCommand command)
     {
         var businessResult = await _service.CreateDraft(command);
         return Ok(businessResult);
     }
 
     [HttpPost("update-draft")]
-    public async Task<IActionResult> UpdateDraft([FromQuery] TopicCreateOrUpdateDraft command)
+    public async Task<IActionResult> UpdateDraft([FromQuery] TopicUpdateDraftCommand command)
     {
         var businessResult = await _service.UpdateDraft(command);
         return Ok(businessResult);
