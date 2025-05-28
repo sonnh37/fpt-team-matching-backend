@@ -66,6 +66,7 @@ public class TeamMemberRepository : BaseRepository<TeamMember>, ITeamMemberRepos
     {
         var hasTeam = GetQueryable(m => m.IsDeleted == false &&
                                         m.UserId == userId &&
+                                        m.LeaveDate == null &&
                                         (m.Status == Domain.Enums.TeamMemberStatus.InProgress ||
                                          m.Status == Domain.Enums.TeamMemberStatus.Pending))
             .AnyAsync();
@@ -73,4 +74,14 @@ public class TeamMemberRepository : BaseRepository<TeamMember>, ITeamMemberRepos
         return hasTeam;
     }
 
+    public async Task<TeamMember?> GetPendingTeamMemberOfUser(Guid userId)
+    {
+        var teamMember = await GetQueryable(m => m.IsDeleted == false &&
+                                        m.UserId == userId &&
+                                        m.LeaveDate == null &&
+                                        m.Status == Domain.Enums.TeamMemberStatus.Pending)
+                        .FirstOrDefaultAsync();
+
+        return teamMember;
+    }
 }
