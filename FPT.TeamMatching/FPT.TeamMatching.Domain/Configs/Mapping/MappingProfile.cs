@@ -244,6 +244,8 @@ public class MappingProfile : Profile
         CreateMap<Topic, TopicResult>().ReverseMap();
         CreateMap<Topic, TopicCreateCommand>().ReverseMap();
         CreateMap<Topic, TopicUpdateCommand>().ReverseMap();
+        CreateMap<Topic, TopicCreateDraftCommand>().ReverseMap();
+        CreateMap<Topic, TopicUpdateDraftCommand>().ReverseMap();
 
         #endregion
 

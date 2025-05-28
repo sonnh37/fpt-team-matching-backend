@@ -8,6 +8,7 @@ using FPT.TeamMatching.Domain.Models.Requests.Queries.Projects;
 using FPT.TeamMatching.Domain.Utilities.Filters;
 using Microsoft.EntityFrameworkCore;
 using MongoDB.Driver.Linq;
+using System.Linq;
 
 namespace FPT.TeamMatching.Data.Repositories;
 
@@ -498,5 +499,14 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
     {
         var result = await _context.Projects.AsNoTracking().FirstOrDefaultAsync(x => x.Id == projectId);
         return result;
+    }
+
+    public async Task<Project?> GetProjectWithStatusByLeaderId(Guid leaderId, List<ProjectStatus> listStatus)
+    {
+        var project = await _context.Projects.Where(e => e.IsDeleted == false &&
+                                                         e.LeaderId == leaderId &&
+                                                         listStatus.Contains((ProjectStatus)e.Status))
+                                             .FirstOrDefaultAsync();
+        return project;
     }
 }

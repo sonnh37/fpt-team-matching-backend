@@ -1362,6 +1362,18 @@ public class TopicService : BaseService<Topic>, ITopicService
             //sinh vien
             if (role.Contains("Student"))
             {
+                //check co nhom
+                var teammember = await _teamMemberRepository.GetPendingTeamMemberOfUser(user.Id);
+                if (teammember == null)
+                {
+                    return HandlerFail("Sinh viên phải có nhóm và chưa khóa nhóm");
+                }
+                //check leader
+                if (teammember.Role != TeamMemberRole.Leader)
+                {
+                    return HandlerFail("Chỉ nhóm trưởng mới được tạo đề tài");
+                }
+
                 if (draft.IsEnterpriseTopic)
                 {
                     return HandlerFail("Sinh viên không thể tạo đề tài doanh nghiệp");

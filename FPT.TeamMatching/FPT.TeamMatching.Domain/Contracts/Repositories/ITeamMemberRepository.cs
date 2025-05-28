@@ -18,4 +18,6 @@ public interface ITeamMemberRepository : IBaseRepository<TeamMember>
 
     Task<bool> UserHasTeamNow(Guid userId);
 
+    Task<TeamMember?> GetPendingTeamMemberOfUser(Guid userId);
+
 }
