@@ -74,7 +74,6 @@ public class TopicService : BaseService<Topic>, ITopicService
                 .WithData(result)
                 .WithStatus(Const.SUCCESS_CODE)
                 .WithMessage(Const.SUCCESS_READ_MSG);
-
         }
         catch (Exception ex)
         {
@@ -309,6 +308,7 @@ public class TopicService : BaseService<Topic>, ITopicService
         _topicRepository.Add(topic);
         return topic;
     }
+
     #endregion
 
     #endregion
@@ -328,6 +328,7 @@ public class TopicService : BaseService<Topic>, ITopicService
                 return HandlerFail("Không tìm thấy kì");
             }
 
+
             if (semester.Status != SemesterStatus.Preparing)
             {
                 return HandlerFail("Chưa đến thời gian đề tài");
@@ -342,6 +343,7 @@ public class TopicService : BaseService<Topic>, ITopicService
                     return HandlerFail("Chưa đến thời gian nộp đề tài");
                 }
             }
+
             // 2. Validate lecturer-specific rules
             var validationError = await ValidateLecturerRules(topicCreateModel, semester);
             if (validationError.Status != 1)
@@ -366,7 +368,7 @@ public class TopicService : BaseService<Topic>, ITopicService
                 topic.EnterpriseName = topicCreateModel.EnterpriseName;
                 topic.FileUrl = topicCreateModel.FileUrl;
                 //status
-                topic.Status = TopicStatus.ManagerPending;
+                topic.Status = topic.SubMentorId != null ? TopicStatus.MentorPending : TopicStatus.ManagerPending;
                 await SetBaseEntityForUpdate(topic);
                 _topicRepository.Update(topic);
             }
@@ -379,7 +381,7 @@ public class TopicService : BaseService<Topic>, ITopicService
                 topic.TopicCode = await _semesterService.GenerateNewTopicCode();
                 topic.StageTopicId = stageTopic?.Id;
                 topic.OwnerId = userId;
-                topic.Status = TopicStatus.ManagerPending;
+                topic.Status = topic.SubMentorId != null ? TopicStatus.MentorPending : TopicStatus.ManagerPending;
                 topic.SemesterId = semester.Id;
                 topic.IsExistedTeam = false;
                 topic.Type = topicCreateModel.IsEnterpriseTopic ? TopicType.Enterprise : TopicType.Lecturer;
@@ -387,6 +389,8 @@ public class TopicService : BaseService<Topic>, ITopicService
                 await SetBaseEntityForCreation(topic);
                 _topicRepository.Add(topic);
             }
+
+            if (!await _unitOfWork.SaveChanges()) return HandlerFail("Gửi đề tài không thành công");
 
             // 4. Create requests 
             //nop cho submentor trc
@@ -397,13 +401,15 @@ public class TopicService : BaseService<Topic>, ITopicService
             };
             if (topicCreateModel.SubMentorId != null)
             {
+                topicRequestForMentor.ReviewerId = topicCreateModel.SubMentorId;
                 topicRequestForMentor.Role = "SubMentor";
             }
-                //nop cho manager
+            //nop cho manager
             else
             {
                 topicRequestForMentor.Role = "Manager";
             }
+
             await SetBaseEntityForCreation(topicRequestForMentor);
             _topicRequestRepository.Add(topicRequestForMentor);
 
@@ -1265,7 +1271,7 @@ public class TopicService : BaseService<Topic>, ITopicService
                 .WithMessage(errorMessage);
         }
     }
-    
+
     public async Task<BusinessResult> GetTopicInvitesForSubMentor(TopicGetListInviteForSubmentorQuery query)
     {
         try
@@ -1366,27 +1372,36 @@ public class TopicService : BaseService<Topic>, ITopicService
                 {
                     return HandlerFail("Sinh viên không thể tạo đề tài doanh nghiệp");
                 }
+
                 if (draft.EnterpriseName != null)
                 {
                     return HandlerFail("Sinh viên không thể nhập tên doanh nghiệp");
                 }
+
                 draft.Type = TopicType.Student;
             }
+
             //giang vien
-            else if (role.Contains("Lecturer"))
+            // else if (role.Contains("Lecturer"))
+            // {
+
+           // if (!role.Contains("Mentor"))
+                       // {
+                       //     return HandlerFail("Người dùng không phải là Mentor trong kì này nên không thể tạo đề tài");
+                       // } 
+
+            if (role.Contains("Mentor"))
             {
-                if (!role.Contains("Mentor"))
-                {
-                    return HandlerFail("Người dùng không phải là Mentor trong kì này nên không thể tạo đề tài");
-                }
                 if (draft.IsEnterpriseTopic && draft.EnterpriseName == null)
                 {
                     return HandlerFail("Đề tài doanh nghiệp cần phải có tên doanh nghiệp");
                 }
+
                 if (!draft.IsEnterpriseTopic && draft.EnterpriseName != null)
                 {
                     return HandlerFail("Đề tài không cần phải có tên doanh nghiệp");
                 }
+
                 if (draft.IsEnterpriseTopic)
                 {
                     draft.Type = TopicType.Enterprise;
@@ -1396,18 +1411,21 @@ public class TopicService : BaseService<Topic>, ITopicService
                     draft.Type = TopicType.Lecturer;
                 }
             }
-            else
-            {
-                return HandlerFail("Người dùng phải là giảng viên hoặc sinh viên");
-            }
+
+
+            // }
+            // else
+            // {
+            //     return HandlerFail("Người dùng phải là giảng viên hoặc sinh viên");
+            // }
 
             draft.OwnerId = user.Id;
             draft.Status = TopicStatus.Draft;
             draft.SemesterId = semester.Id;
             draft.IsExistedTeam = false;
 
-            _topicRepository.Add(draft);
             await SetBaseEntityForCreation(draft);
+            _topicRepository.Add(draft);
             var isSuccess = await _unitOfWork.SaveChanges();
             if (!isSuccess)
             {
@@ -1415,15 +1433,15 @@ public class TopicService : BaseService<Topic>, ITopicService
             }
 
             return new ResponseBuilder()
-                    .WithStatus(Const.SUCCESS_CODE)
-                    .WithMessage("Tạo bảng nháp thành công");
+                .WithStatus(Const.SUCCESS_CODE)
+                .WithMessage("Tạo bảng nháp thành công");
         }
         catch (Exception ex)
         {
             var errorMessage = $"An error occured in {typeof(TopicResult).Name}: {ex.Message}";
             return new ResponseBuilder()
-                     .WithStatus(Const.FAIL_CODE)
-                     .WithMessage(errorMessage);
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage(errorMessage);
         }
     }
 
@@ -1465,7 +1483,7 @@ public class TopicService : BaseService<Topic>, ITopicService
             }
 
             //check owner
-            if (draft.OwnerId == user.Id)
+            if (draft.OwnerId != user.Id)
             {
                 return HandlerFail("Người dùng không phải người sở hữu đề tài");
             }
@@ -1478,6 +1496,7 @@ public class TopicService : BaseService<Topic>, ITopicService
                 {
                     return HandlerFail("Sinh viên không thể tạo đề tài doanh nghiệp");
                 }
+
                 if (draft.EnterpriseName != null)
                 {
                     return HandlerFail("Sinh viên không thể nhập tên doanh nghiệp");
@@ -1485,20 +1504,25 @@ public class TopicService : BaseService<Topic>, ITopicService
             }
 
             //giang vien
-            else if (role.Contains("Lecturer"))
+            // else if (role.Contains("Lecturer"))
+            // {
+            // if (!role.Contains("Mentor"))
+            // {
+            //     return HandlerFail("Người dùng không phải là Mentor trong kì này nên không thể tạo đề tài");
+            // }
+
+            if (role.Contains("Mentor"))
             {
-                if (!role.Contains("Mentor"))
-                {
-                    return HandlerFail("Người dùng không phải là Mentor trong kì này nên không thể tạo đề tài");
-                }
                 if (draft.IsEnterpriseTopic && draft.EnterpriseName == null)
                 {
                     return HandlerFail("Đề tài doanh nghiệp cần phải có tên doanh nghiệp");
                 }
+
                 if (!draft.IsEnterpriseTopic && draft.EnterpriseName != null)
                 {
                     return HandlerFail("Đề tài không cần phải có tên doanh nghiệp");
                 }
+
                 if (draft.IsEnterpriseTopic)
                 {
                     draft.Type = TopicType.Enterprise;
@@ -1508,10 +1532,13 @@ public class TopicService : BaseService<Topic>, ITopicService
                     draft.Type = TopicType.Lecturer;
                 }
             }
-            else
-            {
-                return HandlerFail("Người dùng phải là giảng viên hoặc sinh viên");
-            }
+
+
+            // }
+            // else
+            // {
+            //     return HandlerFail("Người dùng phải là giảng viên hoặc sinh viên");
+            // }
 
             draft.Abbreviation = command.Abbreviation;
             draft.Description = command.Description;
@@ -1530,15 +1557,15 @@ public class TopicService : BaseService<Topic>, ITopicService
             }
 
             return new ResponseBuilder()
-                    .WithStatus(Const.SUCCESS_CODE)
-                    .WithMessage("Cập nhật bản nháp thành công");
+                .WithStatus(Const.SUCCESS_CODE)
+                .WithMessage("Cập nhật bản nháp thành công");
         }
         catch (Exception ex)
         {
             var errorMessage = $"An error occured in {typeof(TopicResult).Name}: {ex.Message}";
             return new ResponseBuilder()
-                     .WithStatus(Const.FAIL_CODE)
-                     .WithMessage(errorMessage);
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage(errorMessage);
         }
     }
 }

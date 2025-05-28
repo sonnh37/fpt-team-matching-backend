@@ -348,25 +348,27 @@ public class TopicRequestService : BaseService<TopicRequest>, ITopicRequestServi
                 {
                     var approveTopicRequestOfSubMentor = await _topicRequestRepository.GetByTopicIdAndRoleAndStatus(
                         topic.Id, "SubMentor", TopicRequestStatus.Approved);
-                    var shouldApprove = topic.SubMentorId == null || 
-                                         (topic.SubMentorId != null && 
-                                          approveTopicRequestOfSubMentor.Any());
-    
+                    var shouldApprove = topic.SubMentorId == null ||
+                                        (topic.SubMentorId != null &&
+                                         approveTopicRequestOfSubMentor.Any());
+
                     if (shouldApprove)
                     {
                         topic.Status = TopicStatus.MentorApproved;
                     }
-                    
                 }
 
                 //neu la status la consider -> sua status cua topic -> MentorConsidered
                 if (topicRequest.Status == TopicRequestStatus.Consider)
                 {
-                    var approveTopicRequestOfSubMentor = await _topicRequestRepository.GetByTopicIdAndRoleAndStatus(topic.Id, "SubMentor", TopicRequestStatus.Approved);
-                    var shouldApprove = topic.SubMentorId == null || 
-                                        (topic.SubMentorId != null && 
+                    var approveTopicRequestOfSubMentor =
+                        await _topicRequestRepository.GetByTopicIdAndRoleAndStatus(topic.Id, "SubMentor",
+                            TopicRequestStatus.Approved);
+
+                    var shouldApprove = topic.SubMentorId == null ||
+                                        (topic.SubMentorId != null &&
                                          approveTopicRequestOfSubMentor.Any());
-    
+
                     if (shouldApprove)
                     {
                         topic.Status = TopicStatus.MentorConsider;
@@ -383,7 +385,7 @@ public class TopicRequestService : BaseService<TopicRequest>, ITopicRequestServi
 
                 //noti cho owner
                 noti.Description = "Đề tài " + topicInclude?.Abbreviation + " đã được " +
-                                    topicInclude?.Mentor?.Code + " (Mentor) duyệt. Hãy kiểm tra kết quả!";
+                                   topicInclude?.Mentor?.Code + " (Mentor) duyệt. Hãy kiểm tra kết quả!";
                 await _notificationService.CreateForUser(noti);
             }
             //neu submentor response
@@ -398,29 +400,46 @@ public class TopicRequestService : BaseService<TopicRequest>, ITopicRequestServi
                 //neu la status la approve -> sua status cua topic -> approve
                 if (topicRequest.Status == TopicRequestStatus.Approved)
                 {
-                    var approveTopicRequestOfMentor = await _topicRequestRepository.GetByTopicIdAndRoleAndStatus(topic.Id, "Mentor", TopicRequestStatus.Approved);
-                    var considerTopicRequestOfMentor = await _topicRequestRepository.GetByTopicIdAndRoleAndStatus(topic.Id, "Mentor", TopicRequestStatus.Consider);
-                    var shouldApprove = topic.SubMentorId == null || 
-                                        (topic.SubMentorId != null && 
-                                         approveTopicRequestOfMentor.Any());
-    
+                    var approveTopicRequestOfMentor =
+                        await _topicRequestRepository.GetByTopicIdAndRoleAndStatus(topic.Id, "Mentor",
+                            TopicRequestStatus.Approved);
+                    var considerTopicRequestOfMentor =
+                        await _topicRequestRepository.GetByTopicIdAndRoleAndStatus(topic.Id, "Mentor",
+                            TopicRequestStatus.Consider);
+                    var topicRequestOfMentor = await _topicRequestRepository.GetByTopicIdAndRole(topic.Id, "Mentor");
+
+                    var shouldApprove = topicRequestOfMentor.Count > 0
+                        ? (topic.SubMentorId == null ||
+                           (topic.SubMentorId != null &&
+                            approveTopicRequestOfMentor.Any()))
+                        : (topic.SubMentorId != null);
+
                     if (shouldApprove)
                     {
                         topic.Status = TopicStatus.MentorApproved;
                     }
-                    
-                    var shouldConsider = topic.SubMentorId == null || 
-                                        (topic.SubMentorId != null && 
-                                         considerTopicRequestOfMentor.Any());
-    
-                    if (shouldConsider)
+
+                    if (topicRequestOfMentor.Count > 0)
                     {
-                        topic.Status = TopicStatus.MentorConsider;
+                        var shouldConsider = topic.SubMentorId == null ||
+                                             (topic.SubMentorId != null &&
+                                              considerTopicRequestOfMentor.Any());
+
+                        if (shouldConsider)
+                        {
+                            topic.Status = TopicStatus.MentorConsider;
+                        }
                     }
+                    
+                    
                 }
 
+                await SetBaseEntityForUpdate(topic);
+                _topicRepository.Update(topic);
+                var isSuccess = await _unitOfWork.SaveChanges();
+                if (!isSuccess) return HandlerFail(Const.FAIL_SAVE_MSG);
                 noti.Description = "Đề tài " + topicRequest.Topic?.Abbreviation + " đã được " +
-                                           topicInclude?.SubMentor?.Code + " (SubMentor) duyệt. Hãy kiểm tra kết quả!";
+                                   topicInclude?.SubMentor?.Code + " (SubMentor) duyệt. Hãy kiểm tra kết quả!";
                 await _notificationService.CreateForUser(noti);
             }
 
@@ -445,7 +464,8 @@ public class TopicRequestService : BaseService<TopicRequest>, ITopicRequestServi
                 if (!isSuccess) return HandlerFail(Const.FAIL_SAVE_MSG);
 
                 //noti cho owner
-                noti.Description = "Đề tài " + topicRequest.Topic?.Abbreviation + " đã được duyệt xong. Hãy kiểm tra kết quả!";
+                noti.Description = "Đề tài " + topicRequest.Topic?.Abbreviation +
+                                   " đã được duyệt xong. Hãy kiểm tra kết quả!";
                 await _notificationService.CreateForUser(noti);
             }
 
@@ -505,10 +525,12 @@ public class TopicRequestService : BaseService<TopicRequest>, ITopicRequestServi
             }
 
             //check con slot lam submentor k
-            var topicBeSubMentor = await _topicRepository.GetTopicsBeSubMentorOfUserInSemester(submentor.Id, semester.Id);
+            var topicBeSubMentor =
+                await _topicRepository.GetTopicsBeSubMentorOfUserInSemester(submentor.Id, semester.Id);
             if (topicBeSubMentor.Count() == semester.LimitTopicSubMentor)
             {
-                return HandlerFail("Mentor này đã làm Mentor 2 đủ số lượng nhóm quy định của kì: " + topicBeSubMentor.Count());
+                return HandlerFail("Mentor này đã làm Mentor 2 đủ số lượng nhóm quy định của kì: " +
+                                   topicBeSubMentor.Count());
             }
 
             var topicRequest = new TopicRequest
@@ -580,14 +602,17 @@ public class TopicRequestService : BaseService<TopicRequest>, ITopicRequestServi
             {
                 return HandlerFail("Không tìm thấy đề tài");
             }
+
             //neu approve -> them submentor vao topic
             if (command.Status == TopicRequestStatus.Approved)
             {
                 //check con slot lam submentor k
-                var topicBeSubMentor = await _topicRepository.GetTopicsBeSubMentorOfUserInSemester(user.Id, semester.Id);
+                var topicBeSubMentor =
+                    await _topicRepository.GetTopicsBeSubMentorOfUserInSemester(user.Id, semester.Id);
                 if (topicBeSubMentor.Count() == semester.LimitTopicSubMentor)
                 {
-                    return HandlerFail("Bạn đã làm Mentor 2 đủ số lượng nhóm quy định của kì: " + topicBeSubMentor.Count());
+                    return HandlerFail("Bạn đã làm Mentor 2 đủ số lượng nhóm quy định của kì: " +
+                                       topicBeSubMentor.Count());
                 }
 
                 topic.SubMentorId = user.Id;
@@ -609,7 +634,8 @@ public class TopicRequestService : BaseService<TopicRequest>, ITopicRequestServi
             var noti = new NotificationCreateForIndividual
             {
                 UserId = topic.MentorId,
-                Description = user?.Code + " đã phản hồi lời mời làm Mentor 2 cho đề tài " + topic.Abbreviation + " của bạn"
+                Description = user?.Code + " đã phản hồi lời mời làm Mentor 2 cho đề tài " + topic.Abbreviation +
+                              " của bạn"
             };
             await _notificationService.CreateForIndividual(noti);
 

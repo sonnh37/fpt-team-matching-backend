@@ -19,13 +19,12 @@ public class TeamMemberRepository : BaseRepository<TeamMember>, ITeamMemberRepos
     }
 
     // Get teammber mà user đang active
-    public async Task<TeamMember?> GetTeamMemberActiveByUserId(Guid userId)
+    public async Task<TeamMember?> GetTeamMemberActiveByUserId(Guid? userId, Guid? semesterId)
     {
-        var semester = await _semesterRepository.GetUpComingSemester();
-        if (semester == null) return null;
+        
         var queryable = GetQueryable(m =>
             m.UserId == userId && m.IsDeleted == false && m.Project != null && m.Project.Leader != null &&
-            m.Project.Leader.UserXRoles.Any(m => m.SemesterId == semester.Id));
+            m.Project.Leader.UserXRoles.Any(m => m.SemesterId == semesterId));
         return await queryable.SingleOrDefaultAsync();
     }
 

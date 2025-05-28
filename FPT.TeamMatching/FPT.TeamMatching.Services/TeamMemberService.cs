@@ -23,7 +23,8 @@ public class TeamMemberService : BaseService<TeamMember>, ITeamMemberService
     private readonly IReviewRepository _reviewRepository;
     private readonly INotificationService _notificationService;
 
-    public TeamMemberService(IMapper mapper, IUnitOfWork unitOfWork, INotificationService notificationService) : base(mapper, unitOfWork)
+    public TeamMemberService(IMapper mapper, IUnitOfWork unitOfWork, INotificationService notificationService) : base(
+        mapper, unitOfWork)
     {
         _teamMemberRepository = unitOfWork.TeamMemberRepository;
         _projectRepository = unitOfWork.ProjectRepository;
@@ -57,8 +58,10 @@ public class TeamMemberService : BaseService<TeamMember>, ITeamMemberService
         try
         {
             var userId = GetUserIdFromClaims();
+            var semester = await GetSemesterInCurrentWorkSpace();
             if (userId == null) return HandlerFail("Không tìm thấy người dùng");
-            var teamMemberCurrentUser = await _teamMemberRepository.GetTeamMemberActiveByUserId(userId.Value);
+            var teamMemberCurrentUser =
+                await _teamMemberRepository.GetTeamMemberActiveByUserId(userId.Value, semester?.Id);
             if (teamMemberCurrentUser == null) return HandlerFail("Người dùng chưa có nhóm");
 
             teamMemberCurrentUser.LeaveDate = DateTime.UtcNow;
@@ -249,7 +252,6 @@ public class TeamMemberService : BaseService<TeamMember>, ITeamMemberService
         }
     }
 
-   
 
     public async Task<BusinessResult> UpdateTeamMemberByMentor(List<MentorUpdate> requests)
     {
@@ -325,11 +327,12 @@ public class TeamMemberService : BaseService<TeamMember>, ITeamMemberService
             return HandlerError(ex.Message);
         }
     }
+
     public async Task<BusinessResult> AddRange(TeamMemberAddRangeCommand command)
     {
         try
         {
-            var semester =  await GetSemesterInCurrentWorkSpace();
+            var semester = await GetSemesterInCurrentWorkSpace();
             var foundProject = await _projectRepository.GetById(command.ProjectId);
             if (foundProject == null)
             {
@@ -337,6 +340,7 @@ public class TeamMemberService : BaseService<TeamMember>, ITeamMemberService
                     .WithStatus(Const.FAIL_CODE)
                     .WithMessage("Không tìm thấy nhóm");
             }
+
             var foundTopic = await _unitOfWork.TopicRepository.GetById(command.TopicId);
 
             if (foundTopic == null || foundTopic.IsDeleted == true || foundTopic.IsExistedTeam == true)
@@ -355,17 +359,20 @@ public class TeamMemberService : BaseService<TeamMember>, ITeamMemberService
                         .WithStatus(Const.FAIL_CODE)
                         .WithMessage("Đề tài cũ không tìm thấy");
                 }
+
                 oldTopic.IsExistedTeam = false;
                 _unitOfWork.TopicRepository.Update(oldTopic);
             }
-            
+
             var allTeamMember = await _teamMemberRepository.GetMembersOfTeamByProjectId(command.ProjectId);
-            if (allTeamMember.Count + command.TeamMembers.Count < semester.MinTeamSize || allTeamMember.Count + command.TeamMembers.Count > semester.MaxTeamSize)
+            if (allTeamMember.Count + command.TeamMembers.Count < semester.MinTeamSize ||
+                allTeamMember.Count + command.TeamMembers.Count > semester.MaxTeamSize)
             {
                 return new ResponseBuilder()
                     .WithStatus(Const.FAIL_CODE)
                     .WithMessage("Số lượng thành viên không phù hợp");
             }
+
             List<TeamMember> entityList = new List<TeamMember>();
             foreach (var teamMemberCreateCommand in command.TeamMembers)
             {
@@ -374,18 +381,18 @@ public class TeamMemberService : BaseService<TeamMember>, ITeamMemberService
                 var mapTeamMember = _mapper.Map<TeamMember>(teamMemberCreateCommand);
                 entityList.Add(mapTeamMember);
             }
-            
+
             List<TeamMember> existingTeamMembers = new List<TeamMember>();
             foreach (var teamMember in allTeamMember)
             {
                 teamMember.Status = TeamMemberStatus.InProgress;
                 existingTeamMembers.Add(teamMember);
             }
-            
+
             foundTopic.IsExistedTeam = true;
             foundProject.Status = ProjectStatus.InProgress;
             foundProject.TopicId = command.TopicId;
-            
+
             _projectRepository.Update(foundProject);
             _unitOfWork.TopicRepository.Update(foundTopic);
             _teamMemberRepository.UpdateRange(existingTeamMembers);
