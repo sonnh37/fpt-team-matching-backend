@@ -176,16 +176,16 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
             }
 
             //check student co topic pending hay approve k
-            var semesterUpComing = await _semesterRepository.GetUpComingSemester();
-            if (semesterUpComing == null)
-                return HandlerFail("Hệ thống chưa cập nhật.");
-            var topic = await _topicRepository.GetTopicNotRejectOfUserInSemester(user.Id, semesterUpComing.Id);
-            if (topic != null)
-            {
-                return new ResponseBuilder()
-                    .WithStatus(Const.FAIL_CODE)
-                    .WithMessage("Người dùng đã nộp ý tưởng");
-            }
+            //var semesterUpComing = await _semesterRepository.GetUpComingSemester();
+            //if (semesterUpComing == null)
+            //    return HandlerFail("Hệ thống chưa cập nhật.");
+            //var topic = await _topicRepository.GetTopicNotRejectOfUserInSemester(user.Id, semesterUpComing.Id);
+            //if (topic != null)
+            //{
+            //    return new ResponseBuilder()
+            //        .WithStatus(Const.FAIL_CODE)
+            //        .WithMessage("Người dùng đã nộp ý tưởng");
+            //}
 
             //check student trong teammember in process OR pass
             var inTeamMember = await StudentInTeamMember(user.Id);
@@ -836,8 +836,7 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
 
         foreach (var teamMember in teamMembers)
         {
-            //if (teamMember.Status != TeamMemberStatus.Failed)
-            if (teamMember.Status != TeamMemberStatus.Fail2 && teamMember.Status != TeamMemberStatus.Fail1)
+            if (teamMember.LeaveDate != null)
             {
                 haveTeamMember = true;
             }
