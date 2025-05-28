@@ -836,7 +836,7 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
 
         foreach (var teamMember in teamMembers)
         {
-            if (teamMember.LeaveDate != null)
+            if (teamMember.LeaveDate == null)
             {
                 haveTeamMember = true;
             }
