@@ -13,7 +13,7 @@ public interface IProjectRepository : IBaseRepository<Project>
     Task<Project?> GetProjectInSemesterByUserIdLoginFollowNewest(Guid? userId, Guid? semesterId);
     Task<Project?> GetProjectByUserIdLoginFollowNewest(Guid userId);
     Task<(List<Project>, int)> GetProjectsForMentor(ProjectGetListForMentorQuery query, Guid userId);
-    Task<List<Project>?> GetProjectsStartingNow();
+    Task<List<Project>?> GetProjectsStartingNow(Guid semesterId);
     Task<Project?> GetProjectByCode(string code);
     Task<Project?> GetProjectOfUserLogin(Guid userId);
     Task<int> NumberOfProjectInSemester(Guid semesterId);
@@ -27,7 +27,7 @@ public interface IProjectRepository : IBaseRepository<Project>
 
     Task<Project?> GetProjectInSemesterCurrentByUserIdLogin(Guid userId);
     
-    Task<(List<Project>, int)> SearchProjects(ProjectSearchQuery query);
+    Task<(List<Project>, int)> SearchProjects(ProjectSearchQuery query, Guid semesterId);
 
     Task<List<Project>?> GetPendingProjectsWithNoTopicStartingBySemesterId(Guid semesterId);
 

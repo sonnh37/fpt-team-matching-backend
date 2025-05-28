@@ -212,6 +212,33 @@ namespace FPT.TeamMatching.Services
                         .WithStatus(Const.FAIL_CODE)
                         .WithMessage("Còn " + students.Count() + " sinh viên chưa có nhóm");
                 }
+                var projectsInProgress = await _projectRepository.GetProjectsStartingNow(semester.Id);
+                var reviews = await _unitOfWork.ReviewRepository.GetAll();
+                if (projectsInProgress == null)
+                {
+                    return new ResponseBuilder()
+                        .WithStatus(Const.FAIL_CODE)
+                        .WithMessage("Không tìm thấy nhóm nào đang trong kì");
+                }
+                foreach (var project in projectsInProgress)
+                {
+                    for (int i = 1; i <= 3; i++)
+                    {
+                        if (reviews.FirstOrDefault(x => x.ProjectId == project.Id && x.Number == i) == null)
+                        {
+                            var review = new Review
+                            {
+                                ProjectId = project.Id,
+                                Number = i
+                            };
+
+                            await SetBaseEntityForCreation(review);
+
+                            // Thêm vào repository
+                            _unitOfWork.ReviewRepository.Add(review);
+                        }
+                    }
+                }
 
                 semester.OnGoingDate = DateTime.UtcNow;
             }
