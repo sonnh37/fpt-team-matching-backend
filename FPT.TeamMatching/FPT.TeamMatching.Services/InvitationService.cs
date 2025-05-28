@@ -128,8 +128,9 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
             if (userIdClaim == null)
                 return HandlerFailAuth();
 
+            var wsSemesterId = await GetSemesterInCurrentWorkSpace();
             var userId = userIdClaim.Value;
-            var userInTeamMember = await _teamMemberRepository.GetTeamMemberActiveByUserId(userId);
+            var userInTeamMember = await _teamMemberRepository.GetTeamMemberActiveByUserId(userId, wsSemesterId.Id);
             if (userInTeamMember == null) return HandlerFail("Bạn chưa có nhóm");
 
             var isLeader = userInTeamMember.Role == TeamMemberRole.Leader;
@@ -709,6 +710,13 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
                            .WithStatus(Const.FAIL_CODE)
                            .WithMessage(Const.FAIL_SAVE_MSG);
                     }
+                    var saveChange = await _unitOfWork.SaveChanges();
+                    if (!saveChange)
+                    {
+                        return new ResponseBuilder()
+                            .WithStatus(Const.FAIL_CODE)
+                            .WithMessage(Const.FAIL_SAVE_MSG);
+                    }
 
                     //noti nếu sender != leader
                     foreach (var i in invitationsPending)
@@ -725,7 +733,7 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
 
                 #region Xử lí các yêu cầu vào nhóm của user
                 var pendingInvitationsOfSender = await _invitationRepository.GetInvitationsBySenderIdAndStatus(student.Id, InvitationStatus.Pending);
-                if (pendingInvitationsOfSender != null)
+                if (pendingInvitationsOfSender != null && pendingInvitationsOfSender.Count != 0)
                 {
                     foreach (var i in pendingInvitationsOfSender)
                     {
@@ -735,13 +743,7 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
                     _invitationRepository.UpdateRange(pendingInvitationsOfSender);
                 }
 
-                var saveChange = await _unitOfWork.SaveChanges();
-                if (!saveChange)
-                {
-                    return new ResponseBuilder()
-                       .WithStatus(Const.FAIL_CODE)
-                       .WithMessage(Const.FAIL_SAVE_MSG);
-                }
+               
 
                 return new ResponseBuilder()
                     .WithStatus(Const.SUCCESS_CODE)

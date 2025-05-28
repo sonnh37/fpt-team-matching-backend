@@ -80,7 +80,8 @@ public class ProjectService : BaseService<Project>, IProjectService
         {
             List<ProjectResult>? results;
 
-            var (data, total) = await _projectRepository.SearchProjects(query);
+            var wsSemester = await GetSemesterInCurrentWorkSpace();
+            var (data, total) = await _projectRepository.SearchProjects(query, wsSemester.Id);
 
             results = _mapper.Map<List<ProjectResult>>(data);
 
