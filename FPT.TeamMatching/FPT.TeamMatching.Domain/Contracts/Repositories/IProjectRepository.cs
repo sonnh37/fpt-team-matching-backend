@@ -12,7 +12,7 @@ public interface IProjectRepository : IBaseRepository<Project>
     Task<Project?> GetProjectInSemesterByUserIdLoginFollowNewest(Guid? userId, Guid? semesterId);
     Task<Project?> GetProjectByUserIdLoginFollowNewest(Guid userId);
     Task<(List<Project>, int)> GetProjectsForMentor(ProjectGetListForMentorQuery query, Guid userId);
-    Task<List<Project>?> GetProjectsStartingNow();
+    Task<List<Project>?> GetProjectsStartingNow(Guid semesterId);
     Task<Project?> GetProjectByCode(string code);
     Task<Project?> GetProjectOfUserLogin(Guid userId);
     Task<int> NumberOfProjectInSemester(Guid semesterId);

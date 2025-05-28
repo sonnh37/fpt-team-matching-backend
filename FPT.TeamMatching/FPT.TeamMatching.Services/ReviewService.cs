@@ -94,8 +94,9 @@ public class ReviewService : BaseService<Review>, IReviewService
 
     public async Task CreateReviewsForActiveProject()
     {
+        var semester = await GetSemesterInCurrentWorkSpace();
         //Tim project den thgian bat dau
-        var projects = await _projectRepository.GetProjectsStartingNow();
+        var projects = await _projectRepository.GetProjectsStartingNow(semester.Id);
         var reviews = await _reviewRepository.GetAll();
         if (projects == null)
         {

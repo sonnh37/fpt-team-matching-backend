@@ -804,6 +804,7 @@ public class UserService : BaseService<User>, IUserService
                             var firstname = reader.GetValue(3).ToString();
                             var lastname = reader.GetValue(4).ToString();
 
+                            var semester = await GetSemesterInCurrentWorkSpace();
                             var user = new User
                             {
                                 Email = email,
@@ -818,6 +819,7 @@ public class UserService : BaseService<User>, IUserService
                                     {
                                         UserId = null,
                                         RoleId = roleLecture.Id,
+                                        SemesterId = semester.Id
                                     }
                                 }
                             };

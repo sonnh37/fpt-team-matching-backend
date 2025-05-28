@@ -235,7 +235,7 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
         return (results, query.IsPagination ? total : results.Count);
     }
 
-    public async Task<List<Project>?> GetProjectsStartingNow()
+    public async Task<List<Project>?> GetProjectsStartingNow(Guid semesterId)
     {
         var today = DateTime.UtcNow.AddHours(7).Date;
         var tomorrow = today.AddDays(1);
@@ -247,9 +247,7 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
                         p.Topic != null &&
                         p.Topic.StageTopic != null &&
                         p.Topic.StageTopic.Semester != null &&
-                        p.Topic.StageTopic.Semester.StartDate != null &&
-                        p.Topic.StageTopic.Semester.StartDate.Value.AddHours(7) >= today &&
-                        p.Topic.StageTopic.Semester.StartDate.Value.AddHours(7) < tomorrow
+                        p.Topic.StageTopic.Semester.Id == semesterId
                 // p.Topic.StageTopic.Semester.StartDate.Value.Day == DateTime.UtcNow.Day
             )
             .ToListAsync();
