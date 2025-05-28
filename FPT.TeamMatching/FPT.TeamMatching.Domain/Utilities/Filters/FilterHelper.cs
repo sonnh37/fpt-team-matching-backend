@@ -153,6 +153,12 @@ public static class FilterHelper
         {
             queryable = queryable.Where(m => m.Status == query.Status);
         }
+        
+        if (query.SemesterId != null)
+        {
+            queryable = queryable.Where(m =>
+                m.SemesterId != null && m.SemesterId == query.SemesterId);
+        }
 
         queryable = BaseFilterHelper.Base(queryable, query);
 

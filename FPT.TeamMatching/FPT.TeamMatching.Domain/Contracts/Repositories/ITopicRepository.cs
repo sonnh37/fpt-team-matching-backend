@@ -10,6 +10,8 @@ namespace FPT.TeamMatching.Domain.Contracts.Repositories;
 
 public interface ITopicRepository : IBaseRepository<Topic>
 {
+    Task<(List<Topic>, int)> GetTopicInvitesForSubMentor(TopicGetListInviteForSubmentorQuery query, Guid? userId,
+        Guid? semesterId);
     Task<IList<Topic>> GetTopicsByUserId(Guid? userId, Guid? semesterId);
 
     Task<(List<Topic>, int)> GetTopicsOfReviewerByRolesAndStatus(

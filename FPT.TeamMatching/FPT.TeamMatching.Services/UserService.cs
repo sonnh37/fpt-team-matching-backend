@@ -271,7 +271,8 @@ public class UserService : BaseService<User>, IUserService
             var projectOfUser = await _unitOfWork.ProjectRepository.GetProjectByLeaderId(userId);
             if (projectOfUser == null) return HandlerFail("Người dùng không có project hiện tại");
 
-            var (data, total) = await _userRepository.GetStudentsNoTeam(query, projectOfUser.Id);
+            var wsSemester = await GetSemesterInCurrentWorkSpace();
+            var (data, total) = await _userRepository.GetStudentsNoTeam(query, projectOfUser.Id, wsSemester.Id);
             var results = _mapper.Map<List<UserResult>>(data);
             var response = new QueryResult(query, results, total);
 

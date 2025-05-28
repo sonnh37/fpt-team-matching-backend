@@ -28,6 +28,7 @@ namespace FPT.TeamMatching.Domain.Contracts.Services
         Task<BusinessResult> UpdateTopic(TopicUpdateCommand topicUpdateCommand);
         Task<BusinessResult> UpdateStatusTopic(TopicUpdateStatusCommand command);
         Task<BusinessResult> GetTopicsForMentor(TopicGetListForMentorQuery query);
+        Task<BusinessResult> GetTopicInvitesForSubMentor(TopicGetListInviteForSubmentorQuery query);
         Task<BusinessResult> GetTopicsOfSupervisors<TResult>(TopicGetListOfSupervisorsQuery query) where TResult : BaseResult;
 
         Task<BusinessResult> AutoUpdateTopicStatus();

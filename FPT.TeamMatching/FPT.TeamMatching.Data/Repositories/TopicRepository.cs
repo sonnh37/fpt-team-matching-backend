@@ -59,9 +59,9 @@ public class TopicRepository : BaseRepository<Topic>, ITopicRepository
         {
             // Tạo bản sao để không ảnh hưởng list gốc
             var newStatusList = new List<TopicStatus>(statusList);
-    
+
             // Nếu có Approved hoặc Rejected trong yêu cầu
-            if (statusList.Contains(TopicStatus.ManagerApproved) || 
+            if (statusList.Contains(TopicStatus.ManagerApproved) ||
                 statusList.Contains(TopicStatus.ManagerRejected))
             {
                 // Thêm Pending nếu chưa có
@@ -70,20 +70,21 @@ public class TopicRepository : BaseRepository<Topic>, ITopicRepository
                     newStatusList.Add(TopicStatus.ManagerPending);
                 }
             }
-    
+
             // Nếu có Pending trong yêu cầu
             if (statusList.Contains(TopicStatus.ManagerPending))
             {
                 // Thêm cả Approved và Rejected nếu chưa có
                 if (!newStatusList.Contains(TopicStatus.ManagerApproved))
                     newStatusList.Add(TopicStatus.ManagerApproved);
-            
+
                 if (!newStatusList.Contains(TopicStatus.ManagerRejected))
                     newStatusList.Add(TopicStatus.ManagerRejected);
             }
-    
+
             statusList = newStatusList;
         }
+
         var ideas = await queryable
             .Where(e => e.OwnerId == userId
                         && e.SemesterId == semesterId
@@ -98,7 +99,7 @@ public class TopicRepository : BaseRepository<Topic>, ITopicRepository
             .Include(m => m.SubMentor)
             .Include(m => m.Specialty).ThenInclude(m => m.Profession)
             .Include(m => m.Project)
-            .AsSplitQuery() 
+            .AsSplitQuery()
             .ToListAsync();
 
         if (resultDate.HasValue && currentDate < resultDate.Value)
@@ -199,7 +200,10 @@ public class TopicRepository : BaseRepository<Topic>, ITopicRepository
              queryable = queryable.Where(i => i.TopicVersions.All(iv => iv.Topic == null));
          }*/
 
-        queryable = queryable.Where(m => m.Status == query.TopicStatus);
+        if (query.TopicStatus != null)
+        {
+            queryable = queryable.Where(m => m.Status == query.TopicStatus);
+        }
 
         queryable = Sort(queryable, query);
 
@@ -397,11 +401,11 @@ public class TopicRepository : BaseRepository<Topic>, ITopicRepository
         var queryable = GetQueryable();
 
         var topics = await queryable.Where(e => e.IsDeleted == false &&
-                                         e.SubMentorId == subMentorId &&
-                                         e.Status != TopicStatus.ManagerRejected &&
-                                         e.Status != TopicStatus.MentorRejected &&
-                                        e.SemesterId == semesterId)
-                               .ToListAsync();
+                                                e.SubMentorId == subMentorId &&
+                                                e.Status != TopicStatus.ManagerRejected &&
+                                                e.Status != TopicStatus.MentorRejected &&
+                                                e.SemesterId == semesterId)
+            .ToListAsync();
 
         return topics;
     }
@@ -458,9 +462,17 @@ public class TopicRepository : BaseRepository<Topic>, ITopicRepository
             .Include(m => m.TopicRequests)
             .Include(m => m.Project)
             .Include(m => m.MentorTopicRequests)
-            .Include(m => m.TopicVersions);
+            .Include(m => m.TopicVersions)
+            .Include(m => m.SubMentor)
+            .Include(m => m.Mentor)
+            .Include(m => m.Owner)
+            .Include(m => m.Specialty);
 
-        // queryable = queryable.Where(m => m.Status != TopicStatus.ManagerRejected);
+        if (query.Statuses.Count > 0)
+        {
+            queryable = queryable.Where(m => m.Status != null &&
+                                             (query.Statuses.Contains(m.Status.Value)));
+        }
 
         queryable = queryable.Where(m => m.SemesterId == semesterId);
 
@@ -486,6 +498,40 @@ public class TopicRepository : BaseRepository<Topic>, ITopicRepository
         {
             queryable = queryable.Where(m => m.MentorId == userId || m.OwnerId == userId || m.SubMentorId == userId);
         }
+
+        queryable = BaseFilterHelper.Base(queryable, query);
+
+        queryable = Sort(queryable, query);
+
+        var total = queryable.Count();
+        var results = query.IsPagination
+            ? await GetQueryablePagination(queryable, query).ToListAsync()
+            : await queryable.ToListAsync();
+
+        return (results, query.IsPagination ? total : results.Count);
+    }
+
+    public async Task<(List<Topic>, int)> GetTopicInvitesForSubMentor(TopicGetListInviteForSubmentorQuery query,Guid? userId,
+        Guid? semesterId)
+    {
+        var queryable = GetQueryable();
+        queryable = queryable
+            .Include(m => m.TopicRequests)
+            .Include(m => m.Project)
+            .Include(m => m.MentorTopicRequests)
+            .Include(m => m.TopicVersions)
+            .Include(m => m.SubMentor)
+            .Include(m => m.Mentor)
+            .Include(m => m.Owner)
+            .Include(m => m.Specialty);
+
+
+        queryable = queryable.Where(m => m.Status != null &&
+                                         (m.Status == TopicStatus.ManagerApproved));
+
+        queryable = queryable.Where(m => m.SemesterId == semesterId);
+
+        queryable = queryable.Where(m => m.TopicRequests.Any(m => m.ReviewerId == userId && m.Status == TopicRequestStatus.Pending));
 
         queryable = BaseFilterHelper.Base(queryable, query);
 
@@ -543,8 +589,8 @@ public class TopicRepository : BaseRepository<Topic>, ITopicRepository
                                                 e.SemesterId == semesterId &&
                                                 e.Status == TopicStatus.ManagerApproved &&
                                                 e.IsExistedTeam == false
-                                                )
-                                    .ToListAsync();
+            )
+            .ToListAsync();
         return topics;
     }
 
@@ -557,7 +603,7 @@ public class TopicRepository : BaseRepository<Topic>, ITopicRepository
 
         return isExist;
     }
-    
+
     public async Task<List<Topic>> GetTopicWithStatusInStageTopic(List<TopicStatus> topicList, Guid stageTopicId)
     {
         var queryable = GetQueryable();
@@ -565,7 +611,7 @@ public class TopicRepository : BaseRepository<Topic>, ITopicRepository
         var topics = await queryable.Where(e => e.IsDeleted == false &&
                                                 e.StageTopicId == stageTopicId &&
                                                 topicList.Contains((TopicStatus)e.Status))
-                                    .ToListAsync();
+            .ToListAsync();
 
         return topics;
     }
