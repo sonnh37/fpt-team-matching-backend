@@ -367,7 +367,7 @@ public abstract class BaseService<TEntity> : BaseService, IBaseService
             if (doc.RootElement.TryGetProperty("semester", out var semesterElement))
             {
                 string semesterId = semesterElement.GetString();
-                var semester = await _unitOfWork.SemesterRepository.GetById(Guid.Parse(semesterId));
+                var semester = await _unitOfWork.SemesterRepository.GetById(Guid.Parse(semesterId), true);
                 return semester;
             }
         }

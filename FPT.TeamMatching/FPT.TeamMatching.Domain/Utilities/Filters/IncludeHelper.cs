@@ -57,7 +57,7 @@ public static class IncludeHelper
             .Include(e => e.TopicVersions)
             .Include(m => m.Mentor)
             .Include(m => m.SubMentor)
-            .Include(m => m.Semester)
+            .Include(m => m.Semester).ThenInclude(m => m.StageTopics)
             .Include(m => m.Specialty)
             .ThenInclude(m => m.Profession);
         return queryable;

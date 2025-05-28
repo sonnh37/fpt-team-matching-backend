@@ -166,8 +166,8 @@ public class TopicController : ControllerBase
         return Ok(businessResult);
     }
 
-    [HttpPost("update-draft")]
-    public async Task<IActionResult> UpdateDraft([FromQuery] TopicUpdateDraftCommand command)
+    [HttpPut("update-draft")]
+    public async Task<IActionResult> UpdateDraft([FromBody] TopicUpdateDraftCommand command)
     {
         var businessResult = await _service.UpdateDraft(command);
         return Ok(businessResult);

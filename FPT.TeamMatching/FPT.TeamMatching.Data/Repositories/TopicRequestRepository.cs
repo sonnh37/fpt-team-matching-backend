@@ -201,4 +201,16 @@ public class TopicRequestRepository : BaseRepository<TopicRequest>, ITopicReques
 
         return topicRequests;
     }
+    
+    public async Task<List<TopicRequest>> GetByTopicIdAndRole(Guid topicId, string role)
+    {
+        var queryable = GetQueryable();
+
+        var topicRequests = await queryable.Where(e => e.IsDeleted == false &&
+                                                       e.TopicId == topicId &&
+                                                       e.Role == role)
+            .ToListAsync();
+
+        return topicRequests;
+    }
 }

@@ -28,6 +28,8 @@ namespace FPT.TeamMatching.Domain.Contracts.Repositories
 
         Task<List<TopicRequest>?> GetRoleMentorNotApproveInSemester(Guid semesterId);
 
+        Task<List<TopicRequest>> GetByTopicIdAndRole(Guid topicId, string role);
+
         Task<List<TopicRequest>> GetByTopicIdAndRoleAndStatus(Guid topicId, string role, TopicRequestStatus status);
     }
 }

@@ -147,7 +147,7 @@ public class UserService : BaseService<User>, IUserService
             return new ResponseBuilder()
                 .WithData(false)
                 .WithStatus(Const.SUCCESS_CODE)
-                .WithMessage(mentor.Code + " hiện đã SubMentor " + semester.LimitTopicMentorOnly +
+                .WithMessage(subMentor.Email + " hiện đã SubMentor " + semester.LimitTopicMentorOnly +
                              " đề tài. Hãy chọn SubMentor khác!");
         }
         catch (Exception ex)
