@@ -674,7 +674,8 @@ public class UserService : BaseService<User>, IUserService
             //         .WithStatus(Const.FAIL_CODE)
             //         .WithMessage("No upcoming semester!");
             // }
-            var semester = await _unitOfWork.SemesterRepository.GetById(semesterId);
+            // var semester = await _unitOfWork.SemesterRepository.GetById(semesterId);
+            var semester = await GetSemesterInCurrentWorkSpace();
             if (semester == null)
             {
                 return new ResponseBuilder()
