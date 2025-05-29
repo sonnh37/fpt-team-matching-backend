@@ -105,4 +105,11 @@ public class TeamMemberController : ControllerBase
         var result = await _teammemberservice.AddRange(requests);
         return Ok(result); 
     }
+
+    [HttpPut("kick-member/{teamMemberId:guid}")]
+    public async Task<IActionResult> KickMember([FromRoute] Guid teamMemberId)
+    {
+        var result = await _teammemberservice.KickMember(teamMemberId);
+        return Ok(result);
+    }
 }

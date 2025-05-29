@@ -14,6 +14,9 @@ namespace FPT.TeamMatching.Domain.Models.Requests.Commands.Semester
         [Required(ErrorMessage = "Mã học kỳ không được để trống")]
         public string? SemesterCode { get; set; }
 
+        [Required(ErrorMessage = "Tên tiền tố không được để trống")]
+        public string? SemesterPrefixName { get; set; }
+
         [Required(ErrorMessage = "Tên học kỳ không được để trống")]
         public string? SemesterName { get; set; }
 
