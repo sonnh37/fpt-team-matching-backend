@@ -112,7 +112,7 @@ public class ProjectService : BaseService<Project>, IProjectService
             if (project == null) return HandlerFail("Người dùng không có project đang tồn tại");
 
             if (project.Status == ProjectStatus.Canceled)
-                return HandlerFail("Người dùng không có project đang tồn tại trong kì này");
+                return HandlerFail("Người dùng không có project đang tồn tại trong kỳ này");
 
             var result = _mapper.Map<ProjectResult>(project);
 
@@ -140,7 +140,7 @@ public class ProjectService : BaseService<Project>, IProjectService
             if (project == null) return HandlerFail("Người dùng không có project đang tồn tại");
 
             if (project.Status == ProjectStatus.Canceled)
-                return HandlerFail("Người dùng không có project đang tồn tại trong kì này");
+                return HandlerFail("Người dùng không có project đang tồn tại trong  này");
 
             var result = _mapper.Map<ProjectResult>(project);
 
@@ -165,11 +165,11 @@ public class ProjectService : BaseService<Project>, IProjectService
 
             //ki cua stage idea
             var semester = await _semesterRepository.GetSemesterByStageTopicId(stageTopic.Id);
-            if (semester == null) return HandlerFail("Không có kì ứng với đợt duyệt hiện tại!");
+            if (semester == null) return HandlerFail("Không có kỳ ứng với đợt duyệt hiện tại!");
 
             var semesterCurrent = await GetSemesterInCurrentWorkSpace();
             if(semesterCurrent?.Status != SemesterStatus.Preparing)
-                return HandlerFail("Chỉ được tạo ở kì đang chuẩn bị");
+                return HandlerFail("Chỉ được tạo ở  đang chuẩn bị");
             
             var newTeamCode = await _semesterService.GenerateNewTeamCode();
 
@@ -537,7 +537,7 @@ public class ProjectService : BaseService<Project>, IProjectService
             {
                 return new ResponseBuilder()
                 .WithStatus(Const.FAIL_CODE)
-                .WithMessage("Không tìm thấy kì");
+                .WithMessage("Không tìm thấy kỳ");
             }
             var projectsWithMember = await _projectRepository.GetProjectNotInProgressYetInSemester(semester.Id);
             return new ResponseBuilder()
@@ -562,7 +562,7 @@ public class ProjectService : BaseService<Project>, IProjectService
             {
                 return new ResponseBuilder()
                 .WithStatus(Const.FAIL_CODE)
-                .WithMessage("Không tìm thấy kì");
+                .WithMessage("Không tìm thấy kỳ");
             }
             var projectsWithMember = await _projectRepository.GetProjectNotCanceledInSemester(semester.Id);
             return new ResponseBuilder()
@@ -662,7 +662,7 @@ public class ProjectService : BaseService<Project>, IProjectService
             {
                 return new ResponseBuilder()
                 .WithStatus(Const.FAIL_CODE)
-                .WithMessage("Không tìm thấy kì");
+                .WithMessage("Không tìm thấy kỳ");
             }
             var project = await _projectRepository.GetById(projectId);
             if (project == null)
@@ -718,7 +718,7 @@ public class ProjectService : BaseService<Project>, IProjectService
             {
                 return new ResponseBuilder()
                 .WithStatus(Const.FAIL_CODE)
-                .WithMessage("Không tìm thấy kì");
+                .WithMessage("Không tìm thấy kỳ");
             }
             var project = await _projectRepository.GetById(projectId);
             if (project == null)
