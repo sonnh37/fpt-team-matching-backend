@@ -699,8 +699,7 @@ public class UserService : BaseService<User>, IUserService
                 user.ProfileStudent = profileStudents.FirstOrDefault(x => x.UserId == user.Id);
                 user.ProfileStudent ??= new ProfileStudent();
                 user.ProfileStudent.SemesterId = semester.Id;
-              
-                _userXRoleRepository.Add(new UserXRole
+                user.UserXRoles.Add(new UserXRole
                 {
                     UserId = user.Id,
                     RoleId = roleStudent.Id,
@@ -713,7 +712,7 @@ public class UserService : BaseService<User>, IUserService
                 // user.UserXRoles.FirstOrDefault(x => x.RoleId == roleStudent.Id).SemesterId = semester.Id;
             }
 
-            // _userRepository.UpdateRange(listEntity);
+            _userRepository.UpdateRange(listEntity);
             var saveChange = await _unitOfWork.SaveChanges();
             if (!saveChange)
             {
