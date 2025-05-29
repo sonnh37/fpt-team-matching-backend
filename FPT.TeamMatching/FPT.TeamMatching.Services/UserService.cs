@@ -694,8 +694,13 @@ public class UserService : BaseService<User>, IUserService
             var listEntity = _mapper.Map<List<User>>(users);
             var userIds = listEntity.Select(x => x.Id).ToList();
             var profileStudents = await _unitOfWork.ProfileStudentRepository.GetProfileByUserIds(userIds);
+            
             foreach (var user in listEntity)
             {
+                if (await _unitOfWork.UserXRoleRepository.CheckRoleUserInSemester(user.Id, semesterId, "Student"))
+                {
+                    continue;
+                }
                 user.ProfileStudent = profileStudents.FirstOrDefault(x => x.UserId == user.Id);
                 user.ProfileStudent ??= new ProfileStudent();
                 user.ProfileStudent.SemesterId = semester.Id;
