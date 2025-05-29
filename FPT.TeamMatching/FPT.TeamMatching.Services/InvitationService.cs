@@ -96,13 +96,20 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
     {
         try
         {
+            // check semester
+            var semester = await GetSemesterInCurrentWorkSpace();
+            if (semester == null)
+            {
+                return HandlerFail("Không tìm thấy học kỳ");
+            }
             var userIdClaim = GetUserIdFromClaims();
             if (userIdClaim == null)
                 return HandlerFailAuth();
 
             var userId = userIdClaim.Value;
+
             // get by type
-            var (data, total) = await _invitationRepository.GetUserInvitationsByType(query, userId);
+            var (data, total) = await _invitationRepository.GetUserInvitationsByType(query, userId, semester.Id);
             var results = _mapper.Map<List<InvitationResult>>(data);
             var response = new QueryResult(query, results, total);
 
@@ -526,23 +533,27 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
                         i.Status = InvitationStatus.Cancel;
                         await SetBaseEntityForUpdate(i);
                     }
-
                     _invitationRepository.UpdateRange(pendingInvitationsOfSender);
+                }
+                #endregion
 
-                    var saveChange = await _unitOfWork.SaveChanges();
-                    if (!saveChange)
-                    {
-                        return new ResponseBuilder()
-                            .WithStatus(Const.FAIL_CODE)
-                            .WithMessage(Const.FAIL_SAVE_MSG);
-                    }
+                #region Cap nhat team size
+                project.TeamSize += 1;
+                await SetBaseEntityForUpdate(project);
+                _projectRepository.Update(project);
+                #endregion
+
+                var saveChange = await _unitOfWork.SaveChanges();
+                if (!saveChange)
+                {
+                    return new ResponseBuilder()
+                        .WithStatus(Const.FAIL_CODE)
+                        .WithMessage(Const.FAIL_SAVE_MSG);
                 }
 
                 return new ResponseBuilder()
-                    .WithStatus(Const.SUCCESS_CODE)
-                    .WithMessage("Bạn đã đồng ý lời mời tham gia nhóm");
-
-                #endregion
+                   .WithStatus(Const.SUCCESS_CODE)
+                   .WithMessage("Bạn đã đồng ý lời mời tham gia nhóm");
             }
 
             return new ResponseBuilder()
@@ -753,14 +764,25 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
                         i.Status = InvitationStatus.Cancel;
                         await SetBaseEntityForUpdate(i);
                     }
-
                     _invitationRepository.UpdateRange(pendingInvitationsOfSender);
+                }
+                #endregion
+
+                #region Cap nhat team size
+                project.TeamSize += 1;
+                await SetBaseEntityForUpdate(project);
+                _projectRepository.Update(project);
+                #endregion
+
+                var isSuccess = await _unitOfWork.SaveChanges();
+                if (!isSuccess)
+                {
+                    return HandlerError(Const.FAIL_SAVE_MSG);
                 }
 
                 return new ResponseBuilder()
                     .WithStatus(Const.SUCCESS_CODE)
                     .WithMessage("Bạn đã đồng ý yêu cầu tham gia nhóm!");
-                #endregion
             }
 
             return new ResponseBuilder()

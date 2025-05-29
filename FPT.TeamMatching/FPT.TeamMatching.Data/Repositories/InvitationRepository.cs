@@ -55,9 +55,9 @@ public class InvitationRepository : BaseRepository<Invitation>, IInvitationRepos
     }
    
 
-    public async Task<(List<Invitation>, int)> GetUserInvitationsByType(InvitationGetByTypeQuery query, Guid userId)
+    public async Task<(List<Invitation>, int)> GetUserInvitationsByType(InvitationGetByTypeQuery query, Guid userId, Guid semesterId)
     {
-        var queryable = GetQueryable(m => m.Type == query.Type);
+        var queryable = GetQueryable(m => m.Type == query.Type && m.Project.SemesterId == semesterId);
         queryable = queryable
             .Include(m => m.Project)
             .Include(m => m.Receiver)
