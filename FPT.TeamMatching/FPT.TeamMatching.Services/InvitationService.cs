@@ -251,7 +251,7 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
 
             //ki cua stage topic
             var semester = await _semesterRepository.GetSemesterByStageTopicId(stageTopic.Id);
-            if (semester == null) return HandlerFail("Không có kì ứng với đợt duyệt hiện tại!");
+            if (semester == null) return HandlerFail("Không có kỳ ứng với đợt duyệt hiện tại!");
 
             //check nguoi nhan
             var user = await GetUserAsync();
@@ -448,7 +448,7 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
                 {
                     return new ResponseBuilder()
                         .WithStatus(Const.FAIL_CODE)
-                        .WithMessage("Không có kì");
+                        .WithMessage("Không có kỳ");
                 }
 
                 //get thanh vien cua team
@@ -475,7 +475,7 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
                 {
                     return new ResponseBuilder()
                         .WithStatus(Const.FAIL_CODE)
-                        .WithMessage("Không tìm thấy kì");
+                        .WithMessage("Không tìm thấy ");
                 }
 
                 var maxTeamSize = semester.MaxTeamSize;
@@ -684,7 +684,7 @@ public class InvitationService : BaseService<Invitation>, IInvitationService
                 {
                     return new ResponseBuilder()
                         .WithStatus(Const.FAIL_CODE)
-                        .WithMessage("Không có kì");
+                        .WithMessage("Không có ");
                 }
 
                 //get thanh vien cua team

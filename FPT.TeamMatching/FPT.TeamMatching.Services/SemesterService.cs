@@ -176,14 +176,14 @@ namespace FPT.TeamMatching.Services
             {
                 return new ResponseBuilder()
                     .WithStatus(Const.FAIL_CODE)
-                    .WithMessage("Không tìm thấy kì");
+                    .WithMessage("Không tìm thấy ");
             }
             //status phai la preparing, ongoing, closed
             if (status == SemesterStatus.NotStarted)
             {
                 return new ResponseBuilder()
                     .WithStatus(Const.FAIL_CODE)
-                    .WithMessage("Trạng thái tiếp theo của kì không thể là Not Started");
+                    .WithMessage("Trạng thái tiếp theo của  không thể là Not Started");
             }
             //status = Preparing
             if (status == SemesterStatus.Preparing)
@@ -218,7 +218,7 @@ namespace FPT.TeamMatching.Services
                 {
                     return new ResponseBuilder()
                         .WithStatus(Const.FAIL_CODE)
-                        .WithMessage("Không tìm thấy nhóm nào đang trong kì");
+                        .WithMessage("Không tìm thấy nhóm nào đang trong kỳ");
                 }
                 foreach (var project in projectsInProgress)
                 {

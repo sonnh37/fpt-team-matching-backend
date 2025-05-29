@@ -457,7 +457,7 @@ public class UserService : BaseService<User>, IUserService
             {
                 return new ResponseBuilder()
                     .WithStatus(Const.FAIL_CODE)
-                    .WithMessage("Không tìm thấy kì");
+                    .WithMessage("Không tìm thấy kỳ");
             }
 
             var roleStudent = await _unitOfWork.RoleRepository.GetByRoleName("Student");
@@ -602,7 +602,7 @@ public class UserService : BaseService<User>, IUserService
             {
                 return new ResponseBuilder()
                     .WithStatus(Const.FAIL_CODE)
-                    .WithMessage("Không tìm thấy kì");
+                    .WithMessage("Không tìm thấy ");
             }
 
             var roleStudent = await _unitOfWork.RoleRepository.GetByRoleName("Student");
@@ -680,7 +680,7 @@ public class UserService : BaseService<User>, IUserService
             {
                 return new ResponseBuilder()
                     .WithStatus(Const.FAIL_CODE)
-                    .WithMessage("Không tìm thấy kì");
+                    .WithMessage("Không tìm thấy kỳ");
             }
 
             var roleStudent = await _unitOfWork.RoleRepository.GetByRoleName("Student");
