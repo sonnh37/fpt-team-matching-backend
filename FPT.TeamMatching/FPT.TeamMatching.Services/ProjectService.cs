@@ -160,21 +160,21 @@ public class ProjectService : BaseService<Project>, IProjectService
         try
         {
             //lay ra stageTopic hien tai
-            var stageTopic = await _stageTopicRepository.GetCurrentStageTopic();
-            if (stageTopic == null) return HandlerFail("Không có đợt duyệt ứng với ngày hiện tại!");
+            //var stageTopic = await _stageTopicRepository.GetCurrentStageTopic();
+            //if (stageTopic == null) return HandlerFail("Không có đợt duyệt ứng với ngày hiện tại!");
 
             //ki cua stage idea
-            var semester = await _semesterRepository.GetSemesterByStageTopicId(stageTopic.Id);
-            if (semester == null) return HandlerFail("Không có kỳ ứng với đợt duyệt hiện tại!");
+            //var semester = await _semesterRepository.GetSemesterByStageTopicId(stageTopic.Id);
+            //if (semester == null) return HandlerFail("Không có kì ứng với đợt duyệt hiện tại!");
 
             var semesterCurrent = await GetSemesterInCurrentWorkSpace();
             if(semesterCurrent?.Status != SemesterStatus.Preparing)
-                return HandlerFail("Chỉ được tạo ở  đang chuẩn bị");
+                return HandlerFail("Hiện tại không được tạo nhóm");
             
             var newTeamCode = await _semesterService.GenerateNewTeamCode();
 
-            var codeExist = await _projectRepository.IsExistedTeamCode(newTeamCode);
-            if (codeExist) return HandlerFail("Trùng mã nhóm!");
+            //var codeExist = await _projectRepository.IsExistedTeamCode(newTeamCode);
+            //if (codeExist) return HandlerFail("Trùng mã nhóm!");
 
             // Create project
             var project = new Project
