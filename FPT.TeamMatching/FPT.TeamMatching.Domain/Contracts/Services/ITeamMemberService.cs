@@ -10,5 +10,7 @@ public interface ITeamMemberService : IBaseService
     Task<BusinessResult> GetTeamMemberByUserId();
     Task<BusinessResult> UpdateTeamMemberByMentor(List<MentorUpdate> requests);
     Task<BusinessResult> UpdateTeamMemberByManager(ManagerUpdate requests);
-    Task<BusinessResult> AddRange(TeamMemberAddRangeCommand command);
+    Task<BusinessResult> AddRange(TeamMemberAddRangeCommand command); 
+    Task<BusinessResult> KickMember(Guid teamMemberId); 
+
 }

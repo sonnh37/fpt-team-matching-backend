@@ -63,20 +63,25 @@ public class TeamMemberService : BaseService<TeamMember>, ITeamMemberService
             var teamMemberCurrentUser = await _teamMemberRepository.GetTeamMemberActiveByUserId(userId.Value, semesterWs.Id);
             if (teamMemberCurrentUser == null) return HandlerFail("Người dùng chưa có nhóm");
 
+            //update team member
             teamMemberCurrentUser.LeaveDate = DateTime.UtcNow;
-            teamMemberCurrentUser.IsDeleted = true;
-
             await SetBaseEntityForUpdate(teamMemberCurrentUser);
-            _teamMemberRepository.DeletePermanently(teamMemberCurrentUser);
+            _teamMemberRepository.Update(teamMemberCurrentUser);
+
+            //update team size -1
+            var project = await _projectRepository.GetProjectByUserIdLogin((Guid)userId);
+            if (project == null) return HandlerFail("Không tìm thấy nhóm");
+            project.TeamSize -= 1;
+            await SetBaseEntityForUpdate(project);
+            _projectRepository.Update(project);
 
             var saveChanges = await _unitOfWork.SaveChanges();
 
-            if (!saveChanges) return HandlerFail("Đã xảy ra lỗi khi lưu dữ liệu");
+            if (!saveChanges) return HandlerFail(Const.FAIL_SAVE_MSG);
 
             return new ResponseBuilder()
-                .WithData(teamMemberCurrentUser)
-                .WithMessage(Const.SUCCESS_SAVE_MSG)
-                .WithStatus(Const.SUCCESS_CODE);
+                .WithStatus(Const.SUCCESS_CODE)
+                .WithMessage("Rời nhóm thành công");
         }
         catch (Exception ex)
         {
@@ -420,6 +425,46 @@ public class TeamMemberService : BaseService<TeamMember>, ITeamMemberService
         {
             Console.WriteLine(e);
             throw;
+        }
+    }
+
+    public async Task<BusinessResult> KickMember(Guid teamMemberId)
+    {
+        try
+        {
+            var tm = await _teamMemberRepository.GetById(teamMemberId);
+            if (tm == null)
+            {
+                return HandlerFail("Không tìm thấy thành viên");
+            }
+            tm.LeaveDate = DateTime.UtcNow;
+            await SetBaseEntityForUpdate(tm);
+            _teamMemberRepository.Update(tm);
+
+            var project = await _projectRepository.GetById(tm.ProjectId);
+            if (project == null)
+            {
+                return HandlerFail("Không tìm thấy nhóm");
+            }
+            project.TeamSize -= 1;
+            await SetBaseEntityForUpdate(project);
+            _projectRepository.Update(project);
+
+            var isSuccess = await _unitOfWork.SaveChanges();
+            if (!isSuccess)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage(Const.FAIL_SAVE_MSG);
+            }
+
+            return new ResponseBuilder()
+                .WithStatus(Const.SUCCESS_CODE)
+                .WithMessage(Const.SUCCESS_SAVE_MSG);
+        }
+        catch (Exception ex)
+        {
+            return HandlerError(ex.Message);
         }
     }
 }

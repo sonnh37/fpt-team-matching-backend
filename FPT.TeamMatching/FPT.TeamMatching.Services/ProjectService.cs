@@ -278,7 +278,7 @@ public class ProjectService : BaseService<Project>, IProjectService
             if (userId != null)
             {
                 var project = await _projectRepository.GetProjectOfUserLogin((Guid)userId);
-                if (project != null && project.Status == Domain.Enums.ProjectStatus.Pending)
+                if (project != null && (project.Status == Domain.Enums.ProjectStatus.Pending || project.Status == ProjectStatus.Forming))
                 {
                     if (project.LeaderId != userId)
                     {
