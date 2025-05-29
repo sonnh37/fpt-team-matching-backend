@@ -520,6 +520,7 @@ public class UserService : BaseService<User>, IUserService
                             {
                                 Email = email,
                                 Code = code,
+                                Password = BCrypt.Net.BCrypt.HashPassword("123456"),
                                 FirstName = firstname,
                                 LastName = lastname,
                                 Department = Department.HoChiMinh,
@@ -619,6 +620,7 @@ public class UserService : BaseService<User>, IUserService
                 Code = command.Code,
                 FirstName = command.FirstName,
                 LastName = command.LastName,
+                Password = BCrypt.Net.BCrypt.HashPassword("123456"),
                 Department = Department.HoChiMinh,
                 Username = command.Username,
                 Phone = command.Phone,
@@ -899,6 +901,7 @@ public class UserService : BaseService<User>, IUserService
                 LastName = command.LastName,
                 Department = Department.HoChiMinh,
                 Username = command.Username,
+                Password = BCrypt.Net.BCrypt.HashPassword("123456"),
                 Phone = command.Phone,
                 UserXRoles = new List<UserXRole>()
                 {
