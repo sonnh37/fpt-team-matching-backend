@@ -258,7 +258,7 @@ public class NotificationService : BaseService<Notification>, INotificationServi
             var userId = userIdClaim.Value;
 
             var userNoti = await _unitOfWork.NotificationXUserRepository.GetUnreadByUserId(userId);
-            if (userNoti == null)
+            if (userNoti.Count == 0)
                 return new ResponseBuilder()
                     .WithStatus(Const.FAIL_CODE)
                     .WithMessage("Không tìm thấy noti");
