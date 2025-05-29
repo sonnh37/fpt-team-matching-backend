@@ -97,14 +97,14 @@ public class BlogService : BaseService<Blog>, IBlogService
             {
                 return new ResponseBuilder()
                     .WithStatus(Const.FAIL_CODE)
-                    .WithMessage("Không có kì ứng với ngày hiện tại");
+                    .WithMessage("Không có kỳ ứng với ngày hiện tại");
             }
             var result = await _blogrepository.GetBlogFindMemberInCurrentSemester(semester.Id);
             if (result.Count == 0)
             {
                 return new ResponseBuilder()
                 .WithStatus(Const.NOT_FOUND_CODE)
-                .WithMessage("Không có bài blog tuyển thành viên nào trong kì hiện tại");
+                .WithMessage("Không có bài blog tuyển thành viên nào trong  hiện tại");
             }
             return new ResponseBuilder()
                 .WithData(_mapper.Map<List<BlogResult>>(result))
