@@ -358,9 +358,10 @@ namespace FPT.TeamMatching.Services
                     return HandlerFail("Kích thước nhóm tối đa phải lớn hơn kích thước nhóm tối thiểu");
                 }
 
-                semester = _mapper.Map<Semester>(command);
-                await SetBaseEntityForUpdate(semester);
-                _semesterRepository.Update(semester);
+                var mapSemester = _mapper.Map<Semester>(command);
+                mapSemester.Status = semester.Status;
+                await SetBaseEntityForUpdate(mapSemester);
+                _semesterRepository.Update(mapSemester);
                 var isSuccess = await _unitOfWork.SaveChanges();
                 if (!isSuccess)
                 {
