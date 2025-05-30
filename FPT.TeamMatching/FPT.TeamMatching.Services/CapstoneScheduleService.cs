@@ -119,7 +119,7 @@ namespace FPT.TeamMatching.Services
                 {
                     return new ResponseBuilder()
                         .WithStatus(Const.FAIL_CODE)
-                        .WithMessage("Không tìm thấy kì hiện tại");
+                        .WithMessage("Không tìm thấy kỳ hiện tại");
                 }
              
                 var capstoneSchedules1 = await _capstoneScheduleRepository.GetBySemesterIdAndStage(currentSemester.Id, 1);    

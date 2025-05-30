@@ -294,7 +294,12 @@ public class UserService : BaseService<User>, IUserService
     {
         try
         {
-            var (data, total) = await _userRepository.GetUsersInSemester(query);
+            var semester = await GetSemesterInCurrentWorkSpace();
+            if (semester == null)
+            {
+                return HandlerFail("Không tìm thấy học kỳ");
+            }
+            var (data, total) = await _userRepository.GetUsersInSemester(query, semester.Id);
             var results = _mapper.Map<List<UserResult>>(data);
             var response = new QueryResult(query, results, total);
 
@@ -320,7 +325,7 @@ public class UserService : BaseService<User>, IUserService
             if (user != null)
                 return new ResponseBuilder()
                     .WithStatus(Const.FAIL_CODE)
-                    .WithMessage("The email has already been registered.");
+                    .WithMessage("Email đã được đăng ký trước đó.");
 
             // set password
             if (command.Password != null)
@@ -457,7 +462,7 @@ public class UserService : BaseService<User>, IUserService
             {
                 return new ResponseBuilder()
                     .WithStatus(Const.FAIL_CODE)
-                    .WithMessage("Không tìm thấy kì");
+                    .WithMessage("Không tìm thấy kỳ");
             }
 
             var roleStudent = await _unitOfWork.RoleRepository.GetByRoleName("Student");
@@ -520,6 +525,7 @@ public class UserService : BaseService<User>, IUserService
                             {
                                 Email = email,
                                 Code = code,
+                                Password = BCrypt.Net.BCrypt.HashPassword("123456"),
                                 FirstName = firstname,
                                 LastName = lastname,
                                 Department = Department.HoChiMinh,
@@ -602,7 +608,7 @@ public class UserService : BaseService<User>, IUserService
             {
                 return new ResponseBuilder()
                     .WithStatus(Const.FAIL_CODE)
-                    .WithMessage("Không tìm thấy kì");
+                    .WithMessage("Không tìm thấy ");
             }
 
             var roleStudent = await _unitOfWork.RoleRepository.GetByRoleName("Student");
@@ -619,6 +625,7 @@ public class UserService : BaseService<User>, IUserService
                 Code = command.Code,
                 FirstName = command.FirstName,
                 LastName = command.LastName,
+                Password = BCrypt.Net.BCrypt.HashPassword("123456"),
                 Department = Department.HoChiMinh,
                 Username = command.Username,
                 Phone = command.Phone,
@@ -674,12 +681,13 @@ public class UserService : BaseService<User>, IUserService
             //         .WithStatus(Const.FAIL_CODE)
             //         .WithMessage("No upcoming semester!");
             // }
-            var semester = await _unitOfWork.SemesterRepository.GetById(semesterId);
+            // var semester = await _unitOfWork.SemesterRepository.GetById(semesterId);
+            var semester = await GetSemesterInCurrentWorkSpace();
             if (semester == null)
             {
                 return new ResponseBuilder()
                     .WithStatus(Const.FAIL_CODE)
-                    .WithMessage("Không tìm thấy kì");
+                    .WithMessage("Không tìm thấy kỳ");
             }
 
             var roleStudent = await _unitOfWork.RoleRepository.GetByRoleName("Student");
@@ -693,13 +701,17 @@ public class UserService : BaseService<User>, IUserService
             var listEntity = _mapper.Map<List<User>>(users);
             var userIds = listEntity.Select(x => x.Id).ToList();
             var profileStudents = await _unitOfWork.ProfileStudentRepository.GetProfileByUserIds(userIds);
+            
             foreach (var user in listEntity)
             {
+                if (await _unitOfWork.UserXRoleRepository.CheckRoleUserInSemester(user.Id, semesterId, "Student"))
+                {
+                    continue;
+                }
                 user.ProfileStudent = profileStudents.FirstOrDefault(x => x.UserId == user.Id);
                 user.ProfileStudent ??= new ProfileStudent();
                 user.ProfileStudent.SemesterId = semester.Id;
-              
-                _userXRoleRepository.Add(new UserXRole
+                user.UserXRoles.Add(new UserXRole
                 {
                     UserId = user.Id,
                     RoleId = roleStudent.Id,
@@ -712,7 +724,7 @@ public class UserService : BaseService<User>, IUserService
                 // user.UserXRoles.FirstOrDefault(x => x.RoleId == roleStudent.Id).SemesterId = semester.Id;
             }
 
-            // _userRepository.UpdateRange(listEntity);
+            _userRepository.UpdateRange(listEntity);
             var saveChange = await _unitOfWork.SaveChanges();
             if (!saveChange)
             {
@@ -894,6 +906,7 @@ public class UserService : BaseService<User>, IUserService
                 LastName = command.LastName,
                 Department = Department.HoChiMinh,
                 Username = command.Username,
+                Password = BCrypt.Net.BCrypt.HashPassword("123456"),
                 Phone = command.Phone,
                 UserXRoles = new List<UserXRole>()
                 {

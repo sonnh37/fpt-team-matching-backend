@@ -95,7 +95,7 @@ public class TopicService : BaseService<Topic>, ITopicService
             var semester = await GetSemesterInCurrentWorkSpace();
             if (semester == null)
             {
-                return HandlerFail("Không tìm thấy kì");
+                return HandlerFail("Không tìm thấy ");
             }
 
             if (semester.Status != SemesterStatus.Preparing)
@@ -193,7 +193,7 @@ public class TopicService : BaseService<Topic>, ITopicService
             var semester = await GetSemesterInCurrentWorkSpace();
             if (semester == null)
             {
-                return HandlerFail("Không tìm thấy kì");
+                return HandlerFail("Không tìm thấy kỳ");
             }
 
             if (semester.Status != SemesterStatus.Preparing)
@@ -268,11 +268,11 @@ public class TopicService : BaseService<Topic>, ITopicService
         {
             if (topicNotDraftOrReject.Status == TopicStatus.ManagerApproved)
             {
-                return HandlerFail("Sinh viên đã có đề tài được duyệt ở kì này");
+                return HandlerFail("Sinh viên đã có đề tài được duyệt ở  này");
             }
             else
             {
-                return HandlerFail("Sinh viên có đề tài đang trong quá trình duyệt ở kì này");
+                return HandlerFail("Sinh viên có đề tài đang trong quá trình duyệt ở kỳ này");
             }
         }
 
@@ -325,7 +325,7 @@ public class TopicService : BaseService<Topic>, ITopicService
             var semester = await GetSemesterInCurrentWorkSpace();
             if (semester == null)
             {
-                return HandlerFail("Không tìm thấy kì");
+                return HandlerFail("Không tìm thấy ");
             }
 
 
@@ -436,7 +436,7 @@ public class TopicService : BaseService<Topic>, ITopicService
         var semester = await GetSemesterInCurrentWorkSpace();
         if (semester == null)
         {
-            return HandlerFail("Không tìm thấy kì");
+            return HandlerFail("Không tìm thấy kỳ");
         }
 
         if (semester.Status != SemesterStatus.Preparing)
@@ -939,7 +939,7 @@ public class TopicService : BaseService<Topic>, ITopicService
         //    .Include(e => e.UserXRoles).ThenInclude(e => e.Role).SingleOrDefaultAsync();
         //var semesterGetUpComing = await _semesterRepository.GetUpComingSemester();
 
-        //// Nếu như kì sắp tới mà mentor chưa đc role student thì return
+        //// Nếu như kỳ sắp tới mà mentor chưa đc role student thì return
         //if (owner?.UserXRoles?.Any(e => e.Role?.RoleName == "Mentor" && semesterGetUpComing?.Id == e.SemesterId) ==
         //    true)
         //    return;

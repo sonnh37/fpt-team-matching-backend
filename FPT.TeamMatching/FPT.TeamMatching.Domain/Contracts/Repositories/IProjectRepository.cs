@@ -40,4 +40,5 @@ public interface IProjectRepository : IBaseRepository<Project>
     Task<Project> GetByIdAsNoTracking(Guid projectId);
 
     Task<Project?> GetProjectWithStatusByLeaderId(Guid leaderId, List<ProjectStatus> listStatus);
+    Task<Project?> GetProjectByUserLogin(Guid userId);
 }

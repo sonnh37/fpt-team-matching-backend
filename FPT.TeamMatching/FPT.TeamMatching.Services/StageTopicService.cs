@@ -32,7 +32,7 @@ namespace FPT.TeamMatching.Services
                 var semester = await GetSemesterInCurrentWorkSpace();
                 if (semester == null)
                 {
-                    return HandlerFail("Không tìm thấy kì");
+                    return HandlerFail("Không tìm thấy kỳ");
                 }
                 if (semester.Status != SemesterStatus.Preparing)
                 {
@@ -100,7 +100,7 @@ namespace FPT.TeamMatching.Services
             try
             {
                 var semester = await _unitOfWork.SemesterRepository.GetUpComingSemester();
-                if (semester == null) return HandlerFail("Không tìm thấy kì");
+                if (semester == null) return HandlerFail("Không tìm thấy kỳ");
 
                 var entity = await _stageTopicRepositoty.GetByStageNumberAndSemester(number, semester.Id);
                 var result = _mapper.Map<TResult>(entity);
@@ -202,7 +202,7 @@ namespace FPT.TeamMatching.Services
                 var semester = await GetSemesterInCurrentWorkSpace();
                 if (semester == null)
                 {
-                    return HandlerFail("Không tìm thấy kì");
+                    return HandlerFail("Không tìm thấy kỳ");
                 }
                 if (semester.Status != SemesterStatus.Preparing)
                 {

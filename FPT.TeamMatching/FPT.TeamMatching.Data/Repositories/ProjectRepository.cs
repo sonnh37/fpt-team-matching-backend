@@ -141,32 +141,29 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
     {
         var teamMember = await _context.TeamMembers.Where(e => e.UserId == userId &&
                                                                e.LeaveDate == null &&
-                                                               // (e.Status != TeamMemberStatus.Fail2) &&
                                                                e.IsDeleted == false)
             .OrderByDescending(m => m.CreatedDate)
             .FirstOrDefaultAsync();
         if (teamMember == null) return null;
-        
 
         var queryable = GetQueryable().Where(e => e.Id == teamMember.ProjectId);
 
         queryable = queryable.Include(e => e.TeamMembers)
-            .ThenInclude(e => e.User)
-            .Include(e => e.Invitations)
-            .Include(x => x.Reviews)
-            .Include(x => x.Topic)
-            .Include(x => x.Topic).ThenInclude(m => m.Owner)
-            .Include(x => x.Topic).ThenInclude(m => m.Mentor)
-            .Include(x => x.Topic).ThenInclude(m => m.SubMentor)
-            .Include(x => x.Topic).ThenInclude(m => m.Specialty)
-            .Include(x => x.Topic).ThenInclude(m => m.StageTopic)
-            .Include(x => x.Topic).ThenInclude(m => m.Specialty).ThenInclude(m => m.Profession);
+                            .ThenInclude(e => e.User)
+                            .Include(e => e.Invitations)
+                            .Include(x => x.Reviews)
+                            .Include(x => x.Topic)
+                            .Include(x => x.Topic).ThenInclude(m => m.Owner)
+                            .Include(x => x.Topic).ThenInclude(m => m.Mentor)
+                            .Include(x => x.Topic).ThenInclude(m => m.SubMentor)
+                            .Include(x => x.Topic).ThenInclude(m => m.Specialty)
+                            .Include(x => x.Topic).ThenInclude(m => m.StageTopic)
+                            .Include(x => x.Topic).ThenInclude(m => m.Specialty).ThenInclude(m => m.Profession);
 
         queryable = queryable.Where(m => m.Topic != null &&
                                          m.Topic.StageTopic != null &&
                                          m.Topic.StageTopic.SemesterId == semesterId
         );
-
 
         return queryable.FirstOrDefault();
     }
@@ -508,5 +505,18 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
                                                          listStatus.Contains((ProjectStatus)e.Status))
                                              .FirstOrDefaultAsync();
         return project;
+    }
+
+    public async Task<Project?> GetProjectByUserLogin(Guid userId)
+    {
+        var teamMember = await _context.TeamMembers.Where(e => e.UserId == userId &&
+                                                               e.LeaveDate == null &&
+                                                               (e.Status != TeamMemberStatus.Fail2) &&
+                                                               e.IsDeleted == false)
+            .OrderByDescending(m => m.CreatedDate)
+            .FirstOrDefaultAsync();
+        if (teamMember == null) return null;
+        var queryable = await GetQueryable().Where(e => e.Id == teamMember.ProjectId).FirstOrDefaultAsync();
+        return queryable;
     }
 }
