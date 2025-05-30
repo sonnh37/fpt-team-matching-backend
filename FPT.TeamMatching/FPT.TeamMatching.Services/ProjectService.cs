@@ -168,9 +168,9 @@ public class ProjectService : BaseService<Project>, IProjectService
             //if (semester == null) return HandlerFail("Không có kì ứng với đợt duyệt hiện tại!");
 
             var semesterCurrent = await GetSemesterInCurrentWorkSpace();
-            if(semesterCurrent?.Status != SemesterStatus.Preparing)
+            if (semesterCurrent?.Status != SemesterStatus.Preparing)
                 return HandlerFail("Hiện tại không được tạo nhóm");
-            
+
             var newTeamCode = await _semesterService.GenerateNewTeamCode();
 
             //var codeExist = await _projectRepository.IsExistedTeamCode(newTeamCode);
@@ -582,7 +582,7 @@ public class ProjectService : BaseService<Project>, IProjectService
     {
         try
         {
-            var semester =  await GetSemesterInCurrentWorkSpace();
+            var semester = await GetSemesterInCurrentWorkSpace();
             if (command.TeamMembers.Count < semester.MinTeamSize || command.TeamMembers.Count > semester.MaxTeamSize)
             {
                 return new ResponseBuilder()
@@ -623,22 +623,22 @@ public class ProjectService : BaseService<Project>, IProjectService
 
             topic.IsExistedTeam = true;
             _unitOfWork.TopicRepository.Update(topic);
-            
-             var saveChanges = await _unitOfWork.SaveChanges();
-             if (!saveChanges)
-             {
-                 return new ResponseBuilder()
-                     .WithStatus(Const.FAIL_CODE)
-                     .WithMessage(Const.FAIL_SAVE_MSG);
-             }
-             
-             //notification to team members
-             await _notificationService.CreateForTeam(new NotificationCreateForTeam
-             {
-                 Description = "Bạn đã được thêm vào nhóm do quản lí xếp",
-                 ProjectId = entity.Id,
-                 Note = null
-             });
+
+            var saveChanges = await _unitOfWork.SaveChanges();
+            if (!saveChanges)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage(Const.FAIL_SAVE_MSG);
+            }
+
+            //notification to team members
+            await _notificationService.CreateForTeam(new NotificationCreateForTeam
+            {
+                Description = "Bạn đã được thêm vào nhóm do quản lí xếp",
+                ProjectId = entity.Id,
+                Note = null
+            });
 
             return new ResponseBuilder()
                     .WithStatus(Const.SUCCESS_CODE)
@@ -684,7 +684,7 @@ public class ProjectService : BaseService<Project>, IProjectService
                 .WithStatus(Const.FAIL_CODE)
                 .WithMessage("Số lượng thành viên của nhóm phải <= " + semester.MaxTeamSize + " và >= " + semester.MinTeamSize);
             }
-            
+
             //chot nhom doi status sang Pending
             project.Status = ProjectStatus.Pending;
             await SetBaseEntityForUpdate(project);
@@ -709,7 +709,7 @@ public class ProjectService : BaseService<Project>, IProjectService
         }
     }
 
-    public async Task<BusinessResult> BlockProjectByManager(Guid projectId)
+    public async Task<BusinessResult> BlockProjectByManager(Guid projectId, BlockProjectByManager projectStatus)
     {
         try
         {
@@ -727,30 +727,38 @@ public class ProjectService : BaseService<Project>, IProjectService
                 .WithStatus(Const.FAIL_CODE)
                 .WithMessage("Không tìm thấy nhóm");
             }
-            if (project.TopicId == null)
+            if (projectStatus.status == ProjectStatus.InProgress)
             {
-                return new ResponseBuilder()
-                .WithStatus(Const.FAIL_CODE)
-                .WithMessage("Nhóm chưa có đề tài");
-            }
-            var members = await _teamMemberRepository.GetMembersOfTeamByProjectId(projectId);
-            if (members.Count() < semester.MinTeamSize || members.Count() > semester.MaxTeamSize)
-            {
-                return new ResponseBuilder()
-                .WithStatus(Const.FAIL_CODE)
-                .WithMessage("Số lượng thành viên của nhóm phải <= " + semester.MaxTeamSize + " và >= " + semester.MinTeamSize);
-            }
+                if (project.TopicId == null)
+                {
+                    return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("Nhóm chưa có đề tài");
+                }
+                var members = await _teamMemberRepository.GetMembersOfTeamByProjectId(projectId);
+                if (members.Count() < semester.MinTeamSize || members.Count() > semester.MaxTeamSize)
+                {
+                    return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("Số lượng thành viên của nhóm phải <= " + semester.MaxTeamSize + " và >= " + semester.MinTeamSize);
+                }
 
-            //chot nhom doi status sang InProgress va gen team code
-            var teamCode = await _semesterService.GenerateNewTeamCode();
-            if (teamCode == null)
-            {
-                return new ResponseBuilder()
-               .WithStatus(Const.FAIL_CODE)
-               .WithMessage("Xảy ra lỗi khi gen team code");
+                //chot nhom doi status sang InProgress va gen team code
+                var teamCode = await _semesterService.GenerateNewTeamCode();
+                if (teamCode == null)
+                {
+                    return new ResponseBuilder()
+                   .WithStatus(Const.FAIL_CODE)
+                   .WithMessage("Xảy ra lỗi khi gen team code");
+                }
+                project.TeamCode = teamCode;
+                project.Status = ProjectStatus.InProgress;
             }
-            project.TeamCode = teamCode;
-            project.Status = ProjectStatus.InProgress;
+            else
+            {
+                project.Status = ProjectStatus.Forming;
+            }
+            
             await SetBaseEntityForUpdate(project);
             _projectRepository.Update(project);
 
