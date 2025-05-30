@@ -294,7 +294,12 @@ public class UserService : BaseService<User>, IUserService
     {
         try
         {
-            var (data, total) = await _userRepository.GetUsersInSemester(query);
+            var semester = await GetSemesterInCurrentWorkSpace();
+            if (semester == null)
+            {
+                return HandlerFail("Không tìm thấy học kỳ");
+            }
+            var (data, total) = await _userRepository.GetUsersInSemester(query, semester.Id);
             var results = _mapper.Map<List<UserResult>>(data);
             var response = new QueryResult(query, results, total);
 
@@ -320,7 +325,7 @@ public class UserService : BaseService<User>, IUserService
             if (user != null)
                 return new ResponseBuilder()
                     .WithStatus(Const.FAIL_CODE)
-                    .WithMessage("The email has already been registered.");
+                    .WithMessage("Email đã được đăng ký trước đó.");
 
             // set password
             if (command.Password != null)
