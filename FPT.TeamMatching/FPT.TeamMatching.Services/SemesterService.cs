@@ -197,7 +197,7 @@ namespace FPT.TeamMatching.Services
             {
                 //check xem còn nhóm nào đang pending k
                 var projects = await _projectRepository.GetProjectNotInProgressYetInSemester(semester.Id);
-                if (projects.Count() >= 0)
+                if (projects.Count() > 0)
                 {
                     return new ResponseBuilder()
                         .WithStatus(Const.FAIL_CODE)
@@ -206,7 +206,7 @@ namespace FPT.TeamMatching.Services
 
                 //check xem còn student nào chưa có nhóm k
                 var students = await _userRepository.GetStudentDoNotHaveTeam(semester.Id);
-                if (students.Count() >= 0)
+                if (students.Count() > 0)
                 {
                     return new ResponseBuilder()
                         .WithStatus(Const.FAIL_CODE)

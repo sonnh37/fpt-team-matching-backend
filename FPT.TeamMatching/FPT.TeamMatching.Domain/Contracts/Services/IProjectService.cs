@@ -1,5 +1,6 @@
 ﻿using FPT.TeamMatching.Domain.Contracts.Services.Bases;
 using FPT.TeamMatching.Domain.Entities;
+using FPT.TeamMatching.Domain.Enums;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Projects;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Base;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Projects;
@@ -32,6 +33,6 @@ public interface IProjectService : IBaseService
     Task<BusinessResult> ManagerCreateProject(ProjectCreateByManagerCommand command);
 
     Task<BusinessResult> SubmitBlockProjectByStudent(Guid projectId);
-    Task<BusinessResult> BlockProjectByManager(Guid projectId);
+    Task<BusinessResult> BlockProjectByManager(Guid projectId, BlockProjectByManager projectStatus);
     Task<BusinessResult> CancelProjectByManager(Guid projectId);
 }

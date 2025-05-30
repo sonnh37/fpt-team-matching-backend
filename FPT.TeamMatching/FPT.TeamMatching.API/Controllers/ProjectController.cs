@@ -1,5 +1,6 @@
 ﻿using FPT.TeamMatching.Domain.Contracts.Services;
 using FPT.TeamMatching.Domain.Entities;
+using FPT.TeamMatching.Domain.Enums;
 using FPT.TeamMatching.Domain.Models.Requests.Commands.Projects;
 using FPT.TeamMatching.Domain.Models.Requests.Queries.Projects;
 using FPT.TeamMatching.Domain.Models.Results;
@@ -171,9 +172,9 @@ public class ProjectController : ControllerBase
     }
 
     [HttpPut("block-project-by-manager/{projectId:guid}")]
-    public async Task<IActionResult> BlockProjectByManager(Guid projectId)
+    public async Task<IActionResult> BlockProjectByManager([FromRoute] Guid projectId, [FromBody] BlockProjectByManager status)
     {
-        var businessResult = await _service.BlockProjectByManager(projectId);
+        var businessResult = await _service.BlockProjectByManager(projectId, status);
         return Ok(businessResult);
     }
 
