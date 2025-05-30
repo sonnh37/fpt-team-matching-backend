@@ -93,7 +93,7 @@ public class AuthService : IAuthService
                                                                           // if (semesterUpComing == null)
                                                                           //     return new ResponseBuilder()
                                                                           //         .WithStatus(Const.NOT_FOUND_CODE)
-                                                                          //         .WithMessage("Hệ thống chưa cập nhật kì mới.");
+                                                                          //         .WithMessage("Hệ thống chưa cập nhật kỳ mới.");
 
         var user = await _userRepository.GetUserByUsernameOrEmail(query.Account);
 

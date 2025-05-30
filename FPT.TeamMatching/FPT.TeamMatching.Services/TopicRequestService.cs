@@ -225,7 +225,7 @@ public class TopicRequestService : BaseService<TopicRequest>, ITopicRequestServi
 
             //ki cua stage topic
             var semester = await _semesterRepository.GetSemesterByStageTopicId(stageTopic.Id);
-            if (semester == null) return HandlerFail("Không có kì ứng với đợt duyệt hiện tại");
+            if (semester == null) return HandlerFail("Không có kỳ ứng với đợt duyệt hiện tại");
 
             //var topicVersion = await _topicVersionRepository.GetById(command.TopicVersionId);
             //if (topicVersion == null) return HandlerFail("Ko tìm thấy topicVersionId");
@@ -490,7 +490,7 @@ public class TopicRequestService : BaseService<TopicRequest>, ITopicRequestServi
             var semester = await GetSemesterInCurrentWorkSpace();
             if (semester == null)
             {
-                return HandlerFail("Không tìm thấy kì");
+                return HandlerFail("Không tìm thấy kỳ");
             }
 
             if (semester.Status != SemesterStatus.Preparing)
@@ -529,7 +529,7 @@ public class TopicRequestService : BaseService<TopicRequest>, ITopicRequestServi
                 await _topicRepository.GetTopicsBeSubMentorOfUserInSemester(submentor.Id, semester.Id);
             if (topicBeSubMentor.Count() == semester.LimitTopicSubMentor)
             {
-                return HandlerFail("Mentor này đã làm Mentor 2 đủ số lượng nhóm quy định của kì: " +
+                return HandlerFail("Mentor này đã làm Mentor 2 đủ số lượng nhóm quy định của kỳ: " +
                                    topicBeSubMentor.Count());
             }
 
@@ -587,7 +587,7 @@ public class TopicRequestService : BaseService<TopicRequest>, ITopicRequestServi
             var semester = await GetSemesterInCurrentWorkSpace();
             if (semester == null)
             {
-                return HandlerFail("Không tìm thấy kì");
+                return HandlerFail("Không tìm thấy kỳ");
             }
 
             if (semester.Status != SemesterStatus.Preparing)
