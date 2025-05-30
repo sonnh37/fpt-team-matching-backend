@@ -90,6 +90,10 @@ public class TopicService : BaseService<Topic>, ITopicService
     {
         try
         {
+            if (topicCreateModel.SpecialtyId == null)
+            {
+                return HandlerFail("Hãy cập nhật ngành học của bạn");
+            }
             var userId = GetUserIdFromClaims();
             // 1. check semester's status is preparing
             var semester = await GetSemesterInCurrentWorkSpace();
@@ -136,7 +140,7 @@ public class TopicService : BaseService<Topic>, ITopicService
                 topic.Status = TopicStatus.MentorPending;
                 topic.SemesterId = semester.Id;
                 topic.Type = TopicType.Student;
-                topic.IsExistedTeam = true;
+                topic.IsExistedTeam = false;
                 topic.IsEnterpriseTopic = false;
 
                 await SetBaseEntityForCreation(topic);
@@ -320,6 +324,11 @@ public class TopicService : BaseService<Topic>, ITopicService
     {
         try
         {
+            if (topicCreateModel.SpecialtyId == null)
+            {
+                return HandlerFail("Hãy cập nhật chuyên ngành");
+            }
+
             var userId = GetUserIdFromClaims();
             // 1. Validate semester
             var semester = await GetSemesterInCurrentWorkSpace();
@@ -328,7 +337,6 @@ public class TopicService : BaseService<Topic>, ITopicService
                 return HandlerFail("Không tìm thấy ");
             }
 
-
             if (semester.Status != SemesterStatus.Preparing)
             {
                 return HandlerFail("Chưa đến thời gian đề tài");
@@ -336,7 +344,7 @@ public class TopicService : BaseService<Topic>, ITopicService
 
             var stageTopic = await _stageTopicRepositoty.GetCurrentStageTopicBySemesterId(semester.Id);
 
-            if (topicCreateModel.SubMentorId != null)
+            if (topicCreateModel.SubMentorId == null)
             {
                 if (stageTopic == null)
                 {
@@ -354,9 +362,13 @@ public class TopicService : BaseService<Topic>, ITopicService
             //3. Check xem lecturer có bảng draft k, nếu có bảng draft thì update
             var topic = await _topicRepository.GetTopicWithStatusInSemesterOfUser((Guid)userId, semester.Id,
                 [TopicStatus.Draft]);
+            
             if (topic != null)
             {
-                topic.TopicCode = await _semesterService.GenerateNewTopicCode();
+                if (topicCreateModel.SubMentorId == null)
+                {
+                    topic.TopicCode = await _semesterService.GenerateNewTopicCode();
+                }
                 topic.StageTopicId = stageTopic?.Id;
                 topic.SubMentorId = topicCreateModel.SubMentorId;
                 topic.SpecialtyId = topicCreateModel.SpecialtyId;
@@ -378,7 +390,10 @@ public class TopicService : BaseService<Topic>, ITopicService
             {
                 topic = _mapper.Map<Topic>(topicCreateModel);
                 topic.Id = Guid.NewGuid();
-                topic.TopicCode = await _semesterService.GenerateNewTopicCode();
+                if (topicCreateModel.SubMentorId == null)
+                {
+                    topic.TopicCode = await _semesterService.GenerateNewTopicCode();
+                }
                 topic.StageTopicId = stageTopic?.Id;
                 topic.OwnerId = userId;
                 topic.Status = topic.SubMentorId != null ? TopicStatus.MentorPending : TopicStatus.ManagerPending;
@@ -399,6 +414,7 @@ public class TopicService : BaseService<Topic>, ITopicService
                 TopicId = topic.Id,
                 Status = TopicRequestStatus.Pending,
             };
+
             if (topicCreateModel.SubMentorId != null)
             {
                 topicRequestForMentor.ReviewerId = topicCreateModel.SubMentorId;
@@ -1363,8 +1379,7 @@ public class TopicService : BaseService<Topic>, ITopicService
             }
 
             var draft = _mapper.Map<Topic>(command);
-
-            //check tao draft
+            
             //sinh vien
             if (role.Contains("Student"))
             {
@@ -1393,15 +1408,6 @@ public class TopicService : BaseService<Topic>, ITopicService
                 draft.Type = TopicType.Student;
             }
 
-            //giang vien
-            // else if (role.Contains("Lecturer"))
-            // {
-
-           // if (!role.Contains("Mentor"))
-                       // {
-                       //     return HandlerFail("Người dùng không phải là Mentor trong kì này nên không thể tạo đề tài");
-                       // } 
-
             if (role.Contains("Mentor"))
             {
                 if (draft.IsEnterpriseTopic && draft.EnterpriseName == null)
@@ -1422,14 +1428,8 @@ public class TopicService : BaseService<Topic>, ITopicService
                 {
                     draft.Type = TopicType.Lecturer;
                 }
+                draft.MentorId = user.Id;
             }
-
-
-            // }
-            // else
-            // {
-            //     return HandlerFail("Người dùng phải là giảng viên hoặc sinh viên");
-            // }
 
             draft.OwnerId = user.Id;
             draft.Status = TopicStatus.Draft;

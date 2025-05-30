@@ -388,6 +388,7 @@ public class TopicRequestService : BaseService<TopicRequest>, ITopicRequestServi
                                    topicInclude?.Mentor?.Code + " (Mentor) duyệt. Hãy kiểm tra kết quả!";
                 await _notificationService.CreateForUser(noti);
             }
+
             //neu submentor response
             else if (topicRequest.Role == "SubMentor")
             {

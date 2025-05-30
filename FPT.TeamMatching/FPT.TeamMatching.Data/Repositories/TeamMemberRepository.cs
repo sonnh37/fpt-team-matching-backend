@@ -56,7 +56,10 @@ public class TeamMemberRepository : BaseRepository<TeamMember>, ITeamMemberRepos
     public async Task<TeamMember?> GetByUserAndProject(Guid userId, Guid projectId)
     {
         return await _dbContext.TeamMembers
-            .FirstOrDefaultAsync(tm => tm.UserId == userId && tm.ProjectId == projectId);
+            .FirstOrDefaultAsync(tm => tm.IsDeleted == false &&
+                                       tm.UserId == userId &&
+                                       tm.ProjectId == projectId &&
+                                       tm.LeaveDate == null);
     }
 
     public Task<bool> UserHasTeamNow(Guid userId)
