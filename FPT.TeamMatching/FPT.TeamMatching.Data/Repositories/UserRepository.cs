@@ -126,14 +126,8 @@ public class UserRepository : BaseRepository<User>, IUserRepository
     }
 
 
-    public async Task<(List<User>, int)> GetUsersInSemester(UserGetAllInSemesterQuery query)
+    public async Task<(List<User>, int)> GetUsersInSemester(UserGetAllInSemesterQuery query, Guid semesterId)
     {
-        var semester = await _semesterRepository.GetCurrentSemester();
-        if (semester == null)
-        {
-            return (new List<User>(), 0);
-        }
-
         var queryable = GetQueryable();
         queryable = queryable
             .Include(m => m.UserXRoles)
@@ -144,9 +138,7 @@ public class UserRepository : BaseRepository<User>, IUserRepository
             .Include(m => m.ProfileStudent).ThenInclude(x => x.Specialty)
             .Include(e => e.UserXRoles).ThenInclude(e => e.Semester);
 
-        queryable = queryable.Where(m =>
-            m.UserXRoles.Any(mx =>
-                mx.SemesterId != semester.Id));
+        queryable = queryable.Where(m => m.UserXRoles.Any(mx => mx.SemesterId == semesterId));
 
         if (!string.IsNullOrEmpty(query.Role))
         {
@@ -159,8 +151,7 @@ public class UserRepository : BaseRepository<User>, IUserRepository
             queryable = queryable.Where(m =>
                 m.LastName != null && m.FirstName != null &&
                 ((m.Email != null && m.Email.Contains(query.EmailOrFullname.Trim().ToLower())) ||
-                 (m.LastName.Trim().ToLower() + " " + m.FirstName.Trim().ToLower()).Contains(query.EmailOrFullname
-                     .Trim().ToLower()))
+                 (m.LastName.Trim().ToLower() + " " + m.FirstName.Trim().ToLower()).Contains(query.EmailOrFullname.Trim().ToLower()))
             );
         }
 

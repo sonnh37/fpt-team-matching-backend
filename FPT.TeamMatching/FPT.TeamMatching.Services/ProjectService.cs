@@ -137,10 +137,10 @@ public class ProjectService : BaseService<Project>, IProjectService
             var semester = await GetSemesterInCurrentWorkSpace();
 
             var project = await _projectRepository.GetProjectInSemesterByUserIdLoginFollowNewest(userId.Value, semester?.Id);
-            if (project == null) return HandlerFail("Người dùng không có project đang tồn tại");
+            if (project == null) return HandlerFail("Người dùng không có nhóm đang tồn tại");
 
             if (project.Status == ProjectStatus.Canceled)
-                return HandlerFail("Người dùng không có project đang tồn tại trong  này");
+                return HandlerFail("Người dùng không có nhóm đang tồn tại trong này");
 
             var result = _mapper.Map<ProjectResult>(project);
 

@@ -69,7 +69,7 @@ public class TeamMemberService : BaseService<TeamMember>, ITeamMemberService
             _teamMemberRepository.Update(teamMemberCurrentUser);
 
             //update team size -1
-            var project = await _projectRepository.GetProjectByUserIdLogin((Guid)userId);
+            var project = await _projectRepository.GetProjectByUserLogin((Guid)userId);
             if (project == null) return HandlerFail("Không tìm thấy nhóm");
             project.TeamSize -= 1;
             await SetBaseEntityForUpdate(project);
