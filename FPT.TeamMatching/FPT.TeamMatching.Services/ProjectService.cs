@@ -588,6 +588,12 @@ public class ProjectService : BaseService<Project>, IProjectService
         try
         {
             var semester = await GetSemesterInCurrentWorkSpace();
+            if (semester.Status == SemesterStatus.OnGoing || semester.Status == SemesterStatus.Closed)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("Hiện tại không thể tạo nhóm");
+            }
             if (command.TeamMembers.Count < semester.MinTeamSize || command.TeamMembers.Count > semester.MaxTeamSize)
             {
                 return new ResponseBuilder()
