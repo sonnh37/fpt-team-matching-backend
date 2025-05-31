@@ -696,7 +696,7 @@ public class UserService : BaseService<User>, IUserService
             
             foreach (var user in listEntity)
             {
-                if (await _unitOfWork.UserXRoleRepository.CheckRoleUserInSemester(user.Id, semesterId, "Student"))
+                if (!await _unitOfWork.UserXRoleRepository.CheckRoleUserInSemester(user.Id, semesterId, "Student"))
                 {
                     continue;
                 }
