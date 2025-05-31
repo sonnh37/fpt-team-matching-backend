@@ -878,6 +878,7 @@ public class UserService : BaseService<User>, IUserService
                                 FirstName = firstname,
                                 LastName = lastname,
                                 Department = Department.HoChiMinh,
+                                Password = BCrypt.Net.BCrypt.HashPassword("123456"),
                                 Username = code.ToLower(),
                                 UserXRoles = new List<UserXRole>()
                                 {
