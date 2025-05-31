@@ -589,8 +589,9 @@ public class TopicRepository : BaseRepository<Topic>, ITopicRepository
         var queryable = GetQueryable();
         var topics = await queryable.Where(e => e.IsDeleted == false &&
                                                 e.SemesterId == semesterId &&
-                                                e.Status == TopicStatus.ManagerApproved &&
-                                                e.IsExistedTeam == false
+                                                e.Status == TopicStatus.ManagerApproved 
+                                                // &&
+                                                // e.IsExistedTeam == false
             )
             .ToListAsync();
         return topics;

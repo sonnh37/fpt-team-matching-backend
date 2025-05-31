@@ -333,105 +333,114 @@ public class TeamMemberService : BaseService<TeamMember>, ITeamMemberService
         }
     }
 
-    public async Task<BusinessResult> AddRange(TeamMemberAddRangeCommand command)
+public async Task<BusinessResult> AddRange(TeamMemberAddRangeCommand command)
+{
+    try
     {
-        try
+        var semester = await GetSemesterInCurrentWorkSpace();
+        var foundProject = await _projectRepository.GetById(command.ProjectId);
+        if (foundProject == null)
         {
-            var semester = await GetSemesterInCurrentWorkSpace();
-            var foundProject = await _projectRepository.GetById(command.ProjectId);
-            if (foundProject == null)
-            {
-                return new ResponseBuilder()
-                    .WithStatus(Const.FAIL_CODE)
-                    .WithMessage("Không tìm thấy nhóm");
-            }
-
-            var foundTopic = await _unitOfWork.TopicRepository.GetById(command.TopicId);
-
-            if (foundTopic == null || foundTopic.IsDeleted == true || foundTopic.IsExistedTeam == true)
-            {
-                return new ResponseBuilder()
-                    .WithStatus(Const.FAIL_CODE)
-                    .WithMessage("Không tìm thấy đề tài");
-            }
-
-            if (foundProject.TopicId != null)
-            {
-                var oldTopic = await _unitOfWork.TopicRepository.GetById(foundProject.TopicId);
-                if (oldTopic == null)
-                {
-                    return new ResponseBuilder()
-                        .WithStatus(Const.FAIL_CODE)
-                        .WithMessage("Đề tài cũ không tìm thấy");
-                }
-
-                oldTopic.IsExistedTeam = false;
-                _unitOfWork.TopicRepository.Update(oldTopic);
-            }
-
-            var allTeamMember = await _teamMemberRepository.GetMembersOfTeamByProjectId(command.ProjectId);
-            if (allTeamMember.Count + command.TeamMembers.Count < semester.MinTeamSize ||
-                allTeamMember.Count + command.TeamMembers.Count > semester.MaxTeamSize)
-            {
-                return new ResponseBuilder()
-                    .WithStatus(Const.FAIL_CODE)
-                    .WithMessage("Số lượng thành viên không phù hợp");
-            }
-
-            List<TeamMember> entityList = new List<TeamMember>();
-            foreach (var teamMemberCreateCommand in command.TeamMembers)
-            {
-                teamMemberCreateCommand.JoinDate = DateTime.UtcNow;
-                teamMemberCreateCommand.Status = TeamMemberStatus.InProgress;
-                var mapTeamMember = _mapper.Map<TeamMember>(teamMemberCreateCommand);
-                entityList.Add(mapTeamMember);
-            }
-
-            List<TeamMember> existingTeamMembers = new List<TeamMember>();
-            foreach (var teamMember in allTeamMember)
-            {
-                teamMember.Status = TeamMemberStatus.InProgress;
-                existingTeamMembers.Add(teamMember);
-            }
-
-            foundTopic.IsExistedTeam = true;
-            foundProject.Status = ProjectStatus.InProgress;
-            foundProject.TopicId = command.TopicId;
-
-            _projectRepository.Update(foundProject);
-            _unitOfWork.TopicRepository.Update(foundTopic);
-            _teamMemberRepository.UpdateRange(existingTeamMembers);
-            _teamMemberRepository.AddRange(entityList);
-
-            var saveChange = await _unitOfWork.SaveChanges();
-            if (!saveChange)
-            {
-                return new ResponseBuilder()
-                    .WithStatus(Const.FAIL_CODE)
-                    .WithMessage(Const.FAIL_SAVE_MSG);
-            }
-
-            await _notificationService.CreateForTeam(new NotificationCreateForTeam
-            {
-                ProjectId = semester.Id,
-                Note = "",
-                Description = "Nhóm của bạn đã được thêm thành viên mới bởi quản lí vui lòng kiểm tra"
-            });
             return new ResponseBuilder()
-                .WithStatus(Const.SUCCESS_CODE)
-                .WithMessage(Const.SUCCESS_SAVE_MSG);
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage("Không tìm thấy nhóm");
         }
-        catch (Exception e)
+
+        var foundTopic = await _unitOfWork.TopicRepository.GetById(command.TopicId);
+
+        if (foundTopic == null || foundTopic.IsDeleted == true)
         {
-            Console.WriteLine(e);
-            throw;
+            return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage("Không tìm thấy đề tài");
         }
+
+        // Handle old topic if one existed and is different from the new one
+        if (foundProject.TopicId != null && foundProject.TopicId != foundTopic.Id)
+        {
+            var oldTopic = await _unitOfWork.TopicRepository.GetById(foundProject.TopicId);
+            if (oldTopic == null)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("Đề tài cũ không tìm thấy");
+            }
+            // Mark the old topic as no longer having an existing team
+            oldTopic.IsExistedTeam = false;
+            _unitOfWork.TopicRepository.Update(oldTopic); // This will track the oldTopic for update
+        }
+
+        var allTeamMember = await _teamMemberRepository.GetMembersOfTeamByProjectId(command.ProjectId);
+        if (allTeamMember.Count + command.TeamMembers.Count < semester.MinTeamSize ||
+            allTeamMember.Count + command.TeamMembers.Count > semester.MaxTeamSize)
+        {
+            return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage("Số lượng thành viên không phù hợp");
+        }
+
+        List<TeamMember> entityList = new List<TeamMember>();
+        foreach (var teamMemberCreateCommand in command.TeamMembers)
+        {
+            teamMemberCreateCommand.JoinDate = DateTime.UtcNow;
+            teamMemberCreateCommand.Status = TeamMemberStatus.InProgress;
+            var mapTeamMember = _mapper.Map<TeamMember>(teamMemberCreateCommand);
+            entityList.Add(mapTeamMember);
+        }
+
+        List<TeamMember> existingTeamMembersToUpdate = new List<TeamMember>(); // Rename to avoid confusion
+        foreach (var teamMember in allTeamMember)
+        {
+            teamMember.Status = TeamMemberStatus.InProgress;
+            existingTeamMembersToUpdate.Add(teamMember);
+        }
+
+        // Always mark the new/current topic as having an existing team
+        foundTopic.IsExistedTeam = true;
+        foundProject.Status = ProjectStatus.InProgress;
+        foundProject.TopicId = command.TopicId;
+
+        _projectRepository.Update(foundProject);
+        _unitOfWork.TopicRepository.Update(foundTopic); // This will track the foundTopic for update
+        _teamMemberRepository.UpdateRange(existingTeamMembersToUpdate);
+        _teamMemberRepository.AddRange(entityList);
+
+        var saveChange = await _unitOfWork.SaveChanges();
+        if (!saveChange)
+        {
+            return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage(Const.FAIL_SAVE_MSG);
+        }
+
+        await _notificationService.CreateForTeam(new NotificationCreateForTeam
+        {
+            ProjectId = semester.Id, // Should this be ProjectId instead of semester.Id?
+            Note = "",
+            Description = "Nhóm của bạn đã được thêm thành viên mới bởi quản lí vui lòng kiểm tra"
+        });
+        return new ResponseBuilder()
+            .WithStatus(Const.SUCCESS_CODE)
+            .WithMessage(Const.SUCCESS_SAVE_MSG);
     }
+    catch (Exception e)
+    {
+        Console.WriteLine(e);
+        throw;
+    }
+}
 
     public async Task<BusinessResult> KickMember(Guid teamMemberId)
     {
         try
         {
+            var semester = await GetSemesterInCurrentWorkSpace();
+            if (semester.Status == SemesterStatus.OnGoing || semester.Status == SemesterStatus.Closed)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("Hiện tại không thể tạo nhóm");
+            }
             var tm = await _teamMemberRepository.GetById(teamMemberId);
             if (tm == null)
             {
