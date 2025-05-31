@@ -416,6 +416,12 @@ public static class FilterHelper
             queryable = queryable.Where(m =>
                 m.UserXRoles.Any(uxr => uxr.Role != null && uxr.Role.RoleName == query.Role));
         }
+        
+        if (query.SemesterId != null)
+        {
+            queryable = queryable.Where(m =>
+                m.UserXRoles.Any(uxr => uxr.SemesterId == query.SemesterId));
+        }
 
         if (!string.IsNullOrEmpty(query.EmailOrFullname))
         {
