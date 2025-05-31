@@ -460,6 +460,7 @@ public class TopicRepository : BaseRepository<Topic>, ITopicRepository
     {
         var queryable = GetQueryable();
         queryable = queryable
+            .Include(m => m.StageTopic)
             .Include(m => m.TopicRequests)
             .Include(m => m.Project)
             .Include(m => m.MentorTopicRequests)
