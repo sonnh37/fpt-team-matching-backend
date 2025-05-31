@@ -160,6 +160,13 @@ public class UserController : ControllerBase
         var msg = await _userService.UpdateStudentExistedRange(userResults, semesterId);
         return Ok(msg);
     }
+    
+    [HttpPut("import/lecturers/update-existed")]
+    public async Task<IActionResult> UpdateLecturerExistedRange([FromBody] UserResult[] userResults, [FromQuery] Guid semesterId)
+    {
+        var msg = await _userService.UpdateLecturerExistedRange(userResults, semesterId);
+        return Ok(msg);
+    }
 
     [HttpGet("get-suggestions-emails")]
     public async Task<IActionResult> GetTeamMembers([FromQuery] string email)
