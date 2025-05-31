@@ -94,6 +94,7 @@ public class TopicService : BaseService<Topic>, ITopicService
             {
                 return HandlerFail("Hãy cập nhật ngành học của bạn");
             }
+
             var userId = GetUserIdFromClaims();
             // 1. check semester's status is preparing
             var semester = await GetSemesterInCurrentWorkSpace();

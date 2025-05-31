@@ -35,12 +35,12 @@ namespace FPT.TeamMatching.API.Controllers
             return Ok(msg);
         }
 
-        [HttpPost]
-        public async Task<IActionResult> Create([FromBody] UserXRoleCreateCommand request)
-        {
-            var msg = await _service.CreateOrUpdate<UserXRoleResult>(request);
-            return Ok(msg);
-        }
+        //[HttpPost]
+        //public async Task<IActionResult> Create([FromBody] UserXRoleCreateCommand request)
+        //{
+        //    var msg = await _service.CreateOrUpdate<UserXRoleResult>(request);
+        //    return Ok(msg);
+        //}
 
         [HttpPut]
         public async Task<IActionResult> Update([FromBody] UserXRoleUpdateCommand request)
@@ -62,6 +62,13 @@ namespace FPT.TeamMatching.API.Controllers
             var businessResult = await _service.DeleteById(request.Id, request.IsPermanent);
 
             return Ok(businessResult);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AddRole([FromBody] UserXRoleCreateCommand request)
+        {
+            var msg = await _service.AddRole(request);
+            return Ok(msg);
         }
     }
 }
