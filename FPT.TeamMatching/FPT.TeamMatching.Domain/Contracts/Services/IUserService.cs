@@ -54,5 +54,6 @@ public interface IUserService : IBaseService
     Task<BusinessResult> ImportLecturers(IFormFile file);
     Task<BusinessResult> ImportLecturer(CreateByManagerCommand command);
     Task<BusinessResult> UpdateStudentExistedRange(UserResult[] users, Guid semesterId);
+    Task<BusinessResult> UpdateLecturerExistedRange(UserResult[] users, Guid semesterId);
     Task<BusinessResult> GetSuggestionByEmail(string email);
 }

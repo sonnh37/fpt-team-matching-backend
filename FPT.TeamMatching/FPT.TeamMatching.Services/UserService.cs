@@ -674,14 +674,6 @@ public class UserService : BaseService<User>, IUserService
     {
         try
         {
-            // var upComingSemester = await _unitOfWork.SemesterRepository.GetUpComingSemester();
-            // if (upComingSemester == null)
-            // {
-            //     return new ResponseBuilder()
-            //         .WithStatus(Const.FAIL_CODE)
-            //         .WithMessage("No upcoming semester!");
-            // }
-            // var semester = await _unitOfWork.SemesterRepository.GetById(semesterId);
             var semester = await GetSemesterInCurrentWorkSpace();
             if (semester == null)
             {
@@ -745,7 +737,69 @@ public class UserService : BaseService<User>, IUserService
         }
     }
 
+    public async Task<BusinessResult> UpdateLecturerExistedRange(UserResult[] users, Guid semesterId)
+    {
+        try
+        {
+            var semester = await GetSemesterInCurrentWorkSpace();
+            if (semester == null)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("Không tìm thấy kỳ");
+            }
 
+            var roleLecturer = await _unitOfWork.RoleRepository.GetByRoleName("Lecturer");
+            if (roleLecturer == null)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage("Không tìm thấy role giảng viên!");
+            }
+
+            var listEntity = _mapper.Map<List<User>>(users);
+            var userIds = listEntity.Select(x => x.Id).ToList();
+            var profileStudents = await _unitOfWork.ProfileStudentRepository.GetProfileByUserIds(userIds);
+            
+            foreach (var user in listEntity)
+            {
+                if (await _unitOfWork.UserXRoleRepository.CheckRoleUserInSemester(user.Id, semesterId, "Lecturer"))
+                {
+                    continue;
+                }
+                user.UserXRoles.Add(new UserXRole
+                {
+                    UserId = user.Id,
+                    RoleId = roleLecturer.Id,
+                    SemesterId =  semester.Id,
+                    IsPrimary = true,
+                    IsDeleted = false,
+                    CreatedDate = DateTime.UtcNow,
+                    UpdatedDate = DateTime.UtcNow,
+                });
+                // user.UserXRoles.FirstOrDefault(x => x.RoleId == roleStudent.Id).SemesterId = semester.Id;
+            }
+
+            _userRepository.UpdateRange(listEntity);
+            var saveChange = await _unitOfWork.SaveChanges();
+            if (!saveChange)
+            {
+                return new ResponseBuilder()
+                    .WithStatus(Const.FAIL_CODE)
+                    .WithMessage(Const.FAIL_SAVE_MSG);
+            }
+
+            return new ResponseBuilder()
+                .WithStatus(Const.SUCCESS_CODE)
+                .WithMessage(Const.SUCCESS_READ_MSG);
+        }
+        catch (Exception e)
+        {
+            return new ResponseBuilder()
+                .WithStatus(Const.FAIL_CODE)
+                .WithMessage(e.Message);
+        }
+    }
     public async Task<BusinessResult> ImportLecturers(IFormFile file)
     {
         try
