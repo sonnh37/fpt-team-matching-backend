@@ -160,10 +160,7 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
                             .Include(x => x.Topic).ThenInclude(m => m.StageTopic)
                             .Include(x => x.Topic).ThenInclude(m => m.Specialty).ThenInclude(m => m.Profession);
 
-        queryable = queryable.Where(m => m.Topic != null &&
-                                         m.Topic.StageTopic != null &&
-                                         m.Topic.StageTopic.SemesterId == semesterId
-        );
+        queryable = queryable.Where(m => m.SemesterId == semesterId);
 
         return queryable.FirstOrDefault();
     }

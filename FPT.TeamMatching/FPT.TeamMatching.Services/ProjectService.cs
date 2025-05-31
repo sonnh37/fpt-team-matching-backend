@@ -107,8 +107,13 @@ public class ProjectService : BaseService<Project>, IProjectService
         {
             var userId = GetUserIdFromClaims();
             if (userId == null) return HandlerFailAuth();
+            var semester = await GetSemesterInCurrentWorkSpace();
+            if (semester == null)
+            {
+                return HandlerFail("Không tìm thấy học kỳ");
+            }
 
-            var project = await _projectRepository.GetProjectByUserIdLoginFollowNewest(userId.Value);
+            var project = await _projectRepository.GetProjectInSemesterByUserIdLoginFollowNewest(userId.Value, semester.Id);
             if (project == null) return HandlerFail("Người dùng không có project đang tồn tại");
 
             if (project.Status == ProjectStatus.Canceled)
@@ -769,6 +774,20 @@ public class ProjectService : BaseService<Project>, IProjectService
                 .WithStatus(Const.FAIL_CODE)
                 .WithMessage(Const.FAIL_SAVE_MSG);
             }
+            var noti = new NotificationCreateForTeam
+            {
+                ProjectId = project.Id,
+            };
+            if (project.Status == ProjectStatus.InProgress)
+            {
+                noti.Description = "Yêu cầu khóa nhóm của bạn đã được đồng ý. Hãy kiểm tra kết quả!";
+            }
+            else if (project.Status == ProjectStatus.Forming)
+            {
+                noti.Description = "Yêu cầu khóa nhóm của bạn đã bị từ chối. Hãy kiểm tra kết quả!";
+            }
+            await _notificationService.CreateForTeam(noti);
+
             return new ResponseBuilder()
                 .WithStatus(Const.SUCCESS_CODE)
                 .WithMessage(Const.SUCCESS_SAVE_MSG);
