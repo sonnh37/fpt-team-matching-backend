@@ -605,11 +605,21 @@ public class ProjectService : BaseService<Project>, IProjectService
             // var entity = _mapper.Map<Project>(command);
             var projects = await _projectRepository.GetInProgressProjectBySemesterId(semester.Id);
             var numberOfProjects = projects.Count();
-            // Tạo số thứ tự tiếp theo
-            int nextNumber = numberOfProjects + 1;
+            int nextNumber = numberOfProjects;
             string semesterCode = semester.SemesterCode;
-            // Tạo mã nhóm
-            string newTeamCode = $"{semesterCode}SE{nextNumber:D3}";
+            var newTeamCode = "";
+
+            //check trùng mã
+            bool isExisted = true;
+            do
+            {
+                // Tạo số thứ tự tiếp theo
+                nextNumber += 1;
+                // Tạo mã nhóm
+                newTeamCode = $"{semesterCode}SE{nextNumber:D3}";
+                isExisted = await _projectRepository.IsExistedTeamCode(newTeamCode);
+            }
+            while (isExisted);
 
             var mapMember = _mapper.Map<List<TeamMember>>(command.TeamMembers);
             var entity = new Project
