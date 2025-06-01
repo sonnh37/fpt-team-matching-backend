@@ -454,8 +454,7 @@ public class ProjectRepository : BaseRepository<Project>, IProjectRepository
 
     public async Task<bool> IsExistedTeamCode(string teamCode)
     {
-        var isExist = await _context.Projects.Where(e => e.IsDeleted == false &&
-                                                         e.TeamCode == teamCode).AnyAsync();
+        var isExist = await _context.Projects.Where(e => e.TeamCode == teamCode).AnyAsync();
 
         return isExist;
     }
